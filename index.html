@@ -98,7 +98,7 @@
           <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">定向包</h2>
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理腾讯渠道自定义定向配置</p>
         </div>
-        <button onclick="openTgtPkgForm()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <button id="btn-new-tgt-pkg" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
           <i class="fas fa-plus"></i> 新建定向包
         </button>
       </div>
@@ -868,6 +868,11 @@
   // 页面加载时初始化
   window.addEventListener('DOMContentLoaded', function() {
     showView('task-list');
+    // 绑定新建定向包按钮
+    var btn = document.getElementById('btn-new-tgt-pkg');
+    if (btn && window.openTgtPkgForm) {
+      btn.addEventListener('click', window.openTgtPkgForm);
+    }
   });
 })();
 </script>
