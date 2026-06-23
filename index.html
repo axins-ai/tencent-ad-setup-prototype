@@ -130,18 +130,31 @@
             <!-- 地理位置 -->
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">地理位置</div>
-              <div style="display:flex;gap:16px;margin-bottom:12px;">
+              <div style="display:flex;gap:20px;margin-bottom:10px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-geo-mode" value="unlimited" checked onchange="document.getElementById('tgt-pkg-geo-region').style.display='none'" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-geo-mode" value="unlimited" checked onchange="document.getElementById('tgt-pkg-geo-region').style.display='none';document.getElementById('tgt-pkg-geo-map').style.display='none'" style="margin-right:6px;">
                   <span style="font-size:14px;">不限</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-geo-mode" value="region" onchange="document.getElementById('tgt-pkg-geo-region').style.display='block'" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-geo-mode" value="region" onchange="document.getElementById('tgt-pkg-geo-region').style.display='block';document.getElementById('tgt-pkg-geo-map').style.display='none'" style="margin-right:6px;">
                   <span style="font-size:14px;">按区域</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-geo-mode" value="map" onchange="document.getElementById('tgt-pkg-geo-region').style.display='none';document.getElementById('tgt-pkg-geo-map').style.display='block'" style="margin-right:6px;">
+                  <span style="font-size:14px;">从地图选择</span>
                 </label>
               </div>
               <div id="tgt-pkg-geo-region" style="display:none;">
                 <input id="tgt-pkg-region" type="text" placeholder="输入地域，如：北京、上海、广州" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+              </div>
+              <div id="tgt-pkg-geo-map" style="display:none;color:#999;font-size:13px;padding:8px 0;">从地图选择功能暂未实现原型演示</div>
+              <!-- 地点类型 -->
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+                <span style="font-size:14px;font-weight:500;color:#333;">地点类型</span>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input id="tgt-pkg-location-resident" type="checkbox" checked style="margin-right:4px;">
+                  <span style="font-size:13px;color:#666;">常住地</span>
+                </label>
               </div>
             </div>
             
@@ -202,14 +215,26 @@
             <!-- 排除已转化用户 -->
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">排除已转化用户</div>
-              <div style="display:flex;gap:16px;">
+              <div style="display:flex;flex-wrap:wrap;gap:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="tgt-pkg-exclude" value="unlimited" checked style="margin-right:6px;">
-                  <span style="font-size:14px;">不限</span>
+                  <span style="font-size:13px;">不限</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="exclude" style="margin-right:6px;">
-                  <span style="font-size:14px;">排除</span>
+                  <input type="radio" name="tgt-pkg-exclude" value="same_account" style="margin-right:6px;">
+                  <span style="font-size:13px;">同账户营销单元</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_principal" style="margin-right:6px;">
+                  <span style="font-size:13px;">同主体系营销单元</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_business" style="margin-right:6px;">
+                  <span style="font-size:13px;">同业务单元营销单元</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_group" style="margin-right:6px;">
+                  <span style="font-size:13px;">同集团</span>
                 </label>
               </div>
             </div>
@@ -217,22 +242,22 @@
             <!-- 自定义人群 -->
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">自定义人群</div>
-              <div style="display:flex;gap:16px;margin-bottom:12px;">
+              <div style="display:flex;gap:20px;margin-bottom:12px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="tgt-pkg-audience-mode" value="unlimited" checked onchange="document.getElementById('tgt-pkg-audience-config').style.display='none'" style="margin-right:6px;">
                   <span style="font-size:14px;">不限</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-audience-mode" value="target" onchange="document.getElementById('tgt-pkg-audience-config').style.display='block';document.getElementById('tgt-pkg-audience-title').textContent='指定人群'" style="margin-right:6px;">
-                  <span style="font-size:14px;">指定人群</span>
+                  <input type="radio" name="tgt-pkg-audience-mode" value="target" onchange="document.getElementById('tgt-pkg-audience-config').style.display='block';document.getElementById('tgt-pkg-audience-title').textContent='选择定向人群包'" style="margin-right:6px;">
+                  <span style="font-size:14px;">定向人群</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-audience-mode" value="exclude" onchange="document.getElementById('tgt-pkg-audience-config').style.display='block';document.getElementById('tgt-pkg-audience-title').textContent='排除人群'" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="exclude" onchange="document.getElementById('tgt-pkg-audience-config').style.display='block';document.getElementById('tgt-pkg-audience-title').textContent='选择排除人群包'" style="margin-right:6px;">
                   <span style="font-size:14px;">排除人群</span>
                 </label>
               </div>
-              <div id="tgt-pkg-audience-config" style="display:none;">
-                <div style="font-size:13px;color:#666;margin-bottom:8px;" id="tgt-pkg-audience-title">指定人群</div>
+              <div id="tgt-pkg-audience-config" style="display:none;background:#F0F5FF;border:1px solid #D4E4FF;border-radius:8px;padding:12px 16px;">
+                <div style="font-size:13px;color:#333;font-weight:500;margin-bottom:8px;" id="tgt-pkg-audience-title">选择定向人群包</div>
                 <input id="tgt-pkg-audience-input" type="text" placeholder="输入人群包ID或名称，多个用逗号分隔" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
               </div>
             </div>
@@ -243,11 +268,7 @@
               <div style="display:flex;gap:16px;margin-bottom:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="tgt-pkg-conversion-behavior" value="optimize" checked onchange="document.getElementById('tgt-pkg-conversion-detail').style.display='none'" style="margin-right:6px;">
-                  <span style="font-size:14px;">优化行为</span>
-                </label>
-                <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-conversion-behavior" value="custom" onchange="document.getElementById('tgt-pkg-conversion-detail').style.display='block'" style="margin-right:6px;">
-                  <span style="font-size:14px;">指定行为</span>
+                  <span style="font-size:14px;">优化目标</span>
                 </label>
               </div>
               <div id="tgt-pkg-conversion-detail" style="display:none;">
@@ -261,23 +282,23 @@
               <div style="display:flex;flex-wrap:wrap;gap:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="tgt-pkg-conversion-time" value="today" style="margin-right:6px;">
-                  <span style="font-size:14px;">今天</span>
+                  <span style="font-size:13px;">当日</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="tgt-pkg-conversion-time" value="7day" checked style="margin-right:6px;">
-                  <span style="font-size:14px;">最近7天</span>
+                  <span style="font-size:13px;">7天</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="tgt-pkg-conversion-time" value="1month" style="margin-right:6px;">
-                  <span style="font-size:14px;">最近1个月</span>
+                  <span style="font-size:13px;">1个月</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="tgt-pkg-conversion-time" value="3month" style="margin-right:6px;">
-                  <span style="font-size:14px;">最近3个月</span>
+                  <span style="font-size:13px;">3个月</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="tgt-pkg-conversion-time" value="6month" style="margin-right:6px;">
-                  <span style="font-size:14px;">最近6个月</span>
+                  <span style="font-size:13px;">6个月</span>
                 </label>
               </div>
             </div>
@@ -601,7 +622,10 @@
     // 重置地理位置
     document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
     document.getElementById('tgt-pkg-geo-region').style.display = 'none';
+    document.getElementById('tgt-pkg-geo-map').style.display = 'none';
     document.getElementById('tgt-pkg-region').value = '';
+    // 重置地点类型
+    document.getElementById('tgt-pkg-location-resident').checked = true;
     // 重置年龄
     window.setTgtPkgAgeValue('不限');
     // 重置性别
@@ -682,9 +706,13 @@
     var region = '';
     if (geoMode === 'region') {
       region = document.getElementById('tgt-pkg-region').value.trim();
+    } else if (geoMode === 'map') {
+      region = '地图选择';
     } else {
       region = '不限';
     }
+    // 获取地点类型
+    var locationTypeResident = document.getElementById('tgt-pkg-location-resident').checked;
     // 获取年龄
     var age = window.getTgtPkgAgeValue();
     // 获取性别
@@ -707,7 +735,9 @@
     var conversionTimeRange = document.querySelector('input[name="tgt-pkg-conversion-time"]:checked').value;
     var data = {
       name: name,
+      geoMode: geoMode,
       region: region,
+      locationTypeResident: locationTypeResident,
       age: age,
       gender: gender,
       excludeConverted: excludeConverted,

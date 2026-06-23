@@ -1014,12 +1014,13 @@
     onChange
   }) {
     const DAYS = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
-    // 0.5小时单位：0, 0.5, 1, 1.5, ..., 23.5
-    const HOURS = Array.from({
-      length: 48
-    }, (_, i) => i * 0.5);
+    // 24个整点小时头（每个占2个slot），共48个0.5h slot
+    const HOUR_HEADERS = Array.from({
+      length: 24
+    }, (_, i) => i); // 0~23
+    const TOTAL_SLOTS = 48; // 每天行48列
 
-    // value format: { "0-0": true/false, ... } where key is "dayIndex-hour"
+    // value format: { "0-0": true/false, ... } where key is "dayIndex-slotIndex", slotIndex=0..47
     const [slots, setSlots] = useState(value || {});
     const [isSelecting, setIsSelecting] = useState(false);
     const [selectStart, setSelectStart] = useState(null);
@@ -1028,8 +1029,8 @@
     }, [value]);
 
     // 单击切换
-    const handleCellClick = (dayIdx, hour) => {
-      const key = `${dayIdx}-${hour}`;
+    const handleCellClick = (dayIdx, slotIdx) => {
+      const key = `${dayIdx}-${slotIdx}`;
       const newSlots = {
         ...slots,
         [key]: !slots[key]
@@ -1039,13 +1040,13 @@
     };
 
     // 鼠标拖选
-    const handleMouseDown = (dayIdx, hour) => {
+    const handleMouseDown = (dayIdx, slotIdx) => {
       setIsSelecting(true);
       setSelectStart({
         dayIdx,
-        hour
+        slotIdx
       });
-      const key = `${dayIdx}-${hour}`;
+      const key = `${dayIdx}-${slotIdx}`;
       const newSlots = {
         ...slots,
         [key]: !slots[key]
@@ -1053,21 +1054,20 @@
       setSlots(newSlots);
       onChange(newSlots);
     };
-    const handleMouseEnter = (dayIdx, hour) => {
+    const handleMouseEnter = (dayIdx, slotIdx) => {
       if (!isSelecting || !selectStart) return;
       const newSlots = {
         ...slots
       };
       const startDay = Math.min(selectStart.dayIdx, dayIdx);
       const endDay = Math.max(selectStart.dayIdx, dayIdx);
-      const startHour = Math.min(selectStart.hour, hour);
-      const endHour = Math.max(selectStart.hour, hour);
-      const startKey = `${selectStart.dayIdx}-${selectStart.hour}`;
-      const shouldSet = !!slots[startKey]; // 用起始格状态决定填充还是清除
-
+      const startSlot = Math.min(selectStart.slotIdx, slotIdx);
+      const endSlot = Math.max(selectStart.slotIdx, slotIdx);
+      const startKey = `${selectStart.dayIdx}-${selectStart.slotIdx}`;
+      const shouldSet = !!slots[startKey];
       for (let d = startDay; d <= endDay; d++) {
-        for (let h = startHour; h <= endHour; h++) {
-          newSlots[`${d}-${h}`] = shouldSet;
+        for (let s = startSlot; s <= endSlot; s++) {
+          newSlots[`${d}-${s}`] = shouldSet;
         }
       }
       setSlots(newSlots);
@@ -1087,66 +1087,243 @@
       setSlots({});
       onChange({});
     };
-    const selectedCount = Object.values(slots).filter(Boolean).length;
+
+    // 将slot索引转为时间字符串 "HH:MM"
+    const slotToTime = slotIdx => {
+      const h = Math.floor(slotIdx / 2);
+      const m = slotIdx % 2 * 30;
+      return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+    };
+
+    // 生成选中时间段描述文字
+    const buildSelectedText = () => {
+      const parts = [];
+      for (let di = 0; di < 7; di++) {
+        let dayRanges = [];
+        let rangeStart = null;
+        for (let si = 0; si < TOTAL_SLOTS; si++) {
+          const key = `${di}-${si}`;
+          if (!!slots[key]) {
+            if (rangeStart === null) rangeStart = si;
+          } else {
+            if (rangeStart !== null) {
+              dayRanges.push(slotToTime(rangeStart) + '-' + slotToTime(si - 1));
+              rangeStart = null;
+            }
+          }
+        }
+        if (rangeStart !== null) {
+          dayRanges.push(slotToTime(rangeStart) + '-23:30');
+        }
+        if (dayRanges.length > 0) {
+          parts.push(DAYS[di] + ' ' + dayRanges.join('、'));
+        }
+      }
+      return parts.length > 0 ? parts.join('；') : '';
+    };
+    const selectedText = buildSelectedText();
+
+    // 计算tooltip文本
+    const getTooltip = (dayIdx, slotIdx) => {
+      // 找到连续选区的起止
+      let start = slotIdx,
+        end = slotIdx;
+      while (start > 0 && slots[`${dayIdx}-${start - 1}`]) start--;
+      while (end < TOTAL_SLOTS - 1 && slots[`${dayIdx}-${end + 1}`]) end++;
+      return `${DAYS[dayIdx]} ${slotToTime(start)}-${slotToTime(end)}`;
+    };
     return /*#__PURE__*/React.createElement("div", {
-      className: "border border-gray-300 rounded-lg overflow-hidden"
-    }, /*#__PURE__*/React.createElement("table", {
-      className: "w-full border-collapse",
       style: {
-        fontSize: '13px'
+        border: '1px solid #e5e7eb',
+        borderRadius: '8px',
+        overflow: 'hidden'
+      }
+    }, /*#__PURE__*/React.createElement("table", {
+      cellSpacing: 0,
+      cellPadding: 0,
+      style: {
+        width: '100%',
+        borderCollapse: 'collapse',
+        fontSize: '13px',
+        tableLayout: 'fixed'
       }
     }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
-      className: "bg-gray-50"
+      style: {
+        background: '#fafafa'
+      }
     }, /*#__PURE__*/React.createElement("th", {
-      className: "border-r border-b border-gray-200 px-3 py-2 text-center font-medium text-gray-600 w-20"
+      rowSpan: 2,
+      style: {
+        width: '72px',
+        borderRight: '1px solid #f0f0f0',
+        borderBottom: '1px solid #e5e7eb',
+        padding: '8px 4px',
+        textAlign: 'center',
+        fontSize: '12px',
+        color: '#666',
+        fontWeight: 400
+      }
     }, "星期\\时间"), /*#__PURE__*/React.createElement("th", {
-      colSpan: "12",
-      className: "text-center font-medium text-gray-600 px-2 py-2"
+      colSpan: 24,
+      style: {
+        textAlign: 'center',
+        fontSize: '12px',
+        color: '#666',
+        padding: '6px 2px',
+        borderBottom: '1px solid #f0f0f0'
+      }
     }, "00:00 - 12:00"), /*#__PURE__*/React.createElement("th", {
-      colSpan: "12",
-      className: "text-center font-medium text-gray-600 px-2 py-2 border-l border-gray-200"
+      colSpan: 24,
+      style: {
+        textAlign: 'center',
+        fontSize: '12px',
+        color: '#666',
+        padding: '6px 2px',
+        borderBottom: '1px solid #e5e7eb',
+        borderLeft: '1px solid #f0f0f0'
+      }
     }, "12:00 - 24:00")), /*#__PURE__*/React.createElement("tr", {
-      className: "bg-gray-50"
-    }, /*#__PURE__*/React.createElement("th", {
-      className: "border-r border-b border-gray-200"
-    }), HOURS.map(h => /*#__PURE__*/React.createElement("th", {
+      style: {
+        background: '#fafafa'
+      }
+    }, HOUR_HEADERS.map(h => /*#__PURE__*/React.createElement("th", {
       key: h,
-      className: `px-1 py-1 text-center text-xs text-gray-500 font-normal ${h === 12 ? 'border-l border-gray-200' : ''}`
+      colSpan: 2,
+      style: {
+        width: '22px',
+        textAlign: 'center',
+        fontSize: '11px',
+        color: '#999',
+        fontWeight: 400,
+        padding: '2px 0',
+        borderBottom: '1px solid #e5e7eb',
+        borderRight: h === 11 || h === 23 ? '1px solid #f0f0f0' : 'none'
+      }
     }, h)))), /*#__PURE__*/React.createElement("tbody", null, DAYS.map((day, di) => /*#__PURE__*/React.createElement("tr", {
       key: di
     }, /*#__PURE__*/React.createElement("td", {
-      className: "border-r border-b border-gray-200 px-3 py-1 text-center font-medium text-gray-700 bg-gray-50 whitespace-nowrap"
-    }, day), HOURS.map(hi => {
-      const key = `${di}-${hi}`;
+      style: {
+        borderRight: '1px solid #f0f0f0',
+        borderBottom: di === 6 ? 'none' : '1px solid #f0f0f0',
+        padding: '8px 4px',
+        textAlign: 'center',
+        fontSize: '13px',
+        color: '#333',
+        fontWeight: 500,
+        background: '#fafafa',
+        whiteSpace: 'nowrap'
+      }
+    }, day), Array.from({
+      length: TOTAL_SLOTS
+    }, (_, si) => {
+      const key = `${di}-${si}`;
       const isSelected = !!slots[key];
+      const isHalfHourBoundary = si % 2 === 1; // 每30分钟一个边界线
+      const isNoonBoundary = si === 24; // 正午分隔
       return /*#__PURE__*/React.createElement("td", {
-        key: hi,
-        onMouseDown: () => handleMouseDown(di, hi),
-        onMouseEnter: () => handleMouseEnter(di, hi),
-        className: `cursor-pointer border-b border-gray-100 transition-colors select-none ${hi === 12 ? 'border-l border-gray-200' : ''}`
+        key: si,
+        onMouseDown: () => handleMouseDown(di, si),
+        onMouseEnter: () => handleMouseEnter(di, si),
+        title: isSelected ? getTooltip(di, si) : `${day} ${slotToTime(si)}-${slotToTime(si)}`,
+        style: {
+          cursor: 'pointer',
+          borderBottom: di === 6 ? 'none' : '1px solid #f5f5f5',
+          borderRight: isNoonBoundary ? '1px solid #e5e7eb' : isHalfHourBoundary ? '1px solid #f0f0f0' : 'none',
+          padding: 0,
+          userSelect: 'none'
+        }
       }, /*#__PURE__*/React.createElement("div", {
-        className: `w-full h-8 m-0.5 rounded-sm ${isSelected ? 'bg-blue-500' : 'hover:bg-blue-100 bg-gray-100'}`,
-        title: `${day} ${String(hi).padStart(2, '0')}:00`
+        style: {
+          width: '100%',
+          height: '28px',
+          margin: '1px 0',
+          borderRadius: '2px',
+          backgroundColor: isSelected ? '#3b82f6' : '#f9fafb'
+        },
+        onMouseEnter: e => {
+          if (!isSelected) e.target.style.backgroundColor = '#dbeafe';
+        },
+        onMouseLeave: e => {
+          if (!isSelected) e.target.style.backgroundColor = '#f9fafb';
+        }
       }));
     }))))), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between px-4 py-2 bg-gray-50 border-t border-gray-200"
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '10px 16px',
+        background: '#fafafa',
+        borderTop: '1px solid #e5e7eb'
+      }
     }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-4 text-xs text-gray-500"
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        fontSize: '12px',
+        color: '#666'
+      }
     }, /*#__PURE__*/React.createElement("span", {
-      className: "flex items-center gap-1"
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+      }
     }, /*#__PURE__*/React.createElement("span", {
-      className: "inline-block w-3.5 h-3.5 rounded-sm bg-blue-500"
+      style: {
+        display: 'inline-block',
+        width: '14px',
+        height: '14px',
+        borderRadius: '2px',
+        background: '#3b82f6'
+      }
     }), "已选"), /*#__PURE__*/React.createElement("span", {
-      className: "flex items-center gap-1"
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+      }
     }, /*#__PURE__*/React.createElement("span", {
-      className: "inline-block w-3.5 h-3.5 rounded-sm bg-gray-100 border border-gray-300"
+      style: {
+        display: 'inline-block',
+        width: '14px',
+        height: '14px',
+        borderRadius: '2px',
+        background: '#f9fafb',
+        border: '1px solid #e5e7eb'
+      }
     }), "未选"), /*#__PURE__*/React.createElement("span", null, "可拖动鼠标选择时间段")), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-3"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-xs text-gray-600"
-    }, "已选 ", selectedCount, " 个时间段"), /*#__PURE__*/React.createElement("button", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px'
+      }
+    }, selectedText ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '12px',
+        color: '#333',
+        maxWidth: '420px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      },
+      title: selectedText
+    }, selectedText) : /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: '12px',
+        color: '#999'
+      }
+    }, "未选择任何时段"), /*#__PURE__*/React.createElement("button", {
       onClick: clearAll,
-      className: "text-xs text-blue-600 hover:text-blue-800 cursor-pointer"
+      style: {
+        fontSize: '12px',
+        color: '#3b82f6',
+        cursor: 'pointer',
+        background: 'none',
+        border: 'none',
+        padding: '0'
+      }
     }, "清空"))));
   }
 
