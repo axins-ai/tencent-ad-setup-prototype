@@ -778,12 +778,12 @@ function TimeGrid({ value, onChange }) {
 
   return (
     <div style={{border:'1px solid #e5e7eb', borderRadius:'8px', overflow:'hidden'}}>
-      <table cellSpacing={0} cellPadding={0} style={{width:'100%', borderCollapse:'collapse', fontSize:'13px'}}>
+      <table cellSpacing={0} cellPadding={0} style={{width:'100%', borderCollapse:'collapse', fontSize:'13px', tableLayout:'fixed'}}>
         <thead>
           <tr style={{background:'#fafafa'}}>
             <th rowSpan={2} style={{width:'60px', borderRight:'1px solid #e5e7eb', borderBottom:'1px solid #e5e7eb', padding:'8px 4px', textAlign:'center', fontSize:'12px', color:'#666', fontWeight:400}}>星期\时间</th>
-            <th colSpan={24} style={{textAlign:'center', fontSize:'12px', color:'#666', padding:'6px 2px', borderBottom:'1px solid #e5e7eb'}}>00:00 - 12:00</th>
-            <th colSpan={24} style={{textAlign:'center', fontSize:'12px', color:'#666', padding:'6px 2px', borderBottom:'1px solid #e5e7eb', borderLeft:'1px solid #e5e7eb'}}>12:00 - 24:00</th>
+            <th colSpan={24} style={{textAlign:'center', fontSize:'12px', color:'#666', padding:'6px 2px', borderBottom:'1px solid #e5e7eb', width:'50%'}}>00:00 - 12:00</th>
+            <th colSpan={24} style={{textAlign:'center', fontSize:'12px', color:'#666', padding:'6px 2px', borderBottom:'1px solid #e5e7eb', borderLeft:'1px solid #e5e7eb', width:'50%'}}>12:00 - 24:00</th>
           </tr>
           <tr style={{background:'#fafafa'}}>
             {HOURS.map(h => (
@@ -1546,18 +1546,29 @@ function App() {
                               checked={ageSelections.includes(opt.key)}
                               onChange={e => {
                                 if (opt.key === 'unlimited') {
-                                  setAgeSelections(['unlimited']);
+                                  // 不限：切换选中状态
+                                  if (ageSelections.includes('unlimited')) {
+                                    setAgeSelections([]);
+                                  } else {
+                                    setAgeSelections(['unlimited']);
+                                  }
                                 } else {
-                                  let next = ageSelections.filter(k => k !== 'unlimited');
-                                  if (e.target.checked && !next.includes(opt.key)) next.push(opt.key);
-                                  else next = next.filter(k => k !== opt.key);
-                                  setAgeSelections(next.length > 0 ? next : ['unlimited']);
+                                  if (e.target.checked) {
+                                    // 选中年龄段：取消不限，添加当前年龄段
+                                    let next = ageSelections.filter(k => k !== 'unlimited');
+                                    if (!next.includes(opt.key)) next.push(opt.key);
+                                    setAgeSelections(next);
+                                  } else {
+                                    // 取消年龄段
+                                    let next = ageSelections.filter(k => k !== opt.key && k !== 'unlimited');
+                                    setAgeSelections(next.length > 0 ? next : ['unlimited']);
+                                  }
                                 }
                               }}
-                              disabled={opt.key !== 'unlimited' && ageSelections.includes('unlimited')}
+                              disabled={false}
                               className="mr-1.5"
                             />
-                            <span className={`text-sm ${ageSelections.includes(opt.key) ? 'text-gray-900 font-medium' : opt.key !== 'unlimited' && ageSelections.includes('unlimited') ? 'text-gray-300' : 'text-gray-700'}`}>{opt.label}</span>
+                            <span className={`text-sm ${ageSelections.includes(opt.key) ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>{opt.label}</span>
                           </label>
                         ))}
                       </div>

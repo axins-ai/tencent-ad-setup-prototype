@@ -1152,7 +1152,8 @@
       style: {
         width: '100%',
         borderCollapse: 'collapse',
-        fontSize: '13px'
+        fontSize: '13px',
+        tableLayout: 'fixed'
       }
     }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
       style: {
@@ -1177,7 +1178,8 @@
         fontSize: '12px',
         color: '#666',
         padding: '6px 2px',
-        borderBottom: '1px solid #e5e7eb'
+        borderBottom: '1px solid #e5e7eb',
+        width: '50%'
       }
     }, "00:00 - 12:00"), /*#__PURE__*/React.createElement("th", {
       colSpan: 24,
@@ -1187,7 +1189,8 @@
         color: '#666',
         padding: '6px 2px',
         borderBottom: '1px solid #e5e7eb',
-        borderLeft: '1px solid #e5e7eb'
+        borderLeft: '1px solid #e5e7eb',
+        width: '50%'
       }
     }, "12:00 - 24:00")), /*#__PURE__*/React.createElement("tr", {
       style: {
@@ -2174,17 +2177,29 @@
       checked: ageSelections.includes(opt.key),
       onChange: e => {
         if (opt.key === 'unlimited') {
-          setAgeSelections(['unlimited']);
+          // 不限：切换选中状态
+          if (ageSelections.includes('unlimited')) {
+            setAgeSelections([]);
+          } else {
+            setAgeSelections(['unlimited']);
+          }
         } else {
-          let next = ageSelections.filter(k => k !== 'unlimited');
-          if (e.target.checked && !next.includes(opt.key)) next.push(opt.key);else next = next.filter(k => k !== opt.key);
-          setAgeSelections(next.length > 0 ? next : ['unlimited']);
+          if (e.target.checked) {
+            // 选中年龄段：取消不限，添加当前年龄段
+            let next = ageSelections.filter(k => k !== 'unlimited');
+            if (!next.includes(opt.key)) next.push(opt.key);
+            setAgeSelections(next);
+          } else {
+            // 取消年龄段
+            let next = ageSelections.filter(k => k !== opt.key && k !== 'unlimited');
+            setAgeSelections(next.length > 0 ? next : ['unlimited']);
+          }
         }
       },
-      disabled: opt.key !== 'unlimited' && ageSelections.includes('unlimited'),
+      disabled: false,
       className: "mr-1.5"
     }), /*#__PURE__*/React.createElement("span", {
-      className: `text-sm ${ageSelections.includes(opt.key) ? 'text-gray-900 font-medium' : opt.key !== 'unlimited' && ageSelections.includes('unlimited') ? 'text-gray-300' : 'text-gray-700'}`
+      className: `text-sm ${ageSelections.includes(opt.key) ? 'text-gray-900 font-medium' : 'text-gray-700'}`
     }, opt.label)))))), /*#__PURE__*/React.createElement("div", {
       className: "py-4 border-b border-gray-200"
     }, /*#__PURE__*/React.createElement("div", {
