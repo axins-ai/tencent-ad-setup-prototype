@@ -680,13 +680,16 @@ function TimeGrid({ value, onChange }) {
     onChange(newSlots);
   };
 
-  // 鼠标按下（切换单个0.5h格子，支持拖选）
+  // 鼠标按下（切换整个小时，支持拖选）
   const handleMouseDown = (dayIdx, slotIdx) => {
     setIsSelecting(true);
-    setSelectStart({ dayIdx, slotIdx });
-    const key = `${dayIdx}-${slotIdx}`;
+    const hourStart = Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR;
+    setSelectStart({ dayIdx, slotIdx: hourStart });
     const newSlots = { ...slots };
-    newSlots[key] = !newSlots[key];
+    const currentState = !!slots[`${dayIdx}-${hourStart}`];
+    for (let s = hourStart; s < hourStart + SLOTS_PER_HOUR; s++) {
+      newSlots[`${dayIdx}-${s}`] = !currentState;
+    }
     setSlots(newSlots);
     onChange(newSlots);
   };
