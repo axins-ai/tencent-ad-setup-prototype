@@ -1043,21 +1043,18 @@
       onChange(newSlots);
     };
 
-    // 鼠标拖选（以小时为单位）
+    // 鼠标按下（切换单个0.5h格子，支持拖选）
     const handleMouseDown = (dayIdx, slotIdx) => {
       setIsSelecting(true);
-      const hourStart = Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR;
       setSelectStart({
         dayIdx,
-        hourStart
+        slotIdx
       });
+      const key = `${dayIdx}-${slotIdx}`;
       const newSlots = {
         ...slots
       };
-      const currentState = !!slots[`${dayIdx}-${hourStart}`];
-      for (let s = hourStart; s < hourStart + SLOTS_PER_HOUR; s++) {
-        newSlots[`${dayIdx}-${s}`] = !currentState;
-      }
+      newSlots[key] = !newSlots[key];
       setSlots(newSlots);
       onChange(newSlots);
     };
@@ -1068,12 +1065,12 @@
       };
       const startDay = Math.min(selectStart.dayIdx, dayIdx);
       const endDay = Math.max(selectStart.dayIdx, dayIdx);
-      const startHour = Math.min(selectStart.hourStart, Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR);
-      const endHour = Math.max(selectStart.hourStart, Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR) + (SLOTS_PER_HOUR - 1);
-      const startKey = `${selectStart.dayIdx}-${selectStart.hourStart}`;
+      const startSlot = Math.min(selectStart.slotIdx, slotIdx);
+      const endSlot = Math.max(selectStart.slotIdx, slotIdx);
+      const startKey = `${selectStart.dayIdx}-${selectStart.slotIdx}`;
       const shouldSet = !!slots[startKey];
       for (let d = startDay; d <= endDay; d++) {
-        for (let s = startHour; s <= endHour; s++) {
+        for (let s = startSlot; s <= endSlot; s++) {
           newSlots[`${d}-${s}`] = shouldSet;
         }
       }
@@ -1102,7 +1099,7 @@
       return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
     };
 
-    // 生成选中时间段描述文字（按小时合并）
+    // 生成选中时间段描述文字（按0.5h合并）
     const buildSelectedText = () => {
       const parts = [];
       for (let di = 0; di < 7; di++) {
@@ -1114,13 +1111,15 @@
             if (rangeStart === null) rangeStart = si;
           } else {
             if (rangeStart !== null) {
-              dayRanges.push(slotToTime(rangeStart) + '-' + slotToTime(si - 1));
+              // 结束时间显示为下一个格子开始时间（即整点）
+              const endSi = si;
+              dayRanges.push(slotToTime(rangeStart) + '-' + slotToTime(endSi));
               rangeStart = null;
             }
           }
         }
         if (rangeStart !== null) {
-          dayRanges.push(slotToTime(rangeStart) + '-23:30');
+          dayRanges.push(slotToTime(rangeStart) + '-24:00');
         }
         if (dayRanges.length > 0) {
           parts.push(DAYS[di] + ' ' + dayRanges.join('、'));
@@ -1130,15 +1129,15 @@
     };
     const selectedText = buildSelectedText();
 
-    // 计算tooltip文本
+    // 计算tooltip文本（显示完整选中时间段）
     const getTooltip = (dayIdx, slotIdx) => {
-      const hourStart = Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR;
-      let start = hourStart,
-        end = hourStart + SLOTS_PER_HOUR - 1;
-      // 扩展找到连续选区
+      let start = slotIdx,
+        end = slotIdx;
+      // 向两边扩展找到连续选区
       while (start > 0 && slots[`${dayIdx}-${start - 1}`]) start--;
       while (end < TOTAL_SLOTS - 1 && slots[`${dayIdx}-${end + 1}`]) end++;
-      return `${DAYS[dayIdx]} ${slotToTime(start)}-${slotToTime(end)}`;
+      const timeStr = start === end ? `${DAYS[dayIdx]} ${slotToTime(start)}-${slotToTime(start + 1)}` : `${DAYS[dayIdx]} ${slotToTime(start)}-${slotToTime(end + 1)}`;
+      return timeStr;
     };
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1239,7 +1238,8 @@
           borderBottom: di === 6 ? 'none' : '1px solid #f5f5f5',
           borderRight: isNoonBoundary ? '2px solid #e5e7eb' : isHourBoundary ? '1px solid #e5e7eb' : '1px solid #f0f0f0',
           padding: 0,
-          userSelect: 'none'
+          userSelect: 'none',
+          width: '2.0833%'
         }
       }, /*#__PURE__*/React.createElement("div", {
         style: {
