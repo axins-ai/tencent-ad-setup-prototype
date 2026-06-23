@@ -200,7 +200,7 @@
             </div>
             
             <!-- 排除已转化用户 -->
-            <div style="margin-bottom:16px;">
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">排除已转化用户</div>
               <div style="display:flex;gap:16px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
@@ -210,6 +210,74 @@
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="tgt-pkg-exclude" value="exclude" style="margin-right:6px;">
                   <span style="font-size:14px;">排除</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 自定义人群 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">自定义人群</div>
+              <div style="display:flex;gap:16px;margin-bottom:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="unlimited" checked onchange="document.getElementById('tgt-pkg-audience-config').style.display='none'" style="margin-right:6px;">
+                  <span style="font-size:14px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="target" onchange="document.getElementById('tgt-pkg-audience-config').style.display='block';document.getElementById('tgt-pkg-audience-title').textContent='指定人群'" style="margin-right:6px;">
+                  <span style="font-size:14px;">指定人群</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="exclude" onchange="document.getElementById('tgt-pkg-audience-config').style.display='block';document.getElementById('tgt-pkg-audience-title').textContent='排除人群'" style="margin-right:6px;">
+                  <span style="font-size:14px;">排除人群</span>
+                </label>
+              </div>
+              <div id="tgt-pkg-audience-config" style="display:none;">
+                <div style="font-size:13px;color:#666;margin-bottom:8px;" id="tgt-pkg-audience-title">指定人群</div>
+                <input id="tgt-pkg-audience-input" type="text" placeholder="输入人群包ID或名称，多个用逗号分隔" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+              </div>
+            </div>
+
+            <!-- 转化行为 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">转化行为</div>
+              <div style="display:flex;gap:16px;margin-bottom:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-conversion-behavior" value="optimize" checked onchange="document.getElementById('tgt-pkg-conversion-detail').style.display='none'" style="margin-right:6px;">
+                  <span style="font-size:14px;">优化行为</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-conversion-behavior" value="custom" onchange="document.getElementById('tgt-pkg-conversion-detail').style.display='block'" style="margin-right:6px;">
+                  <span style="font-size:14px;">指定行为</span>
+                </label>
+              </div>
+              <div id="tgt-pkg-conversion-detail" style="display:none;">
+                <input id="tgt-pkg-conversion-input" type="text" placeholder="输入转化行为ID或名称" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+              </div>
+            </div>
+
+            <!-- 转化时间区间 -->
+            <div style="margin-bottom:16px;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">转化时间区间</div>
+              <div style="display:flex;flex-wrap:wrap;gap:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-conversion-time" value="today" style="margin-right:6px;">
+                  <span style="font-size:14px;">今天</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-conversion-time" value="7day" checked style="margin-right:6px;">
+                  <span style="font-size:14px;">最近7天</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-conversion-time" value="1month" style="margin-right:6px;">
+                  <span style="font-size:14px;">最近1个月</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-conversion-time" value="3month" style="margin-right:6px;">
+                  <span style="font-size:14px;">最近3个月</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-conversion-time" value="6month" style="margin-right:6px;">
+                  <span style="font-size:14px;">最近6个月</span>
                 </label>
               </div>
             </div>
@@ -540,6 +608,16 @@
     document.querySelector('input[name="tgt-pkg-gender"][value="不限"]').checked = true;
     // 重置排除已转化用户
     document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]').checked = true;
+    // 重置自定义人群
+    document.querySelector('input[name="tgt-pkg-audience-mode"][value="unlimited"]').checked = true;
+    document.getElementById('tgt-pkg-audience-config').style.display = 'none';
+    document.getElementById('tgt-pkg-audience-input').value = '';
+    // 重置转化行为
+    document.querySelector('input[name="tgt-pkg-conversion-behavior"][value="optimize"]').checked = true;
+    document.getElementById('tgt-pkg-conversion-detail').style.display = 'none';
+    document.getElementById('tgt-pkg-conversion-input').value = '';
+    // 重置转化时间区间
+    document.querySelector('input[name="tgt-pkg-conversion-time"][value="7day"]').checked = true;
     document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
   };
   window.editTgtPkg = function(idx) {
@@ -560,10 +638,37 @@
     window.setTgtPkgAgeValue(tp.age || '不限');
     // 加载性别
     var gender = tp.gender || '不限';
-    document.querySelector('input[name="tgt-pkg-gender"][value="' + gender + '"]').checked = true;
+    var genderRadio = document.querySelector('input[name="tgt-pkg-gender"][value="' + gender + '"]');
+    if (genderRadio) genderRadio.checked = true;
     // 加载排除已转化用户
     var exclude = tp.excludeConverted || 'unlimited';
-    document.querySelector('input[name="tgt-pkg-exclude"][value="' + exclude + '"]').checked = true;
+    var excludeRadio = document.querySelector('input[name="tgt-pkg-exclude"][value="' + exclude + '"]');
+    if (excludeRadio) excludeRadio.checked = true;
+    // 加载自定义人群
+    var audienceMode = tp.audienceMode || 'unlimited';
+    var audienceModeRadio = document.querySelector('input[name="tgt-pkg-audience-mode"][value="' + audienceMode + '"]');
+    if (audienceModeRadio) audienceModeRadio.checked = true;
+    if (audienceMode !== 'unlimited') {
+      document.getElementById('tgt-pkg-audience-config').style.display = 'block';
+      document.getElementById('tgt-pkg-audience-title').textContent = audienceMode === 'target' ? '指定人群' : '排除人群';
+    } else {
+      document.getElementById('tgt-pkg-audience-config').style.display = 'none';
+    }
+    document.getElementById('tgt-pkg-audience-input').value = tp.audienceInput || '';
+    // 加载转化行为
+    var conversionBehavior = tp.conversionBehavior || 'optimize';
+    var conversionRadio = document.querySelector('input[name="tgt-pkg-conversion-behavior"][value="' + conversionBehavior + '"]');
+    if (conversionRadio) conversionRadio.checked = true;
+    if (conversionBehavior !== 'optimize') {
+      document.getElementById('tgt-pkg-conversion-detail').style.display = 'block';
+    } else {
+      document.getElementById('tgt-pkg-conversion-detail').style.display = 'none';
+    }
+    document.getElementById('tgt-pkg-conversion-input').value = tp.conversionInput || '';
+    // 加载转化时间区间
+    var conversionTime = tp.conversionTimeRange || '7day';
+    var conversionTimeRadio = document.querySelector('input[name="tgt-pkg-conversion-time"][value="' + conversionTime + '"]');
+    if (conversionTimeRadio) conversionTimeRadio.checked = true;
     document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
   };
   window.closeTgtPkgForm = function() {
@@ -586,12 +691,31 @@
     var gender = document.querySelector('input[name="tgt-pkg-gender"]:checked').value;
     // 获取排除已转化用户
     var excludeConverted = document.querySelector('input[name="tgt-pkg-exclude"]:checked').value;
+    // 获取自定义人群
+    var audienceMode = document.querySelector('input[name="tgt-pkg-audience-mode"]:checked').value;
+    var audienceInput = '';
+    if (audienceMode !== 'unlimited') {
+      audienceInput = document.getElementById('tgt-pkg-audience-input').value.trim();
+    }
+    // 获取转化行为
+    var conversionBehavior = document.querySelector('input[name="tgt-pkg-conversion-behavior"]:checked').value;
+    var conversionInput = '';
+    if (conversionBehavior !== 'optimize') {
+      conversionInput = document.getElementById('tgt-pkg-conversion-input').value.trim();
+    }
+    // 获取转化时间区间
+    var conversionTimeRange = document.querySelector('input[name="tgt-pkg-conversion-time"]:checked').value;
     var data = {
       name: name,
       region: region,
       age: age,
       gender: gender,
-      excludeConverted: excludeConverted
+      excludeConverted: excludeConverted,
+      audienceMode: audienceMode,
+      audienceInput: audienceInput,
+      conversionBehavior: conversionBehavior,
+      conversionInput: conversionInput,
+      conversionTimeRange: conversionTimeRange
     };
     if (editingTgtPkgIdx >= 0) {
       data.id = targetingPackages[editingTgtPkgIdx].id;

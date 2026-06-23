@@ -1188,7 +1188,12 @@
         region: geoMode === 'unlimited' ? '不限' : geoMode === 'region' ? geoSelectedProvinces.join(',') : '地图选择',
         age: ageSelections.includes('unlimited') ? '不限' : ageSelections.join(','),
         gender: genderSelection === 'unlimited' ? '不限' : genderSelection,
-        excludeConverted: excludeConvertedMode
+        excludeConverted: excludeConvertedMode,
+        audienceMode: audienceMode,
+        targetAudiences: selectedTargetAudiences,
+        excludeAudiences: selectedExcludeAudiences,
+        conversionBehavior: conversionBehavior,
+        conversionTimeRange: conversionTimeRange
       };
       const updated = [...userTgtPkgs, pkg];
       setUserTgtPkgs(updated);
@@ -3042,11 +3047,29 @@
       className: "text-xs text-gray-500"
     }, "性别："), /*#__PURE__*/React.createElement("span", {
       className: "text-xs text-gray-900 ml-1"
-    }, genderSelection === 'unlimited' ? '不限' : genderSelection)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    }, genderSelection === 'unlimited' ? '不限' : genderSelection)), /*#__PURE__*/React.createElement("div", {
+      className: "mb-2"
+    }, /*#__PURE__*/React.createElement("span", {
       className: "text-xs text-gray-500"
     }, "排除已转化用户："), /*#__PURE__*/React.createElement("span", {
       className: "text-xs text-gray-900 ml-1"
-    }, excludeConvertedMode === 'unlimited' ? '不限' : excludeConvertedMode))), /*#__PURE__*/React.createElement("p", {
+    }, excludeConvertedMode === 'unlimited' ? '不限' : excludeConvertedMode)), /*#__PURE__*/React.createElement("div", {
+      className: "mb-2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-500"
+    }, "自定义人群："), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-900 ml-1"
+    }, audienceMode === 'unlimited' ? '不限' : audienceMode === 'target' ? '指定人群：' + selectedTargetAudiences.join('、') : '排除人群：' + selectedExcludeAudiences.join('、'))), /*#__PURE__*/React.createElement("div", {
+      className: "mb-2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-500"
+    }, "转化行为："), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-900 ml-1"
+    }, conversionBehavior === 'optimize' ? '优化行为' : '指定行为：' + (window.__customConversionName || '已选择指定行为'))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-500"
+    }, "转化时间区间："), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-900 ml-1"
+    }, conversionTimeRange === 'today' ? '今天' : conversionTimeRange === '7day' ? '最近7天' : conversionTimeRange === '1month' ? '最近1个月' : conversionTimeRange === '3month' ? '最近3个月' : '最近6个月'))), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-gray-500"
     }, "将保存以上配置为定向包，可在「定向包」模式下重复使用。")), /*#__PURE__*/React.createElement("div", {
       className: "px-6 py-4 border-t flex gap-2 justify-end"

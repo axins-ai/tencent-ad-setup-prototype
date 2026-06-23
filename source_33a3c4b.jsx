@@ -822,6 +822,11 @@ function App() {
       age: ageSelections.includes('unlimited') ? '不限' : ageSelections.join(','),
       gender: genderSelection === 'unlimited' ? '不限' : genderSelection,
       excludeConverted: excludeConvertedMode,
+      audienceMode: audienceMode,
+      targetAudiences: selectedTargetAudiences,
+      excludeAudiences: selectedExcludeAudiences,
+      conversionBehavior: conversionBehavior,
+      conversionTimeRange: conversionTimeRange,
     };
     const updated = [...userTgtPkgs, pkg];
     setUserTgtPkgs(updated);
@@ -2366,10 +2371,34 @@ function App() {
                       </div>
                       
                       {/* 排除已转化用户 */}
-                      <div>
+                      <div className="mb-2">
                         <span className="text-xs text-gray-500">排除已转化用户：</span>
                         <span className="text-xs text-gray-900 ml-1">
                           {excludeConvertedMode === 'unlimited' ? '不限' : excludeConvertedMode}
+                        </span>
+                      </div>
+
+                      {/* 自定义人群 */}
+                      <div className="mb-2">
+                        <span className="text-xs text-gray-500">自定义人群：</span>
+                        <span className="text-xs text-gray-900 ml-1">
+                          {audienceMode === 'unlimited' ? '不限' : (audienceMode === 'target' ? '指定人群：' + selectedTargetAudiences.join('、') : '排除人群：' + selectedExcludeAudiences.join('、'))}
+                        </span>
+                      </div>
+
+                      {/* 转化行为 */}
+                      <div className="mb-2">
+                        <span className="text-xs text-gray-500">转化行为：</span>
+                        <span className="text-xs text-gray-900 ml-1">
+                          {conversionBehavior === 'optimize' ? '优化行为' : '指定行为：' + (window.__customConversionName || '已选择指定行为')}
+                        </span>
+                      </div>
+
+                      {/* 转化时间区间 */}
+                      <div>
+                        <span className="text-xs text-gray-500">转化时间区间：</span>
+                        <span className="text-xs text-gray-900 ml-1">
+                          {conversionTimeRange === 'today' ? '今天' : (conversionTimeRange === '7day' ? '最近7天' : (conversionTimeRange === '1month' ? '最近1个月' : (conversionTimeRange === '3month' ? '最近3个月' : '最近6个月')))}
                         </span>
                       </div>
                     </div>
