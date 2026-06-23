@@ -1102,27 +1102,25 @@
       return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
     };
 
-    // 生成选中时间段描述文字（按0.5h合并）
+    // 生成选中时间段描述文字（按0.5h合并，显示每个格子的起止时间）
     const buildSelectedText = () => {
       const parts = [];
       for (let di = 0; di < 7; di++) {
         let dayRanges = [];
         let rangeStart = null;
-        for (let si = 0; si < TOTAL_SLOTS; si++) {
+        for (let si = 0; si <= TOTAL_SLOTS; si++) {
           const key = `${di}-${si}`;
-          if (!!slots[key]) {
+          const isSelected = si < TOTAL_SLOTS ? !!slots[key] : false;
+          if (isSelected) {
             if (rangeStart === null) rangeStart = si;
           } else {
             if (rangeStart !== null) {
-              // 结束时间显示为下一个格子开始时间（即整点）
-              const endSi = si;
+              // 结束时间 = 该段最后一个格子的结束时间（即下一个格子的开始时间）
+              const endSi = si; // si 是第一个未选中的格子
               dayRanges.push(slotToTime(rangeStart) + '-' + slotToTime(endSi));
               rangeStart = null;
             }
           }
-        }
-        if (rangeStart !== null) {
-          dayRanges.push(slotToTime(rangeStart) + '-24:00');
         }
         if (dayRanges.length > 0) {
           parts.push(DAYS[di] + ' ' + dayRanges.join('、'));
@@ -1132,15 +1130,16 @@
     };
     const selectedText = buildSelectedText();
 
-    // 计算tooltip文本（显示完整选中时间段）
+    // 计算tooltip文本（显示鼠标所在格子的完整时间段）
     const getTooltip = (dayIdx, slotIdx) => {
-      let start = slotIdx,
-        end = slotIdx;
-      // 向两边扩展找到连续选区
-      while (start > 0 && slots[`${dayIdx}-${start - 1}`]) start--;
-      while (end < TOTAL_SLOTS - 1 && slots[`${dayIdx}-${end + 1}`]) end++;
-      const timeStr = start === end ? `${DAYS[dayIdx]} ${slotToTime(start)}-${slotToTime(start + 1)}` : `${DAYS[dayIdx]} ${slotToTime(start)}-${slotToTime(end + 1)}`;
-      return timeStr;
+      // 找到包含当前格子的连续选中区间
+      let rangeStart = slotIdx,
+        rangeEnd = slotIdx;
+      while (rangeStart > 0 && slots[`${dayIdx}-${rangeStart - 1}`]) rangeStart--;
+      while (rangeEnd < TOTAL_SLOTS - 1 && slots[`${dayIdx}-${rangeEnd + 1}`]) rangeEnd++;
+      // 只在这个格子被选中时才显示 tooltip
+      if (!slots[`${dayIdx}-${slotIdx}`]) return '';
+      return `${DAYS[dayIdx]} ${slotToTime(rangeStart)}-${slotToTime(rangeEnd + 1)}`;
     };
     return /*#__PURE__*/React.createElement("div", {
       style: {
