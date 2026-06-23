@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdBatch 原型</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="margin:0;font-family:sans-serif;background:#F0F2F5;">
+
+<!-- 导航层：默认可见 -->
+<div id="nav-layer" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;background:white;display:flex;">
+
+  <!-- 左侧菜单 -->
+  <div style="width:256px;height:100vh;background:white;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;position:fixed;left:0;top:0;">
+    <div style="padding:20px;border-bottom:1px solid #e5e7eb;">
+      <h1 style="font-size:18px;font-weight:bold;color:#1890FF;margin:0;">AdBatch</h1>
+      <p style="font-size:12px;color:#9ca3af;margin:4px 0 0 0;">腾讯广告批量搭建</p>
+    </div>
+    <nav style="flex:1;padding:12px;display:flex;flex-direction:column;gap:4px;">
+      <button onclick="showTaskList()" id="menu-task-list" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;border:none;background:#E6F7FF;color:#1890FF;font-weight:600;font-size:14px;cursor:pointer;">
+        <i class="fas fa-rocket"></i>
+        批创工具
+      </button>
+    </nav>
+    <div style="padding:16px;border-top:1px solid #e5e7eb;">
+      <p style="font-size:12px;color:#9ca3af;margin:0;">v2.0 · 原型版本</p>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div style="margin-left:256px;height:100vh;overflow:auto;">
+    <!-- 任务列表视图 -->
+    <div id="view-task-list" style="display:none;padding:32px 24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
+        <div>
+          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">批创工具</h2>
+          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理批量创意搭建任务</p>
+        </div>
+        <button onclick="showChannelSelect()" style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;">
+          <i class="fas fa-plus" style="margin-right:8px;"></i>新建任务
+        </button>
+      </div>
+      <div id="task-list-content">
+        <div style="text-align:center;padding:80px 0;color:#9ca3af;">
+          <div style="font-size:48px;margin-bottom:16px;">📋</div>
+          <p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p>
+          <p style="font-size:14px;margin:8px 0 0 0;">点击「新建任务」开始创建批量创意搭建</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 选择渠道视图 -->
+    <div id="view-channel-select" style="display:none;padding:32px 24px;">
+      <button onclick="showTaskList()" style="display:flex;align-items:center;gap:8px;color:#6b7280;background:none;border:none;cursor:pointer;font-size:14px;margin-bottom:24px;">
+        <i class="fas fa-arrow-left"></i>
+        <span>返回任务列表</span>
+      </button>
+      <div style="margin-bottom:32px;">
+        <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0 0 8px 0;">选择投放渠道</h2>
+        <p style="font-size:14px;color:#6b7280;margin:0;">选择要投放的渠道，进入对应的广告搭建表单</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <button onclick="selectChannel('gdt')" style="width:100%;display:flex;align-items:center;gap:16px;padding:20px;border:2px solid #e5e7eb;border-radius:12px;background:white;cursor:pointer;text-align:left;">
+          <div style="font-size:24px;">🎯</div>
+          <div style="flex:1;">
+            <h3 style="font-size:18px;font-weight:bold;color:#111827;margin:0;">广点通</h3>
+            <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">腾讯广告广点通渠道</p>
+          </div>
+          <i class="fas fa-chevron-right" style="color:#9ca3af;"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 表单视图（React 渲染） -->
+    <div id="view-form" style="display:none;"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var currentView = 'task-list';
+  var tasks = [];
+  try {
+    tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
+  } catch(e) {}
+
+  window.showTaskList = function() {
+    currentView = 'task-list';
+    document.getElementById('nav-layer').style.display = 'flex';
+    document.getElementById('view-task-list').style.display = 'block';
+    document.getElementById('view-channel-select').style.display = 'none';
+    document.getElementById('view-form').style.display = 'none';
+  };
+
+  window.showChannelSelect = function() {
+    currentView = 'channel-select';
+    document.getElementById('nav-layer').style.display = 'flex';
+    document.getElementById('view-task-list').style.display = 'none';
+    document.getElementById('view-channel-select').style.display = 'block';
+    document.getElementById('view-form').style.display = 'none';
+  };
+
+  window.selectChannel = function(channelId) {
+    var newTask = {
+      id: 'task_' + Date.now(),
+      name: '任务-' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+      channel: channelId,
+      channelName: channelId === 'gdt' ? '广点通' : channelId,
+      createdAt: new Date().toISOString(),
+      status: 'draft'
+    };
+    tasks.push(newTask);
+    try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
+    window.showForm();
+  };
+
+  window.showForm = function() {
+    currentView = 'form';
+    document.getElementById('nav-layer').style.display = 'none';
+    document.getElementById('view-form').style.display = 'block';
+    if (window.renderForm) window.renderForm();
+  };
+
+  window.deleteTask = function(id) {
+    tasks = tasks.filter(function(t) { return t.id !== id; });
+    try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
+    renderTaskList();
+  };
+
+  window.runTask = function(id) {
+    alert('开始执行任务（模拟）');
+  };
+
+  function renderTaskList() {
+    var container = document.getElementById('task-list-content');
+    if (tasks.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:80px 0;color:#9ca3af;"><div style="font-size:48px;margin-bottom:16px;">📋</div><p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p><p style="font-size:14px;margin:8px 0 0 0;">点击「新建任务」开始创建批量创意搭建</p></div>';
+      return;
+    }
+    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">';
+    for (var i = 0; i < tasks.length; i++) {
+      var task = tasks[i];
+      html += '<div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">' +
+          '<div>' +
+            '<h4 style="font-weight:bold;color:#111827;margin:0;">' + escapeHtml(task.name) + '</h4>' +
+            '<p style="font-size:12px;color:#6b7280;margin:4px 0 0 0;">渠道：' + escapeHtml(task.channelName || task.channel) + '</p>' +
+            '<p style="font-size:12px;color:#9ca3af;margin:4px 0 0 0;">创建于 ' + new Date(task.createdAt).toLocaleDateString() + '</p>' +
+          '</div>' +
+          '<button onclick="deleteTask(\'' + task.id + '\')" style="color:#f87171;background:none;border:none;cursor:pointer;padding:8px;"><i class="fas fa-trash"></i></button>' +
+        '</div>' +
+        '<button onclick="runTask(\'' + task.id + '\')" style="width:100%;background:#1890FF;color:white;font-size:13px;padding:10px;border-radius:8px;border:none;cursor:pointer;">运行任务</button>' +
+      '</div>';
+    }
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  window.addEventListener('DOMContentLoaded', function() {
+    window.showTaskList();
+  });
+})();
+</script>
+
+</body>
+</html>

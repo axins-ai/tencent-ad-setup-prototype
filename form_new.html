@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>腾讯广告搭建流程原型 - 完整交互版 v2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script>
+tailwind.config = { theme: { extend: { colors: { primary: '#1890FF', success: '#52C41A', warning: '#FAAD14', danger: '#FF4D4F' } } } }
+</script>
+<style>
+body { margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.modal-content { background: white; border-radius: 12px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+.btn-primary { background: #1890FF; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #40A9FF; }
+.btn-primary:disabled { background: #d9d9d9; cursor: not-allowed; }
+.btn-secondary { background: #f0f0f0; color: #333; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
+.btn-secondary:hover { background: #e0e0e0; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #E6F7FF; color: #1890FF; border-radius: 999px; font-size: 13px; }
+.tag button { background: none; border: none; cursor: pointer; color: #1890FF; font-size: 12px; padding: 0; margin-left: 2px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="app.js"></script>
+
+</body>
+</html>

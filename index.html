@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdBatch 原型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="margin:0;font-family:sans-serif;background:#F0F2F5;">
+
+<!-- 主布局：左侧菜单 + 右侧内容 -->
+<div id="app-container" style="display:flex;height:100vh;">
+
+  <!-- 左侧菜单 -->
+  <div id="left-menu" style="width:256px;min-width:256px;height:100vh;background:white;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100;">
+    <div style="padding:20px;border-bottom:1px solid #e5e7eb;">
+      <h1 style="font-size:18px;font-weight:bold;color:#1890FF;margin:0;">AdBatch</h1>
+      <p style="font-size:12px;color:#9ca3af;margin:4px 0 0 0;">腾讯广告批量搭建</p>
+    </div>
+    <nav style="flex:1;padding:12px;display:flex;flex-direction:column;gap:2px;">
+      <!-- 批创工具 section -->
+      <div style="margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:600;color:#9ca3af;padding:6px 16px 8px;letter-spacing:0.5px;">批创工具</div>
+
+        <button onclick="showView('task-list')" id="menu-task-list" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:#E6F7FF;color:#1890FF;font-weight:600;font-size:14px;cursor:pointer;">
+          <i class="fas fa-list" style="width:18px;text-align:center;font-size:14px;"></i>
+          任务列表
+        </button>
+
+        <button onclick="showView('targeting-packages')" id="menu-targeting-packages" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
+          <i class="fas fa-bullseye" style="width:18px;text-align:center;font-size:14px;"></i>
+          定向包
+        </button>
+
+        <button onclick="showView('creative-assets')" id="menu-creative-assets" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
+          <i class="fas fa-image" style="width:18px;text-align:center;font-size:14px;"></i>
+          创意资产
+        </button>
+
+        <button onclick="showView('copy-library')" id="menu-copy-library" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
+          <i class="fas fa-font" style="width:18px;text-align:center;font-size:14px;"></i>
+          文案库
+        </button>
+      </div>
+    </nav>
+    <div style="padding:16px;border-top:1px solid #e5e7eb;">
+      <p style="font-size:12px;color:#9ca3af;margin:0;">v2.0 · 原型版本</p>
+    </div>
+  </div>
+
+  <!-- 右侧主内容区 -->
+  <div id="main-content" style="margin-left:256px;flex:1;height:100vh;overflow:auto;">
+
+    <!-- 视图：任务列表 -->
+    <div id="view-task-list" style="display:block;padding:32px 24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
+        <div>
+          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">批创工具</h2>
+          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理批量创意搭建任务</p>
+        </div>
+        <div style="position:relative;" onmouseenter="showDropdown()" onmouseleave="hideDropdown()">
+          <button style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-plus"></i>新增批创任务
+            <i class="fas fa-chevron-down" style="font-size:12px;"></i>
+          </button>
+          <div id="channel-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:white;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.15);min-width:200px;z-index:200;overflow:hidden;">
+            <div onclick="selectChannel('gdt')" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;color:#111827;" onmouseenter="this.style.background='#f5f5f5'" onmouseleave="this.style.background='white'">
+              <span style="font-size:18px;">🎯</span>
+              <span>广点通</span>
+            </div>
+            <div style="padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:14px;color:#c0c0c0;cursor:not-allowed;background:#fafafa;">
+              <span style="font-size:18px;filter:grayscale(1);">📰</span>
+              <span>头条</span>
+              <span style="margin-left:auto;font-size:12px;color:#c0c0c0;">即将支持</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="task-list-content">
+        <div style="text-align:center;padding:80px 0;color:#9ca3af;">
+          <div style="font-size:48px;margin-bottom:16px;">📋</div>
+          <p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p>
+          <p style="font-size:14px;margin:8px 0 0 0;">点击「新增批创任务」开始创建批量创意搭建</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 视图：表单 iframe -->
+    <div id="view-form" style="display:none;height:100%;">
+      <iframe id="form-frame" src="form.html" style="width:100%;height:100vh;border:none;"></iframe>
+    </div>
+
+    <!-- 视图：定向包列表 -->
+    <div id="view-targeting-packages" style="display:none;padding:32px 24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div>
+          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">定向包</h2>
+          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理腾讯渠道自定义定向配置</p>
+        </div>
+        <button onclick="openTgtPkgForm()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-plus"></i> 新建定向包
+        </button>
+      </div>
+      <div id="targeting-package-list-content" style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+        <div style="display:flex;align-items:center;padding:14px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">
+          <div style="flex:0.8;">渠道</div>
+          <div style="flex:1.5;">定向包名称</div>
+          <div style="flex:1.5;">地域</div>
+          <div style="flex:0.8;">年龄</div>
+          <div style="flex:0.6;">性别</div>
+          <div style="flex:1.2;text-align:right;">操作</div>
+        </div>
+        <div id="tp-rows"></div>
+      </div>
+      <!-- 新建/编辑表单弹窗 -->
+      <div id="tgt-pkg-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;width:90vw;max-width:900px;max-height:85vh;overflow-y:auto;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
+            <h3 style="font-size:16px;font-weight:600;margin:0;" id="tgt-pkg-form-title">新建定向包</h3>
+            <button onclick="closeTgtPkgForm()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
+          </div>
+          <div style="padding:20px;">
+            <!-- 定向包名称 -->
+            <div style="margin-bottom:20px;">
+              <label style="display:block;font-size:14px;font-weight:500;color:#333;margin-bottom:6px;">定向包名称 <span style="color:#ff4d4f;">*</span></label>
+              <input id="tgt-pkg-name" type="text" placeholder="输入定向包名称" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+            </div>
+            
+            <!-- 地理位置 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">地理位置</div>
+              <div style="display:flex;gap:16px;margin-bottom:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-geo-mode" value="unlimited" checked onchange="document.getElementById('tgt-pkg-geo-region').style.display='none'" style="margin-right:6px;">
+                  <span style="font-size:14px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-geo-mode" value="region" onchange="document.getElementById('tgt-pkg-geo-region').style.display='block'" style="margin-right:6px;">
+                  <span style="font-size:14px;">按区域</span>
+                </label>
+              </div>
+              <div id="tgt-pkg-geo-region" style="display:none;">
+                <input id="tgt-pkg-region" type="text" placeholder="输入地域，如：北京、上海、广州" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+              </div>
+            </div>
+            
+            <!-- 年龄 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">年龄（可多选）</div>
+              <div id="tgt-pkg-age-options" style="display:flex;flex-wrap:wrap;gap:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="checkbox" value="unlimited" checked onchange="window.tgtPkgAgeChange(this)" style="margin-right:6px;">
+                  <span style="font-size:14px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="checkbox" value="14-18" onchange="window.tgtPkgAgeChange(this)" style="margin-right:6px;">
+                  <span style="font-size:14px;">14-18岁</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="checkbox" value="19-24" onchange="window.tgtPkgAgeChange(this)" style="margin-right:6px;">
+                  <span style="font-size:14px;">19-24岁</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="checkbox" value="25-29" onchange="window.tgtPkgAgeChange(this)" style="margin-right:6px;">
+                  <span style="font-size:14px;">25-29岁</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="checkbox" value="30-39" onchange="window.tgtPkgAgeChange(this)" style="margin-right:6px;">
+                  <span style="font-size:14px;">30-39岁</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="checkbox" value="40-49" onchange="window.tgtPkgAgeChange(this)" style="margin-right:6px;">
+                  <span style="font-size:14px;">40-49岁</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="checkbox" value="50+" onchange="window.tgtPkgAgeChange(this)" style="margin-right:6px;">
+                  <span style="font-size:14px;">50岁及以上</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- 性别 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">性别</div>
+              <div style="display:flex;gap:16px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-gender" value="不限" checked style="margin-right:6px;">
+                  <span style="font-size:14px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-gender" value="男" style="margin-right:6px;">
+                  <span style="font-size:14px;">男</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-gender" value="女" style="margin-right:6px;">
+                  <span style="font-size:14px;">女</span>
+                </label>
+              </div>
+            </div>
+            
+            <!-- 排除已转化用户 -->
+            <div style="margin-bottom:16px;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">排除已转化用户</div>
+              <div style="display:flex;gap:16px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-exclude" value="unlimited" checked style="margin-right:6px;">
+                  <span style="font-size:14px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-exclude" value="exclude" style="margin-right:6px;">
+                  <span style="font-size:14px;">排除</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
+            <button onclick="closeTgtPkgForm()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
+            <button onclick="saveTgtPkg()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 视图：创意资产（暂空） -->
+    <div id="view-creative-assets" style="display:none;padding:32px 24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div>
+          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">创意资产</h2>
+          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告创意素材</p>
+        </div>
+      </div>
+      <div style="text-align:center;padding:80px 0;color:#9ca3af;">
+        <div style="font-size:48px;margin-bottom:16px;">🖼️</div>
+        <p style="font-size:18px;margin:0 0 8px 0;">功能开发中</p>
+        <p style="font-size:14px;margin:8px 0 0 0;">创意资产管理功能即将上线</p>
+      </div>
+    </div>
+
+    <!-- 视图：文案库 -->
+    <div id="view-copy-library" style="display:none;padding:32px 24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div>
+          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">文案库</h2>
+          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告文案</p>
+        </div>
+        <button onclick="openCopyForm()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-plus"></i> 新增文案
+        </button>
+      </div>
+      <div id="copy-library-content" style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+        <div style="display:flex;align-items:center;padding:14px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">
+          <div style="flex:0.5;text-align:center;">序号</div>
+          <div style="flex:3;">文案内容</div>
+          <div style="flex:1;text-align:right;">操作</div>
+        </div>
+        <div id="copy-rows"></div>
+      </div>
+      <!-- 新增文案弹窗 -->
+      <div id="copy-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;width:90vw;max-width:700px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
+            <h3 style="font-size:16px;font-weight:600;margin:0;">新增文案</h3>
+            <button onclick="closeCopyForm()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
+          </div>
+          <div style="padding:20px;">
+            <textarea id="copy-content-input" placeholder="输入文案内容..." style="width:100%;height:120px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
+            <button onclick="closeCopyForm()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
+            <button onclick="saveCopy()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  var tasks = [];
+  var currentTaskId = null;
+  var targetingPackages = [];
+  var copyTexts = [];
+  try {
+    tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
+  } catch(e) {}
+  try {
+    targetingPackages = JSON.parse(localStorage.getItem('ad_targeting_packages') || '[]');
+  } catch(e) {}
+  try {
+    copyTexts = JSON.parse(localStorage.getItem('ad_copy_texts') || '[]');
+  } catch(e) {}
+
+  // ========== 下拉菜单 ==========
+  window.showDropdown = function() {
+    document.getElementById('channel-dropdown').style.display = 'block';
+  };
+  window.hideDropdown = function() {
+    document.getElementById('channel-dropdown').style.display = 'none';
+  };
+
+  // ========== 视图切换 ==========
+  var VIEWS = ['task-list', 'form', 'targeting-packages', 'creative-assets', 'copy-library'];
+  window.showView = function(name) {
+    VIEWS.forEach(function(v) {
+      var el = document.getElementById('view-' + v);
+      if (el) el.style.display = 'none';
+    });
+    var target = document.getElementById('view-' + name);
+    if (target) target.style.display = 'block';
+    setActiveMenu('menu-' + name.replace(/-/g, '-'));
+    // 刷新数据
+    if (name === 'task-list') renderTaskList();
+    if (name === 'targeting-packages') renderTgtPkgList();
+    if (name === 'copy-library') renderCopyList();
+  };
+
+  // 显示任务列表（兼容旧调用）
+  window.showTaskList = function() {
+    showView('task-list');
+  };
+
+  // ========== 菜单高亮 ==========
+  function setActiveMenu(activeId) {
+    var ids = ['menu-task-list', 'menu-targeting-packages', 'menu-creative-assets', 'menu-copy-library'];
+    ids.forEach(function(id) {
+      var btn = document.getElementById(id);
+      if (!btn) return;
+      if (id === activeId) {
+        btn.style.background = '#E6F7FF';
+        btn.style.color = '#1890FF';
+        btn.style.fontWeight = '600';
+      } else {
+        btn.style.background = 'transparent';
+        btn.style.color = '#333';
+        btn.style.fontWeight = '400';
+      }
+    });
+  }
+
+  // ========== 选择渠道 → 加载表单 ==========
+  window.selectChannel = function(channelId) {
+    hideDropdown();
+    var newTask = {
+      id: 'task_' + Date.now(),
+      name: '任务-' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+      channel: channelId,
+      channelName: channelId === 'gdt' ? '广点通' : channelId,
+      createdAt: new Date().toISOString(),
+      status: 'draft'
+    };
+    tasks.push(newTask);
+    try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
+    currentTaskId = newTask.id;
+    openForm(newTask.id);
+  };
+
+  function openForm(taskId) {
+    document.getElementById('view-task-list').style.display = 'none';
+    document.getElementById('view-form').style.display = 'block';
+    // 隐藏其他视图
+    ['view-targeting-packages','view-creative-assets','view-copy-library'].forEach(function(v) {
+      var el = document.getElementById('view-' + v);
+      if (el) el.style.display = 'none';
+    });
+    var frame = document.getElementById('form-frame');
+    frame.src = 'form.html?taskId=' + encodeURIComponent(taskId);
+  }
+
+  window.closeForm = function() {
+    showView('task-list');
+  };
+
+  // ========== 任务操作 ==========
+  window.editTask = function(taskId) {
+    currentTaskId = taskId;
+    openForm(taskId);
+  };
+
+  window.deleteTask = function(taskId) {
+    if (!confirm('确定要删除该任务吗？')) return;
+    tasks = tasks.filter(function(t) { return t.id !== taskId; });
+    try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
+    localStorage.removeItem('ad_task_form_' + taskId);
+    renderTaskList();
+  };
+
+  window.scheduleTask = function(taskId) {
+    alert('定时运行功能开发中，当前为原型版本');
+  };
+
+  // ========== 渲染任务列表 ==========
+  function renderTaskList() {
+    var container = document.getElementById('task-list-content');
+    if (tasks.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:80px 0;color:#9ca3af;">' +
+        '<div style="font-size:48px;margin-bottom:16px;">📋</div>' +
+        '<p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p>' +
+        '<p style="font-size:14px;margin:8px 0 0 0;">点击「新增批创任务」开始创建批量创意搭建</p>' +
+        '</div>';
+      return;
+    }
+    var placementMap = { 'wechat_video':'视频号','wechat_article':'公众号','qq_space':'QQ空间','tencent_video':'腾讯视频','tencent_news':'腾讯新闻','all':'全版位' };
+    var tpNameMap = { 'tp_001':'一线城市青年','tp_002':'全国泛投','tp_003':'二三线城市中年','tp_004':'老年人群','tp_005':'一线城市泛投' };
+    var reversed = tasks.slice().reverse();
+    var html = '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">';
+    html += '<div style="display:flex;align-items:center;padding:16px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">' +
+      '<div style="flex:1.2;">业务名称</div>' +
+      '<div style="flex:1;">账户</div>' +
+      '<div style="flex:0.8;">渠道</div>' +
+      '<div style="flex:1;">定向包</div>' +
+      '<div style="flex:1;">投放版位</div>' +
+      '<div style="flex:1.2;text-align:right;">操作</div>' +
+      '</div>';
+    reversed.forEach(function(task) {
+      var taskData = null;
+      try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch(e) {}
+      var accountDisplay = (taskData && taskData.selectedAccountIds && taskData.selectedAccountIds.length > 0) ? taskData.selectedAccountIds.length + ' 个账户' : '-';
+      var placementVal = taskData && taskData.placement ? taskData.placement : '';
+      var placementDisplay = placementVal ? (placementMap[placementVal] || placementVal) : '未选择';
+      var tpDisplay = '-';
+      if (taskData && taskData.selectedTargetingPackages && taskData.selectedTargetingPackages.length > 0) {
+        var tpNames = taskData.selectedTargetingPackages.map(function(id) { return tpNameMap[id] || id; });
+        tpDisplay = tpNames.join('、');
+        if (tpDisplay.length > 12) tpDisplay = tpNames.length + ' 个定向包';
+      }
+      html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;" onmouseenter="this.style.background=\'#f9f9f9\'" onmouseleave="this.style.background=\'white\'">' +
+        '<div style="flex:1.2;font-weight:500;">' + escapeHtml(task.name) + '<br><span style="font-size:12px;color:#9ca3af;">' + (task.status === 'draft' ? '草稿' : task.status) + ' · ' + formatDate(task.createdAt) + '</span></div>' +
+        '<div style="flex:1;">' + escapeHtml(accountDisplay) + '</div>' +
+        '<div style="flex:0.8;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
+        '<div style="flex:1;color:#6b7280;">' + escapeHtml(tpDisplay) + '</div>' +
+        '<div style="flex:1;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
+        '<div style="flex:1.2;display:flex;justify-content:flex-end;gap:8px;">' +
+          '<button onclick="editTask(\'' + task.id + '\')" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-pen" style="margin-right:4px;"></i>编辑</button>' +
+          '<button onclick="scheduleTask(\'' + task.id + '\')" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-clock" style="margin-right:4px;"></i>定时运行</button>' +
+          '<button onclick="deleteTask(\'' + task.id + '\')" style="padding:6px 14px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;"><i class="fas fa-trash" style="margin-right:4px;"></i>删除</button>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  // ========== 定向包表单年龄多选逻辑 ==========
+  window.tgtPkgAgeChange = function(checkbox) {
+    var value = checkbox.value;
+    var allCheckboxes = document.querySelectorAll('#tgt-pkg-age-options input[type="checkbox"]');
+    if (value === 'unlimited') {
+      // 选择"不限"，取消其他所有选择
+      allCheckboxes.forEach(function(cb) {
+        if (cb.value !== 'unlimited') cb.checked = false;
+      });
+    } else {
+      // 选择具体年龄，取消"不限"
+      allCheckboxes.forEach(function(cb) {
+        if (cb.value === 'unlimited') cb.checked = false;
+      });
+      // 如果没有选择任何具体年龄，自动选择"不限"
+      var anyChecked = false;
+      allCheckboxes.forEach(function(cb) {
+        if (cb.value !== 'unlimited' && cb.checked) anyChecked = true;
+      });
+      if (!anyChecked) {
+        allCheckboxes.forEach(function(cb) {
+          if (cb.value === 'unlimited') cb.checked = true;
+        });
+      }
+    }
+  };
+  window.getTgtPkgAgeValue = function() {
+    var allCheckboxes = document.querySelectorAll('#tgt-pkg-age-options input[type="checkbox"]');
+    var selected = [];
+    allCheckboxes.forEach(function(cb) {
+      if (cb.checked) selected.push(cb.value);
+    });
+    if (selected.includes('unlimited')) return '不限';
+    return selected.join(',');
+  };
+  window.setTgtPkgAgeValue = function(val) {
+    var allCheckboxes = document.querySelectorAll('#tgt-pkg-age-options input[type="checkbox"]');
+    // 先全部取消
+    allCheckboxes.forEach(function(cb) { cb.checked = false; });
+    if (!val || val === '不限') {
+      // 选择"不限"
+      allCheckboxes.forEach(function(cb) {
+        if (cb.value === 'unlimited') cb.checked = true;
+      });
+    } else {
+      // 选择具体年龄
+      var vals = val.split(',');
+      allCheckboxes.forEach(function(cb) {
+        if (vals.includes(cb.value)) cb.checked = true;
+      });
+      // 取消"不限"
+      allCheckboxes.forEach(function(cb) {
+        if (cb.value === 'unlimited') cb.checked = false;
+      });
+    }
+  };
+
+  // ========== 定向包列表 ==========
+  window.renderTgtPkgList = function() {
+    var container = document.getElementById('tp-rows');
+    if (!container) return;
+    if (targetingPackages.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:40px 0;color:#9ca3af;font-size:14px;">暂无定向包，点击「新建定向包」创建</div>';
+      return;
+    }
+    var html = '';
+    targetingPackages.forEach(function(tp, idx) {
+      html += '<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;">' +
+        '<div style="flex:0.8;"><span style="padding:3px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">腾讯广告</span></div>' +
+        '<div style="flex:1.5;font-weight:500;">' + escapeHtml(tp.name) + '</div>' +
+        '<div style="flex:1.5;color:#6b7280;">' + escapeHtml(tp.region || '-') + '</div>' +
+        '<div style="flex:0.8;color:#6b7280;">' + escapeHtml(tp.age || '-') + '</div>' +
+        '<div style="flex:0.6;color:#6b7280;">' + escapeHtml(tp.gender || '-') + '</div>' +
+        '<div style="flex:1.2;display:flex;justify-content:flex-end;gap:6px;">' +
+          '<button onclick="editTgtPkg(' + idx + ')" style="padding:5px 12px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;">编辑</button>' +
+          '<button onclick="deleteTgtPkg(' + idx + ')" style="padding:5px 12px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;">删除</button>' +
+        '</div>' +
+      '</div>';
+    });
+    container.innerHTML = html;
+  };
+
+  var editingTgtPkgIdx = -1;
+  window.openTgtPkgForm = function() {
+    editingTgtPkgIdx = -1;
+    document.getElementById('tgt-pkg-form-title').textContent = '新建定向包';
+    document.getElementById('tgt-pkg-name').value = '';
+    // 重置地理位置
+    document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
+    document.getElementById('tgt-pkg-geo-region').style.display = 'none';
+    document.getElementById('tgt-pkg-region').value = '';
+    // 重置年龄
+    window.setTgtPkgAgeValue('不限');
+    // 重置性别
+    document.querySelector('input[name="tgt-pkg-gender"][value="不限"]').checked = true;
+    // 重置排除已转化用户
+    document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]').checked = true;
+    document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
+  };
+  window.editTgtPkg = function(idx) {
+    editingTgtPkgIdx = idx;
+    var tp = targetingPackages[idx];
+    document.getElementById('tgt-pkg-form-title').textContent = '编辑定向包';
+    document.getElementById('tgt-pkg-name').value = tp.name || '';
+    // 加载地理位置
+    if (!tp.region || tp.region === '不限') {
+      document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
+      document.getElementById('tgt-pkg-geo-region').style.display = 'none';
+    } else {
+      document.querySelector('input[name="tgt-pkg-geo-mode"][value="region"]').checked = true;
+      document.getElementById('tgt-pkg-geo-region').style.display = 'block';
+      document.getElementById('tgt-pkg-region').value = tp.region;
+    }
+    // 加载年龄
+    window.setTgtPkgAgeValue(tp.age || '不限');
+    // 加载性别
+    var gender = tp.gender || '不限';
+    document.querySelector('input[name="tgt-pkg-gender"][value="' + gender + '"]').checked = true;
+    // 加载排除已转化用户
+    var exclude = tp.excludeConverted || 'unlimited';
+    document.querySelector('input[name="tgt-pkg-exclude"][value="' + exclude + '"]').checked = true;
+    document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
+  };
+  window.closeTgtPkgForm = function() {
+    document.getElementById('tgt-pkg-form-modal').style.display = 'none';
+  };
+  window.saveTgtPkg = function() {
+    var name = document.getElementById('tgt-pkg-name').value.trim();
+    if (!name) { alert('请输入定向包名称'); return; }
+    // 获取地理位置
+    var geoMode = document.querySelector('input[name="tgt-pkg-geo-mode"]:checked').value;
+    var region = '';
+    if (geoMode === 'region') {
+      region = document.getElementById('tgt-pkg-region').value.trim();
+    } else {
+      region = '不限';
+    }
+    // 获取年龄
+    var age = window.getTgtPkgAgeValue();
+    // 获取性别
+    var gender = document.querySelector('input[name="tgt-pkg-gender"]:checked').value;
+    // 获取排除已转化用户
+    var excludeConverted = document.querySelector('input[name="tgt-pkg-exclude"]:checked').value;
+    var data = {
+      name: name,
+      region: region,
+      age: age,
+      gender: gender,
+      excludeConverted: excludeConverted
+    };
+    if (editingTgtPkgIdx >= 0) {
+      data.id = targetingPackages[editingTgtPkgIdx].id;
+      targetingPackages[editingTgtPkgIdx] = data;
+    } else {
+      data.id = 'tp_' + Date.now();
+      targetingPackages.push(data);
+    }
+    try { localStorage.setItem('ad_targeting_packages', JSON.stringify(targetingPackages)); } catch(e) {}
+    closeTgtPkgForm();
+    renderTgtPkgList();
+  };
+  window.deleteTgtPkg = function(idx) {
+    if (!confirm('确定要删除该定向包吗？')) return;
+    targetingPackages.splice(idx, 1);
+    try { localStorage.setItem('ad_targeting_packages', JSON.stringify(targetingPackages)); } catch(e) {}
+    renderTgtPkgList();
+  };
+
+  // ========== 文案库 ==========
+  window.renderCopyList = function() {
+    var container = document.getElementById('copy-rows');
+    if (!container) return;
+    if (copyTexts.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:40px 0;color:#9ca3af;font-size:14px;">暂无文案，点击「新增文案」创建</div>';
+      return;
+    }
+    var html = '';
+    copyTexts.forEach(function(cp, idx) {
+      html += '<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;">' +
+        '<div style="flex:0.5;text-align:center;color:#9ca3af;font-size:13px;">' + (idx + 1) + '</div>' +
+        '<div style="flex:3;color:#333;line-height:1.6;">' + escapeHtml(cp.content) + '</div>' +
+        '<div style="flex:1;display:flex;justify-content:flex-end;gap:6px;">' +
+          '<button onclick="editCopy(' + idx + ')" style="padding:5px 12px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;">编辑</button>' +
+          '<button onclick="deleteCopy(' + idx + ')" style="padding:5px 12px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;">删除</button>' +
+        '</div>' +
+      '</div>';
+    });
+    container.innerHTML = html;
+  };
+
+  var editingCopyIdx = -1;
+  window.openCopyForm = function() {
+    editingCopyIdx = -1;
+    document.getElementById('copy-content-input').value = '';
+    document.getElementById('copy-form-modal').style.display = 'flex';
+  };
+  window.editCopy = function(idx) {
+    editingCopyIdx = idx;
+    document.getElementById('copy-content-input').value = copyTexts[idx].content || '';
+    document.getElementById('copy-form-modal').style.display = 'flex';
+  };
+  window.closeCopyForm = function() {
+    document.getElementById('copy-form-modal').style.display = 'none';
+  };
+  window.saveCopy = function() {
+    var content = document.getElementById('copy-content-input').value.trim();
+    if (!content) { alert('请输入文案内容'); return; }
+    if (editingCopyIdx >= 0) {
+      copyTexts[editingCopyIdx].content = content;
+    } else {
+      copyTexts.push({ id: 'cp_' + Date.now(), content: content });
+    }
+    try { localStorage.setItem('ad_copy_texts', JSON.stringify(copyTexts)); } catch(e) {}
+    closeCopyForm();
+    renderCopyList();
+  };
+  window.deleteCopy = function(idx) {
+    if (!confirm('确定要删除该文案吗？')) return;
+    copyTexts.splice(idx, 1);
+    try { localStorage.setItem('ad_copy_texts', JSON.stringify(copyTexts)); } catch(e) {}
+    renderCopyList();
+  };
+
+  // ========== 工具函数 ==========
+  function formatDate(isoStr) {
+    try {
+      var d = new Date(isoStr);
+      return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    } catch(e) { return ''; }
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // ========== 跨页面通信 ==========
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'TASK_FORM_SAVE') {
+      renderTaskList();
+    }
+  });
+
+  // 页面加载时初始化
+  window.addEventListener('DOMContentLoaded', function() {
+    showView('task-list');
+  });
+})();
+</script>
+
+</body>
+</html>

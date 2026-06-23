@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>腾讯广告搭建流程原型 - 完整交互版 v2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script>
+tailwind.config = { theme: { extend: { colors: { primary: '#1890FF', success: '#52C41A', warning: '#FAAD14', danger: '#FF4D4F' } } } }
+</script>
+<style>
+body { margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.modal-content { background: white; border-radius: 12px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+.btn-primary { background: #1890FF; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #40A9FF; }
+.btn-primary:disabled { background: #d9d9d9; cursor: not-allowed; }
+.btn-secondary { background: #f0f0f0; color: #333; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
+.btn-secondary:hover { background: #e0e0e0; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #E6F7FF; color: #1890FF; border-radius: 999px; font-size: 13px; }
+.tag button { background: none; border: none; cursor: pointer; color: #1890FF; font-size: 12px; padding: 0; margin-left: 2px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+</style>
+</head>
+<body>
+<!-- 返回按钮（在 iframe 内，调用父窗口方法） -->
+<div id="back-bar" style="position:sticky;top:0;z-index:9999;background:white;border-bottom:1px solid #e5e7eb;padding:10px 16px;display:flex;align-items:center;gap:8px;">
+  <button onclick="doReturn()" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid #e5e7eb;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">
+    <i class="fas fa-arrow-left"></i> 返回任务列表
+  </button>
+  <button onclick="doSave()" style="display:flex;align-items:center;gap:6px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;padding:6px 14px;margin-left:8px;">
+    <i class="fas fa-save"></i> 保存任务
+  </button>
+  <script>
+  function doReturn() {
+    if (window.__doSaveForm) window.__doSaveForm();
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'TASK_FORM_SAVE' }, '*');
+    }
+    try { window.parent.closeForm(); } catch(e) {}
+  }
+  function doSave() {
+    if (window.__doSaveForm) window.__doSaveForm();
+    alert('任务已保存！');
+  }
+  </script>
+</div>
+
+<div id="root"></div>
+
+<script src="app.js"></script>
+
+</body>
+</html>

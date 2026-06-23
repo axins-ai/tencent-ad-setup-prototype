@@ -1,0 +1,340 @@
+diff --git a/app.js b/app.js
+index 223f054..64af5ba 100644
+--- a/app.js
++++ b/app.js
+@@ -1515,8 +1515,8 @@ function PreviewModal({
+ }
+ 
+ // ==================== 渲染应用 ====================
+-// 检查是否在导航流程中，如果是则挂到 view-form，否则挂到 root
+-const mountEl = document.getElementById('view-form') || document.getElementById('root');
++// 挂载到 #root（由导航层控制显示/隐藏）
++const mountEl = document.getElementById('root');
+ if (mountEl) {
+   const root = ReactDOM.createRoot(mountEl);
+   root.render(/*#__PURE__*/React.createElement(App, null));
+diff --git a/index.html b/index.html
+index 2ea2c7e..1b68db6 100644
+--- a/index.html
++++ b/index.html
+@@ -3,189 +3,172 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>腾讯广告搭建流程原型 - 完整交互版 v2</title>
++<title>AdBatch 原型</title>
+ <script src="https://cdn.tailwindcss.com"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+-<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+-<script>
+-tailwind.config = { theme: { extend: { colors: { primary: '#1890FF', success: '#52C41A', warning: '#FAAD14', danger: '#FF4D4F' } } }
+-</script>
+-<style>
+-body { margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
+-.modal-content { background: white; border-radius: 12px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+-.btn-primary { background: #1890FF; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
+-.btn-primary:hover { background: #40A9FF; }
+-.btn-primary:disabled { background: #d9d9d9; cursor: not-allowed; }
+-.btn-secondary { background: #f0f0f0; color: #333; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
+-.btn-secondary:hover { background: #e0e0e0; }
+-.tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #E6F7FF; color: #1890FF; border-radius: 999px; font-size: 13px; }
+-.tag button { background: none; border: none; cursor: pointer; color: #1890FF; font-size: 12px; padding: 0; margin-left: 2px; }
+-@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+-.animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+-</style>
+ </head>
+-<body>
+-<div id="root"></div>
++<body style="margin:0;font-family:sans-serif;background:#F0F2F5;">
++
++<!-- 导航层：默认可见 -->
++<div id="nav-layer" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;background:white;display:flex;">
+ 
+-<!-- 导航层（原生 JS 实现） -->
+-<div id="nav-layer" style="display: none; position: fixed; inset: 0; z-index: 100; background: white;">
+   <!-- 左侧菜单 -->
+-  <div style="width: 256px; height: 100vh; background: white; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; position: fixed; left: 0; top: 0;">
+-    <div style="padding: 20px; border-bottom: 1px solid #e5e7eb;">
+-      <h1 style="font-size: 18px; font-weight: bold; color: #1890FF; margin: 0;">AdBatch</h1>
+-      <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0 0;">腾讯广告批量搭建</p>
++  <div style="width:256px;height:100vh;background:white;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;position:fixed;left:0;top:0;">
++    <div style="padding:20px;border-bottom:1px solid #e5e7eb;">
++      <h1 style="font-size:18px;font-weight:bold;color:#1890FF;margin:0;">AdBatch</h1>
++      <p style="font-size:12px;color:#9ca3af;margin:4px 0 0 0;">腾讯广告批量搭建</p>
+     </div>
+-    <nav style="flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 4px;">
+-      <button onclick="showTaskList()" id="menu-task-list" style="width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; border: none; background: #EFF6FF; color: #1890FF; font-weight: 600; font-size: 14px; cursor: pointer;">
++    <nav style="flex:1;padding:12px;display:flex;flex-direction:column;gap:4px;">
++      <button onclick="showTaskList()" id="menu-task-list" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;border:none;background:#E6F7FF;color:#1890FF;font-weight:600;font-size:14px;cursor:pointer;">
+         <i class="fas fa-rocket"></i>
+         批创工具
+       </button>
+     </nav>
+-    <div style="padding: 16px; border-top: 1px solid #e5e7eb;">
+-      <p style="font-size: 12px; color: #9ca3af; margin: 0;">v2.0 · 原型版本</p>
++    <div style="padding:16px;border-top:1px solid #e5e7eb;">
++      <p style="font-size:12px;color:#9ca3af;margin:0;">v2.0 · 原型版本</p>
+     </div>
+   </div>
+-  
++
+   <!-- 主内容区 -->
+-  <div style="margin-left: 256px; height: 100vh; overflow: auto;">
++  <div style="margin-left:256px;height:100vh;overflow:auto;">
+     <!-- 任务列表视图 -->
+-    <div id="view-task-list" style="display: none; padding: 32px 24px;">
+-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;">
++    <div id="view-task-list" style="display:none;padding:32px 24px;">
++      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
+         <div>
+-          <h2 style="font-size: 24px; font-weight: bold; color: #111827; margin: 0;">批创工具</h2>
+-          <p style="font-size: 14px; color: #6b7280; margin: 4px 0 0 0;">管理批量创意搭建任务</p>
++          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">批创工具</h2>
++          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理批量创意搭建任务</p>
+         </div>
+-        <button onclick="showChannelSelect()" class="btn-primary" style="font-size: 16px; padding: 12px 24px;">
+-          <i class="fas fa-plus" style="margin-right: 8px;"></i>新建任务
++        <button onclick="showChannelSelect()" style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;">
++          <i class="fas fa-plus" style="margin-right:8px;"></i>新建任务
+         </button>
+       </div>
+       <div id="task-list-content">
+-        <!-- 任务列表内容会通过 JS 动态生成 -->
++        <div style="text-align:center;padding:80px 0;color:#9ca3af;">
++          <div style="font-size:48px;margin-bottom:16px;">📋</div>
++          <p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p>
++          <p style="font-size:14px;margin:8px 0 0 0;">点击「新建任务」开始创建批量创意搭建</p>
++        </div>
+       </div>
+     </div>
+-    
++
+     <!-- 选择渠道视图 -->
+-    <div id="view-channel-select" style="display: none; padding: 32px 24px;">
+-      <button onclick="showTaskList()" style="display: flex; align-items: center; gap: 8px; color: #6b7280; background: none; border: none; cursor: pointer; font-size: 14px; margin-bottom: 24px;">
++    <div id="view-channel-select" style="display:none;padding:32px 24px;">
++      <button onclick="showTaskList()" style="display:flex;align-items:center;gap:8px;color:#6b7280;background:none;border:none;cursor:pointer;font-size:14px;margin-bottom:24px;">
+         <i class="fas fa-arrow-left"></i>
+         <span>返回任务列表</span>
+       </button>
+-      <div style="margin-bottom: 32px;">
+-        <h2 style="font-size: 24px; font-weight: bold; color: #111827; margin: 0 0 8px 0;">选择投放渠道</h2>
+-        <p style="font-size: 14px; color: #6b7280; margin: 0;">选择要投放的渠道，进入对应的广告搭建表单</p>
++      <div style="margin-bottom:32px;">
++        <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0 0 8px 0;">选择投放渠道</h2>
++        <p style="font-size:14px;color:#6b7280;margin:0;">选择要投放的渠道，进入对应的广告搭建表单</p>
+       </div>
+-      <div style="display: flex; flex-direction: column; gap: 16px;">
+-        <button onclick="selectChannel('gdt')" style="width: 100%; display: flex; align-items: center; gap: 16px; padding: 20px; border: 2px solid #e5e7eb; border-radius: 12px; background: white; cursor: pointer; text-align: left; transition: all 0.2s;" onmouseover="this.style.borderColor='#1890FF'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='white';">
+-          <div style="font-size: 24px;">🎯</div>
+-          <div style="flex: 1;">
+-            <h3 style="font-size: 18px; font-weight: bold; color: #111827; margin: 0;">广点通</h3>
+-            <p style="font-size: 14px; color: #6b7280; margin: 4px 0 0 0;">腾讯广告广点通渠道</p>
++      <div style="display:flex;flex-direction:column;gap:16px;">
++        <button onclick="selectChannel('gdt')" style="width:100%;display:flex;align-items:center;gap:16px;padding:20px;border:2px solid #e5e7eb;border-radius:12px;background:white;cursor:pointer;text-align:left;">
++          <div style="font-size:24px;">🎯</div>
++          <div style="flex:1;">
++            <h3 style="font-size:18px;font-weight:bold;color:#111827;margin:0;">广点通</h3>
++            <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">腾讯广告广点通渠道</p>
+           </div>
+-          <i class="fas fa-chevron-right" style="color: #9ca3af;"></i>
++          <i class="fas fa-chevron-right" style="color:#9ca3af;"></i>
+         </button>
+       </div>
+     </div>
+-    
++
+     <!-- 表单视图（React 渲染） -->
+-    <div id="view-form" style="display: none;">
+-      <!-- React 会渲染到这里 -->
+-    </div>
++    <div id="view-form" style="display:none;"></div>
+   </div>
+ </div>
+ 
+-<script src="app.js"></script>
+ <script>
+-// 导航逻辑（原生 JS）
+-let currentView = 'task-list';
+-let tasks = [];
+-
+-// 从 localStorage 读取任务
+-try {
+-  tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
+-} catch(e) {}
+-
+-function showTaskList() {
+-  currentView = 'task-list';
+-  document.getElementById('view-task-list').style.display = 'block';
+-  document.getElementById('view-channel-select').style.display = 'none';
+-  document.getElementById('view-form').style.display = 'none';
+-  renderTaskList();
+-}
+-
+-function showChannelSelect() {
+-  currentView = 'channel-select';
+-  document.getElementById('view-task-list').style.display = 'none';
+-  document.getElementById('view-channel-select').style.display = 'block';
+-  document.getElementById('view-form').style.display = 'none';
+-}
+-
+-function showForm() {
+-  currentView = 'form';
+-  document.getElementById('view-task-list').style.display = 'none';
+-  document.getElementById('view-channel-select').style.display = 'none';
+-  document.getElementById('view-form').style.display = 'block';
+-}
+-
+-function selectChannel(channelId) {
+-  // 创建新任务
+-  const newTask = {
+-    id: 'task_' + Date.now(),
+-    name: '任务-' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+-    channel: channelId,
+-    channelName: channelId === 'gdt' ? '广点通' : channelId,
+-    createdAt: new Date().toISOString(),
+-    status: 'draft'
++(function() {
++  var currentView = 'task-list';
++  var tasks = [];
++  try {
++    tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
++  } catch(e) {}
++
++  window.showTaskList = function() {
++    currentView = 'task-list';
++    document.getElementById('nav-layer').style.display = 'flex';
++    document.getElementById('view-task-list').style.display = 'block';
++    document.getElementById('view-channel-select').style.display = 'none';
++    document.getElementById('view-form').style.display = 'none';
+   };
+-  tasks.push(newTask);
+-  try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
+-  showForm();
+-}
+-
+-function renderTaskList() {
+-  const container = document.getElementById('task-list-content');
+-  if (tasks.length === 0) {
+-    container.innerHTML = `
+-      <div style="text-align: center; padding: 80px 0; color: #9ca3af;">
+-        <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+-        <p style="font-size: 18px; margin: 0 0 8px 0;">暂无任务</p>
+-        <p style="font-size: 14px; margin: 8px 0 0 0;">点击「新建任务」开始创建批量创意搭建</p>
+-      </div>
+-    `;
+-    return;
++
++  window.showChannelSelect = function() {
++    currentView = 'channel-select';
++    document.getElementById('nav-layer').style.display = 'flex';
++    document.getElementById('view-task-list').style.display = 'none';
++    document.getElementById('view-channel-select').style.display = 'block';
++    document.getElementById('view-form').style.display = 'none';
++  };
++
++  window.selectChannel = function(channelId) {
++    var newTask = {
++      id: 'task_' + Date.now(),
++      name: '任务-' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
++      channel: channelId,
++      channelName: channelId === 'gdt' ? '广点通' : channelId,
++      createdAt: new Date().toISOString(),
++      status: 'draft'
++    };
++    tasks.push(newTask);
++    try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
++    window.showForm();
++  };
++
++  window.showForm = function() {
++    currentView = 'form';
++    document.getElementById('nav-layer').style.display = 'none';
++    document.getElementById('view-form').style.display = 'block';
++    if (window.renderForm) window.renderForm();
++  };
++
++  window.deleteTask = function(id) {
++    tasks = tasks.filter(function(t) { return t.id !== id; });
++    try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
++    renderTaskList();
++  };
++
++  window.runTask = function(id) {
++    alert('开始执行任务（模拟）');
++  };
++
++  function renderTaskList() {
++    var container = document.getElementById('task-list-content');
++    if (tasks.length === 0) {
++      container.innerHTML = '<div style="text-align:center;padding:80px 0;color:#9ca3af;"><div style="font-size:48px;margin-bottom:16px;">📋</div><p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p><p style="font-size:14px;margin:8px 0 0 0;">点击「新建任务」开始创建批量创意搭建</p></div>';
++      return;
++    }
++    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">';
++    for (var i = 0; i < tasks.length; i++) {
++      var task = tasks[i];
++      html += '<div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
++        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">' +
++          '<div>' +
++            '<h4 style="font-weight:bold;color:#111827;margin:0;">' + escapeHtml(task.name) + '</h4>' +
++            '<p style="font-size:12px;color:#6b7280;margin:4px 0 0 0;">渠道：' + escapeHtml(task.channelName || task.channel) + '</p>' +
++            '<p style="font-size:12px;color:#9ca3af;margin:4px 0 0 0;">创建于 ' + new Date(task.createdAt).toLocaleDateString() + '</p>' +
++          '</div>' +
++          '<button onclick="deleteTask(\'' + task.id + '\')" style="color:#f87171;background:none;border:none;cursor:pointer;padding:8px;"><i class="fas fa-trash"></i></button>' +
++        '</div>' +
++        '<button onclick="runTask(\'' + task.id + '\')" style="width:100%;background:#1890FF;color:white;font-size:13px;padding:10px;border-radius:8px;border:none;cursor:pointer;">运行任务</button>' +
++      '</div>';
++    }
++    html += '</div>';
++    container.innerHTML = html;
+   }
+-  
+-  container.innerHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">' +
+-    tasks.map(task => `
+-      <div style="background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+-        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+-          <div>
+-            <h4 style="font-weight: bold; color: #111827; margin: 0;">${task.name}</h4>
+-            <p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">渠道：${task.channelName || task.channel}</p>
+-            <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0 0;">创建于 ${new Date(task.createdAt).toLocaleDateString()}</p>
+-          </div>
+-          <button onclick="deleteTask('${task.id}')" style="color: #f87171; background: none; border: none; cursor: pointer; padding: 8px;"><i class="fas fa-trash"></i></button>
+-        </div>
+-        <button onclick="runTask('${task.id}')" class="btn-primary" style="width: 100%; font-size: 13px; padding: 10px;">运行任务</button>
+-      </div>
+-    `).join('') + '</div>';
+-}
+-
+-function deleteTask(id) {
+-  tasks = tasks.filter(t => t.id !== id);
+-  try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
+-  renderTaskList();
+-}
+-
+-function runTask(id) {
+-  alert('开始执行任务（模拟）');
+-}
+-
+-// 页面加载时显示任务列表
+-window.addEventListener('DOMContentLoaded', function() {
+-  showTaskList();
+-});
++
++  function escapeHtml(str) {
++    var div = document.createElement('div');
++    div.appendChild(document.createTextNode(str));
++    return div.innerHTML;
++  }
++
++  window.addEventListener('DOMContentLoaded', function() {
++    window.showTaskList();
++  });
++})();
+ </script>
++
+ </body>
+-</html>
+\ No newline at end of file
++</html>

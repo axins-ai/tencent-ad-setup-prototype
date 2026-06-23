@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>定向包管理</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="margin:0;font-family:sans-serif;background:#F0F2F5;">
+<div id="app" style="padding:24px;"></div>
+<script>
+tailwind.config = { theme: { extend: { colors: { primary: '#1890FF' } } } }
+
+// ===== 数据 =====
+const MOCK_BUILTIN = [
+  {id:'tp_001', name:'一线城市青年', geoMode:'region', geoProvince:['华东','华南'], ageKey:'25-29', genderKey:'female', audienceMode:'unlimited', audienceIds:[] },
+  {id:'tp_002', name:'全国泛投', geoMode:'unlimited', geoProvince:[], ageKey:'unlimited', genderKey:'unlimited', audienceMode:'unlimited', audienceIds:[] },
+  {id:'tp_003', name:'二三线城市中年', geoMode:'region', geoProvince:['华北','华中'], ageKey:'30-39', genderKey:'unlimited', audienceMode:'unlimited', audienceIds:[] },
+  {id:'tp_004', name:'老年人群', geoMode:'region', geoProvince:['华北'], ageKey:'50+', genderKey:'unlimited', audienceMode:'unlimited', audienceIds:[] },
+  {id:'tp_005', name:'一线城市泛投', geoMode:'region', geoProvince:['华东'], ageKey:'unlimited', genderKey:'unlimited', audienceMode:'unlimited', audienceIds:[] },
+];
+
+function loadUserPackages() {
+  try { return JSON.parse(localStorage.getItem('ad_user_targeting_packages') || '[]'); } catch(e) { return []; }
+}
+function saveUserPackages(pkgs) {
+  try { localStorage.setItem('ad_user_targeting_packages', JSON.stringify(pkgs)); } catch(e) {}
+}
+
+// ===== 渲染 =====
+let state = {
+  view: 'list', // 'list' | 'edit'
+  editingId: null, // null = 新增
+  form: { name:'', geoMode:'unlimited', geoProvince:[], ageKey:'unlimited', genderKey:'unlimited', audienceMode:'unlimited' },
+  userPackages: loadUserPackages(),
+};
+
+function render() {
+  const el = document.getElementById('app');
+  if (state.view === 'list') {
+    const all = [...MOCK_BUILTIN, ...state.userPackages];
+    let html = '<div style="max-width:900px;margin:0 auto;">';
+
+    // 顶部
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">' +
+      '<h2 style="font-size:18px;font-weight:600;color:#111827;margin:0;">管理定向包</h2>' +
+      '<button onclick="startNew()" style="padding:6px 16px;background:#1890FF;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">' +
+        '<i class="fas fa-plus" style="margin-right:4px;"></i>新增定向包' +
+      '</button>' +
+    '</div>';
+
+    // 系统内置
+    html += '<p style="font-size:12px;color:#9ca3af;margin:0 0 8px 0;">系统内置</p>';
+    MOCK_BUILTIN.forEach(tp => {
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:white;border-radius:8px;margin-bottom:4px;">' +
+        '<div><span style="font-weight:500;font-size:14px;">' + esc(tp.name) + '</span>' +
+        '<span style="font-size:12px;color:#9ca3af;margin-left:8px;">' + esc(tp.geoMode==='unlimited'?'不限':tp.geoProvince.join('/')) + ' · ' + esc(tp.ageKey==='unlimited'?'不限':tp.ageKey+'岁') + ' · ' + esc(tp.genderKey==='unlimited'?'不限':tp.genderKey) + '</span>' +
+        '</div>' +
+        '<button onclick="startEdit(\'' + tp.id + '\')" style="padding:4px 12px;background:white;border:1px solid #e5e7eb;border-radius:4px;cursor:pointer;font-size:12px;color:#333;">编辑</button>' +
+      '</div>';
+    });
+
+    // 自定义
+    if (state.userPackages.length > 0) {
+      html += '<p style="font-size:12px;color:#9ca3af;margin:16px 0 8px 0;">自定义</p>';
+      state.userPackages.forEach(tp => {
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:white;border-radius:8px;margin-bottom:4px;">' +
+          '<div><span style="font-weight:500;font-size:14px;">' + esc(tp.name) + '</span></div>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<button onclick="startEdit(\'' + tp.id + '\')" style="padding:4px 12px;background:white;border:1px solid #e5e7eb;border-radius:4px;cursor:pointer;font-size:12px;color:#333;">编辑</button>' +
+            '<button onclick="deletePkg(\'' + tp.id + '\')" style="padding:4px 12px;background:white;border:1px solid #ffa39e;border-radius:4px;cursor:pointer;font-size:12px;color:#ff4d4f;">删除</button>' +
+          '</div>' +
+        '</div>';
+      });
+    } else {
+      html += '<p style="text-align:center;color:#9ca3af;padding:20px 0;">暂无自定义定向包，点击「新增定向包」创建</p>';
+    }
+
+    html += '</div>';
+    el.innerHTML = html;
+  } else {
+    // 编辑视图
+    const f = state.form;
+    let html = '<div style="max-width:900px;margin:0 auto;">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">' +
+      '<h2 style="font-size:18px;font-weight:600;color:#111827;margin:0;">' + (state.editingId ? '编辑定向包' : '新增定向包') + '</h2>' +
+      '<button onclick="goList()" style="background:none;border:none;cursor:pointer;font-size:14px;color:#1890FF;">返回列表</button>' +
+    '</div>';
+
+    html += '<div style="background:white;border-radius:12px;padding:24px;">';
+
+    // 名称
+    html += '<div style="margin-bottom:16px;">' +
+      '<label style="display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:4px;">定向包名称 <span style="color:#ff4d4f;">*</span></label>' +
+      '<input id="pkg-name" type="text" value="' + esc(f.name) + '" placeholder="输入定向包名称" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">' +
+    '</div>';
+
+    // 地理位置
+    html += '<div style="margin-bottom:16px;">' +
+      '<label style="display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:6px;">地理位置</label>' +
+      '<div style="display:flex;gap:12px;margin-bottom:8px;">' +
+        '<label style="display:flex;align-items:center;cursor:pointer;font-size:13px;"><input type="radio" name="geo" ' + (f.geoMode==='unlimited'?'checked':'') + ' onchange="setForm({...form, geoMode:\'unlimited\'})" style="margin-right:4px;"> 不限</label>' +
+        '<label style="display:flex;align-items:center;cursor:pointer;font-size:13px;"><input type="radio" name="geo" ' + (f.geoMode==='region'?'checked':'') + ' onchange="setForm({...form, geoMode:\'region\'})" style="margin-right:4px;"> 按区域</label>' +
+      '</div>';
+    if (f.geoMode === 'region') {
+      const regions = ['华东','华南','华北','西南','西北','东北','华中'];
+      html += '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+      regions.forEach(r => {
+        const selected = f.geoProvince.includes(r);
+        html += '<button onclick="toggleGeo(\'' + r + '\')" style="padding:4px 10px;border:1px solid ' + (selected?'#1890FF':'#d1d5db') + ';border-radius:999px;font-size:12px;cursor:pointer;background:' + (selected?'#E6F7FF':'white') + ';color:' + (selected?'#1890FF':'#333') + ';">' + r + '</button>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // 年龄
+    const ageOpts = [{key:'unlimited',label:'不限'},{key:'19-24',label:'19-24岁'},{key:'25-29',label:'25-29岁'},{key:'30-39',label:'30-39岁'},{key:'40-49',label:'40-49岁'},{key:'50+',label:'50岁及以上'}];
+    html += '<div style="margin-bottom:16px;">' +
+      '<label style="display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:6px;">年龄</label>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+    ageOpts.forEach(opt => {
+      const selected = f.ageKey === opt.key;
+      html += '<button onclick="setForm({...form, ageKey:\'' + opt.key + '\'})" style="padding:4px 10px;border:1px solid ' + (selected?'#1890FF':'#d1d5db') + ';border-radius:6px;font-size:12px;cursor:pointer;background:' + (selected?'#E6F7FF':'white') + ';color:' + (selected?'#1890FF':'#333') + ';">' + opt.label + '</button>';
+    });
+    html += '</div></div>';
+
+    // 性别
+    const genderOpts = [{v:'unlimited',l:'不限'},{v:'male',l:'男'},{v:'female',l:'女'}];
+    html += '<div style="margin-bottom:16px;">' +
+      '<label style="display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:6px;">性别</label>' +
+      '<div style="display:flex;gap:12px;">';
+    genderOpts.forEach(opt => {
+      html += '<label style="display:flex;align-items:center;cursor:pointer;font-size:13px;"><input type="radio" name="gender" value="' + opt.v + '" ' + (f.genderKey===opt.v?'checked':'') + ' onchange="setForm({...form, genderKey:this.value})" style="margin-right:4px;"> ' + opt.l + '</label>';
+    });
+    html += '</div></div>';
+
+    // 自定义人群（简化）
+    const audOpts = [{v:'unlimited',l:'不限'},{v:'target',l:'定向人群'},{v:'exclude',l:'排除人群'}];
+    html += '<div style="margin-bottom:16px;">' +
+      '<label style="display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:6px;">自定义人群</label>' +
+      '<div style="display:flex;gap:12px;">';
+    audOpts.forEach(opt => {
+      html += '<label style="display:flex;align-items:center;cursor:pointer;font-size:13px;"><input type="radio" name="audience" value="' + opt.v + '" ' + (f.audienceMode===opt.v?'checked':'') + ' onchange="setForm({...form, audienceMode:this.value})" style="margin-right:4px;"> ' + opt.l + '</label>';
+    });
+    html += '</div></div>';
+
+    html += '</div>'; // 关闭 white panel
+
+    // 底部按钮
+    html += '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">' +
+      '<button onclick="goList()" style="padding:8px 20px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;">取消</button>' +
+      '<button onclick="savePkg()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;">保存定向包</button>' +
+    '</div>';
+
+    html += '</div>';
+    el.innerHTML = html;
+  }
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function setForm(newForm) { state.form = newForm; render(); }
+function toggleGeo(r) {
+  const next = state.form.geoProvince.includes(r) ? state.form.geoProvince.filter(x=>x!==r) : [...state.form.geoProvince, r];
+  setForm({...state.form, geoProvince: next});
+}
+
+function startNew() {
+  state.view = 'edit'; state.editingId = null;
+  state.form = { name:'', geoMode:'unlimited', geoProvince:[], ageKey:'unlimited', genderKey:'unlimited', audienceMode:'unlimited' };
+  render();
+}
+function goList() { state.view = 'list'; render(); }
+
+function startEdit(id) {
+  const all = [...MOCK_BUILTIN, ...state.userPackages];
+  const pkg = all.find(p => p.id === id);
+  if (!pkg) return;
+  state.view = 'edit'; state.editingId = id;
+  state.form = {
+    name: pkg.name || '',
+    geoMode: pkg.geoMode || 'unlimited',
+    geoProvince: pkg.geoProvince || [],
+    ageKey: pkg.ageKey || 'unlimited',
+    genderKey: pkg.genderKey || 'unlimited',
+    audienceMode: pkg.audienceMode || 'unlimited',
+  };
+  render();
+}
+
+function savePkg() {
+  const name = document.getElementById('pkg-name').value.trim();
+  if (!name) { alert('请输入定向包名称'); return; }
+  state.form.name = name;
+  if (state.editingId) {
+    // 编辑
+    const updated = state.userPackages.map(p => p.id === state.editingId ? {...p, ...state.form} : p);
+    state.userPackages = updated;
+  } else {
+    // 新增
+    const newPkg = { id: 'user_tp_' + Date.now(), ...state.form };
+    state.userPackages = [...state.userPackages, newPkg];
+  }
+  saveUserPackages(state.userPackages);
+  // 通知父窗口更新
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: 'TARGETING_PKG_SAVE', packages: state.userPackages }, '*');
+  }
+  state.view = 'list';
+  render();
+}
+
+function deletePkg(id) {
+  if (!confirm('确定删除该定向包？')) return;
+  const mockIds = MOCK_BUILTIN.map(p => p.id);
+  if (mockIds.includes(id)) { alert('系统内置定向包不能删除'); return; }
+  state.userPackages = state.userPackages.filter(p => p.id !== id);
+  saveUserPackages(state.userPackages);
+  render();
+}
+
+// 初始化
+render();
+</script>
+</body>
+</html>
