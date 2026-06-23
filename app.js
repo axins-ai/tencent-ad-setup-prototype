@@ -1008,17 +1008,18 @@
     }, "确认选择"))));
   }
 
-  // 周历时间网格组件（0.5小时单位）
+  // 周历时间网格组件
+  // 最小单位：1小时（视觉上每1小时分2个0.5h格子，共48列/天）
   function TimeGrid({
     value,
     onChange
   }) {
     const DAYS = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
-    // 24个整点小时头（每个占2个slot），共48个0.5h slot
-    const HOUR_HEADERS = Array.from({
+    const HOURS = Array.from({
       length: 24
-    }, (_, i) => i); // 0~23
-    const TOTAL_SLOTS = 48; // 每天行48列
+    }, (_, i) => i); // 0~23 整点
+    const TOTAL_SLOTS = 48; // 48个0.5h格子（每天）
+    const SLOTS_PER_HOUR = 2; // 每1小时=2个格子
 
     // value format: { "0-0": true/false, ... } where key is "dayIndex-slotIndex", slotIndex=0..47
     const [slots, setSlots] = useState(value || {});
@@ -1028,29 +1029,35 @@
       if (value) setSlots(value);
     }, [value]);
 
-    // 单击切换
+    // 单击切换整个小时（2个slot）
     const handleCellClick = (dayIdx, slotIdx) => {
-      const key = `${dayIdx}-${slotIdx}`;
+      const hourStart = Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR;
       const newSlots = {
-        ...slots,
-        [key]: !slots[key]
+        ...slots
       };
+      const currentState = !!slots[`${dayIdx}-${hourStart}`];
+      for (let s = hourStart; s < hourStart + SLOTS_PER_HOUR; s++) {
+        newSlots[`${dayIdx}-${s}`] = !currentState;
+      }
       setSlots(newSlots);
       onChange(newSlots);
     };
 
-    // 鼠标拖选
+    // 鼠标拖选（以小时为单位）
     const handleMouseDown = (dayIdx, slotIdx) => {
       setIsSelecting(true);
+      const hourStart = Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR;
       setSelectStart({
         dayIdx,
-        slotIdx
+        hourStart
       });
-      const key = `${dayIdx}-${slotIdx}`;
       const newSlots = {
-        ...slots,
-        [key]: !slots[key]
+        ...slots
       };
+      const currentState = !!slots[`${dayIdx}-${hourStart}`];
+      for (let s = hourStart; s < hourStart + SLOTS_PER_HOUR; s++) {
+        newSlots[`${dayIdx}-${s}`] = !currentState;
+      }
       setSlots(newSlots);
       onChange(newSlots);
     };
@@ -1061,12 +1068,12 @@
       };
       const startDay = Math.min(selectStart.dayIdx, dayIdx);
       const endDay = Math.max(selectStart.dayIdx, dayIdx);
-      const startSlot = Math.min(selectStart.slotIdx, slotIdx);
-      const endSlot = Math.max(selectStart.slotIdx, slotIdx);
-      const startKey = `${selectStart.dayIdx}-${selectStart.slotIdx}`;
+      const startHour = Math.min(selectStart.hourStart, Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR);
+      const endHour = Math.max(selectStart.hourStart, Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR) + (SLOTS_PER_HOUR - 1);
+      const startKey = `${selectStart.dayIdx}-${selectStart.hourStart}`;
       const shouldSet = !!slots[startKey];
       for (let d = startDay; d <= endDay; d++) {
-        for (let s = startSlot; s <= endSlot; s++) {
+        for (let s = startHour; s <= endHour; s++) {
           newSlots[`${d}-${s}`] = shouldSet;
         }
       }
@@ -1090,12 +1097,12 @@
 
     // 将slot索引转为时间字符串 "HH:MM"
     const slotToTime = slotIdx => {
-      const h = Math.floor(slotIdx / 2);
-      const m = slotIdx % 2 * 30;
+      const h = Math.floor(slotIdx / SLOTS_PER_HOUR);
+      const m = slotIdx % SLOTS_PER_HOUR * 30;
       return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
     };
 
-    // 生成选中时间段描述文字
+    // 生成选中时间段描述文字（按小时合并）
     const buildSelectedText = () => {
       const parts = [];
       for (let di = 0; di < 7; di++) {
@@ -1125,9 +1132,10 @@
 
     // 计算tooltip文本
     const getTooltip = (dayIdx, slotIdx) => {
-      // 找到连续选区的起止
-      let start = slotIdx,
-        end = slotIdx;
+      const hourStart = Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR;
+      let start = hourStart,
+        end = hourStart + SLOTS_PER_HOUR - 1;
+      // 扩展找到连续选区
       while (start > 0 && slots[`${dayIdx}-${start - 1}`]) start--;
       while (end < TOTAL_SLOTS - 1 && slots[`${dayIdx}-${end + 1}`]) end++;
       return `${DAYS[dayIdx]} ${slotToTime(start)}-${slotToTime(end)}`;
@@ -1144,8 +1152,7 @@
       style: {
         width: '100%',
         borderCollapse: 'collapse',
-        fontSize: '13px',
-        tableLayout: 'fixed'
+        fontSize: '13px'
       }
     }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
       style: {
@@ -1154,8 +1161,8 @@
     }, /*#__PURE__*/React.createElement("th", {
       rowSpan: 2,
       style: {
-        width: '72px',
-        borderRight: '1px solid #f0f0f0',
+        width: '60px',
+        borderRight: '1px solid #e5e7eb',
         borderBottom: '1px solid #e5e7eb',
         padding: '8px 4px',
         textAlign: 'center',
@@ -1170,7 +1177,7 @@
         fontSize: '12px',
         color: '#666',
         padding: '6px 2px',
-        borderBottom: '1px solid #f0f0f0'
+        borderBottom: '1px solid #e5e7eb'
       }
     }, "00:00 - 12:00"), /*#__PURE__*/React.createElement("th", {
       colSpan: 24,
@@ -1180,32 +1187,31 @@
         color: '#666',
         padding: '6px 2px',
         borderBottom: '1px solid #e5e7eb',
-        borderLeft: '1px solid #f0f0f0'
+        borderLeft: '1px solid #e5e7eb'
       }
     }, "12:00 - 24:00")), /*#__PURE__*/React.createElement("tr", {
       style: {
         background: '#fafafa'
       }
-    }, HOUR_HEADERS.map(h => /*#__PURE__*/React.createElement("th", {
+    }, HOURS.map(h => /*#__PURE__*/React.createElement("th", {
       key: h,
       colSpan: 2,
       style: {
-        width: '22px',
         textAlign: 'center',
         fontSize: '11px',
         color: '#999',
         fontWeight: 400,
         padding: '2px 0',
         borderBottom: '1px solid #e5e7eb',
-        borderRight: h === 11 || h === 23 ? '1px solid #f0f0f0' : 'none'
+        borderRight: h === 11 || h === 23 ? '1px solid #e5e7eb' : '1px solid #f0f0f0'
       }
     }, h)))), /*#__PURE__*/React.createElement("tbody", null, DAYS.map((day, di) => /*#__PURE__*/React.createElement("tr", {
       key: di
     }, /*#__PURE__*/React.createElement("td", {
       style: {
-        borderRight: '1px solid #f0f0f0',
-        borderBottom: di === 6 ? 'none' : '1px solid #f0f0f0',
-        padding: '8px 4px',
+        borderRight: '1px solid #e5e7eb',
+        borderBottom: di === 6 ? 'none' : '1px solid #e5e7eb',
+        padding: '6px 4px',
         textAlign: 'center',
         fontSize: '13px',
         color: '#333',
@@ -1218,24 +1224,24 @@
     }, (_, si) => {
       const key = `${di}-${si}`;
       const isSelected = !!slots[key];
-      const isHalfHourBoundary = si % 2 === 1; // 每30分钟一个边界线
+      const isHourBoundary = si % SLOTS_PER_HOUR === 0; // 整点边界
       const isNoonBoundary = si === 24; // 正午分隔
       return /*#__PURE__*/React.createElement("td", {
         key: si,
         onMouseDown: () => handleMouseDown(di, si),
         onMouseEnter: () => handleMouseEnter(di, si),
-        title: isSelected ? getTooltip(di, si) : `${day} ${slotToTime(si)}-${slotToTime(si)}`,
+        title: isSelected ? getTooltip(di, si) : `${day} ${slotToTime(si)}`,
         style: {
           cursor: 'pointer',
           borderBottom: di === 6 ? 'none' : '1px solid #f5f5f5',
-          borderRight: isNoonBoundary ? '1px solid #e5e7eb' : isHalfHourBoundary ? '1px solid #f0f0f0' : 'none',
+          borderRight: isNoonBoundary ? '2px solid #e5e7eb' : isHourBoundary ? '1px solid #e5e7eb' : '1px solid #f0f0f0',
           padding: 0,
           userSelect: 'none'
         }
       }, /*#__PURE__*/React.createElement("div", {
         style: {
           width: '100%',
-          height: '28px',
+          height: '26px',
           margin: '1px 0',
           borderRadius: '2px',
           backgroundColor: isSelected ? '#3b82f6' : '#f9fafb'
@@ -1293,7 +1299,7 @@
         background: '#f9fafb',
         border: '1px solid #e5e7eb'
       }
-    }), "未选"), /*#__PURE__*/React.createElement("span", null, "可拖动鼠标选择时间段")), /*#__PURE__*/React.createElement("div", {
+    }), "未选")), /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -1303,7 +1309,7 @@
       style: {
         fontSize: '12px',
         color: '#333',
-        maxWidth: '420px',
+        maxWidth: '480px',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap'
@@ -1326,7 +1332,6 @@
       }
     }, "清空"))));
   }
-
   // 主应用
   function App() {
     // ===== 基础配置 =====
