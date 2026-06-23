@@ -3000,7 +3000,7 @@
       className: "modal-overlay",
       onClick: () => setShowSaveTgtPkgModal(false)
     }, /*#__PURE__*/React.createElement("div", {
-      className: "modal-content w-full max-w-md",
+      className: "modal-content w-full max-w-lg",
       onClick: e => e.stopPropagation()
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-between px-6 py-4 border-b"
@@ -3010,8 +3010,8 @@
       onClick: () => setShowSaveTgtPkgModal(false),
       className: "text-gray-400 hover:text-gray-600 text-xl"
     }, "×")), /*#__PURE__*/React.createElement("div", {
-      className: "p-6"
-    }, /*#__PURE__*/React.createElement("label", {
+      className: "p-6 space-y-4"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
       className: "block text-sm font-medium text-gray-700 mb-1"
     }, "定向包名称 ", /*#__PURE__*/React.createElement("span", {
       className: "text-red-500"
@@ -3020,9 +3020,35 @@
       onChange: e => setSaveTgtPkgName(e.target.value),
       placeholder: "输入定向包名称",
       className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-    }), /*#__PURE__*/React.createElement("p", {
-      className: "mt-3 text-xs text-gray-500"
-    }, "将保存当前自定义定向配置（地域、年龄、性别等）为定向包，可在「定向包」模式下重复使用。")), /*#__PURE__*/React.createElement("div", {
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "bg-gray-50 border border-gray-200 rounded-lg p-4"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "text-sm font-medium text-gray-700 mb-3"
+    }, "当前配置摘要"), /*#__PURE__*/React.createElement("div", {
+      className: "mb-2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-500"
+    }, "地理位置："), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-900 ml-1"
+    }, geoMode === 'unlimited' ? '不限' : geoMode === 'region' ? geoSelectedProvinces.length > 0 ? geoSelectedProvinces.join('、') : '已选择省份' : '地图选择')), /*#__PURE__*/React.createElement("div", {
+      className: "mb-2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-500"
+    }, "年龄："), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-900 ml-1"
+    }, ageSelections.includes('unlimited') ? '不限' : ageSelections.filter(a => a !== 'unlimited').join('、'))), /*#__PURE__*/React.createElement("div", {
+      className: "mb-2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-500"
+    }, "性别："), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-900 ml-1"
+    }, genderSelection === 'unlimited' ? '不限' : genderSelection)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-500"
+    }, "排除已转化用户："), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-900 ml-1"
+    }, excludeConvertedMode === 'unlimited' ? '不限' : excludeConvertedMode))), /*#__PURE__*/React.createElement("p", {
+      className: "text-xs text-gray-500"
+    }, "将保存以上配置为定向包，可在「定向包」模式下重复使用。")), /*#__PURE__*/React.createElement("div", {
       className: "px-6 py-4 border-t flex gap-2 justify-end"
     }, /*#__PURE__*/React.createElement("button", {
       onClick: () => {

@@ -2320,20 +2320,61 @@ function App() {
             {/* 保存为定向包弹窗 */}
             {showSaveTgtPkgModal && (
               <div className="modal-overlay" onClick={() => setShowSaveTgtPkgModal(false)}>
-                <div className="modal-content w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <div className="modal-content w-full max-w-lg" onClick={e => e.stopPropagation()}>
                   <div className="flex items-center justify-between px-6 py-4 border-b">
                     <h3 className="font-semibold text-gray-900">保存为定向包</h3>
                     <button onClick={() => setShowSaveTgtPkgModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
                   </div>
-                  <div className="p-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">定向包名称 <span className="text-red-500">*</span></label>
-                    <input
-                      value={saveTgtPkgName}
-                      onChange={e => setSaveTgtPkgName(e.target.value)}
-                      placeholder="输入定向包名称"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <p className="mt-3 text-xs text-gray-500">将保存当前自定义定向配置（地域、年龄、性别等）为定向包，可在「定向包」模式下重复使用。</p>
+                  <div className="p-6 space-y-4">
+                    {/* 定向包名称 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">定向包名称 <span className="text-red-500">*</span></label>
+                      <input
+                        value={saveTgtPkgName}
+                        onChange={e => setSaveTgtPkgName(e.target.value)}
+                        placeholder="输入定向包名称"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    
+                    {/* 当前配置摘要 */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <p className="text-sm font-medium text-gray-700 mb-3">当前配置摘要</p>
+                      
+                      {/* 地理位置 */}
+                      <div className="mb-2">
+                        <span className="text-xs text-gray-500">地理位置：</span>
+                        <span className="text-xs text-gray-900 ml-1">
+                          {geoMode === 'unlimited' ? '不限' : (geoMode === 'region' ? (geoSelectedProvinces.length > 0 ? geoSelectedProvinces.join('、') : '已选择省份') : '地图选择')}
+                        </span>
+                      </div>
+                      
+                      {/* 年龄 */}
+                      <div className="mb-2">
+                        <span className="text-xs text-gray-500">年龄：</span>
+                        <span className="text-xs text-gray-900 ml-1">
+                          {ageSelections.includes('unlimited') ? '不限' : ageSelections.filter(a => a !== 'unlimited').join('、')}
+                        </span>
+                      </div>
+                      
+                      {/* 性别 */}
+                      <div className="mb-2">
+                        <span className="text-xs text-gray-500">性别：</span>
+                        <span className="text-xs text-gray-900 ml-1">
+                          {genderSelection === 'unlimited' ? '不限' : genderSelection}
+                        </span>
+                      </div>
+                      
+                      {/* 排除已转化用户 */}
+                      <div>
+                        <span className="text-xs text-gray-500">排除已转化用户：</span>
+                        <span className="text-xs text-gray-900 ml-1">
+                          {excludeConvertedMode === 'unlimited' ? '不限' : excludeConvertedMode}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-xs text-gray-500">将保存以上配置为定向包，可在「定向包」模式下重复使用。</p>
                   </div>
                   <div className="px-6 py-4 border-t flex gap-2 justify-end">
                     <button onClick={() => { setSaveTgtPkgName(''); setShowSaveTgtPkgModal(false); }} className="btn-secondary text-sm">取消</button>
