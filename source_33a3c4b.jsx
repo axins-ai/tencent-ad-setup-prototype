@@ -668,28 +668,22 @@ function TimeGrid({ value, onChange }) {
   
   useEffect(() => { if (value) setSlots(value); }, [value]);
   
-  // 单击切换整个小时（2个slot）
+  // 单击切换单个0.5h格子
   const handleCellClick = (dayIdx, slotIdx) => {
-    const hourStart = Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR;
+    const key = `${dayIdx}-${slotIdx}`;
     const newSlots = { ...slots };
-    const currentState = !!slots[`${dayIdx}-${hourStart}`];
-    for (let s = hourStart; s < hourStart + SLOTS_PER_HOUR; s++) {
-      newSlots[`${dayIdx}-${s}`] = !currentState;
-    }
+    newSlots[key] = !newSlots[key];
     setSlots(newSlots);
     onChange(newSlots);
   };
 
-  // 鼠标按下（切换整个小时，支持拖选）
+  // 鼠标按下（开始拖选，切换单个0.5h格子）
   const handleMouseDown = (dayIdx, slotIdx) => {
     setIsSelecting(true);
-    const hourStart = Math.floor(slotIdx / SLOTS_PER_HOUR) * SLOTS_PER_HOUR;
-    setSelectStart({ dayIdx, slotIdx: hourStart });
+    setSelectStart({ dayIdx, slotIdx });
+    const key = `${dayIdx}-${slotIdx}`;
     const newSlots = { ...slots };
-    const currentState = !!slots[`${dayIdx}-${hourStart}`];
-    for (let s = hourStart; s < hourStart + SLOTS_PER_HOUR; s++) {
-      newSlots[`${dayIdx}-${s}`] = !currentState;
-    }
+    newSlots[key] = !newSlots[key];
     setSlots(newSlots);
     onChange(newSlots);
   };
