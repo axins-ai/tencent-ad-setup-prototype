@@ -1462,7 +1462,10 @@
     const nameVariables = ['日期', '定向包名称', '版位', '创建人'];
 
     // ===== 创意配置 =====
+    const [creativeMax, setCreativeMax] = useState(false);
     const [creativeEnhanceMax, setCreativeEnhanceMax] = useState(false);
+    const [creativeName, setCreativeName] = useState('');
+    const creativeNameVariables = ['日期', '素材名称', '素材类型'];
     const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
     const [selectedCopies, setSelectedCopies] = useState([]);
     const [videoStrategy, setVideoStrategy] = useState('average');
@@ -2072,8 +2075,40 @@
       }, /*#__PURE__*/React.createElement("input", {
         type: "checkbox",
         checked: selected,
-        readOnly: true,
-        className: "mr-2 w-3.5 h-3.5"
+        onChange: () => {
+          const prev = geoSelectedCities[activeProvinceId] || [];
+          if (selected) {
+            setGeoSelectedCities({
+              ...geoSelectedCities,
+              [activeProvinceId]: prev.filter(c => c !== city)
+            });
+          } else {
+            setGeoSelectedCities({
+              ...geoSelectedCities,
+              [activeProvinceId]: [...prev, city]
+            });
+          }
+          // 同步更新省份选中状态
+          const newCityList = selected ? prev.filter(c => c !== city) : [...prev, city];
+          const allCities = MOCK.regionCascade.cities[activeProvinceId] || [];
+          if (newCityList.length === allCities.length) {
+            // 全选了该省所有城市 → 确保省份被选中
+            if (!geoSelectedProvince.includes(activeProvinceId)) {
+              setGeoSelectedProvince([...geoSelectedProvince, activeProvinceId]);
+            }
+          } else {
+            // 没有全选 → 如果城市列表为空则取消省份选中
+            if (newCityList.length === 0) {
+              setGeoSelectedProvince(geoSelectedProvince.filter(x => x !== activeProvinceId));
+              const newCities = {
+                ...geoSelectedCities
+              };
+              delete newCities[activeProvinceId];
+              setGeoSelectedCities(newCities);
+            }
+          }
+        },
+        className: "mr-2 w-3.5 h-3.5 cursor-pointer"
       }), /*#__PURE__*/React.createElement("span", null, city));
     }), !activeProvinceId && /*#__PURE__*/React.createElement("div", {
       className: "px-3 py-4 text-sm text-gray-400 text-center"
@@ -2598,23 +2633,12 @@
       placeholder: "输入营销单元名称",
       className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
     }), /*#__PURE__*/React.createElement("div", {
-      className: "relative"
-    }, /*#__PURE__*/React.createElement("button", {
-      type: "button",
-      onClick: () => setShowNameVarDropdown(!showNameVarDropdown),
-      className: "px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50 whitespace-nowrap"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-code mr-1"
-    }), "插入变量"), showNameVarDropdown && /*#__PURE__*/React.createElement("div", {
-      className: "absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 min-w-[120px]"
-    }, nameVariables.map(v => /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-1 text-sm text-gray-500"
+    }, nameVariables.map(v => /*#__PURE__*/React.createElement("span", {
       key: v,
-      onClick: () => {
-        setUnitName(unitName + '{' + v + '}');
-        setShowNameVarDropdown(false);
-      },
-      className: "px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 text-gray-700"
-    }, v))))))))), /*#__PURE__*/React.createElement("div", {
+      onClick: () => setUnitName(unitName + '{' + v + '}'),
+      className: "text-blue-500 hover:text-blue-700 cursor-pointer"
+    }, "+", v)))))))), /*#__PURE__*/React.createElement("div", {
       className: "bg-white rounded-xl shadow-sm border overflow-hidden"
     }, /*#__PURE__*/React.createElement("div", {
       className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
@@ -2625,6 +2649,23 @@
     }, "3"), "创意配置")), /*#__PURE__*/React.createElement("div", {
       className: "p-6 space-y-6"
     }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+      className: "block text-sm font-medium text-gray-700 mb-2"
+    }, "创意max"), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-4"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `text-sm font-medium ${!creativeMax ? 'text-green-600' : 'text-gray-400'}`
+    }, "关闭"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setCreativeMax(!creativeMax),
+      className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${creativeMax ? 'bg-blue-500' : 'bg-gray-300'}`
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${creativeMax ? 'translate-x-6' : 'translate-x-1'}`
+    })), /*#__PURE__*/React.createElement("span", {
+      className: `text-sm font-medium ${creativeMax ? 'text-green-600' : 'text-gray-400'}`
+    }, "开启"), creativeMax && /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-orange-500"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-exclamation-triangle mr-1"
+    }), "仅支持关闭"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
       className: "block text-sm font-medium text-gray-700 mb-2"
     }, "创意增强Max"), /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-4"
@@ -2642,6 +2683,22 @@
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-exclamation-triangle mr-1"
     }), "仅支持关闭"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+      className: "block text-sm font-medium text-gray-700 mb-1"
+    }, "创意名称"), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-2"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "text",
+      value: creativeName,
+      onChange: e => setCreativeName(e.target.value),
+      placeholder: "输入创意名称（支持变量）",
+      className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-1 text-sm text-gray-500"
+    }, creativeNameVariables.map(v => /*#__PURE__*/React.createElement("span", {
+      key: v,
+      onClick: () => setCreativeName(creativeName + '{' + v + '}'),
+      className: "text-blue-500 hover:text-blue-700 cursor-pointer"
+    }, "+", v))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
       className: "block text-sm font-medium text-gray-700 mb-2"
     }, "创意素材 ", /*#__PURE__*/React.createElement("span", {
       className: "text-red-500"
