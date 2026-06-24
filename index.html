@@ -980,6 +980,8 @@
     // 重置排除已转化
     document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]').checked = true;
     document.getElementById('tgt-pkg-conversion-section').style.display = 'none';
+    // 渲染年龄选项 + 省份列表
+    if (window.renderTgtPkgAgeOptions) window.renderTgtPkgAgeOptions();
     // 显示弹窗 (使用 flex 以居中)
     document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
   };
@@ -990,23 +992,30 @@
     document.getElementById('tgt-pkg-form-title').textContent = '编辑定向包';
     document.getElementById('tgt-pkg-name').value = tp.name || '';
     // 地理位置
+    tgtPkgSelectedProvinces = [];
+    tgtPkgSelectedCities = {};
+    tgtPkgActiveProvince = '';
     if (tp.geoMode === 'region') {
       document.querySelector('input[name="tgt-pkg-geo-mode"][value="region"]').checked = true;
-    document.getElementById('tgt-pkg-geo-region').style.display = 'block';
+      document.getElementById('tgt-pkg-geo-region').style.display = 'block';
+      // 从 tp.region 回显选中的城市
+      var regionStr = tp.region || '';
+      var selectedCityNames = regionStr.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+      // 遍历 regionData，匹配城市
+      regionData.forEach(function(item) {
+        var matched = item.cities.filter(function(c) { return selectedCityNames.indexOf(c) >= 0; });
+        if (matched.length > 0) {
+          tgtPkgSelectedProvinces.push(item.province);
+          tgtPkgSelectedCities[item.province] = matched;
+        }
+      });
+      // 激活第一个省份
+      if (tgtPkgSelectedProvinces.length > 0) tgtPkgActiveProvince = tgtPkgSelectedProvinces[0];
+      window.renderTgtPkgProvinceList();
+      window.updateTgtPkgGeoCount();
     } else {
       document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
       document.getElementById('tgt-pkg-geo-region').style.display = 'none';
-    }
-    // 回显地域标签
-    var tagsEl = document.getElementById('tgt-pkg-region-tags');
-    if (tagsEl) {
-      var regionStr = tp.region || '';
-      var cities = regionStr.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
-      var html = '';
-      cities.forEach(function(city) {
-        html += '<span data-city="' + city.trim() + '" style="display:inline-flex;align-items:center;padding:3px 8px;background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;border-radius:4px;font-size:12px;">' + city.trim() + ' <span onclick="removeTgtPkgRegion(\'' + city.trim() + '\')" style="margin-left:4px;cursor:pointer;font-size:14px;">×</span></span>';
-      });
-      tagsEl.innerHTML = html;
     }
     document.getElementById('tgt-pkg-location-resident').checked = tp.locationTypeResident !== false;
     // 年龄
@@ -1044,12 +1053,14 @@
     if (!name) { alert('请输入定向包名称'); return; }
     // 获取地理位置
     var geoMode = document.querySelector('input[name="tgt-pkg-geo-mode"]:checked').value;
-    var region = '';
+    var region = '不限';
     if (geoMode === 'region') {
-      var selectedCities = window.getSelectedRegions();
-      region = selectedCities.join(',');
-    } else {
-      region = '不限';
+      // 从新 UI 的 tgtPkgSelectedCities 构建 region 字符串
+      var allCities = [];
+      Object.values(tgtPkgSelectedCities).forEach(function(cities) {
+        allCities = allCities.concat(cities);
+      });
+      region = allCities.join(',');
     }
     // 获取地点类型
     var locationTypeResident = document.getElementById('tgt-pkg-location-resident').checked;
@@ -1227,6 +1238,14 @@
   } else {
     diagnoseAndBind();
   }
+  // 初始化年龄选项
+  if (window.renderTgtPkgAgeOptions) window.renderTgtPkgAgeOptions();
+  // 绑定新建定向包按钮
+  var btn = document.getElementById('btn-new-tgt-pkg');
+  if (btn) btn.addEventListener('click', function() {
+    if (typeof window.openTgtPkgForm === 'function') window.openTgtPkgForm();
+    else alert('脚本加载中，请稍后再试');
+  });
 })();
 </script>
 
