@@ -1394,10 +1394,11 @@
     // 改为多选：支持定向包组合（同账户不同定向包 = 多个单元）
     const [selectedTargetingPackages, setSelectedTargetingPackages] = useState([]);
     // 自定义定向 - 地理位置级联
-    const [geoMode, setGeoMode] = useState('region'); // 'unlimited' | 'region' | 'map'
+    const [geoMode, setGeoMode] = useState('region'); // 'unlimited' | 'region'
     const [geoSelectedCountry, setGeoSelectedCountry] = useState('cn');
     const [geoSelectedProvinces, setGeoSelectedProvinces] = useState([]);
     const [geoSelectedCities, setGeoSelectedCities] = useState({}); // { provinceId: [city1, city2] }
+    const [activeProvinceId, setActiveProvinceId] = useState(''); // 当前选中的省份（用于右侧城市列表）
     // 地点类型（只保留常住地）
     const [locationTypeResident, setLocationTypeResident] = useState(true);
     // 年龄
@@ -1987,17 +1988,7 @@
       className: "mr-1.5"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text-sm text-gray-700"
-    }, "按区域")), /*#__PURE__*/React.createElement("label", {
-      className: "flex items-center cursor-pointer ml-4"
-    }, /*#__PURE__*/React.createElement("input", {
-      type: "radio",
-      name: "geo_mode",
-      checked: geoMode === 'map',
-      onChange: () => setGeoMode('map'),
-      className: "mr-1.5"
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm text-gray-700"
-    }, "从地图选择"))), geoMode === 'region' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    }, "按区域"))), geoMode === 'region' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
       className: "bg-blue-50/50 rounded-xl p-4 border border-blue-100 mb-3"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-2 mb-3"
@@ -2005,138 +1996,92 @@
       className: "fas fa-map-marker-alt text-blue-500"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text-sm font-medium text-gray-800"
-    }, "按区域"), /*#__PURE__*/React.createElement("div", {
-      className: "ml-auto flex items-center gap-2"
-    }, /*#__PURE__*/React.createElement("button", {
-      className: "text-xs text-blue-600 hover:text-blue-800"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-file-import mr-1"
-    }), "批量导入区域"))), /*#__PURE__*/React.createElement("div", {
-      className: "relative mb-3"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
-    }), /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      placeholder: "搜索国家、省、市、区、商圈",
-      className: "w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-    })), /*#__PURE__*/React.createElement("div", {
-      className: "grid grid-cols-3 gap-3"
+    }, "按区域")), /*#__PURE__*/React.createElement("div", {
+      className: "grid grid-cols-2 gap-3"
     }, /*#__PURE__*/React.createElement("div", {
       className: "border border-gray-200 rounded-lg overflow-hidden bg-white"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700 flex items-center justify-between"
-    }, /*#__PURE__*/React.createElement("span", null, MOCK.regionCascade.countries.find(c => c.id === geoSelectedCountry)?.name || '选择'), /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-chevron-right text-gray-400 text-xs"
-    })), /*#__PURE__*/React.createElement("div", {
-      className: "max-h-48 overflow-y-auto p-1"
-    }, MOCK.regionCascade.countries.map(c => /*#__PURE__*/React.createElement("div", {
-      key: c.id,
-      onClick: () => {
-        setGeoSelectedCountry(c.id);
-        setGeoSelectedProvinces([]);
-        setGeoSelectedCities({});
-      },
-      className: `px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 rounded ${geoSelectedCountry === c.id ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-700'}`
-    }, c.name)))), /*#__PURE__*/React.createElement("div", {
-      className: "border border-gray-200 rounded-lg overflow-hidden bg-white"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700 flex items-center justify-between"
-    }, /*#__PURE__*/React.createElement("span", null, "省份"), /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-chevron-right text-gray-400 text-xs"
-    })), /*#__PURE__*/React.createElement("div", {
-      className: "max-h-48 overflow-y-auto p-1"
-    }, (MOCK.regionCascade.provinces[geoSelectedCountry] || []).map(p => /*#__PURE__*/React.createElement("div", {
+      className: "px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700"
+    }, "省份（点击查看城市）"), /*#__PURE__*/React.createElement("div", {
+      className: "max-h-52 overflow-y-auto p-1"
+    }, (MOCK.regionCascade.provinces['cn'] || []).map(p => /*#__PURE__*/React.createElement("div", {
       key: p.id,
-      onClick: () => {
-        if (geoSelectedProvinces.includes(p.id)) {
-          setGeoSelectedProvinces(geoSelectedProvinces.filter(x => x !== p.id));
-          const newCities = {
-            ...geoSelectedCities
-          };
-          delete newCities[p.id];
-          setGeoSelectedCities(newCities);
-        } else {
-          setGeoSelectedProvinces([...geoSelectedProvinces, p.id]);
-        }
-      },
-      className: `px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${geoSelectedProvinces.includes(p.id) ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-700'}`
+      onClick: () => setActiveProvinceId(p.id),
+      className: `px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${activeProvinceId === p.id ? 'bg-blue-200 text-blue-800 font-semibold' : ''} ${geoSelectedProvinces.includes(p.id) ? 'text-blue-700' : 'text-gray-700'}`
     }, /*#__PURE__*/React.createElement("input", {
       type: "checkbox",
       checked: geoSelectedProvinces.includes(p.id),
       readOnly: true,
       className: "mr-2 w-3.5 h-3.5"
-    }), p.name)))), /*#__PURE__*/React.createElement("div", {
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "truncate"
+    }, p.name), geoSelectedProvinces.includes(p.id) && /*#__PURE__*/React.createElement("span", {
+      className: "ml-auto text-xs text-blue-500"
+    }, (() => {
+      const all = MOCK.regionCascade.cities[p.id] || [];
+      const sel = geoSelectedCities[p.id] || [];
+      return `${sel.length}/${all.length}`;
+    })()))))), /*#__PURE__*/React.createElement("div", {
       className: "border border-gray-200 rounded-lg overflow-hidden bg-white"
     }, /*#__PURE__*/React.createElement("div", {
       className: "px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700"
-    }, "城市"), /*#__PURE__*/React.createElement("div", {
-      className: "max-h-48 overflow-y-auto p-1"
-    }, (() => {
-      // 收集所有已选省份的城市
-      let allCities = [];
-      geoSelectedProvinces.forEach(pid => {
-        const cities = MOCK.regionCascade.cities[pid] || [];
-        allCities = [...allCities, ...cities.map(c => ({
-          provinceId: pid,
-          name: c
-        }))];
-      });
-      if (allCities.length === 0) return /*#__PURE__*/React.createElement("div", {
-        className: "px-3 py-4 text-sm text-gray-400 text-center"
-      }, "请先选择省份");
-      return allCities.map((city, idx) => {
-        const selected = (geoSelectedCities[city.provinceId] || []).includes(city.name);
-        return /*#__PURE__*/React.createElement("div", {
-          key: `${city.provinceId}-${idx}`,
-          onClick: () => {
-            const prev = geoSelectedCities[city.provinceId] || [];
-            if (selected) {
-              setGeoSelectedCities({
-                ...geoSelectedCities,
-                [city.provinceId]: prev.filter(c => c !== city.name)
-              });
-            } else {
-              setGeoSelectedCities({
-                ...geoSelectedCities,
-                [city.provinceId]: [...prev, city.name]
-              });
-            }
-          },
-          className: `px-3 py-1.5 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${selected ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
-        }, /*#__PURE__*/React.createElement("input", {
-          type: "checkbox",
-          checked: selected,
-          readOnly: true,
-          className: "mr-2 w-3.5 h-3.5"
-        }), /*#__PURE__*/React.createElement("span", {
-          className: "truncate"
-        }, city.name));
-      });
-    })()))))), geoMode === 'unlimited' && /*#__PURE__*/React.createElement("p", {
+    }, "城市 ", activeProvinceId ? `· ${MOCK.regionCascade.provinces['cn'].find(p => p.id === activeProvinceId)?.name || ''}` : '（请点击左侧省份）'), /*#__PURE__*/React.createElement("div", {
+      className: "max-h-52 overflow-y-auto p-1"
+    }, activeProvinceId && (MOCK.regionCascade.cities[activeProvinceId] || []).map(city => {
+      const selected = (geoSelectedCities[activeProvinceId] || []).includes(city);
+      return /*#__PURE__*/React.createElement("div", {
+        key: city,
+        onClick: () => {
+          const prev = geoSelectedCities[activeProvinceId] || [];
+          if (selected) {
+            setGeoSelectedCities({
+              ...geoSelectedCities,
+              [activeProvinceId]: prev.filter(c => c !== city)
+            });
+          } else {
+            setGeoSelectedCities({
+              ...geoSelectedCities,
+              [activeProvinceId]: [...prev, city]
+            });
+          }
+        },
+        className: `px-3 py-1.5 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${selected ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
+      }, /*#__PURE__*/React.createElement("input", {
+        type: "checkbox",
+        checked: selected,
+        readOnly: true,
+        className: "mr-2 w-3.5 h-3.5"
+      }), /*#__PURE__*/React.createElement("span", null, city));
+    }), !activeProvinceId && /*#__PURE__*/React.createElement("div", {
+      className: "px-3 py-4 text-sm text-gray-400 text-center"
+    }, "请点击左侧省份查看城市")))), /*#__PURE__*/React.createElement("div", {
+      className: "flex gap-2 mt-3"
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        const allPids = (MOCK.regionCascade.provinces['cn'] || []).map(p => p.id);
+        const allCities = {};
+        allPids.forEach(pid => {
+          allCities[pid] = [...(MOCK.regionCascade.cities[pid] || [])];
+        });
+        setGeoSelectedProvinces(allPids);
+        setGeoSelectedCities(allCities);
+      },
+      className: "text-xs text-blue-600 hover:text-blue-800"
+    }, "全选全部"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        setGeoSelectedProvinces([]);
+        setGeoSelectedCities({});
+      },
+      className: "text-xs text-gray-500 hover:text-gray-700"
+    }, "清空全部")))), geoMode === 'unlimited' && /*#__PURE__*/React.createElement("p", {
       className: "text-sm text-gray-400 py-2 px-3 bg-gray-50 rounded-lg inline-block"
-    }, "已选择\"不限\"，将投放到所有地域"), geoMode === 'map' && /*#__PURE__*/React.createElement("p", {
-      className: "text-sm text-gray-400 py-2 px-3 bg-gray-50 rounded-lg inline-block"
-    }, "从地图选择功能暂未实现原型演示"), /*#__PURE__*/React.createElement("div", {
+    }, "已选择\"不限\"，将投放到所有地域"), /*#__PURE__*/React.createElement("div", {
       className: "mt-3 flex items-start gap-2"
     }, /*#__PURE__*/React.createElement("span", {
       className: "text-sm font-semibold text-gray-900 whitespace-nowrap pt-1"
-    }, "地点类型"), /*#__PURE__*/React.createElement("div", {
-      className: "flex flex-wrap items-center gap-x-5 gap-y-1"
-    }, /*#__PURE__*/React.createElement("label", {
-      className: "flex items-center cursor-pointer"
-    }, /*#__PURE__*/React.createElement("input", {
-      type: "checkbox",
-      checked: locationTypeResident,
-      onChange: e => setLocationTypeResident(e.target.checked),
-      className: "mr-1.5"
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm"
-    }, "常住地"), /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-info-circle text-gray-300 ml-1 text-xs cursor-help",
-      title: "常住地：用户常驻在该区域"
-    })))), /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-gray-400 mt-2 pl-[60px]"
-    }, "微信流量当前不支持「近到访」，且仅支持投放国内（含港澳地区）及部分外国区域")), /*#__PURE__*/React.createElement("div", {
+    }, "地点类型"), /*#__PURE__*/React.createElement("span", {
+      className: "text-sm text-gray-700"
+    }, "常住地"))), /*#__PURE__*/React.createElement("div", {
       className: "py-4 border-b border-gray-200"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-1 mb-3"
@@ -2233,7 +2178,7 @@
       className: "text-sm font-semibold text-gray-900"
     }, "自定义人群"), /*#__PURE__*/React.createElement("i", {
       className: "fas fa-info-circle text-gray-300 ml-1 text-xs cursor-help",
-      title: "通过上传用户包等方式定向或排除特定人群"
+      title: "通过上传用户包等方式排除特定人群"
     }), /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-6 ml-4"
     }, /*#__PURE__*/React.createElement("label", {
@@ -2252,68 +2197,13 @@
     }, /*#__PURE__*/React.createElement("input", {
       type: "radio",
       name: "audience_mode",
-      value: "target",
-      checked: audienceMode === 'target',
-      onChange: e => setAudienceMode(e.target.value),
-      className: "mr-1.5"
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm"
-    }, "定向人群")), /*#__PURE__*/React.createElement("label", {
-      className: "flex items-center cursor-pointer"
-    }, /*#__PURE__*/React.createElement("input", {
-      type: "radio",
-      name: "audience_mode",
       value: "exclude",
       checked: audienceMode === 'exclude',
       onChange: e => setAudienceMode(e.target.value),
       className: "mr-1.5"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text-sm"
-    }, "排除人群")))), audienceMode === 'target' && /*#__PURE__*/React.createElement("div", {
-      className: "ml-[72px] bg-blue-50 border border-blue-200 rounded-xl p-4 animate-fadeIn"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between mb-3"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-2"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-users text-blue-500"
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm font-bold text-blue-800"
-    }, "选择定向人群包")), /*#__PURE__*/React.createElement("button", {
-      onClick: refreshAudiencePackages,
-      className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-100"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-sync-alt mr-1"
-    }), "刷新列表")), /*#__PURE__*/React.createElement("select", {
-      value: "",
-      onChange: e => {
-        const val = e.target.value;
-        if (val && !selectedTargetAudiences.includes(val)) {
-          setSelectedTargetAudiences([...selectedTargetAudiences, val]);
-        }
-      },
-      className: "w-full px-3 py-2 border border-blue-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-3"
-    }, /*#__PURE__*/React.createElement("option", {
-      value: ""
-    }, "++ 添加人群包 ++"), audiencePackageList.map(ap => /*#__PURE__*/React.createElement("option", {
-      key: ap.id,
-      value: ap.id,
-      disabled: selectedTargetAudiences.includes(ap.id)
-    }, ap.name, selectedTargetAudiences.includes(ap.id) ? ' ✓ 已选' : ''))), selectedTargetAudiences.length > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "flex flex-wrap gap-1"
-    }, selectedTargetAudiences.map(id => {
-      const pkg = audiencePackageList.find(a => a.id === id);
-      return pkg ? /*#__PURE__*/React.createElement("span", {
-        key: id,
-        className: "tag bg-blue-100 text-blue-800"
-      }, pkg.name, /*#__PURE__*/React.createElement("button", {
-        onClick: () => setSelectedTargetAudiences(selectedTargetAudiences.filter(i => i !== id))
-      }, /*#__PURE__*/React.createElement("i", {
-        className: "fas fa-times"
-      }))) : null;
-    })), selectedTargetAudiences.length === 0 && /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-blue-400"
-    }, "未选择任何人群包，将不限定向人群")), audienceMode === 'exclude' && /*#__PURE__*/React.createElement("div", {
+    }, "排除人群")))), audienceMode === 'exclude' && /*#__PURE__*/React.createElement("div", {
       className: "ml-[72px] bg-orange-50 border border-orange-200 rounded-xl p-4 animate-fadeIn"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-between mb-3"
@@ -3252,7 +3142,7 @@
       className: "text-xs text-gray-500"
     }, "自定义人群："), /*#__PURE__*/React.createElement("span", {
       className: "text-xs text-gray-900 ml-1"
-    }, audienceMode === 'unlimited' ? '不限' : audienceMode === 'target' ? '指定人群：' + selectedTargetAudiences.join('、') : '排除人群：' + selectedExcludeAudiences.join('、'))), /*#__PURE__*/React.createElement("div", {
+    }, audienceMode === 'unlimited' ? '不限' : '排除人群：' + selectedExcludeAudiences.join('、'))), /*#__PURE__*/React.createElement("div", {
       className: "mb-2"
     }, /*#__PURE__*/React.createElement("span", {
       className: "text-xs text-gray-500"
