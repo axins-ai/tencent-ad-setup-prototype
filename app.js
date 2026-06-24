@@ -1989,7 +1989,12 @@
       type: "radio",
       name: "geo_mode",
       checked: geoMode === 'unlimited',
-      onChange: () => setGeoMode('unlimited'),
+      onChange: () => {
+        setGeoMode('unlimited');
+        setGeoSelectedProvinces([]);
+        setGeoSelectedCities({});
+        setActiveProvinceId('');
+      },
       className: "mr-1.5"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text-sm text-gray-700"
