@@ -29,22 +29,22 @@
       <div style="margin-bottom:8px;">
         <div style="font-size:11px;font-weight:600;color:#9ca3af;padding:6px 16px 8px;letter-spacing:0.5px;">批创工具</div>
 
-        <button onclick="showView('task-list')" id="menu-task-list" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:#E6F7FF;color:#1890FF;font-weight:600;font-size:14px;cursor:pointer;">
+        <button id="menu-task-list" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:#E6F7FF;color:#1890FF;font-weight:600;font-size:14px;cursor:pointer;">
           <i class="fas fa-list" style="width:18px;text-align:center;font-size:14px;"></i>
           任务列表
         </button>
 
-        <button onclick="showView('targeting-packages')" id="menu-targeting-packages" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
+        <button id="menu-targeting-packages" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
           <i class="fas fa-bullseye" style="width:18px;text-align:center;font-size:14px;"></i>
           定向包
         </button>
 
-        <button onclick="showView('creative-assets')" id="menu-creative-assets" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
+        <button id="menu-creative-assets" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
           <i class="fas fa-image" style="width:18px;text-align:center;font-size:14px;"></i>
           创意资产
         </button>
 
-        <button onclick="showView('copy-library')" id="menu-copy-library" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
+        <button id="menu-copy-library" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
           <i class="fas fa-font" style="width:18px;text-align:center;font-size:14px;"></i>
           文案库
         </button>
@@ -65,16 +65,13 @@
           <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">批创工具</h2>
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理批量创意搭建任务</p>
         </div>
-        <div style="position:relative;" onmouseenter="showDropdown()" onmouseleave="hideDropdown()">
+        <div style="position:relative;">
           <button style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
             <i class="fas fa-plus"></i>新增批创任务
             <i class="fas fa-chevron-down" style="font-size:12px;"></i>
           </button>
-          <div id="channel-dropdown" style="display:none;position:absolute;top:100%;right:0;background:white;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.15);min-width:200px;z-index:200;overflow:hidden;">
-            <div onclick="selectChannel('gdt')" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;color:#111827;" onmouseenter="this.style.background='#f5f5f5'" onmouseleave="this.style.background='white'">
-              <span style="font-size:18px;">🎯</span>
-              <span>广点通</span>
-            </div>
+          <div id="channel-dropdown" class="dropdown-container" style="display:none;position:absolute;top:100%;right:0;background:white;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.15);min-width:200px;z-index:200;overflow:hidden;">
+            <div id="channel-gdt" class="dropdown-item" data-channel="gdt" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;color:#111827;"><span style="font-size:18px;">🎯</span><span>广点通</span></div>
             <div style="padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:14px;color:#c0c0c0;cursor:not-allowed;background:#fafafa;">
               <span style="font-size:18px;filter:grayscale(1);">📰</span>
               <span>头条</span>
@@ -104,7 +101,7 @@
           <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">定向包</h2>
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理腾讯渠道自定义定向配置</p>
         </div>
-        <button id="btn-new-tgt-pkg" onclick="if(typeof window.openTgtPkgForm==='function'){window.openTgtPkgForm();}else{alert('加载中，请稍候');}" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <button id="btn-new-tgt-pkg" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
           <i class="fas fa-plus"></i> 新建定向包
         </button>
       </div>
@@ -124,19 +121,19 @@
         <div style="background:white;border-radius:12px;width:90vw;max-width:900px;max-height:85vh;overflow-y:auto;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
             <h3 style="font-size:16px;font-weight:600;margin:0;" id="tgt-pkg-form-title">新建定向包</h3>
-            <button onclick="closeTgtPkgForm()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
+            <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
           </div>
           <div style="padding:20px;">
             <!-- 定向包名称 -->
             <div style="margin-bottom:20px;">
               <label style="display:block;font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">定向包名称 <span style="color:#ff4d4f;">*</span></label>
               <div style="display:flex;align-items:center;gap:8px;">
-                <input id="tgt-pkg-name" type="text" placeholder="输入定向包名称" style="flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+                <input id="tgt-pkg-name" type="text" placeholder="输入定向包名称" style="flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
                 <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#9ca3af;">
-                  <span style="cursor:pointer;color:#1890FF;" onclick="insertTgtPkgNameVar('日期')">+日期</span>
-                  <span style="cursor:pointer;color:#1890FF;" onclick="insertTgtPkgNameVar('定向包名称')">+定向包名称</span>
-                  <span style="cursor:pointer;color:#1890FF;" onclick="insertTgtPkgNameVar('版位')">+版位</span>
-                  <span style="cursor:pointer;color:#1890FF;" onclick="insertTgtPkgNameVar('创建人')">+创建人</span>
+                  <span style="cursor:pointer;color:#1890FF;">+日期</span>
+                  <span style="cursor:pointer;color:#1890FF;">+定向包名称</span>
+                  <span style="cursor:pointer;color:#1890FF;">+版位</span>
+                  <span style="cursor:pointer;color:#1890FF;">+创建人</span>
                 </div>
               </div>
             </div>
@@ -146,11 +143,11 @@
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">地理位置</div>
               <div style="display:flex;gap:12px;margin-bottom:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-geo-mode" value="unlimited" checked onchange="window.toggleTgtPkgGeoMode()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-geo-mode" value="unlimited" checked style="margin-right:6px;">
                   <span style="font-size:14px;">不限</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-geo-mode" value="region" onchange="window.toggleTgtPkgGeoMode()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-geo-mode" value="region" style="margin-right:6px;">
                   <span style="font-size:14px;">按区域</span>
                 </label>
               </div>
@@ -212,16 +209,16 @@
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">自定义人群</div>
               <div style="display:flex;gap:16px;margin-bottom:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-audience-mode" value="unlimited" checked onchange="window.toggleTgtPkgAudience()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="unlimited" checked style="margin-right:6px;">
                   <span style="font-size:14px;">不限</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-audience-mode" value="exclude" onchange="window.toggleTgtPkgAudience()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="exclude" style="margin-right:6px;">
                   <span style="font-size:14px;">排除人群</span>
                 </label>
               </div>
               <div id="tgt-pkg-audience-config" style="display:none;">
-                <input id="tgt-pkg-audience-input" type="text" placeholder="输入要排除的人群标签或ID" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+                <input id="tgt-pkg-audience-input" type="text" placeholder="输入要排除的人群标签或ID" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
               </div>
             </div>
 
@@ -230,23 +227,23 @@
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">排除已转化用户</div>
               <div style="display:flex;flex-wrap:wrap;gap:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="unlimited" checked onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-exclude" value="unlimited" checked style="margin-right:6px;">
                   <span style="font-size:13px;">不限</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="same_account" onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_account" style="margin-right:6px;">
                   <span style="font-size:13px;">同账户营销单元</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="same_principal" onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_principal" style="margin-right:6px;">
                   <span style="font-size:13px;">同主体系营销单元</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="same_business" onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_business" style="margin-right:6px;">
                   <span style="font-size:13px;">同业务单元营销单元</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="same_group" onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_group" style="margin-right:6px;">
                   <span style="font-size:13px;">同集团</span>
                 </label>
               </div>
@@ -257,12 +254,12 @@
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">转化行为</div>
               <div style="display:flex;gap:16px;margin-bottom:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-conversion-behavior" value="optimize" checked onchange="document.getElementById('tgt-pkg-conversion-detail').style.display='none'" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-conversion-behavior" value="optimize" checked style="margin-right:6px;">
                   <span style="font-size:14px;">优化目标</span>
                 </label>
               </div>
               <div id="tgt-pkg-conversion-detail" style="display:none;">
-                <input id="tgt-pkg-conversion-input" type="text" placeholder="输入转化行为ID或名称" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+                <input id="tgt-pkg-conversion-input" type="text" placeholder="输入转化行为ID或名称" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
               </div>
             </div>
 
@@ -294,8 +291,8 @@
             </div>
           </div>
           <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
-            <button onclick="closeTgtPkgForm()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
-            <button onclick="saveTgtPkg()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
+            <button style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
+            <button style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
           </div>
         </div>
       </div>
@@ -305,11 +302,11 @@
         <div style="background:white;border-radius:12px;width:90vw;max-width:720px;max-height:80vh;display:flex;flex-direction:column;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
             <h4 style="font-size:16px;font-weight:600;margin:0;">选择地域</h4>
-            <button onclick="closeRegionSelector()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
+            <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
           </div>
           <!-- 搜索 -->
           <div style="padding:12px 20px;border-bottom:1px solid #f0f0f0;">
-            <input id="region-search-input" type="text" placeholder="搜索省份或城市..." oninput="filterRegionList()" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+            <input id="region-search-input" type="text" placeholder="搜索省份或城市..." style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;">
           </div>
           <!-- 省份/城市列表 -->
           <div id="region-list-container" style="flex:1;overflow-y:auto;padding:12px 20px;">
@@ -321,8 +318,8 @@
             <div id="region-selected-tags" style="display:flex;flex-wrap:wrap;gap:6px;max-height:60px;overflow-y:auto;"></div>
           </div>
           <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid #e5e7eb;">
-            <button onclick="closeRegionSelector()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
-            <button onclick="confirmRegionSelection()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">确认</button>
+            <button style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
+            <button style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">确认</button>
           </div>
         </div>
       </div>
@@ -351,7 +348,7 @@
           <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">文案库</h2>
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告文案</p>
         </div>
-        <button onclick="openCopyForm()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <button style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
           <i class="fas fa-plus"></i> 新增文案
         </button>
       </div>
@@ -368,14 +365,14 @@
         <div style="background:white;border-radius:12px;width:90vw;max-width:700px;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
             <h3 style="font-size:16px;font-weight:600;margin:0;">新增文案</h3>
-            <button onclick="closeCopyForm()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
+            <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
           </div>
           <div style="padding:20px;">
-            <textarea id="copy-content-input" placeholder="输入文案内容..." style="width:100%;height:120px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
+            <textarea id="copy-content-input" placeholder="输入文案内容..." style="width:100%;height:120px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
           </div>
           <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
-            <button onclick="closeCopyForm()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
-            <button onclick="saveCopy()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
+            <button style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
+            <button style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
           </div>
         </div>
       </div>
@@ -533,16 +530,16 @@
         tpDisplay = tpNames.join('、');
         if (tpDisplay.length > 12) tpDisplay = tpNames.length + ' 个定向包';
       }
-      html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;" onmouseenter="this.style.background=\'#f9f9f9\'" onmouseleave="this.style.background=\'white\'">' +
+      html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;">' +
         '<div style="flex:1.2;font-weight:500;">' + escapeHtml(task.name) + '<br><span style="font-size:12px;color:#9ca3af;">' + (task.status === 'draft' ? '草稿' : task.status) + ' · ' + formatDate(task.createdAt) + '</span></div>' +
         '<div style="flex:1;">' + escapeHtml(accountDisplay) + '</div>' +
         '<div style="flex:0.8;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
         '<div style="flex:1;color:#6b7280;">' + escapeHtml(tpDisplay) + '</div>' +
         '<div style="flex:1;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
         '<div style="flex:1.2;display:flex;justify-content:flex-end;gap:8px;">' +
-          '<button onclick="editTask(\'' + task.id + '\')" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-pen" style="margin-right:4px;"></i>编辑</button>' +
-          '<button onclick="scheduleTask(\'' + task.id + '\')" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-clock" style="margin-right:4px;"></i>定时运行</button>' +
-          '<button onclick="deleteTask(\'' + task.id + '\')" style="padding:6px 14px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;"><i class="fas fa-trash" style="margin-right:4px;"></i>删除</button>' +
+          '<button data-task-id="' + task.id + '" data-action="edit" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-pen" style="margin-right:4px;"></i>编辑</button>' +
+          '<button data-task-id="' + task.id + '" data-action="schedule" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-clock" style="margin-right:4px;"></i>定时运行</button>' +
+          '<button data-task-id="' + task.id + '" data-action="delete" style="padding:6px 14px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;"><i class="fas fa-trash" style="margin-right:4px;"></i>删除</button>' +
         '</div>' +
       '</div>';
     });
@@ -842,7 +839,7 @@
         var key = pIdx + '-' + cIdx;
         var isSelected = selectedRegions.indexOf(city) >= 0;
         html += '<label data-city="' + city + '" style="display:flex;align-items:center;cursor:pointer;padding:4px 10px;border-radius:6px;font-size:13px;' + (isSelected ? 'background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;' : 'background:#f5f5f5;color:#666;border:1px solid #e5e7eb;') + '">';
-        html += '<input type="checkbox" value="' + city + '" ' + (isSelected ? 'checked' : '') + ' onchange="toggleRegionCity(this)" style="margin-right:4px;">';
+        html += '<input type="checkbox" value="' + city + '" ' + (isSelected ? 'checked' : '') + ' style="margin-right:4px;">';
         html += '<span>' + city + '</span>';
         html += '</label>';
       });
@@ -871,7 +868,7 @@
     if (tagsEl) {
       var html = '';
       selectedRegions.forEach(function(city) {
-        html += '<span data-city="' + city + '" style="display:inline-flex;align-items:center;padding:2px 8px;background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;border-radius:4px;font-size:12px;">' + city + ' <span onclick="removeRegionCity(\'' + city + '\')" style="margin-left:4px;cursor:pointer;font-size:14px;">×</span></span>';
+        html += '<span data-city="' + city + '" style="display:inline-flex;align-items:center;padding:2px 8px;background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;border-radius:4px;font-size:12px;">' + city + ' <span style="margin-left:4px;cursor:pointer;font-size:14px;">×</span></span>';
       });
       tagsEl.innerHTML = html;
     }
@@ -889,7 +886,7 @@
     if (tagsEl) {
       var html = '';
       selectedRegions.forEach(function(city) {
-        html += '<span data-city="' + city + '" style="display:inline-flex;align-items:center;padding:3px 8px;background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;border-radius:4px;font-size:12px;">' + city + ' <span onclick="removeTgtPkgRegion(\'' + city + '\')" style="margin-left:4px;cursor:pointer;font-size:14px;">×</span></span>';
+        html += '<span data-city="' + city + '" style="display:inline-flex;align-items:center;padding:3px 8px;background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;border-radius:4px;font-size:12px;">' + city + ' <span style="margin-left:4px;cursor:pointer;font-size:14px;">×</span></span>';
       });
       tagsEl.innerHTML = html;
     }
@@ -976,8 +973,8 @@
         '<div style="flex:0.8;color:#6b7280;">' + escapeHtml(tp.age || '-') + '</div>' +
         '<div style="flex:0.6;color:#6b7280;">' + escapeHtml(tp.gender || '-') + '</div>' +
         '<div style="flex:1.2;display:flex;justify-content:flex-end;gap:6px;">' +
-          '<button onclick="editTgtPkg(' + idx + ')" style="padding:5px 12px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;">编辑</button>' +
-          '<button onclick="deleteTgtPkg(' + idx + ')" style="padding:5px 12px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;">删除</button>' +
+          '<button data-idx="' + idx + '" data-action="edit" style="padding:5px 12px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;">编辑</button>' +
+          '<button data-idx="' + idx + '" data-action="delete" style="padding:5px 12px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;">删除</button>' +
         '</div>' +
       '</div>';
     });
@@ -1160,8 +1157,8 @@
         '<div style="flex:0.5;text-align:center;color:#9ca3af;font-size:13px;">' + (idx + 1) + '</div>' +
         '<div style="flex:3;color:#333;line-height:1.6;">' + escapeHtml(cp.content) + '</div>' +
         '<div style="flex:1;display:flex;justify-content:flex-end;gap:6px;">' +
-          '<button onclick="editCopy(' + idx + ')" style="padding:5px 12px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;">编辑</button>' +
-          '<button onclick="deleteCopy(' + idx + ')" style="padding:5px 12px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;">删除</button>' +
+          '<button data-idx="' + idx + '" data-action="edit" style="padding:5px 12px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;">编辑</button>' +
+          '<button data-idx="' + idx + '" data-action="delete" style="padding:5px 12px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;">删除</button>' +
         '</div>' +
       '</div>';
     });
@@ -1277,6 +1274,119 @@
     else alert('脚本加载中，请稍后再试');
   });
 })();
+
+
+  // ========= 事件绑定（全部使用 addEventListener）=========
+  function bindAllEvents() {
+    // -- 菜单按钮 --
+    var menuIds = ['menu-task-list', 'menu-targeting-packages', 'menu-creative-assets', 'menu-copy-library'];
+    var viewNames = ['task-list', 'targeting-packages', 'creative-assets', 'copy-library'];
+    menuIds.forEach(function(id, i) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('click', function() { showView(viewNames[i]); });
+    });
+
+    // -- 新增批创任务 下拉 --
+    var ddTrigger = document.querySelector('#channel-dropdown').parentElement;
+    var ddMenu = document.getElementById('channel-dropdown');
+    if (ddTrigger) {
+      ddTrigger.addEventListener('mouseenter', function() { ddMenu.style.display = 'block'; });
+      ddTrigger.addEventListener('mouseleave', function() { ddMenu.style.display = 'none'; });
+    }
+    // 广点通选项
+    var gdtItem = document.querySelector('[data-channel="gdt"]');
+    if (gdtItem) {
+      gdtItem.addEventListener('mouseenter', function() { this.style.background = '#f5f5f5'; });
+      gdtItem.addEventListener('mouseleave', function() { this.style.background = 'white'; });
+      gdtItem.addEventListener('click', function() { selectChannel('gdt'); });
+    }
+
+    // -- 新建定向包按钮 --
+    var btnNewPkg = document.getElementById('btn-new-tgt-pkg');
+    if (btnNewPkg) btnNewPkg.addEventListener('click', function() {
+      if (typeof window.openTgtPkgForm === 'function') window.openTgtPkgForm();
+      else alert('脚本加载中，请稍候');
+    });
+
+    // -- 定向包表单：关闭/保存按钮 --
+    var modal = document.getElementById('tgt-pkg-form-modal');
+    if (modal) {
+      // 关闭按钮（×）
+      var closeBtns = modal.querySelectorAll('[id^="tgt-pkg-form"] button, .close-tgt-pkg');
+      // 用事件委托：modal 内所有带 data-action 的元素
+      modal.addEventListener('click', function(e) {
+        var target = e.target;
+        // 找到最近的按钮
+        var btn = target.closest('button');
+        if (!btn) return;
+        var txt = btn.textContent.trim();
+        if (txt === '×' || txt.indexOf('取消') >= 0) closeTgtPkgForm();
+        if (txt.indexOf('保存') >= 0) saveTgtPkg();
+      });
+    }
+
+    // -- 定向包表单：radio 按钮 --
+    var geoRadios = document.querySelectorAll('input[name="tgt-pkg-geo-mode"]');
+    geoRadios.forEach(function(r) {
+      r.addEventListener('change', function() { if (window.toggleTgtPkgGeoMode) toggleTgtPkgGeoMode(); });
+    });
+    var audienceRadios = document.querySelectorAll('input[name="tgt-pkg-audience-mode"]');
+    audienceRadios.forEach(function(r) {
+      r.addEventListener('change', function() { if (window.toggleTgtPkgAudience) toggleTgtPkgAudience(); });
+    });
+
+    // -- 定向包列表：事件委托 --
+    var tpContainer = document.getElementById('tp-rows');
+    if (tpContainer) {
+      tpContainer.addEventListener('click', function(e) {
+        var btn = e.target.closest('button');
+        if (!btn) return;
+        var idx = btn.getAttribute('data-idx');
+        if (idx === null) return;
+        idx = parseInt(idx);
+        if (btn.textContent.indexOf('编辑') >= 0) editTgtPkg(idx);
+        if (btn.textContent.indexOf('删除') >= 0) deleteTgtPkg(idx);
+      });
+    }
+
+    // -- 任务列表：事件委托 --
+    var taskContainer = document.getElementById('task-list-content');
+    if (taskContainer) {
+      taskContainer.addEventListener('click', function(e) {
+        var btn = e.target.closest('button');
+        if (!btn) return;
+        var taskId = btn.getAttribute('data-task-id');
+        if (!taskId) return;
+        if (btn.textContent.indexOf('编辑') >= 0) editTask(taskId);
+        if (btn.textContent.indexOf('删除') >= 0) deleteTask(taskId);
+        if (btn.textContent.indexOf('定时') >= 0) scheduleTask(taskId);
+      });
+    }
+
+    // -- 文案库：事件委托 --
+    var copyContainer = document.getElementById('copy-rows');
+    if (copyContainer) {
+      copyContainer.addEventListener('click', function(e) {
+        var btn = e.target.closest('button');
+        if (!btn) return;
+        var idx = btn.getAttribute('data-idx');
+        if (idx === null) return;
+        idx = parseInt(idx);
+        if (btn.textContent.indexOf('编辑') >= 0) editCopy(idx);
+        if (btn.textContent.indexOf('删除') >= 0) deleteCopy(idx);
+      });
+    }
+
+    console.log('[bindAllEvents] 所有事件已绑定');
+  }
+
+  // 立即执行绑定
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindAllEvents);
+  } else {
+    bindAllEvents();
+  }
+
 </script>
 
 </body>
