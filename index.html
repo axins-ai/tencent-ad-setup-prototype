@@ -655,6 +655,8 @@
     window.updateTgtPkgGeoCount();
   };
 
+
+  // ========= 渲染省份列表（使用 data- 属性 + addEventListener）==========
   window.renderTgtPkgProvinceList = function() {
     var container = document.getElementById('tgt-pkg-province-list');
     if (!container) return;
@@ -663,16 +665,31 @@
       var p = item.province;
       var isSelected = tgtPkgSelectedProvinces.indexOf(p) >= 0;
       var isActive = tgtPkgActiveProvince === p;
-      html += '<div style="padding:6px 8px;cursor:pointer;border-radius:6px;font-size:13px;display:flex;align-items:center;' +
-        (isActive ? 'background:#E6F7FF;color:#1890FF;font-weight:600;' : (isSelected ? 'color:#1890FF;' : 'color:#333;')) +
-        '" onclick="window.selectTgtPkgProvince(\'' + p + '\')">" +
-        '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' style="margin-right:6px;cursor:pointer;" onchange="window.toggleTgtPkgProvince(\'' + p + '\')">' +
+      var style = 'padding:6px 8px;cursor:pointer;border-radius:6px;font-size:13px;display:flex;align-items:center;';
+      if (isActive) style += 'background:#E6F7FF;color:#1890FF;font-weight:600;';
+      else if (isSelected) style += 'color:#1890FF;';
+      else style += 'color:#333;';
+      html += '<div data-province="' + p + '" style="' + style + '">' +
+        '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' style="margin-right:6px;cursor:pointer;" data-province-cb="' + p + '">' +
         '<span>' + p + '</span>' +
         (isSelected ? '<span style="margin-left:auto;font-size:11px;color:#999;">' + (tgtPkgSelectedCities[p] || []).length + '/' + item.cities.length + '</span>' : '') +
         '</div>';
     });
     container.innerHTML = html;
-    // 渲染城市列表
+    // 绑定省份点击事件
+    container.querySelectorAll('[data-province]').forEach(function(div) {
+      var province = div.getAttribute('data-province');
+      div.addEventListener('click', function(e) {
+        if (e.target.type === 'checkbox') return;
+        window.selectTgtPkgProvince(province);
+      });
+    });
+    container.querySelectorAll('[data-province-cb]').forEach(function(cb) {
+      var province = cb.getAttribute('data-province-cb');
+      cb.addEventListener('change', function() {
+        window.toggleTgtPkgProvince(province);
+      });
+    });
     if (tgtPkgActiveProvince) {
       window.renderTgtPkgCityList(tgtPkgActiveProvince);
     }
@@ -687,11 +704,9 @@
   window.toggleTgtPkgProvince = function(province) {
     var idx = tgtPkgSelectedProvinces.indexOf(province);
     if (idx >= 0) {
-      // 取消选中：去掉省份 + 清空该省城市
       tgtPkgSelectedProvinces.splice(idx, 1);
       delete tgtPkgSelectedCities[province];
     } else {
-      // 选中：添加省份 + 全选该省城市
       tgtPkgSelectedProvinces.push(province);
       var item = regionData.find(function(x) { return x.province === province; });
       if (item) tgtPkgSelectedCities[province] = [].concat(item.cities);
@@ -711,12 +726,28 @@
     var html = '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px;">' + province + ' · 城市</div>';
     item.cities.forEach(function(city) {
       var isSelected = selectedCities.indexOf(city) >= 0;
-      html += '<div style="padding:4px 8px;cursor:pointer;border-radius:4px;font-size:12px;display:flex;align-items:center;' + (isSelected ? 'background:#E6F7FF;color:#1890FF;' : '') + '">' +
-        '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' style="margin-right:6px;cursor:pointer;" onchange="window.toggleTgtPkgCity(\'' + province + '\',\'' + city + '\')">' +
+      var style = 'padding:4px 8px;cursor:pointer;border-radius:4px;font-size:12px;display:flex;align-items:center;';
+      if (isSelected) style += 'background:#E6F7FF;color:#1890FF;';
+      html += '<div data-city="' + city + '" style="' + style + '">' +
+        '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' style="margin-right:6px;cursor:pointer;" data-city-cb="' + city + '">' +
         '<span>' + city + '</span>' +
         '</div>';
     });
     container.innerHTML = html;
+    // 绑定城市点击事件
+    container.querySelectorAll('[data-city]').forEach(function(div) {
+      var city = div.getAttribute('data-city');
+      div.addEventListener('click', function(e) {
+        if (e.target.type === 'checkbox') return;
+        window.toggleTgtPkgCity(province, city);
+      });
+    });
+    container.querySelectorAll('[data-city-cb]').forEach(function(cb) {
+      var city = cb.getAttribute('data-city-cb');
+      cb.addEventListener('change', function() {
+        window.toggleTgtPkgCity(province, city);
+      });
+    });
   };
 
   window.toggleTgtPkgCity = function(province, city) {
@@ -725,7 +756,6 @@
     var idx = cities.indexOf(city);
     if (idx >= 0) {
       cities.splice(idx, 1);
-      // 如果城市列表为空，取消省份选中
       if (cities.length === 0) {
         delete tgtPkgSelectedCities[province];
         var pIdx = tgtPkgSelectedProvinces.indexOf(province);
@@ -733,7 +763,6 @@
       }
     } else {
       cities.push(city);
-      // 确保省份被选中
       if (tgtPkgSelectedProvinces.indexOf(province) < 0) {
         tgtPkgSelectedProvinces.push(province);
       }
@@ -769,7 +798,8 @@
     if (section) section.style.display = (mode !== 'unlimited') ? 'block' : 'none';
   };
 
-  // ========= 地域选择器（旧，保留兼容）==========
+  // ========= 地域选择器（旧，保留兼容）=========
+  window.openRegionSelector = function() {
     // 初始化已选
     selectedRegions = [];
     var tagsEl = document.getElementById('tgt-pkg-region-tags');
