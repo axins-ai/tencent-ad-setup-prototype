@@ -12,6 +12,10 @@
   }
 })(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : this, function () {
   "use strict";
+  var _react = window.React;
+  if (!_react) { console.error('React CDN 未加载'); return; }
+  var { useEffect, useState } = _react;
+
 
   function App() {
     // ===== 基础配置 =====
