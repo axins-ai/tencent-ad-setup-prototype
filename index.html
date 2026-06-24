@@ -995,7 +995,6 @@
     // 清除地域标签
     var tagsEl = document.getElementById('tgt-pkg-region-tags');
     if (tagsEl) tagsEl.innerHTML = '';
-    document.getElementById('tgt-pkg-location-resident').checked = true;
     // 重置年龄
     window.setTgtPkgAgeValue('不限');
     // 重置性别
@@ -1044,7 +1043,6 @@
       document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
       document.getElementById('tgt-pkg-geo-region').style.display = 'none';
     }
-    document.getElementById('tgt-pkg-location-resident').checked = tp.locationTypeResident !== false;
     // 年龄
     window.setTgtPkgAgeValue(tp.age || '不限');
     // 性别
@@ -1090,7 +1088,6 @@
       region = allCities.join(',');
     }
     // 获取地点类型
-    var locationTypeResident = document.getElementById('tgt-pkg-location-resident').checked;
     // 获取年龄
     var age = window.getTgtPkgAgeValue();
     // 获取性别
