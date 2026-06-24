@@ -104,7 +104,7 @@
           <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">定向包</h2>
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理腾讯渠道自定义定向配置</p>
         </div>
-        <button id="btn-new-tgt-pkg" onclick="window.location.href='tgt-pkg-form.html'" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;position:relative;z-index:9999;">
+        <button id="btn-new-tgt-pkg" onclick="if(typeof window.openTgtPkgForm==='function'){window.openTgtPkgForm();}else{alert('加载中，请稍候');}" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
           <i class="fas fa-plus"></i> 新建定向包
         </button>
       </div>
