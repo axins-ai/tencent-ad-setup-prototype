@@ -987,29 +987,39 @@
     editingTgtPkgIdx = -1;
     // 清空地域选择状态
     selectedRegions = [];
-    document.getElementById('tgt-pkg-form-title').textContent = '新建定向包';
+    var elTitle = document.getElementById('tgt-pkg-form-title');
+    if (elTitle) elTitle.textContent = '新建定向包';
     document.getElementById('tgt-pkg-name').value = '';
     // 重置地理位置
-    document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
-    document.getElementById('tgt-pkg-geo-region').style.display = 'none';
+    var geoUnlimited = document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]');
+    if (geoUnlimited) geoUnlimited.checked = true;
+    var elGeoRegion = document.getElementById('tgt-pkg-geo-region');
+    if (elGeoRegion) elGeoRegion.style.display = 'none';
     // 清除地域标签
     var tagsEl = document.getElementById('tgt-pkg-region-tags');
     if (tagsEl) tagsEl.innerHTML = '';
     // 重置年龄
     window.setTgtPkgAgeValue('不限');
     // 重置性别
-    document.querySelector('input[name="tgt-pkg-gender"][value="不限"]').checked = true;
+    var elGender = document.querySelector('input[name="tgt-pkg-gender"][value="不限"]');
+    if (elGender) elGender.checked = true;
     // 重置自定义人群
-    document.querySelector('input[name="tgt-pkg-audience-mode"][value="unlimited"]').checked = true;
-    document.getElementById('tgt-pkg-audience-config').style.display = 'none';
-    document.getElementById('tgt-pkg-audience-input').value = '';
+    var elAudMode = document.querySelector('input[name="tgt-pkg-audience-mode"][value="unlimited"]');
+    if (elAudMode) elAudMode.checked = true;
+    var elAudConfig = document.getElementById('tgt-pkg-audience-config');
+    if (elAudConfig) elAudConfig.style.display = 'none';
+    var elAudInput = document.getElementById('tgt-pkg-audience-input');
+    if (elAudInput) elAudInput.value = '';
     // 重置排除已转化
-    document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]').checked = true;
-    document.getElementById('tgt-pkg-conversion-section').style.display = 'none';
+    var el = document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]');
+
+    if (el) el.checked = true;
+    // tgt-pkg-conversion-section 元素已删除，跳过
     // 渲染年龄选项 + 省份列表
     if (window.renderTgtPkgAgeOptions) window.renderTgtPkgAgeOptions();
     // 显示弹窗 (使用 flex 以居中)
-    document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
+    var elModal = document.getElementById('tgt-pkg-form-modal');
+    if (elModal) elModal.style.display = 'flex';
   };
   window.editTgtPkg = function(idx) {
     var tp = targetingPackages[idx];
@@ -1022,8 +1032,11 @@
     tgtPkgSelectedCities = {};
     tgtPkgActiveProvince = '';
     if (tp.geoMode === 'region') {
-      document.querySelector('input[name="tgt-pkg-geo-mode"][value="region"]').checked = true;
-      document.getElementById('tgt-pkg-geo-region').style.display = 'block';
+      var el = document.querySelector('input[name="tgt-pkg-geo-mode"][value="region"]');
+
+      if (el) el.checked = true;
+      var elGeoRegion2 = document.getElementById('tgt-pkg-geo-region');
+      if (elGeoRegion2) elGeoRegion2.style.display = 'block';
       // 从 tp.region 回显选中的城市
       var regionStr = tp.region || '';
       var selectedCityNames = regionStr.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
@@ -1040,8 +1053,11 @@
       window.renderTgtPkgProvinceList();
       window.updateTgtPkgGeoCount();
     } else {
-      document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
-      document.getElementById('tgt-pkg-geo-region').style.display = 'none';
+      var el = document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]');
+
+      if (el) el.checked = true;
+      var elGeoRegion3 = document.getElementById('tgt-pkg-geo-region');
+      if (elGeoRegion3) elGeoRegion3.style.display = 'none';
     }
     // 年龄
     window.setTgtPkgAgeValue(tp.age || '不限');
@@ -1053,19 +1069,24 @@
     if (audMode === 'target') audMode = 'exclude'; // 原型已去掉「定向人群」
     if (audMode !== 'unlimited') {
       document.querySelector('input[name="tgt-pkg-audience-mode"][value="' + tp.audienceMode + '"]').checked = true;
-      document.getElementById('tgt-pkg-audience-config').style.display = 'block';
+      var elAudConfig2 = document.getElementById('tgt-pkg-audience-config');
+      if (elAudConfig2) elAudConfig2.style.display = 'block';
     } else {
-      document.querySelector('input[name="tgt-pkg-audience-mode"][value="unlimited"]').checked = true;
-      document.getElementById('tgt-pkg-audience-config').style.display = 'none';
+      var elAudMode = document.querySelector('input[name="tgt-pkg-audience-mode"][value="unlimited"]');
+    if (elAudMode) elAudMode.checked = true;
+      var elAudConfig3 = document.getElementById('tgt-pkg-audience-config');
+      if (elAudConfig3) elAudConfig3.style.display = 'none';
     }
     document.getElementById('tgt-pkg-audience-input').value = tp.audienceInput || '';
     // 排除已转化
     if (tp.excludeConverted && tp.excludeConverted !== 'unlimited') {
       document.querySelector('input[name="tgt-pkg-exclude"][value="' + tp.excludeConverted + '"]').checked = true;
-      document.getElementById('tgt-pkg-conversion-section').style.display = 'block';
+      // tgt-pkg-conversion-section 元素已删除，跳过
     } else {
-      document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]').checked = true;
-      document.getElementById('tgt-pkg-conversion-section').style.display = 'none';
+      var el = document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]');
+
+      if (el) el.checked = true;
+      // tgt-pkg-conversion-section 元素已删除，跳过
     }
     // 显示弹窗
     document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
