@@ -1411,7 +1411,7 @@
       });
       setGeoSelectedProvinces(allProvinceIds);
       setGeoSelectedCities(allCitiesMap);
-      setActiveProvinceId('');
+      setActiveProvinceId(allProvinceIds.length > 0 ? allProvinceIds[0] : '');
     };
 
     // 年龄
@@ -2059,13 +2059,7 @@
     }), /*#__PURE__*/React.createElement("span", {
       className: "truncate",
       onClick: () => setActiveProvinceId(p.id)
-    }, p.name), geoSelectedProvinces.includes(p.id) && /*#__PURE__*/React.createElement("span", {
-      className: "ml-auto text-xs text-blue-500"
-    }, (() => {
-      const all = MOCK.regionCascade.cities[p.id] || [];
-      const sel = geoSelectedCities[p.id] || [];
-      return `${sel.length}/${all.length}`;
-    })()))))), /*#__PURE__*/React.createElement("div", {
+    }, p.name))))), /*#__PURE__*/React.createElement("div", {
       className: "border border-gray-200 rounded-lg overflow-hidden bg-white"
     }, /*#__PURE__*/React.createElement("div", {
       className: "px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700"
@@ -2681,19 +2675,6 @@
       className: "text-sm font-medium text-gray-400"
     }, "开启"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
       className: "block text-sm font-medium text-gray-700 mb-2"
-    }, "创意max"), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-4"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-sm font-medium text-green-600"
-    }, "关闭"), /*#__PURE__*/React.createElement("button", {
-      disabled: true,
-      className: "relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "inline-block h-4 w-4 transform rounded-full bg-white translate-x-1"
-    })), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm font-medium text-gray-400"
-    }, "开启"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-      className: "block text-sm font-medium text-gray-700 mb-2"
     }, "创意增强Max"), /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-4"
     }, /*#__PURE__*/React.createElement("span", {
@@ -2710,22 +2691,6 @@
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-exclamation-triangle mr-1"
     }), "仅支持关闭"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-      className: "block text-sm font-medium text-gray-700 mb-1"
-    }, "创意名称"), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-2"
-    }, /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      value: creativeName,
-      onChange: e => setCreativeName(e.target.value),
-      placeholder: "输入创意名称（支持变量）",
-      className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-    }), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-1 text-sm text-gray-500"
-    }, creativeNameVariables.map(v => /*#__PURE__*/React.createElement("span", {
-      key: v,
-      onClick: () => setCreativeName(creativeName + '{' + v + '}'),
-      className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-    }, "+", v))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
       className: "block text-sm font-medium text-gray-700 mb-1"
     }, "创意名称"), /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-2"
