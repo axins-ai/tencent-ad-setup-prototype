@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>定向包 - 测试版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+<style>
+body { margin:0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #F0F2F5; }
+</style>
+</head>
+<body>
+
+<!-- 诊断栏 -->
+<div id="diag-bar" style="display:none; padding:10px 16px; font-size:13px; font-family: monospace; border-bottom: 2px solid;"></div>
+
+<div style="padding:32px 24px; max-width: 900px; margin: 0 auto;">
+  <!-- 模拟左侧菜单 -->
+  <div style="display:flex; gap:24px;">
+    <!-- 左侧菜单（模拟） -->
+    <div style="width:200px; background:white; border-radius:12px; padding:16px; height:fit-content;">
+      <div style="font-size:14px; font-weight:600; color:#333; margin-bottom:16px;">菜单</div>
+      <button onclick="showView('task-list')" style="width:100%; padding:10px; border:none; background:transparent; cursor:pointer; text-align:left; font-size:14px; color:#666; border-radius:8px; margin-bottom:4px;">📋 任务列表</button>
+      <button onclick="showView('targeting-packages')" style="width:100%; padding:10px; border:none; background:#E6F7FF; cursor:pointer; text-align:left; font-size:14px; color:#1890FF; border-radius:8px; font-weight:600; margin-bottom:4px;">🎯 定向包</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <div style="flex:1;">
+      <!-- 任务列表视图 -->
+      <div id="view-task-list" style="display:none;">
+        <h2>任务列表</h2>
+        <p>这是任务列表页面...</p>
+      </div>
+
+      <!-- 定向包视图 -->
+      <div id="view-targeting-packages">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+          <div>
+            <h2 style="font-size:24px; font-weight:bold; color:#111827; margin:0;">定向包</h2>
+            <p style="font-size:14px; color:#6b7280; margin:4px 0 0 0;">管理腾讯渠道自定义定向配置</p>
+          </div>
+          <!-- 新建定向包按钮 -->
+          <button id="btn-new-tgt-pkg" style="background:#1890FF; color:white; font-size:14px; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <span>+</span> 新建定向包
+          </button>
+        </div>
+
+        <!-- 定向包列表（模拟） -->
+        <div style="background:white; border-radius:12px; padding:20px;">
+          <p style="color:#9ca3af; text-align:center;">暂无定向包，点击上方「新建定向包」创建</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 定向包表单弹窗 -->
+<div id="tgt-pkg-form-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; align-items:center; justify-content:center;">
+  <div style="background:white; border-radius:12px; width:90vw; max-width:900px; max-height:85vh; overflow-y:auto;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #e5e7eb;">
+      <h3 style="font-size:16px; font-weight:600; margin:0;" id="tgt-pkg-form-title">新建定向包</h3>
+      <button onclick="closeTgtPkgForm()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#9ca3af;">×</button>
+    </div>
+    <div style="padding:20px;">
+      <div style="margin-bottom:20px;">
+        <label style="display:block; font-size:14px; font-weight:500; color:#333; margin-bottom:6px;">定向包名称 <span style="color:#ff4d4f;">*</span></label>
+        <input id="tgt-pkg-name" type="text" placeholder="输入定向包名称" style="width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:8px; font-size:14px; outline:none; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #e5e7eb;">
+        <div style="font-size:14px; font-weight:500; color:#333; margin-bottom:10px;">地理位置</div>
+        <div style="display:flex; gap:20px; margin-bottom:10px; flex-wrap:wrap;">
+          <label style="display:flex; align-items:center; cursor:pointer;">
+            <input type="radio" name="tgt-pkg-geo" value="unlimited" checked onchange="document.getElementById('tgt-pkg-geo-region').style.display='none';" style="margin-right:6px;">
+            <span style="font-size:14px;">不限</span>
+          </label>
+          <label style="display:flex; align-items:center; cursor:pointer;">
+            <input type="radio" name="tgt-pkg-geo" value="region" onchange="document.getElementById('tgt-pkg-geo-region').style.display='block';" style="margin-right:6px;">
+            <span style="font-size:14px;">按区域</span>
+          </label>
+        </div>
+        <div id="tgt-pkg-geo-region" style="display:none;">
+          <input type="text" placeholder="输入地域，如：北京、上海、广州" style="width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:8px; font-size:14px; outline:none; box-sizing:border-box;">
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <button onclick="closeTgtPkgForm()" style="padding:8px 16px; background:#f0f0f0; color:#333; border:none; border-radius:8px; cursor:pointer; font-size:14px; margin-right:8px;">取消</button>
+        <button onclick="saveTgtPkg()" style="padding:8px 16px; background:#1890FF; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px;">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== 视图切换 ==========
+var VIEWS = ['task-list', 'targeting-packages'];
+window.showView = function(name) {
+  VIEWS.forEach(function(v) {
+    var el = document.getElementById('view-' + v);
+    if (el) el.style.display = 'none';
+  });
+  var target = document.getElementById('view-' + name);
+  if (target) target.style.display = 'block';
+};
+
+// ========== 定向包表单 ==========
+window.openTgtPkgForm = function() {
+  document.getElementById('tgt-pkg-form-title').textContent = '新建定向包';
+  document.getElementById('tgt-pkg-name').value = '';
+  document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
+};
+
+window.closeTgtPkgForm = function() {
+  document.getElementById('tgt-pkg-form-modal').style.display = 'none';
+};
+
+window.saveTgtPkg = function() {
+  var name = document.getElementById('tgt-pkg-name').value.trim();
+  if (!name) { alert('请输入定向包名称'); return; }
+  alert('定向包「' + name + '」已保存！');
+  closeTgtPkgForm();
+};
+
+// ========== 绑定按钮事件 ==========
+function bindEvents() {
+  var bar = document.getElementById('diag-bar');
+  var msgs = [];
+
+  // 检查 openTgtPkgForm 是否定义
+  msgs.push('openTgtPkgForm: ' + (typeof window.openTgtPkgForm === 'function' ? '✅ 已定义' : '❌ 未定义'));
+
+  // 绑定按钮（cloneNode 方式，最可靠）
+  var btn = document.getElementById('btn-new-tgt-pkg');
+  if (btn) {
+    msgs.push('按钮 btn-new-tgt-pkg: ✅ 已找到');
+    // 方式1：onclick 属性（最可靠）
+    btn.onclick = function() {
+      if (typeof window.openTgtPkgForm === 'function') {
+        window.openTgtPkgForm();
+      } else {
+        alert('错误：openTgtPkgForm 函数未定义！');
+      }
+    };
+    msgs.push('按钮 onclick: ✅ 已绑定（onclick 属性）');
+  } else {
+    msgs.push('按钮 btn-new-tgt-pkg: ❌ 未找到！');
+  }
+
+  // 显示诊断结果
+  if (bar) {
+    var hasError = msgs.some(function(m) { return m.indexOf('❌') >= 0; });
+    bar.style.display = 'block';
+    bar.style.background = hasError ? '#fee2e2' : '#dcfce7';
+    bar.style.color = hasError ? '#991b1b' : '#166534';
+    bar.style.borderBottomColor = hasError ? '#fca5a5' : '#86efac';
+    bar.textContent = '🔍 诊断：' + msgs.join(' | ');
+  }
+  console.log('[诊断]', msgs.join(' | '));
+}
+
+// 立即执行
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bindEvents);
+} else {
+  bindEvents();
+}
+</script>
+
+</body>
+</html>
