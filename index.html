@@ -149,8 +149,10 @@
               <div id="tgt-pkg-geo-region" style="display:none;">
                 <div style="background:#F0F5FF;border:1px solid #D4E4FF;border-radius:8px;padding:12px 16px;">
                   <div style="font-size:13px;color:#333;font-weight:500;margin-bottom:8px;">按区域选择</div>
-                  <input id="tgt-pkg-region" type="text" placeholder="输入地域，如：北京、上海、广州" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:8px;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
-                  <div style="text-align:right;"><button onclick="alert('地域选择功能（级联选择器）原型演示')" style="font-size:12px;color:#1890FF;background:none;border:none;cursor:pointer;">+ 打开级联选择器</button></div>
+                  <!-- 已选地域标签 -->
+                  <div id="tgt-pkg-region-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+                  <!-- 打开选择器按钮 -->
+                  <button type="button" onclick="openRegionSelector()" style="padding:8px 14px;border:1px dashed #1890FF;background:white;color:#1890FF;border-radius:8px;cursor:pointer;font-size:13px;">+ 选择地域</button>
                 </div>
               </div>
 
@@ -313,6 +315,33 @@
           <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
             <button onclick="closeTgtPkgForm()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
             <button onclick="saveTgtPkg()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地域选择器弹窗 -->
+      <div id="region-selector-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;width:90vw;max-width:720px;max-height:80vh;display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
+            <h4 style="font-size:16px;font-weight:600;margin:0;">选择地域</h4>
+            <button onclick="closeRegionSelector()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
+          </div>
+          <!-- 搜索 -->
+          <div style="padding:12px 20px;border-bottom:1px solid #f0f0f0;">
+            <input id="region-search-input" type="text" placeholder="搜索省份或城市..." oninput="filterRegionList()" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+          </div>
+          <!-- 省份/城市列表 -->
+          <div id="region-list-container" style="flex:1;overflow-y:auto;padding:12px 20px;">
+            <!-- 由 JS 动态渲染 -->
+          </div>
+          <!-- 已选 -->
+          <div style="padding:12px 20px;border-top:1px solid #f0f0f0;background:#fafafa;">
+            <div style="font-size:13px;color:#666;margin-bottom:6px;">已选地域：<span id="region-selected-count">0</span> 个</div>
+            <div id="region-selected-tags" style="display:flex;flex-wrap:wrap;gap:6px;max-height:60px;overflow-y:auto;"></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid #e5e7eb;">
+            <button onclick="closeRegionSelector()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
+            <button onclick="confirmRegionSelection()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">确认</button>
           </div>
         </div>
       </div>
@@ -576,7 +605,158 @@
     }
   };
 
-  // ========== 排除已转化用户改变时，显示/隐藏转化行为和转化时间区间 ==========
+  // ========== 地域选择器 ==========
+  var regionData = [
+    { province: '北京', cities: ['北京'] },
+    { province: '上海', cities: ['上海'] },
+    { province: '天津', cities: ['天津'] },
+    { province: '重庆', cities: ['重庆'] },
+    { province: '广东', cities: ['广州','深圳','东莞','佛山','珠海','中山','惠州','江门','湛江','茂名','汕头','肇庆'] },
+    { province: '浙江', cities: ['杭州','宁波','温州','嘉兴','绍兴','义乌','台州','金华'] },
+    { province: '江苏', cities: ['南京','苏州','无锡','常州','南通','徐州','扬州','盐城'] },
+    { province: '山东', cities: ['济南','青岛','烟台','潍坊','临沂','济宁'] },
+    { province: '四川', cities: ['成都','绵阳','德阳','南充','宜宾'] },
+    { province: '湖北', cities: ['武汉','宜昌','襄阳','荆州'] },
+    { province: '湖南', cities: ['长沙','株洲','湘潭','衡阳'] },
+    { province: '河南', cities: ['郑州','洛阳','新乡','南阳'] },
+    { province: '河北', cities: ['石家庄','唐山','保定','邯郸'] },
+    { province: '福建', cities: ['福州','厦门','泉州','漳州'] },
+    { province: '安徽', cities: ['合肥','芜湖','蚌埠','阜阳'] },
+    { province: '辽宁', cities: ['沈阳','大连','鞍山','锦州'] },
+    { province: '陕西', cities: ['西安','咸阳','宝鸡'] },
+    { province: '江西', cities: ['南昌','赣州','九江'] },
+    { province: '广西', cities: ['南宁','桂林','柳州'] },
+    { province: '云南', cities: ['昆明','曲靖','玉溪'] },
+    { province: '山西', cities: ['太原','大同','长治'] },
+    { province: '黑龙江', cities: ['哈尔滨','大庆','齐齐哈尔'] },
+    { province: '吉林', cities: ['长春','吉林市','延边'] },
+    { province: '贵州', cities: ['贵阳','遵义','六盘水'] },
+    { province: '甘肃', cities: ['兰州','天水','白银'] },
+    { province: '内蒙古', cities: ['呼和浩特','包头','赤峰'] },
+    { province: '新疆', cities: ['乌鲁木齐','克拉玛依'] },
+    { province: '海南', cities: ['海口','三亚'] },
+    { province: '其他', cities: ['西藏','青海','宁夏','台湾','香港','澳门'] }
+  ];
+  var selectedRegions = []; // 当前选中的城市数组
+
+  window.openRegionSelector = function() {
+    // 初始化已选
+    selectedRegions = [];
+    var tagsEl = document.getElementById('tgt-pkg-region-tags');
+    if (tagsEl) {
+      var existing = tagsEl.querySelectorAll('span[data-city]');
+      existing.forEach(function(span) {
+        selectedRegions.push(span.getAttribute('data-city'));
+      });
+    }
+    document.getElementById('region-search-input').value = '';
+    renderRegionList('');
+    updateRegionSelectedTags();
+    document.getElementById('region-selector-modal').style.display = 'flex';
+  };
+
+  window.closeRegionSelector = function() {
+    document.getElementById('region-selector-modal').style.display = 'none';
+  };
+
+  window.filterRegionList = function() {
+    var keyword = document.getElementById('region-search-input').value.trim();
+    renderRegionList(keyword);
+  };
+
+  function renderRegionList(keyword) {
+    var container = document.getElementById('region-list-container');
+    if (!container) return;
+    var kw = (keyword || '').toLowerCase();
+    var html = '';
+    regionData.forEach(function(item, pIdx) {
+      // 过滤省份
+      var matchedCities = item.cities.filter(function(c) {
+        return !kw || item.province.toLowerCase().indexOf(kw) >= 0 || c.toLowerCase().indexOf(kw) >= 0;
+      });
+      if (kw && matchedCities.length === 0) return;
+      html += '<div style="margin-bottom:12px;">';
+      html += '<div style="font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">' + item.province + '</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      matchedCities.forEach(function(city, cIdx) {
+        var key = pIdx + '-' + cIdx;
+        var isSelected = selectedRegions.indexOf(city) >= 0;
+        html += '<label data-city="' + city + '" style="display:flex;align-items:center;cursor:pointer;padding:4px 10px;border-radius:6px;font-size:13px;' + (isSelected ? 'background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;' : 'background:#f5f5f5;color:#666;border:1px solid #e5e7eb;') + '">';
+        html += '<input type="checkbox" value="' + city + '" ' + (isSelected ? 'checked' : '') + ' onchange="toggleRegionCity(this)" style="margin-right:4px;">';
+        html += '<span>' + city + '</span>';
+        html += '</label>';
+      });
+      html += '</div></div>';
+    });
+    if (!html) html = '<div style="text-align:center;color:#9ca3af;padding:20px 0;font-size:14px;">未找到匹配的省份或城市</div>';
+    container.innerHTML = html;
+  }
+
+  window.toggleRegionCity = function(checkbox) {
+    var city = checkbox.value;
+    if (checkbox.checked) {
+      if (selectedRegions.indexOf(city) < 0) selectedRegions.push(city);
+    } else {
+      selectedRegions = selectedRegions.filter(function(c) { return c !== city; });
+    }
+    // 刷新列表样式
+    renderRegionList(document.getElementById('region-search-input').value.trim());
+    updateRegionSelectedTags();
+  };
+
+  function updateRegionSelectedTags() {
+    var countEl = document.getElementById('region-selected-count');
+    var tagsEl = document.getElementById('region-selected-tags');
+    if (countEl) countEl.textContent = selectedRegions.length;
+    if (tagsEl) {
+      var html = '';
+      selectedRegions.forEach(function(city) {
+        html += '<span data-city="' + city + '" style="display:inline-flex;align-items:center;padding:2px 8px;background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;border-radius:4px;font-size:12px;">' + city + ' <span onclick="removeRegionCity(\'' + city + '\')" style="margin-left:4px;cursor:pointer;font-size:14px;">×</span></span>';
+      });
+      tagsEl.innerHTML = html;
+    }
+  }
+
+  window.removeRegionCity = function(city) {
+    selectedRegions = selectedRegions.filter(function(c) { return c !== city; });
+    renderRegionList(document.getElementById('region-search-input').value.trim());
+    updateRegionSelectedTags();
+  };
+
+  window.confirmRegionSelection = function() {
+    // 更新主表单的标签显示
+    var tagsEl = document.getElementById('tgt-pkg-region-tags');
+    if (tagsEl) {
+      var html = '';
+      selectedRegions.forEach(function(city) {
+        html += '<span data-city="' + city + '" style="display:inline-flex;align-items:center;padding:3px 8px;background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;border-radius:4px;font-size:12px;">' + city + ' <span onclick="removeTgtPkgRegion(\'' + city + '\')" style="margin-left:4px;cursor:pointer;font-size:14px;">×</span></span>';
+      });
+      tagsEl.innerHTML = html;
+    }
+    document.getElementById('region-selector-modal').style.display = 'none';
+  };
+
+  window.removeTgtPkgRegion = function(city) {
+    selectedRegions = selectedRegions.filter(function(c) { return c !== city; });
+    var tagsEl = document.getElementById('tgt-pkg-region-tags');
+    if (tagsEl) {
+      var spans = tagsEl.querySelectorAll('span[data-city]');
+      spans.forEach(function(span) {
+        if (span.getAttribute('data-city') === city) span.remove();
+      });
+    }
+  };
+
+  // 获取已选地域（供 saveTgtPkg 使用）
+  window.getSelectedRegions = function() {
+    var tagsEl = document.getElementById('tgt-pkg-region-tags');
+    if (!tagsEl) return [];
+    var result = [];
+    tagsEl.querySelectorAll('span[data-city]').forEach(function(span) {
+      result.push(span.getAttribute('data-city'));
+    });
+    return result;
+  };
   window.toggleConversionFields = function() {
     var excludeVal = document.querySelector('input[name="tgt-pkg-exclude"]:checked').value;
     var conversionSection = document.getElementById('tgt-pkg-conversion-section');
@@ -653,7 +833,9 @@
     // 重置地理位置
     document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
     document.getElementById('tgt-pkg-geo-region').style.display = 'none';
-    document.getElementById('tgt-pkg-region').value = '';
+    // 清除地域标签
+    var tagsEl = document.getElementById('tgt-pkg-region-tags');
+    if (tagsEl) tagsEl.innerHTML = '';
     document.getElementById('tgt-pkg-location-resident').checked = true;
     // 重置年龄
     window.setTgtPkgAgeValue('不限');
@@ -678,12 +860,22 @@
     // 地理位置
     if (tp.geoMode === 'region') {
       document.querySelector('input[name="tgt-pkg-geo-mode"][value="region"]').checked = true;
-      document.getElementById('tgt-pkg-geo-region').style.display = 'block';
+    document.getElementById('tgt-pkg-geo-region').style.display = 'block';
     } else {
       document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
       document.getElementById('tgt-pkg-geo-region').style.display = 'none';
     }
-    document.getElementById('tgt-pkg-region').value = tp.region || '';
+    // 回显地域标签
+    var tagsEl = document.getElementById('tgt-pkg-region-tags');
+    if (tagsEl) {
+      var regionStr = tp.region || '';
+      var cities = regionStr.split(',').filter(function(s) { return s.trim(); });
+      var html = '';
+      cities.forEach(function(city) {
+        html += '<span data-city="' + city.trim() + '" style="display:inline-flex;align-items:center;padding:3px 8px;background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;border-radius:4px;font-size:12px;">' + city.trim() + ' <span onclick="removeTgtPkgRegion(\'' + city.trim() + '\')" style="margin-left:4px;cursor:pointer;font-size:14px;">×</span></span>';
+      });
+      tagsEl.innerHTML = html;
+    }
     document.getElementById('tgt-pkg-location-resident').checked = tp.locationTypeResident !== false;
     // 年龄
     window.setTgtPkgAgeValue(tp.age || '不限');
@@ -720,9 +912,8 @@
     var geoMode = document.querySelector('input[name="tgt-pkg-geo-mode"]:checked').value;
     var region = '';
     if (geoMode === 'region') {
-      region = document.getElementById('tgt-pkg-region').value.trim();
-    } else if (geoMode === 'map') {
-      region = '地图选择';
+      var selectedCities = window.getSelectedRegions();
+      region = selectedCities.join(',');
     } else {
       region = '不限';
     }
