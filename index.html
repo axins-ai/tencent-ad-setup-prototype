@@ -174,7 +174,10 @@
             <!-- 地点类型 -->
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">地点类型</div>
-              <div style="font-size:14px;color:#333;">常住地</div>
+              <label style="display:flex;align-items:center;cursor:pointer;">
+                <input type="checkbox" id="tgt-pkg-location-resident" checked style="margin-right:6px;">
+                <span style="font-size:14px;color:#333;">常住地</span>
+              </label>
             </div>
 
             <!-- 年龄 -->
@@ -218,7 +221,7 @@
                 </label>
               </div>
               <div id="tgt-pkg-audience-config" style="display:none;">
-                <input id="tgt-pkg-audience-input" type="text" placeholder="输入要排除的人群标签或ID" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
+                <div id="tgt-pkg-audience-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
               </div>
             </div>
 
@@ -250,7 +253,7 @@
             </div>
 
             <!-- 转化行为 -->
-            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+            <div id="tgt-pkg-conversion-behavior-section" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">转化行为</div>
               <div style="display:flex;gap:16px;margin-bottom:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
@@ -389,6 +392,23 @@
   var copyTexts = [];
   try {
     tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
+
+    // 初始化排除已转化显示逻辑
+    var excludeRadios = document.querySelectorAll('input[name="tgt-pkg-exclude"]');
+    excludeRadios.forEach(function(radio) {
+      radio.addEventListener('change', function() {
+        var val = this.value;
+        var behaviorSection = document.getElementById('tgt-pkg-conversion-behavior-section');
+        var timeSection = document.getElementById('tgt-pkg-conversion-time-section');
+        if (val === 'unlimited') {
+          if (behaviorSection) behaviorSection.style.display = 'none';
+          if (timeSection) timeSection.style.display = 'none';
+        } else {
+          if (behaviorSection) behaviorSection.style.display = 'block';
+          if (timeSection) timeSection.style.display = 'block';
+        }
+      });
+    });
   } catch(e) {}
   try {
     targetingPackages = JSON.parse(localStorage.getItem('ad_targeting_packages') || '[]');
@@ -401,7 +421,14 @@
   window.showDropdown = function() {
     var chDd = document.getElementById('channel-dropdown');
     if (chDd) chDd.style.display = 'block';
-  };
+  }
+  // 人群包数据
+  var customAudiences = [
+    { id: 'ca_001', name: '上周访问用户' },
+    { id: 'ca_002', name: '近30天活跃用户' },
+    { id: 'ca_003', name: '高价值用户' }
+  ];
+;
   window.hideDropdown = function() {
     var chDd2 = document.getElementById('channel-dropdown');
     if (chDd2) chDd2.style.display = 'none';
@@ -1027,6 +1054,10 @@
     // tgt-pkg-conversion-section 元素已删除，跳过
     // 渲染年龄选项 + 省份列表
     if (window.renderTgtPkgAgeOptions) window.renderTgtPkgAgeOptions();
+    if (window.renderTgtPkgAudienceList) window.renderTgtPkgAudienceList();
+    // 默认渲染省份列表和城市列表
+    if (window.renderTgtPkgProvinceList) window.renderTgtPkgProvinceList();
+    if (tgtPkgActiveProvince) window.renderTgtPkgCityList(tgtPkgActiveProvince);
     // 显示弹窗 (使用 flex 以居中)
     var elModal = document.getElementById('tgt-pkg-form-modal');
     if (elModal) elModal.style.display = 'flex';
@@ -1323,6 +1354,26 @@
       container.appendChild(label);
     });
   };
+  // 渲染人群包列表
+  window.renderTgtPkgAudienceList = function() {
+    var container = document.getElementById('tgt-pkg-audience-list');
+    if (!container) return;
+    container.innerHTML = '';
+    if (typeof customAudiences === 'undefined') return;
+    customAudiences.forEach(function(aud) {
+      var label = document.createElement('label');
+      label.style.cssText = 'display:flex;align-items:center;padding:6px 12px;background:#f9fafb;border-radius:6px;cursor:pointer;font-size:13px;';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = aud.id;
+      cb.name = 'tgt-pkg-audience';
+      cb.style.marginRight = '6px';
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(aud.name));
+      container.appendChild(label);
+    });
+  };
+
 
   // 初始化年龄选项
   if (window.renderTgtPkgAgeOptions) window.renderTgtPkgAgeOptions();
