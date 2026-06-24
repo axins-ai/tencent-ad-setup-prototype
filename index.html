@@ -1302,6 +1302,28 @@
   } else {
     diagnoseAndBind();
   }
+
+  // 渲染年龄选项
+  window.renderTgtPkgAgeOptions = function() {
+    var container = document.getElementById('tgt-pkg-age-options');
+    if (!container) return;
+    var ages = ['不限', '18-24', '25-34', '35-44', '45-54', '55+'];
+    container.innerHTML = '';
+    ages.forEach(function(age) {
+      var label = document.createElement('label');
+      label.style.cssText = 'display:flex;align-items:center;padding:6px 12px;background:#f9fafb;border-radius:6px;cursor:pointer;font-size:13px;';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = age;
+      cb.name = 'tgt-pkg-age';
+      if (age === '不限') cb.checked = true;
+      cb.style.marginRight = '6px';
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(age));
+      container.appendChild(label);
+    });
+  };
+
   // 初始化年龄选项
   if (window.renderTgtPkgAgeOptions) window.renderTgtPkgAgeOptions();
   // 绑定新建定向包按钮
