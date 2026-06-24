@@ -129,29 +129,130 @@
           <div style="padding:20px;">
             <!-- 定向包名称 -->
             <div style="margin-bottom:20px;">
-              
-                
+              <label style="display:block;font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">定向包名称 <span style="color:#ff4d4f;">*</span></label>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input id="tgt-pkg-name" type="text" placeholder="输入定向包名称" style="flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+                <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#9ca3af;">
+                  <span style="cursor:pointer;color:#1890FF;" onclick="insertTgtPkgNameVar('日期')">+日期</span>
+                  <span style="cursor:pointer;color:#1890FF;" onclick="insertTgtPkgNameVar('定向包名称')">+定向包名称</span>
+                  <span style="cursor:pointer;color:#1890FF;" onclick="insertTgtPkgNameVar('版位')">+版位</span>
+                  <span style="cursor:pointer;color:#1890FF;" onclick="insertTgtPkgNameVar('创建人')">+创建人</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 地理位置 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">地理位置</div>
+              <div style="display:flex;gap:12px;margin-bottom:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="same_account" onchange="window.toggleConversionFields()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-geo-mode" value="unlimited" checked onchange="window.toggleTgtPkgGeoMode()" style="margin-right:6px;">
+                  <span style="font-size:14px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-geo-mode" value="region" onchange="window.toggleTgtPkgGeoMode()" style="margin-right:6px;">
+                  <span style="font-size:14px;">按区域</span>
+                </label>
+              </div>
+              <div id="tgt-pkg-geo-region" style="display:none;">
+                <div style="background:#f9fafb;border-radius:8px;padding:12px;">
+                  <div style="font-size:13px;font-weight:500;color:#666;margin-bottom:8px;">选择省份和城市</div>
+                  <div id="tgt-pkg-geo-container" style="display:grid;grid-template-columns:200px 1fr;gap:8px;max-height:200px;overflow:hidden;">
+                    <!-- 省份列表 -->
+                    <div id="tgt-pkg-province-list" style="border-right:1px solid #e5e7eb;padding-right:8px;overflow-y:auto;max-height:200px;">
+                      <!-- 由 JS 动态渲染 -->
+                    </div>
+                    <!-- 城市列表 -->
+                    <div id="tgt-pkg-city-list" style="overflow-y:auto;max-height:200px;">
+                      <div style="font-size:12px;color:#9ca3af;padding:8px;">点击左侧省份查看城市</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:8px;font-size:12px;color:#9ca3af;">
+                    已选：<span id="tgt-pkg-geo-count">0</span> 个地区
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 地点类型 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">地点类型</div>
+              <div style="font-size:14px;color:#333;">常住地</div>
+            </div>
+
+            <!-- 年龄 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">年龄</div>
+              <div id="tgt-pkg-age-options" style="display:flex;flex-wrap:wrap;gap:8px;">
+                <!-- 由 JS 动态渲染 -->
+              </div>
+            </div>
+
+            <!-- 性别 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">性别</div>
+              <div style="display:flex;gap:16px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-gender" value="不限" checked style="margin-right:6px;">
+                  <span style="font-size:14px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-gender" value="男" style="margin-right:6px;">
+                  <span style="font-size:14px;">男</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-gender" value="女" style="margin-right:6px;">
+                  <span style="font-size:14px;">女</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 自定义人群 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">自定义人群</div>
+              <div style="display:flex;gap:16px;margin-bottom:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="unlimited" checked onchange="window.toggleTgtPkgAudience()" style="margin-right:6px;">
+                  <span style="font-size:14px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="exclude" onchange="window.toggleTgtPkgAudience()" style="margin-right:6px;">
+                  <span style="font-size:14px;">排除人群</span>
+                </label>
+              </div>
+              <div id="tgt-pkg-audience-config" style="display:none;">
+                <input id="tgt-pkg-audience-input" type="text" placeholder="输入要排除的人群标签或ID" style="width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#1890FF'" onblur="this.style.borderColor='#e5e7eb'">
+              </div>
+            </div>
+
+            <!-- 排除已转化 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">排除已转化用户</div>
+              <div style="display:flex;flex-wrap:wrap;gap:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-exclude" value="unlimited" checked onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
+                  <span style="font-size:13px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_account" onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
                   <span style="font-size:13px;">同账户营销单元</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="same_principal" onchange="window.toggleConversionFields()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_principal" onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
                   <span style="font-size:13px;">同主体系营销单元</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="same_business" onchange="window.toggleConversionFields()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_business" onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
                   <span style="font-size:13px;">同业务单元营销单元</span>
                 </label>
                 <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-exclude" value="same_group" onchange="window.toggleConversionFields()" style="margin-right:6px;">
+                  <input type="radio" name="tgt-pkg-exclude" value="same_group" onchange="window.toggleTgtPkgConversion()" style="margin-right:6px;">
                   <span style="font-size:13px;">同集团</span>
                 </label>
               </div>
             </div>
 
-            <div id="tgt-pkg-conversion-section" style="display:none;">
-<!-- 转化行为 -->
+            <!-- 转化行为 -->
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">转化行为</div>
               <div style="display:flex;gap:16px;margin-bottom:12px;">
@@ -519,7 +620,156 @@
   ];
   var selectedRegions = []; // 当前选中的城市数组
 
-  window.openRegionSelector = function() {
+  // ========= 定向包表单：新地理选择（双栏）==========
+  var tgtPkgSelectedProvinces = []; // 选中的省份
+  var tgtPkgSelectedCities = {}; // { provinceName: [city1, city2] }
+  var tgtPkgActiveProvince = ''; // 当前选中的省份（用于显示右侧城市）
+
+  window.toggleTgtPkgGeoMode = function() {
+    var mode = document.querySelector('input[name="tgt-pkg-geo-mode"]:checked').value;
+    var regionDiv = document.getElementById('tgt-pkg-geo-region');
+    if (mode === 'region') {
+      regionDiv.style.display = 'block';
+      // 默认全选
+      if (tgtPkgSelectedProvinces.length === 0) {
+        window.selectAllTgtPkgProvincesAndCities();
+      }
+      window.renderTgtPkgProvinceList();
+    } else {
+      regionDiv.style.display = 'none';
+      // 不限：清空选择
+      tgtPkgSelectedProvinces = [];
+      tgtPkgSelectedCities = {};
+      tgtPkgActiveProvince = '';
+      window.updateTgtPkgGeoCount();
+    }
+  };
+
+  window.selectAllTgtPkgProvincesAndCities = function() {
+    tgtPkgSelectedProvinces = regionData.map(function(item) { return item.province; });
+    tgtPkgSelectedCities = {};
+    regionData.forEach(function(item) {
+      tgtPkgSelectedCities[item.province] = [].concat(item.cities);
+    });
+    tgtPkgActiveProvince = '';
+    window.updateTgtPkgGeoCount();
+  };
+
+  window.renderTgtPkgProvinceList = function() {
+    var container = document.getElementById('tgt-pkg-province-list');
+    if (!container) return;
+    var html = '';
+    regionData.forEach(function(item) {
+      var p = item.province;
+      var isSelected = tgtPkgSelectedProvinces.indexOf(p) >= 0;
+      var isActive = tgtPkgActiveProvince === p;
+      html += '<div style="padding:6px 8px;cursor:pointer;border-radius:6px;font-size:13px;display:flex;align-items:center;' +
+        (isActive ? 'background:#E6F7FF;color:#1890FF;font-weight:600;' : (isSelected ? 'color:#1890FF;' : 'color:#333;')) +
+        '" onclick="window.selectTgtPkgProvince(\'' + p + '\')">" +
+        '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' style="margin-right:6px;cursor:pointer;" onchange="window.toggleTgtPkgProvince(\'' + p + '\')">' +
+        '<span>' + p + '</span>' +
+        (isSelected ? '<span style="margin-left:auto;font-size:11px;color:#999;">' + (tgtPkgSelectedCities[p] || []).length + '/' + item.cities.length + '</span>' : '') +
+        '</div>';
+    });
+    container.innerHTML = html;
+    // 渲染城市列表
+    if (tgtPkgActiveProvince) {
+      window.renderTgtPkgCityList(tgtPkgActiveProvince);
+    }
+  };
+
+  window.selectTgtPkgProvince = function(province) {
+    tgtPkgActiveProvince = province;
+    window.renderTgtPkgProvinceList();
+    window.renderTgtPkgCityList(province);
+  };
+
+  window.toggleTgtPkgProvince = function(province) {
+    var idx = tgtPkgSelectedProvinces.indexOf(province);
+    if (idx >= 0) {
+      // 取消选中：去掉省份 + 清空该省城市
+      tgtPkgSelectedProvinces.splice(idx, 1);
+      delete tgtPkgSelectedCities[province];
+    } else {
+      // 选中：添加省份 + 全选该省城市
+      tgtPkgSelectedProvinces.push(province);
+      var item = regionData.find(function(x) { return x.province === province; });
+      if (item) tgtPkgSelectedCities[province] = [].concat(item.cities);
+    }
+    tgtPkgActiveProvince = province;
+    window.renderTgtPkgProvinceList();
+    window.renderTgtPkgCityList(province);
+    window.updateTgtPkgGeoCount();
+  };
+
+  window.renderTgtPkgCityList = function(province) {
+    var container = document.getElementById('tgt-pkg-city-list');
+    if (!container) return;
+    var item = regionData.find(function(x) { return x.province === province; });
+    if (!item) { container.innerHTML = '<div style="font-size:12px;color:#9ca3af;padding:8px;">该省份无城市数据</div>'; return; }
+    var selectedCities = tgtPkgSelectedCities[province] || [];
+    var html = '<div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px;">' + province + ' · 城市</div>';
+    item.cities.forEach(function(city) {
+      var isSelected = selectedCities.indexOf(city) >= 0;
+      html += '<div style="padding:4px 8px;cursor:pointer;border-radius:4px;font-size:12px;display:flex;align-items:center;' + (isSelected ? 'background:#E6F7FF;color:#1890FF;' : '') + '">' +
+        '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' style="margin-right:6px;cursor:pointer;" onchange="window.toggleTgtPkgCity(\'' + province + '\',\'' + city + '\')">' +
+        '<span>' + city + '</span>' +
+        '</div>';
+    });
+    container.innerHTML = html;
+  };
+
+  window.toggleTgtPkgCity = function(province, city) {
+    if (!tgtPkgSelectedCities[province]) tgtPkgSelectedCities[province] = [];
+    var cities = tgtPkgSelectedCities[province];
+    var idx = cities.indexOf(city);
+    if (idx >= 0) {
+      cities.splice(idx, 1);
+      // 如果城市列表为空，取消省份选中
+      if (cities.length === 0) {
+        delete tgtPkgSelectedCities[province];
+        var pIdx = tgtPkgSelectedProvinces.indexOf(province);
+        if (pIdx >= 0) tgtPkgSelectedProvinces.splice(pIdx, 1);
+      }
+    } else {
+      cities.push(city);
+      // 确保省份被选中
+      if (tgtPkgSelectedProvinces.indexOf(province) < 0) {
+        tgtPkgSelectedProvinces.push(province);
+      }
+    }
+    window.renderTgtPkgProvinceList();
+    window.renderTgtPkgCityList(province);
+    window.updateTgtPkgGeoCount();
+  };
+
+  window.updateTgtPkgGeoCount = function() {
+    var count = 0;
+    Object.values(tgtPkgSelectedCities).forEach(function(cities) { count += cities.length; });
+    var el = document.getElementById('tgt-pkg-geo-count');
+    if (el) el.textContent = count;
+  };
+
+  window.insertTgtPkgNameVar = function(v) {
+    var input = document.getElementById('tgt-pkg-name');
+    if (!input) return;
+    input.value = input.value + '{' + v + '}';
+    input.focus();
+  };
+
+  window.toggleTgtPkgAudience = function() {
+    var mode = document.querySelector('input[name="tgt-pkg-audience-mode"]:checked').value;
+    var config = document.getElementById('tgt-pkg-audience-config');
+    if (config) config.style.display = (mode !== 'unlimited') ? 'block' : 'none';
+  };
+
+  window.toggleTgtPkgConversion = function() {
+    var mode = document.querySelector('input[name="tgt-pkg-exclude"]:checked').value;
+    var section = document.getElementById('tgt-pkg-conversion-section');
+    if (section) section.style.display = (mode !== 'unlimited') ? 'block' : 'none';
+  };
+
+  // ========= 地域选择器（旧，保留兼容）==========
     // 初始化已选
     selectedRegions = [];
     var tagsEl = document.getElementById('tgt-pkg-region-tags');
