@@ -104,7 +104,7 @@
           <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">定向包</h2>
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理腾讯渠道自定义定向配置</p>
         </div>
-        <button id="btn-new-tgt-pkg" onclick="alert('按钮被点击了！');var m=document.getElementById('tgt-pkg-form-modal');if(m)m.style.display='flex';" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <button id="btn-new-tgt-pkg" onclick="window.location.href='tgt-pkg-form.html'" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;position:relative;z-index:9999;">
           <i class="fas fa-plus"></i> 新建定向包
         </button>
       </div>
@@ -646,83 +646,68 @@
 
   var editingTgtPkgIdx = -1;
   window.openTgtPkgForm = function() {
+    // 重置表单
     editingTgtPkgIdx = -1;
     document.getElementById('tgt-pkg-form-title').textContent = '新建定向包';
     document.getElementById('tgt-pkg-name').value = '';
     // 重置地理位置
     document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
     document.getElementById('tgt-pkg-geo-region').style.display = 'none';
-    document.getElementById('tgt-pkg-geo-map').style.display = 'none';
     document.getElementById('tgt-pkg-region').value = '';
-    // 重置地点类型
     document.getElementById('tgt-pkg-location-resident').checked = true;
     // 重置年龄
     window.setTgtPkgAgeValue('不限');
     // 重置性别
     document.querySelector('input[name="tgt-pkg-gender"][value="不限"]').checked = true;
-    // 重置排除已转化用户
-    document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]').checked = true;
     // 重置自定义人群
     document.querySelector('input[name="tgt-pkg-audience-mode"][value="unlimited"]').checked = true;
     document.getElementById('tgt-pkg-audience-config').style.display = 'none';
     document.getElementById('tgt-pkg-audience-input').value = '';
-    // 重置转化行为
-    document.querySelector('input[name="tgt-pkg-conversion-behavior"][value="optimize"]').checked = true;
-    document.getElementById('tgt-pkg-conversion-detail').style.display = 'none';
-    document.getElementById('tgt-pkg-conversion-input').value = '';
-    // 重置转化时间区间
-    document.querySelector('input[name="tgt-pkg-conversion-time"][value="7day"]').checked = true;
+    // 重置排除已转化
+    document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]').checked = true;
+    document.getElementById('tgt-pkg-conversion-section').style.display = 'none';
+    // 显示弹窗 (使用 flex 以居中)
     document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
   };
   window.editTgtPkg = function(idx) {
-    editingTgtPkgIdx = idx;
     var tp = targetingPackages[idx];
+    if (!tp) return;
+    editingTgtPkgIdx = idx;
     document.getElementById('tgt-pkg-form-title').textContent = '编辑定向包';
     document.getElementById('tgt-pkg-name').value = tp.name || '';
-    // 加载地理位置
-    if (!tp.region || tp.region === '不限') {
-      document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
-      document.getElementById('tgt-pkg-geo-region').style.display = 'none';
-    } else {
+    // 地理位置
+    if (tp.geoMode === 'region') {
       document.querySelector('input[name="tgt-pkg-geo-mode"][value="region"]').checked = true;
       document.getElementById('tgt-pkg-geo-region').style.display = 'block';
-      document.getElementById('tgt-pkg-region').value = tp.region;
-    }
-    // 加载年龄
-    window.setTgtPkgAgeValue(tp.age || '不限');
-    // 加载性别
-    var gender = tp.gender || '不限';
-    var genderRadio = document.querySelector('input[name="tgt-pkg-gender"][value="' + gender + '"]');
-    if (genderRadio) genderRadio.checked = true;
-    // 加载排除已转化用户
-    var exclude = tp.excludeConverted || 'unlimited';
-    var excludeRadio = document.querySelector('input[name="tgt-pkg-exclude"][value="' + exclude + '"]');
-    if (excludeRadio) excludeRadio.checked = true;
-    // 加载自定义人群
-    var audienceMode = tp.audienceMode || 'unlimited';
-    var audienceModeRadio = document.querySelector('input[name="tgt-pkg-audience-mode"][value="' + audienceMode + '"]');
-    if (audienceModeRadio) audienceModeRadio.checked = true;
-    if (audienceMode !== 'unlimited') {
-      document.getElementById('tgt-pkg-audience-config').style.display = 'block';
-      document.getElementById('tgt-pkg-audience-title').textContent = audienceMode === 'target' ? '指定人群' : '排除人群';
     } else {
+      document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]').checked = true;
+      document.getElementById('tgt-pkg-geo-region').style.display = 'none';
+    }
+    document.getElementById('tgt-pkg-region').value = tp.region || '';
+    document.getElementById('tgt-pkg-location-resident').checked = tp.locationTypeResident !== false;
+    // 年龄
+    window.setTgtPkgAgeValue(tp.age || '不限');
+    // 性别
+    var genderRadio = document.querySelector('input[name="tgt-pkg-gender"][value="' + (tp.gender || '不限') + '"]');
+    if (genderRadio) genderRadio.checked = true;
+    // 自定义人群
+    if (tp.audienceMode && tp.audienceMode !== 'unlimited') {
+      document.querySelector('input[name="tgt-pkg-audience-mode"][value="' + tp.audienceMode + '"]').checked = true;
+      document.getElementById('tgt-pkg-audience-config').style.display = 'block';
+    } else {
+      document.querySelector('input[name="tgt-pkg-audience-mode"][value="unlimited"]').checked = true;
       document.getElementById('tgt-pkg-audience-config').style.display = 'none';
     }
     document.getElementById('tgt-pkg-audience-input').value = tp.audienceInput || '';
-    // 加载转化行为
-    var conversionBehavior = tp.conversionBehavior || 'optimize';
-    var conversionRadio = document.querySelector('input[name="tgt-pkg-conversion-behavior"][value="' + conversionBehavior + '"]');
-    if (conversionRadio) conversionRadio.checked = true;
-    if (conversionBehavior !== 'optimize') {
-      document.getElementById('tgt-pkg-conversion-detail').style.display = 'block';
+    // 排除已转化
+    if (tp.excludeConverted && tp.excludeConverted !== 'unlimited') {
+      document.querySelector('input[name="tgt-pkg-exclude"][value="' + tp.excludeConverted + '"]').checked = true;
+      document.getElementById('tgt-pkg-conversion-section').style.display = 'block';
     } else {
-      document.getElementById('tgt-pkg-conversion-detail').style.display = 'none';
+      document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]').checked = true;
+      document.getElementById('tgt-pkg-conversion-section').style.display = 'none';
     }
-    document.getElementById('tgt-pkg-conversion-input').value = tp.conversionInput || '';
-    // 加载转化时间区间
-    var conversionTime = tp.conversionTimeRange || '7day';
-    var conversionTimeRadio = document.querySelector('input[name="tgt-pkg-conversion-time"][value="' + conversionTime + '"]');
-    if (conversionTimeRadio) conversionTimeRadio.checked = true;
+    // 显示弹窗
     document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
   };
   window.closeTgtPkgForm = function() {
