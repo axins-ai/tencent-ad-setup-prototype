@@ -1319,6 +1319,12 @@ function TimeGrid({
 // 主应用
 function App() {
   // ===== 基础配置 =====
+  // 省份 ID -> 中文名称映射
+  const provinceNameMap = {};
+  (MOCK.regionCascade.provinces['cn'] || []).forEach(p => {
+    provinceNameMap[p.id] = p.name;
+  });
+  const getProvinceNames = ids => ids.map(id => provinceNameMap[id] || id).join('、');
   const [businessType, setBusinessType] = useState('benefit_A');
   const [channel, setChannel] = useState('gdt');
   const [selectedAccountIds, setSelectedAccountIds] = useState([]);
@@ -1351,7 +1357,7 @@ function App() {
     const pkg = {
       id: 'user_tp_' + now,
       name: saveTgtPkgName.trim(),
-      region: geoMode === 'unlimited' ? '不限' : geoMode === 'region' ? geoSelectedProvinces.join(',') : '地图选择',
+      region: geoMode === 'unlimited' ? '不限' : geoMode === 'region' ? getProvinceNames(geoSelectedProvinces) : '地图选择',
       age: ageSelections.includes('unlimited') ? '不限' : ageSelections.join(','),
       gender: genderSelection === 'unlimited' ? '不限' : genderSelection,
       excludeConverted: excludeConvertedMode,
@@ -1381,9 +1387,11 @@ function App() {
   // 自定义定向 - 地理位置级联
   const [geoMode, setGeoMode] = useState('region'); // 'unlimited' | 'region'
   const [geoSelectedCountry, setGeoSelectedCountry] = useState('cn');
-  const [geoSelectedProvinces, setGeoSelectedProvinces] = useState([]);
+  // 默认全选所有省份
+  const defaultProvinceIds = (MOCK.regionCascade.provinces['cn'] || []).map(p => p.id);
+  const [geoSelectedProvinces, setGeoSelectedProvinces] = useState(defaultProvinceIds);
   const [geoSelectedCities, setGeoSelectedCities] = useState({}); // { provinceId: [city1, city2] }
-  const [activeProvinceId, setActiveProvinceId] = useState(''); // 当前选中的省份（用于右侧城市列表）
+  const [activeProvinceId, setActiveProvinceId] = useState(defaultProvinceIds[0] || ''); // 默认选中第一个省份，右侧显示城市列表
   // 地点类型（只保留常住地）
   const [locationTypeResident, setLocationTypeResident] = useState(true);
 
@@ -2647,19 +2655,6 @@ function App() {
     className: "p-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "创意max"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-4"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-sm font-medium text-green-600"
-  }, "关闭"), /*#__PURE__*/React.createElement("button", {
-    disabled: true,
-    className: "relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "inline-block h-4 w-4 transform rounded-full bg-white translate-x-1"
-  })), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm font-medium text-gray-400"
-  }, "开启"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
   }, "创意增强Max"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4"
   }, /*#__PURE__*/React.createElement("span", {
@@ -3221,7 +3216,7 @@ function App() {
     className: "text-xs text-gray-500"
   }, "地理位置："), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-900 ml-1"
-  }, geoMode === 'unlimited' ? '不限' : geoMode === 'region' ? geoSelectedProvinces.length > 0 ? geoSelectedProvinces.join('、') : '已选择省份' : '地图选择')), /*#__PURE__*/React.createElement("div", {
+  }, geoMode === 'unlimited' ? '不限' : geoMode === 'region' ? geoSelectedProvinces.length > 0 ? getProvinceNames(geoSelectedProvinces) : '已选择省份' : '地图选择')), /*#__PURE__*/React.createElement("div", {
     className: "mb-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-500"
@@ -3272,14 +3267,3 @@ function App() {
 }
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(/*#__PURE__*/React.createElement(App, null));
-// 暴露 App 到全局作用域
-window.App = App;
-
-// 渲染 React 应用（等 DOM 加载完成）
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() {
-    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
-  });
-} else {
-  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
-}
