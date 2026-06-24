@@ -399,10 +399,12 @@
 
   // ========== 下拉菜单 ==========
   window.showDropdown = function() {
-    document.getElementById('channel-dropdown').style.display = 'block';
+    var chDd = document.getElementById('channel-dropdown');
+    if (chDd) chDd.style.display = 'block';
   };
   window.hideDropdown = function() {
-    document.getElementById('channel-dropdown').style.display = 'none';
+    var chDd2 = document.getElementById('channel-dropdown');
+    if (chDd2) chDd2.style.display = 'none';
   };
 
   // ========== 视图切换 ==========
@@ -462,8 +464,10 @@
   };
 
   function openForm(taskId) {
-    document.getElementById('view-task-list').style.display = 'none';
-    document.getElementById('view-form').style.display = 'block';
+    var vtl = document.getElementById('view-task-list');
+    if (vtl) vtl.style.display = 'none';
+    var vf = document.getElementById('view-form');
+    if (vf) vf.style.display = 'block';
     // 隐藏其他视图
     ['view-targeting-packages','view-creative-assets','view-copy-library'].forEach(function(v) {
       var el = document.getElementById('view-' + v);
@@ -809,11 +813,13 @@
     document.getElementById('region-search-input').value = '';
     renderRegionList('');
     updateRegionSelectedTags();
-    document.getElementById('region-selector-modal').style.display = 'flex';
+    var rsm = document.getElementById('region-selector-modal');
+    if (rsm) rsm.style.display = 'flex';
   };
 
   window.closeRegionSelector = function() {
-    document.getElementById('region-selector-modal').style.display = 'none';
+    var rsm2 = document.getElementById('region-selector-modal');
+    if (rsm2) rsm2.style.display = 'none';
   };
 
   window.filterRegionList = function() {
@@ -890,7 +896,8 @@
       });
       tagsEl.innerHTML = html;
     }
-    document.getElementById('region-selector-modal').style.display = 'none';
+    var rsm2 = document.getElementById('region-selector-modal');
+    if (rsm2) rsm2.style.display = 'none';
   };
 
   window.removeTgtPkgRegion = function(city) {
@@ -983,13 +990,16 @@
 
   var editingTgtPkgIdx = -1;
   window.openTgtPkgForm = function() {
+    try {
+
     // 重置表单
     editingTgtPkgIdx = -1;
     // 清空地域选择状态
     selectedRegions = [];
     var elTitle = document.getElementById('tgt-pkg-form-title');
     if (elTitle) elTitle.textContent = '新建定向包';
-    document.getElementById('tgt-pkg-name').value = '';
+    var elName = document.getElementById('tgt-pkg-name');
+    if (elName) elName.value = '';
     // 重置地理位置
     var geoUnlimited = document.querySelector('input[name="tgt-pkg-geo-mode"][value="unlimited"]');
     if (geoUnlimited) geoUnlimited.checked = true;
@@ -1020,6 +1030,10 @@
     // 显示弹窗 (使用 flex 以居中)
     var elModal = document.getElementById('tgt-pkg-form-modal');
     if (elModal) elModal.style.display = 'flex';
+  } catch(e) {
+      console.error('openTgtPkgForm error:', e);
+      alert('错误：' + e.message);
+    }
   };
   window.editTgtPkg = function(idx) {
     var tp = targetingPackages[idx];
@@ -1089,10 +1103,12 @@
       // tgt-pkg-conversion-section 元素已删除，跳过
     }
     // 显示弹窗
-    document.getElementById('tgt-pkg-form-modal').style.display = 'flex';
+    var tpfm = document.getElementById('tgt-pkg-form-modal');
+    if (tpfm) tpfm.style.display = 'flex';
   };
   window.closeTgtPkgForm = function() {
-    document.getElementById('tgt-pkg-form-modal').style.display = 'none';
+    var tpfm2 = document.getElementById('tgt-pkg-form-modal');
+    if (tpfm2) tpfm2.style.display = 'none';
   };
   window.saveTgtPkg = function() {
     var name = document.getElementById('tgt-pkg-name').value.trim();
@@ -1187,15 +1203,18 @@
   window.openCopyForm = function() {
     editingCopyIdx = -1;
     document.getElementById('copy-content-input').value = '';
-    document.getElementById('copy-form-modal').style.display = 'flex';
+    var cfm = document.getElementById('copy-form-modal');
+    if (cfm) cfm.style.display = 'flex';
   };
   window.editCopy = function(idx) {
     editingCopyIdx = idx;
     document.getElementById('copy-content-input').value = copyTexts[idx].content || '';
-    document.getElementById('copy-form-modal').style.display = 'flex';
+    var cfm = document.getElementById('copy-form-modal');
+    if (cfm) cfm.style.display = 'flex';
   };
   window.closeCopyForm = function() {
-    document.getElementById('copy-form-modal').style.display = 'none';
+    var cfm2 = document.getElementById('copy-form-modal');
+    if (cfm2) cfm2.style.display = 'none';
   };
   window.saveCopy = function() {
     var content = document.getElementById('copy-content-input').value.trim();
