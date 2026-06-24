@@ -1401,6 +1401,19 @@
     const [activeProvinceId, setActiveProvinceId] = useState(''); // 当前选中的省份（用于右侧城市列表）
     // 地点类型（只保留常住地）
     const [locationTypeResident, setLocationTypeResident] = useState(true);
+
+    // 地理位置：默认全选所有省份+城市
+    const selectAllProvinceAndCities = () => {
+      const allProvinceIds = (MOCK.regionCascade.provinces['cn'] || []).map(p => p.id);
+      const allCitiesMap = {};
+      allProvinceIds.forEach(pid => {
+        allCitiesMap[pid] = [...(MOCK.regionCascade.cities[pid] || [])];
+      });
+      setGeoSelectedProvinces(allProvinceIds);
+      setGeoSelectedCities(allCitiesMap);
+      setActiveProvinceId('');
+    };
+
     // 年龄
     const [ageSelections, setAgeSelections] = useState(['unlimited']); // array of selected age keys
     const [customAgeMin, setCustomAgeMin] = useState('');
@@ -1445,6 +1458,8 @@
     const [首日开始, set首日开始] = useState(false);
     const [首日开始时间值, set首日开始时间值] = useState('00:00');
     const [unitName, setUnitName] = useState('');
+    const [showNameVarDropdown, setShowNameVarDropdown] = useState(false);
+    const nameVariables = ['日期', '定向包名称', '版位', '创建人'];
 
     // ===== 创意配置 =====
     const [creativeEnhanceMax, setCreativeEnhanceMax] = useState(false);
@@ -1984,7 +1999,10 @@
       type: "radio",
       name: "geo_mode",
       checked: geoMode === 'region',
-      onChange: () => setGeoMode('region'),
+      onChange: () => {
+        setGeoMode('region');
+        selectAllProvinceAndCities();
+      },
       className: "mr-1.5"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text-sm text-gray-700"
@@ -2076,12 +2094,23 @@
     }, "清空全部")))), geoMode === 'unlimited' && /*#__PURE__*/React.createElement("p", {
       className: "text-sm text-gray-400 py-2 px-3 bg-gray-50 rounded-lg inline-block"
     }, "已选择\"不限\"，将投放到所有地域"), /*#__PURE__*/React.createElement("div", {
-      className: "mt-3 flex items-start gap-2"
+      className: "mt-3 flex items-center gap-2"
     }, /*#__PURE__*/React.createElement("span", {
-      className: "text-sm font-semibold text-gray-900 whitespace-nowrap pt-1"
-    }, "地点类型"), /*#__PURE__*/React.createElement("span", {
+      className: "text-sm font-semibold text-gray-900 whitespace-nowrap",
+      style: {
+        lineHeight: '2rem'
+      }
+    }, "地点类型"), /*#__PURE__*/React.createElement("label", {
+      className: "flex items-center cursor-pointer h-8"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "radio",
+      name: "location_type",
+      checked: true,
+      readOnly: true,
+      className: "mr-1.5 w-3.5 h-3.5"
+    }), /*#__PURE__*/React.createElement("span", {
       className: "text-sm text-gray-700"
-    }, "常住地"))), /*#__PURE__*/React.createElement("div", {
+    }, "常住地")))), /*#__PURE__*/React.createElement("div", {
       className: "py-4 border-b border-gray-200"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-1 mb-3"
@@ -2555,13 +2584,32 @@
       className: "block text-sm font-medium text-gray-700 mb-1"
     }, "营销单元名称 ", /*#__PURE__*/React.createElement("span", {
       className: "text-red-500"
-    }, "*")), /*#__PURE__*/React.createElement("input", {
+    }, "*")), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-2 max-w-md"
+    }, /*#__PURE__*/React.createElement("input", {
       type: "text",
       value: unitName,
       onChange: e => setUnitName(e.target.value),
       placeholder: "输入营销单元名称",
-      className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-    }))))), /*#__PURE__*/React.createElement("div", {
+      className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "relative"
+    }, /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      onClick: () => setShowNameVarDropdown(!showNameVarDropdown),
+      className: "px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50 whitespace-nowrap"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-code mr-1"
+    }), "插入变量"), showNameVarDropdown && /*#__PURE__*/React.createElement("div", {
+      className: "absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 min-w-[120px]"
+    }, nameVariables.map(v => /*#__PURE__*/React.createElement("div", {
+      key: v,
+      onClick: () => {
+        setUnitName(unitName + '{' + v + '}');
+        setShowNameVarDropdown(false);
+      },
+      className: "px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 text-gray-700"
+    }, v))))))))), /*#__PURE__*/React.createElement("div", {
       className: "bg-white rounded-xl shadow-sm border overflow-hidden"
     }, /*#__PURE__*/React.createElement("div", {
       className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
