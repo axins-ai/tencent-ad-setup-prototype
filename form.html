@@ -25,6 +25,83 @@ body { margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Rob
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
 </style>
+  <script>
+    // ===== MOCK 数据（供 React 应用使用）=====
+    window.MOCK = {
+      regionCascade: {
+        provinces: {
+          'cn': [
+            {id:'beijing', name:'北京'},
+            {id:'shanghai', name:'上海'},
+            {id:'tianjin', name:'天津'},
+            {id:'chongqing', name:'重庆'},
+            {id:'guangdong', name:'广东'},
+            {id:'zhejiang', name:'浙江'},
+            {id:'jiangsu', name:'江苏'},
+            {id:'shandong', name:'山东'},
+            {id:'sichuan', name:'四川'},
+            {id:'hubei', name:'湖北'},
+            {id:'hunan', name:'湖南'},
+            {id:'henan', name:'河南'},
+            {id:'hebei', name:'河北'},
+            {id:'fujian', name:'福建'},
+            {id:'anhui', name:'安徽'},
+            {id:'liaoning', name:'辽宁'},
+            {id:'shanxi1', name:'陕西'},
+            {id:'jiangxi', name:'江西'},
+            {id:'guangxi', name:'广西'},
+            {id:'yunnan', name:'云南'},
+          ]
+        },
+        cities: {
+          'beijing':['北京'],
+          'shanghai':['上海'],
+          'tianjin':['天津'],
+          'chongqing':['重庆'],
+          'guangdong':['广州','深圳','东莞','佛山','珠海','中山','惠州','江门','湛江','茂名','汕头','肇庆'],
+          'zhejiang':['杭州','宁波','温州','嘉兴','绍兴','义乌','台州','金华'],
+          'jiangsu':['南京','苏州','无锡','常州','南通','徐州','扬州','盐城'],
+          'shandong':['济南','青岛','烟台','潍坊','临沂','济宁'],
+          'sichuan':['成都','绵阳','德阳','南充','宜宾'],
+          'hubei':['武汉','宜昌','襄阳','荆州'],
+          'hunan':['长沙','株洲','湘潭','衡阳'],
+          'henan':['郑州','洛阳','新乡','南阳'],
+          'hebei':['石家庄','唐山','保定','邯郸'],
+          'fujian':['福州','厦门','泉州','漳州'],
+          'anhui':['合肥','芜湖','蚌埠','阜阳'],
+          'liaoning':['沈阳','大连','鞍山','锦州'],
+          'shanxi1':['西安','咸阳','宝鸡'],
+          'jiangxi':['南昌','赣州','九江'],
+          'guangxi':['南宁','桂林','柳州'],
+          'yunnan':['昆明','大理','曲靖'],
+        }
+      },
+      accounts: [
+        {id:'acc_001', name:'账户A（广点通）'},
+        {id:'acc_002', name:'账户B（广点通）'},
+        {id:'acc_003', name:'账户C（广点通）'},
+      ],
+      specificProducts: [
+        {id:'sp_001', name:'具体产品A'},
+        {id:'sp_002', name:'具体产品B'},
+      ],
+      videoSceneOptions: [
+        {id:'scene_1', label:'场景1'},
+        {id:'scene_2', label:'场景2'},
+        {id:'scene_3', label:'场景3'},
+      ],
+      customAudiences: [
+        {id:'ca_001', name:'自定义人群A'},
+      ],
+      excludeConversions: [
+        {id:'ec_001', name:'排除转化A'},
+      ],
+      targetingPackages: [
+        {id:'tp_001', name:'定向包A', region:'北京、上海', age:'不限', gender:'不限'},
+      ],
+    };
+  </script>
+
 </head>
 <body>
 <!-- 返回按钮（在 iframe 内，调用父窗口方法） -->
