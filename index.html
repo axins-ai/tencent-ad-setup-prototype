@@ -828,6 +828,8 @@
   window.openTgtPkgForm = function() {
     // 重置表单
     editingTgtPkgIdx = -1;
+    // 清空地域选择状态
+    selectedRegions = [];
     document.getElementById('tgt-pkg-form-title').textContent = '新建定向包';
     document.getElementById('tgt-pkg-name').value = '';
     // 重置地理位置
@@ -869,7 +871,7 @@
     var tagsEl = document.getElementById('tgt-pkg-region-tags');
     if (tagsEl) {
       var regionStr = tp.region || '';
-      var cities = regionStr.split(',').filter(function(s) { return s.trim(); });
+      var cities = regionStr.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
       var html = '';
       cities.forEach(function(city) {
         html += '<span data-city="' + city.trim() + '" style="display:inline-flex;align-items:center;padding:3px 8px;background:#E6F7FF;color:#1890FF;border:1px solid #91D5FF;border-radius:4px;font-size:12px;">' + city.trim() + ' <span onclick="removeTgtPkgRegion(\'' + city.trim() + '\')" style="margin-left:4px;cursor:pointer;font-size:14px;">×</span></span>';
