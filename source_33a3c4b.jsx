@@ -880,6 +880,16 @@ function App() {
     });
     return cities.length > 0 ? cities.join('、') : '不限';
   };
+  // 配置摘要中格式化城市列表（最多显示5个，超出显示"等XX个地区"）
+  const formatCitySummary = () => {
+    const cities = [];
+    Object.values(geoSelectedCities).forEach(cityList => {
+      cities.push(...cityList);
+    });
+    if (cities.length === 0) return '不限';
+    if (cities.length <= 5) return cities.join('、');
+    return cities.slice(0, 5).join('、') + ' 等' + cities.length + '个地区';
+  };
 
 
   const [businessType, setBusinessType] = useState('benefit_A');
@@ -2453,7 +2463,7 @@ function App() {
                       <div className="mb-2">
                         <span className="text-xs text-gray-500">地理位置：</span>
                         <span className="text-xs text-gray-900 ml-1">
-                            {geoMode === 'unlimited' ? '不限' : (geoMode === 'region' ? (Object.values(geoSelectedCities).flat().length > 0 ? Object.values(geoSelectedCities).flat().join('、') : '已选择城市') : '地图选择')}
+                            {geoMode === 'unlimited' ? '不限' : (geoMode === 'region' ? formatCitySummary() : '地图选择')}
                         </span>
                       </div>
                       
