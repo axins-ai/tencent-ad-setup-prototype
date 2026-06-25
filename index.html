@@ -6,6 +6,7 @@
 <title>AdBatch 原型</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="region-data.js"></script>
 <!-- 诊断信息栏（加载后立即显示状态） -->
 <style>
 #diag-bar { display:none; position:fixed; top:0; left:0; right:0; z-index:99999; padding:8px 16px; font-size:13px; font-family:monospace; }
@@ -623,7 +624,8 @@
   };
 
   // ========== 地域选择器 ==========
-  var regionData = [
+  // 使用 region-data.js 中的完整数据
+  var regionData = window.REGION_DATA ? window.REGION_DATA.regionData : [
     { province: '北京', cities: ['北京'] },
     { province: '上海', cities: ['上海'] },
     { province: '天津', cities: ['天津'] },
