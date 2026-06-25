@@ -152,20 +152,22 @@
                 </label>
               </div>
               <div id="tgt-pkg-geo-region" style="display:none;">
-                <div style="background:#f9fafb;border-radius:8px;padding:12px;">
-                  <div style="font-size:13px;font-weight:500;color:#666;margin-bottom:8px;">选择省份和城市</div>
-                  <div id="tgt-pkg-geo-container" style="display:grid;grid-template-columns:200px 1fr;gap:8px;max-height:200px;overflow:hidden;">
-                    <!-- 省份列表 -->
-                    <div id="tgt-pkg-province-list" style="border-right:1px solid #e5e7eb;padding-right:8px;overflow-y:auto;max-height:200px;">
+                <div style="background:#eff6ff;border-radius:12px;padding:12px;border:1px solid #bfdbfe;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <i class="fas fa-map-marker-alt" style="color:#3b82f6;"></i>
+                    <span style="font-size:13px;font-weight:500;color:#1e40af;">按区域</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:200px 1fr;gap:8px;">
+                    <div id="tgt-pkg-province-list" style="border-right:1px solid #e5e7eb;padding-right:8px;overflow-y:auto;max-height:200px;background:white;border-radius:8px;">
                       <!-- 由 JS 动态渲染 -->
                     </div>
-                    <!-- 城市列表 -->
-                    <div id="tgt-pkg-city-list" style="overflow-y:auto;max-height:200px;">
+                    <div id="tgt-pkg-city-list" style="overflow-y:auto;max-height:200px;background:white;border-radius:8px;padding:4px;">
                       <div style="font-size:12px;color:#9ca3af;padding:8px;">点击左侧省份查看城市</div>
                     </div>
                   </div>
-                  <div style="margin-top:8px;font-size:12px;color:#9ca3af;">
-                    已选：<span id="tgt-pkg-geo-count">0</span> 个地区
+                  <div style="display:flex;gap:8px;margin-top:8px;">
+                    <button onclick="window.selectAllTgtPkgProvincesAndCities();window.renderTgtPkgProvinceList();" style="font-size:12px;color:#3b82f6;cursor:pointer;background:none;border:none;padding:4px 8px;">全选全部</button>
+                    <button onclick="tgtPkgSelectedProvinces=[];tgtPkgSelectedCities={};tgtPkgActiveProvince='';window.renderTgtPkgProvinceList();window.updateTgtPkgGeoCount();" style="font-size:12px;color:#6b7280;cursor:pointer;background:none;border:none;padding:4px 8px;">清空全部</button>
                   </div>
                 </div>
               </div>
@@ -174,10 +176,11 @@
             <!-- 地点类型 -->
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">地点类型</div>
-              <label style="display:flex;align-items:center;cursor:pointer;">
-                <input type="checkbox" id="tgt-pkg-location-resident" checked style="margin-right:6px;">
-                <span style="font-size:14px;color:#333;">常住地</span>
-              </label>
+              <div style="display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;padding:6px 12px;border-radius:8px;">
+                <input type="checkbox" checked disabled style="margin-right:6px;cursor:not-allowed;accent-color:#22c55e;">
+                <span style="font-size:14px;color:#166534;font-weight:500;">常住地</span>
+                <span style="font-size:11px;color:#22c55e;margin-left:4px;"><i class="fas fa-lock"></i> 已锁定</span>
+              </div>
             </div>
 
             <!-- 年龄 -->
@@ -221,7 +224,12 @@
                 </label>
               </div>
               <div id="tgt-pkg-audience-config" style="display:none;">
-                <div id="tgt-pkg-audience-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                <select id="tgt-pkg-audience-select" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;">
+                  <option value="">-- 选择排除人群包 --</option>
+                  <option value="ca_001">上周访问用户</option>
+                  <option value="ca_002">近30天活跃用户</option>
+                  <option value="ca_003">高价值用户</option>
+                </select>
               </div>
             </div>
 
@@ -253,7 +261,7 @@
             </div>
 
             <!-- 转化行为 -->
-            <div id="tgt-pkg-conversion-behavior-section" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+            <div id="tgt-pkg-conversion-behavior-section" style="display:none;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">转化行为</div>
               <div style="display:flex;gap:16px;margin-bottom:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
@@ -267,7 +275,7 @@
             </div>
 
             <!-- 转化时间区间 -->
-            <div style="margin-bottom:16px;">
+            <div id="tgt-pkg-conversion-time-section" style="display:none;margin-bottom:16px;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">转化时间区间</div>
               <div style="display:flex;flex-wrap:wrap;gap:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">

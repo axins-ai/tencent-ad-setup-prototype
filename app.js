@@ -1,10 +1,26 @@
-const {
-  useState,
-  useEffect
-} = React;
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+var _React = React,
+  useState = _React.useState,
+  useEffect = _React.useEffect;
 
 // ========== Mock 数据 ==========
-const MOCK = {
+var MOCK = {
   businessTypes: [{
     id: 'benefit_A',
     name: '权益A'
@@ -125,29 +141,33 @@ const MOCK = {
   // 素材库（视频+图片），带消耗/CTR/CVR数据
   videoMaterials: Array.from({
     length: 50
-  }, (_, i) => ({
-    id: `v_${String(i + 1).padStart(3, '0')}`,
-    name: `视频素材${i + 1}`,
-    type: 'video',
-    duration: ['0:30', '1:00', '1:30', '2:00'][i % 4],
-    size: ['15MB', '28MB', '20MB', '55MB'][i % 4],
-    thumb: '🎬',
-    spend: Math.round((Math.random() * 5000 + 100) * 100) / 100,
-    ctr: Math.round((Math.random() * 5 + 1) * 100) / 100,
-    cvr: Math.round((Math.random() * 10 + 0.5) * 100) / 100
-  })),
+  }, function (_, i) {
+    return {
+      id: "v_".concat(String(i + 1).padStart(3, '0')),
+      name: "\u89C6\u9891\u7D20\u6750".concat(i + 1),
+      type: 'video',
+      duration: ['0:30', '1:00', '1:30', '2:00'][i % 4],
+      size: ['15MB', '28MB', '20MB', '55MB'][i % 4],
+      thumb: '🎬',
+      spend: Math.round((Math.random() * 5000 + 100) * 100) / 100,
+      ctr: Math.round((Math.random() * 5 + 1) * 100) / 100,
+      cvr: Math.round((Math.random() * 10 + 0.5) * 100) / 100
+    };
+  }),
   imageMaterials: Array.from({
     length: 50
-  }, (_, i) => ({
-    id: `i_${String(i + 1).padStart(3, '0')}`,
-    name: `图片素材${i + 1}`,
-    type: 'image',
-    size: ['120KB', '250KB', '80KB', '300KB'][i % 4],
-    thumb: '🖼️',
-    spend: Math.round((Math.random() * 3000 + 50) * 100) / 100,
-    ctr: Math.round((Math.random() * 4 + 0.5) * 100) / 100,
-    cvr: Math.round((Math.random() * 8 + 0.3) * 100) / 100
-  })),
+  }, function (_, i) {
+    return {
+      id: "i_".concat(String(i + 1).padStart(3, '0')),
+      name: "\u56FE\u7247\u7D20\u6750".concat(i + 1),
+      type: 'image',
+      size: ['120KB', '250KB', '80KB', '300KB'][i % 4],
+      thumb: '🖼️',
+      spend: Math.round((Math.random() * 3000 + 50) * 100) / 100,
+      ctr: Math.round((Math.random() * 4 + 0.5) * 100) / 100,
+      cvr: Math.round((Math.random() * 8 + 0.3) * 100) / 100
+    };
+  }),
   copyLibrary: [{
     id: 'c_001',
     content: '限时优惠，立即办理！',
@@ -423,32 +443,38 @@ const MOCK = {
 };
 
 // 通知组件
-function Notification({
-  msg,
-  type,
-  onClose
-}) {
-  useEffect(() => {
-    const t = setTimeout(onClose, 3000);
-    return () => clearTimeout(t);
+function Notification(_ref) {
+  var msg = _ref.msg,
+    type = _ref.type,
+    onClose = _ref.onClose;
+  useEffect(function () {
+    var t = setTimeout(onClose, 3000);
+    return function () {
+      return clearTimeout(t);
+    };
   }, [onClose]);
-  const bg = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
+  var bg = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
   return /*#__PURE__*/React.createElement("div", {
-    className: `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${bg} max-w-sm`
+    className: "fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white ".concat(bg, " max-w-sm")
   }, msg);
 }
 
 // 版位定投场景弹窗
-function PlacementSceneModal({
-  placement,
-  show,
-  onClose,
-  value,
-  onChange
-}) {
-  const [mode, setMode] = useState('unlimited');
-  const [selected, setSelected] = useState([]);
-  useEffect(() => {
+function PlacementSceneModal(_ref2) {
+  var placement = _ref2.placement,
+    show = _ref2.show,
+    onClose = _ref2.onClose,
+    value = _ref2.value,
+    onChange = _ref2.onChange;
+  var _useState = useState('unlimited'),
+    _useState2 = _slicedToArray(_useState, 2),
+    mode = _useState2[0],
+    setMode = _useState2[1];
+  var _useState3 = useState([]),
+    _useState4 = _slicedToArray(_useState3, 2),
+    selected = _useState4[0],
+    setSelected = _useState4[1];
+  useEffect(function () {
     if (show) {
       if (value && value !== 'unlimited') {
         setMode('custom');
@@ -460,25 +486,31 @@ function PlacementSceneModal({
     }
   }, [show, value]);
   if (!show) return null;
-  const handleToggle = id => {
-    setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+  var handleToggle = function handleToggle(id) {
+    setSelected(function (prev) {
+      return prev.includes(id) ? prev.filter(function (s) {
+        return s !== id;
+      }) : [].concat(_toConsumableArray(prev), [id]);
+    });
   };
-  const handleConfirm = () => {
+  var handleConfirm = function handleConfirm() {
     onChange(mode === 'unlimited' ? 'unlimited' : selected.join(','));
     onClose();
   };
-  const isVideo = placement === 'wechat_video';
+  var isVideo = placement === 'wechat_video';
   return /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
     className: "modal-content w-full max-w-2xl",
-    onClick: e => e.stopPropagation()
+    onClick: function onClick(e) {
+      return e.stopPropagation();
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between p-4 border-b"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-lg font-bold"
-  }, "版位定投场景"), /*#__PURE__*/React.createElement("button", {
+  }, "\u7248\u4F4D\u5B9A\u6295\u573A\u666F"), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     className: "text-gray-400 hover:text-gray-600"
   }, /*#__PURE__*/React.createElement("i", {
@@ -491,17 +523,21 @@ function PlacementSceneModal({
     type: "radio",
     name: "scene_mode",
     checked: mode === 'unlimited',
-    onChange: () => setMode('unlimited'),
+    onChange: function onChange() {
+      return setMode('unlimited');
+    },
     className: "mr-2"
-  }), /*#__PURE__*/React.createElement("span", null, "不限")), /*#__PURE__*/React.createElement("label", {
+  }), /*#__PURE__*/React.createElement("span", null, "\u4E0D\u9650")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer mt-2"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "scene_mode",
     checked: mode === 'custom',
-    onChange: () => setMode('custom'),
+    onChange: function onChange() {
+      return setMode('custom');
+    },
     className: "mr-2"
-  }), /*#__PURE__*/React.createElement("span", null, "自定义"))), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", null, "\u81EA\u5B9A\u4E49"))), /*#__PURE__*/React.createElement("div", {
     className: "overflow-y-auto flex-1 p-4",
     style: {
       maxHeight: '50vh'
@@ -510,130 +546,181 @@ function PlacementSceneModal({
     className: "space-y-3"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-2"
-  }, "视频号定投场景"), MOCK.videoSceneOptions.map(opt => /*#__PURE__*/React.createElement("label", {
-    key: opt.id,
-    className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: selected.includes(opt.id),
-    onChange: () => handleToggle(opt.id),
-    className: "mr-3"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, opt.label), opt.tip && /*#__PURE__*/React.createElement("span", {
-    className: "ml-2 text-gray-400 cursor-help",
-    title: opt.tip
-  }, "❓"))))), !isVideo && /*#__PURE__*/React.createElement("div", {
+  }, "\u89C6\u9891\u53F7\u5B9A\u6295\u573A\u666F"), MOCK.videoSceneOptions.map(function (opt) {
+    return /*#__PURE__*/React.createElement("label", {
+      key: opt.id,
+      className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: selected.includes(opt.id),
+      onChange: function onChange() {
+        return handleToggle(opt.id);
+      },
+      className: "mr-3"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "text-sm"
+    }, opt.label), opt.tip && /*#__PURE__*/React.createElement("span", {
+      className: "ml-2 text-gray-400 cursor-help",
+      title: opt.tip
+    }, "\u2753")));
+  })), !isVideo && /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
-  }, MOCK.mpSceneGroups.map((group, gi) => /*#__PURE__*/React.createElement("div", {
-    key: gi
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-sm font-medium text-gray-700 mb-2"
-  }, group.groupName), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap gap-2"
-  }, group.options.map(opt => /*#__PURE__*/React.createElement("label", {
-    key: opt.id,
-    className: "flex items-center px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: selected.includes(opt.id),
-    onChange: () => handleToggle(opt.id),
-    className: "mr-2"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, opt.label)))))))), mode === 'unlimited' && /*#__PURE__*/React.createElement("div", {
+  }, MOCK.mpSceneGroups.map(function (group, gi) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: gi
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "text-sm font-medium text-gray-700 mb-2"
+    }, group.groupName), /*#__PURE__*/React.createElement("div", {
+      className: "flex flex-wrap gap-2"
+    }, group.options.map(function (opt) {
+      return /*#__PURE__*/React.createElement("label", {
+        key: opt.id,
+        className: "flex items-center px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+      }, /*#__PURE__*/React.createElement("input", {
+        type: "checkbox",
+        checked: selected.includes(opt.id),
+        onChange: function onChange() {
+          return handleToggle(opt.id);
+        },
+        className: "mr-2"
+      }), /*#__PURE__*/React.createElement("span", {
+        className: "text-sm"
+      }, opt.label));
+    })));
+  }))), mode === 'unlimited' && /*#__PURE__*/React.createElement("div", {
     className: "text-center text-gray-400 py-8"
-  }, "已选择\"不限\"，将投放到所有可用场景")), /*#__PURE__*/React.createElement("div", {
+  }, "\u5DF2\u9009\u62E9\"\u4E0D\u9650\"\uFF0C\u5C06\u6295\u653E\u5230\u6240\u6709\u53EF\u7528\u573A\u666F")), /*#__PURE__*/React.createElement("div", {
     className: "p-4 border-t flex justify-end gap-3"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     className: "btn-secondary"
-  }, "取消"), /*#__PURE__*/React.createElement("button", {
+  }, "\u53D6\u6D88"), /*#__PURE__*/React.createElement("button", {
     onClick: handleConfirm,
     className: "btn-primary"
-  }, "确认"))));
+  }, "\u786E\u8BA4"))));
 }
 
 // 素材库弹窗（视频+图片，带排序和日期维度）
-function MaterialModal({
-  show,
-  onClose,
-  onConfirm,
-  selectedMaterials,
-  accountId
-}) {
-  const [activeTab, setActiveTab] = useState('video'); // 'video' | 'image'
-  const [sortField, setSortField] = useState('spend'); // 'spend' | 'ctr' | 'cvr'
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [timeRange, setTimeRange] = useState('7day'); // 'yesterday' | '7day'
-  const [page, setPage] = useState(1);
-  const [batchInputText, setBatchInputText] = useState('');
-  const [showBatchModal, setShowBatchModal] = useState(false);
-  const [localSelected, setLocalSelected] = useState(selectedMaterials.map(m => m.id));
-  const perPage = 50;
-  useEffect(() => {
+function MaterialModal(_ref3) {
+  var show = _ref3.show,
+    onClose = _ref3.onClose,
+    onConfirm = _ref3.onConfirm,
+    selectedMaterials = _ref3.selectedMaterials,
+    accountId = _ref3.accountId;
+  var _useState5 = useState('video'),
+    _useState6 = _slicedToArray(_useState5, 2),
+    activeTab = _useState6[0],
+    setActiveTab = _useState6[1]; // 'video' | 'image'
+  var _useState7 = useState('spend'),
+    _useState8 = _slicedToArray(_useState7, 2),
+    sortField = _useState8[0],
+    setSortField = _useState8[1]; // 'spend' | 'ctr' | 'cvr'
+  var _useState9 = useState('desc'),
+    _useState0 = _slicedToArray(_useState9, 2),
+    sortOrder = _useState0[0],
+    setSortOrder = _useState0[1];
+  var _useState1 = useState('7day'),
+    _useState10 = _slicedToArray(_useState1, 2),
+    timeRange = _useState10[0],
+    setTimeRange = _useState10[1]; // 'yesterday' | '7day'
+  var _useState11 = useState(1),
+    _useState12 = _slicedToArray(_useState11, 2),
+    page = _useState12[0],
+    setPage = _useState12[1];
+  var _useState13 = useState(''),
+    _useState14 = _slicedToArray(_useState13, 2),
+    batchInputText = _useState14[0],
+    setBatchInputText = _useState14[1];
+  var _useState15 = useState(false),
+    _useState16 = _slicedToArray(_useState15, 2),
+    showBatchModal = _useState16[0],
+    setShowBatchModal = _useState16[1];
+  var _useState17 = useState(selectedMaterials.map(function (m) {
+      return m.id;
+    })),
+    _useState18 = _slicedToArray(_useState17, 2),
+    localSelected = _useState18[0],
+    setLocalSelected = _useState18[1];
+  var perPage = 50;
+  useEffect(function () {
     if (show) {
-      setLocalSelected(selectedMaterials.map(m => m.id));
+      setLocalSelected(selectedMaterials.map(function (m) {
+        return m.id;
+      }));
       setPage(1);
     }
   }, [show, selectedMaterials]);
-  const allMaterials = activeTab === 'video' ? MOCK.videoMaterials : MOCK.imageMaterials;
+  var allMaterials = activeTab === 'video' ? MOCK.videoMaterials : MOCK.imageMaterials;
 
   // 排序
-  const sorted = [...allMaterials].sort((a, b) => {
-    const field = sortField;
-    const multiplier = sortOrder === 'desc' ? -1 : 1;
+  var sorted = _toConsumableArray(allMaterials).sort(function (a, b) {
+    var field = sortField;
+    var multiplier = sortOrder === 'desc' ? -1 : 1;
     return (a[field] - b[field]) * multiplier;
   });
-  const totalPages = Math.ceil(sorted.length / perPage);
-  const paged = sorted.slice((page - 1) * perPage, page * perPage);
-  const toggleSelect = id => {
+  var totalPages = Math.ceil(sorted.length / perPage);
+  var paged = sorted.slice((page - 1) * perPage, page * perPage);
+  var toggleSelect = function toggleSelect(id) {
     if (localSelected.includes(id)) {
-      setLocalSelected(localSelected.filter(s => s !== id));
+      setLocalSelected(localSelected.filter(function (s) {
+        return s !== id;
+      }));
     } else {
       if (localSelected.length >= 100) {
         alert('最多选择100个素材');
         return;
       }
-      setLocalSelected([...localSelected, id]);
+      setLocalSelected([].concat(_toConsumableArray(localSelected), [id]));
     }
   };
-  const handleBatchInput = () => {
-    const ids = batchInputText.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
-    let added = 0;
-    ids.forEach(token => {
-      const found = allMaterials.find(m => m.id === token || m.name === token);
+  var handleBatchInput = function handleBatchInput() {
+    var ids = batchInputText.split(/[,，\s]+/).map(function (s) {
+      return s.trim();
+    }).filter(Boolean);
+    var added = 0;
+    ids.forEach(function (token) {
+      var found = allMaterials.find(function (m) {
+        return m.id === token || m.name === token;
+      });
       if (found && !localSelected.includes(found.id)) {
         if (localSelected.length + added >= 100) return;
         localSelected.push(found.id);
         added++;
       }
     });
-    setLocalSelected([...localSelected]);
+    setLocalSelected(_toConsumableArray(localSelected));
     setBatchInputText('');
-    alert(`已批量添加 ${added} 个素材`);
+    alert("\u5DF2\u6279\u91CF\u6DFB\u52A0 ".concat(added, " \u4E2A\u7D20\u6750"));
   };
-  const handleBatchModalInput = () => {
-    const ids = batchInputText.split(/[\n,，\s]+/).map(s => s.trim()).filter(Boolean);
-    let added = 0;
-    ids.forEach(token => {
-      const found = allMaterials.find(m => m.id === token || m.name === token);
+  var handleBatchModalInput = function handleBatchModalInput() {
+    var ids = batchInputText.split(/[\n,，\s]+/).map(function (s) {
+      return s.trim();
+    }).filter(Boolean);
+    var added = 0;
+    ids.forEach(function (token) {
+      var found = allMaterials.find(function (m) {
+        return m.id === token || m.name === token;
+      });
       if (found && !localSelected.includes(found.id)) {
         if (localSelected.length + added >= 100) return;
         localSelected.push(found.id);
         added++;
       }
     });
-    setLocalSelected([...localSelected]);
+    setLocalSelected(_toConsumableArray(localSelected));
     setBatchInputText('');
     setShowBatchModal(false);
-    alert(`已批量添加 ${added} 个素材`);
+    alert("\u5DF2\u6279\u91CF\u6DFB\u52A0 ".concat(added, " \u4E2A\u7D20\u6750"));
   };
-  const handleConfirm = () => {
-    const all = [...MOCK.videoMaterials, ...MOCK.imageMaterials];
-    const result = localSelected.map(id => all.find(m => m.id === id)).filter(Boolean);
+  var handleConfirm = function handleConfirm() {
+    var all = [].concat(_toConsumableArray(MOCK.videoMaterials), _toConsumableArray(MOCK.imageMaterials));
+    var result = localSelected.map(function (id) {
+      return all.find(function (m) {
+        return m.id === id;
+      });
+    }).filter(Boolean);
     onConfirm(result);
     onClose();
   };
@@ -643,12 +730,14 @@ function MaterialModal({
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
     className: "modal-content w-full max-w-6xl",
-    onClick: e => e.stopPropagation()
+    onClick: function onClick(e) {
+      return e.stopPropagation();
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between p-4 border-b"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-lg font-bold"
-  }, "选择素材（已选 ", localSelected.length, "/100）"), /*#__PURE__*/React.createElement("button", {
+  }, "\u9009\u62E9\u7D20\u6750\uFF08\u5DF2\u9009 ", localSelected.length, "/100\uFF09"), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     className: "text-gray-400 hover:text-gray-600"
   }, /*#__PURE__*/React.createElement("i", {
@@ -658,89 +747,103 @@ function MaterialModal({
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex rounded-lg overflow-hidden border border-gray-300"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
+    onClick: function onClick() {
       setActiveTab('video');
       setPage(1);
     },
-    className: `px-4 py-2 text-sm ${activeTab === 'video' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`
-  }, "🎬 视频素材"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
+    className: "px-4 py-2 text-sm ".concat(activeTab === 'video' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700')
+  }, "\uD83C\uDFAC \u89C6\u9891\u7D20\u6750"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
       setActiveTab('image');
       setPage(1);
     },
-    className: `px-4 py-2 text-sm ${activeTab === 'image' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`
-  }, "🖼️ 图片素材")), /*#__PURE__*/React.createElement("div", {
+    className: "px-4 py-2 text-sm ".concat(activeTab === 'image' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700')
+  }, "\uD83D\uDDBC\uFE0F \u56FE\u7247\u7D20\u6750")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "排序："), /*#__PURE__*/React.createElement("select", {
+  }, "\u6392\u5E8F\uFF1A"), /*#__PURE__*/React.createElement("select", {
     value: sortField,
-    onChange: e => setSortField(e.target.value),
+    onChange: function onChange(e) {
+      return setSortField(e.target.value);
+    },
     className: "px-2 py-1 border border-gray-300 rounded text-sm"
   }, /*#__PURE__*/React.createElement("option", {
     value: "spend"
-  }, "消耗"), /*#__PURE__*/React.createElement("option", {
+  }, "\u6D88\u8017"), /*#__PURE__*/React.createElement("option", {
     value: "ctr"
   }, "CTR"), /*#__PURE__*/React.createElement("option", {
     value: "cvr"
   }, "CVR")), /*#__PURE__*/React.createElement("select", {
     value: sortOrder,
-    onChange: e => setSortOrder(e.target.value),
+    onChange: function onChange(e) {
+      return setSortOrder(e.target.value);
+    },
     className: "px-2 py-1 border border-gray-300 rounded text-sm"
   }, /*#__PURE__*/React.createElement("option", {
     value: "desc"
-  }, "从高到低"), /*#__PURE__*/React.createElement("option", {
+  }, "\u4ECE\u9AD8\u5230\u4F4E"), /*#__PURE__*/React.createElement("option", {
     value: "asc"
-  }, "从低到高"))), /*#__PURE__*/React.createElement("div", {
+  }, "\u4ECE\u4F4E\u5230\u9AD8"))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "时间维度："), /*#__PURE__*/React.createElement("label", {
+  }, "\u65F6\u95F4\u7EF4\u5EA6\uFF1A"), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "timeRange",
     value: "yesterday",
     checked: timeRange === 'yesterday',
-    onChange: e => setTimeRange(e.target.value),
+    onChange: function onChange(e) {
+      return setTimeRange(e.target.value);
+    },
     className: "mr-1"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "昨日")), /*#__PURE__*/React.createElement("label", {
+  }, "\u6628\u65E5")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "timeRange",
     value: "7day",
     checked: timeRange === '7day',
-    onChange: e => setTimeRange(e.target.value),
+    onChange: function onChange(e) {
+      return setTimeRange(e.target.value);
+    },
     className: "mr-1"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "近七日"))), /*#__PURE__*/React.createElement("div", {
+  }, "\u8FD1\u4E03\u65E5"))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 ml-auto"
   }, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: batchInputText,
-    onChange: e => setBatchInputText(e.target.value),
-    placeholder: "批量输入素材ID或名称",
+    onChange: function onChange(e) {
+      return setBatchInputText(e.target.value);
+    },
+    placeholder: "\u6279\u91CF\u8F93\u5165\u7D20\u6750ID\u6216\u540D\u79F0",
     className: "px-2 py-1 border border-gray-300 rounded text-sm w-48"
   }), /*#__PURE__*/React.createElement("button", {
     onClick: handleBatchInput,
     className: "btn-secondary text-sm"
-  }, "批量添加"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowBatchModal(true),
+  }, "\u6279\u91CF\u6DFB\u52A0"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setShowBatchModal(true);
+    },
     className: "btn-secondary text-sm bg-blue-50 text-blue-600 border-blue-300"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-list mr-1"
-  }), "批量选择"))), /*#__PURE__*/React.createElement("div", {
+  }), "\u6279\u91CF\u9009\u62E9"))), /*#__PURE__*/React.createElement("div", {
     className: "px-4 py-2 border-b flex items-center justify-between text-sm text-gray-600"
-  }, /*#__PURE__*/React.createElement("span", null, "第 ", page, " / ", totalPages, " 页，共 ", sorted.length, " 个", activeTab === 'video' ? '视频' : '图片', "素材"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, "\u7B2C ", page, " / ", totalPages, " \u9875\uFF0C\u5171 ", sorted.length, " \u4E2A", activeTab === 'video' ? '视频' : '图片', "\u7D20\u6750"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      const currentPageIds = paged.map(m => m.id);
-      const newSelected = [...new Set([...localSelected, ...currentPageIds])];
+    onClick: function onClick() {
+      var currentPageIds = paged.map(function (m) {
+        return m.id;
+      });
+      var newSelected = _toConsumableArray(new Set([].concat(_toConsumableArray(localSelected), _toConsumableArray(currentPageIds))));
       if (newSelected.length > 100) {
         alert('最多选择100个素材');
         return;
@@ -750,35 +853,41 @@ function MaterialModal({
     className: "btn-secondary text-sm bg-green-50 text-green-700 border-green-300 hover:bg-green-100"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-check-square mr-1"
-  }), "全选本页"), /*#__PURE__*/React.createElement("button", {
+  }), "\u5168\u9009\u672C\u9875"), /*#__PURE__*/React.createElement("button", {
     disabled: page <= 1,
-    onClick: () => setPage(page - 1),
+    onClick: function onClick() {
+      return setPage(page - 1);
+    },
     className: "btn-secondary text-sm",
     style: page <= 1 ? {
       opacity: 0.5,
       cursor: 'not-allowed'
     } : {}
-  }, "上一页"), /*#__PURE__*/React.createElement("button", {
+  }, "\u4E0A\u4E00\u9875"), /*#__PURE__*/React.createElement("button", {
     disabled: page >= totalPages,
-    onClick: () => setPage(page + 1),
+    onClick: function onClick() {
+      return setPage(page + 1);
+    },
     className: "btn-secondary text-sm",
     style: page >= totalPages ? {
       opacity: 0.5,
       cursor: 'not-allowed'
     } : {}
-  }, "下一页"))), /*#__PURE__*/React.createElement("div", {
+  }, "\u4E0B\u4E00\u9875"))), /*#__PURE__*/React.createElement("div", {
     className: "overflow-y-auto flex-1 p-4",
     style: {
       maxHeight: '50vh'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
-  }, paged.map(m => {
-    const isSelected = localSelected.includes(m.id);
+  }, paged.map(function (m) {
+    var isSelected = localSelected.includes(m.id);
     return /*#__PURE__*/React.createElement("div", {
       key: m.id,
-      onClick: () => toggleSelect(m.id),
-      className: `border-2 rounded-lg p-3 cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`
+      onClick: function onClick() {
+        return toggleSelect(m.id);
+      },
+      className: "border-2 rounded-lg p-3 cursor-pointer transition-all ".concat(isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50')
     }, /*#__PURE__*/React.createElement("div", {
       className: "text-4xl text-center mb-2"
     }, m.thumb), /*#__PURE__*/React.createElement("p", {
@@ -791,19 +900,19 @@ function MaterialModal({
       className: "flex justify-between"
     }, /*#__PURE__*/React.createElement("span", {
       className: "text-gray-500"
-    }, "消耗："), /*#__PURE__*/React.createElement("span", {
+    }, "\u6D88\u8017\uFF1A"), /*#__PURE__*/React.createElement("span", {
       className: "font-medium text-orange-600"
-    }, "¥", m.spend.toFixed(2))), /*#__PURE__*/React.createElement("div", {
+    }, "\xA5", m.spend.toFixed(2))), /*#__PURE__*/React.createElement("div", {
       className: "flex justify-between"
     }, /*#__PURE__*/React.createElement("span", {
       className: "text-gray-500"
-    }, "CTR："), /*#__PURE__*/React.createElement("span", {
+    }, "CTR\uFF1A"), /*#__PURE__*/React.createElement("span", {
       className: "font-medium text-blue-600"
     }, m.ctr, "%")), /*#__PURE__*/React.createElement("div", {
       className: "flex justify-between"
     }, /*#__PURE__*/React.createElement("span", {
       className: "text-gray-500"
-    }, "CVR："), /*#__PURE__*/React.createElement("span", {
+    }, "CVR\uFF1A"), /*#__PURE__*/React.createElement("span", {
       className: "font-medium text-green-600"
     }, m.cvr, "%"))), isSelected && /*#__PURE__*/React.createElement("div", {
       className: "text-center mt-1"
@@ -814,105 +923,146 @@ function MaterialModal({
     className: "p-4 border-t flex justify-between items-center"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "已选择 ", localSelected.length, " 个素材（可多次选择，累计最多100个）"), /*#__PURE__*/React.createElement("div", {
+  }, "\u5DF2\u9009\u62E9 ", localSelected.length, " \u4E2A\u7D20\u6750\uFF08\u53EF\u591A\u6B21\u9009\u62E9\uFF0C\u7D2F\u8BA1\u6700\u591A100\u4E2A\uFF09"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-3"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      onConfirm(localSelected.map(id => [...MOCK.videoMaterials, ...MOCK.imageMaterials].find(m => m.id === id)).filter(Boolean));
+    onClick: function onClick() {
+      onConfirm(localSelected.map(function (id) {
+        return [].concat(_toConsumableArray(MOCK.videoMaterials), _toConsumableArray(MOCK.imageMaterials)).find(function (m) {
+          return m.id === id;
+        });
+      }).filter(Boolean));
       setLocalSelected([]);
     },
     className: "btn-secondary text-sm"
-  }, "清空重选"), /*#__PURE__*/React.createElement("button", {
+  }, "\u6E05\u7A7A\u91CD\u9009"), /*#__PURE__*/React.createElement("button", {
     onClick: handleConfirm,
     className: "btn-primary"
-  }, "确认选择")))), showBatchModal && /*#__PURE__*/React.createElement("div", {
+  }, "\u786E\u8BA4\u9009\u62E9")))), showBatchModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     style: {
       zIndex: 60
     },
-    onClick: () => setShowBatchModal(false)
+    onClick: function onClick() {
+      return setShowBatchModal(false);
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-xl p-6 w-full max-w-lg",
-    onClick: e => e.stopPropagation()
+    onClick: function onClick(e) {
+      return e.stopPropagation();
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-4"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "text-lg font-bold"
-  }, "批量选择素材"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowBatchModal(false),
+  }, "\u6279\u91CF\u9009\u62E9\u7D20\u6750"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setShowBatchModal(false);
+    },
     className: "text-gray-400 hover:text-gray-600"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-times"
   }))), /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-600 mb-3"
-  }, "请输入素材ID或名称，每行一个或用逗号/空格分隔"), /*#__PURE__*/React.createElement("textarea", {
+  }, "\u8BF7\u8F93\u5165\u7D20\u6750ID\u6216\u540D\u79F0\uFF0C\u6BCF\u884C\u4E00\u4E2A\u6216\u7528\u9017\u53F7/\u7A7A\u683C\u5206\u9694"), /*#__PURE__*/React.createElement("textarea", {
     value: batchInputText,
-    onChange: e => setBatchInputText(e.target.value),
-    placeholder: "例如：\nvm_001\nvm_002\n素材A",
+    onChange: function onChange(e) {
+      return setBatchInputText(e.target.value);
+    },
+    placeholder: "\u4F8B\u5982\uFF1A\nvm_001\nvm_002\n\u7D20\u6750A",
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-4",
     rows: "6"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-end gap-3"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowBatchModal(false),
+    onClick: function onClick() {
+      return setShowBatchModal(false);
+    },
     className: "btn-secondary"
-  }, "取消"), /*#__PURE__*/React.createElement("button", {
+  }, "\u53D6\u6D88"), /*#__PURE__*/React.createElement("button", {
     onClick: handleBatchModalInput,
     className: "btn-primary"
-  }, "确认添加")))));
+  }, "\u786E\u8BA4\u6DFB\u52A0")))));
 }
 
 // 文案库弹窗（支持批量选择 + 添加文案，无CTR）
-function CopyModal({
-  show,
-  onClose,
-  onConfirm,
-  selectedCopies
-}) {
-  const [localSelected, setLocalSelected] = useState(selectedCopies.map(c => c.id));
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newCopyContent, setNewCopyContent] = useState('');
-  const [copies, setCopies] = useState(MOCK.copyLibrary);
-  useEffect(() => {
+function CopyModal(_ref4) {
+  var show = _ref4.show,
+    onClose = _ref4.onClose,
+    onConfirm = _ref4.onConfirm,
+    selectedCopies = _ref4.selectedCopies;
+  var _useState19 = useState(selectedCopies.map(function (c) {
+      return c.id;
+    })),
+    _useState20 = _slicedToArray(_useState19, 2),
+    localSelected = _useState20[0],
+    setLocalSelected = _useState20[1];
+  var _useState21 = useState(false),
+    _useState22 = _slicedToArray(_useState21, 2),
+    showAddForm = _useState22[0],
+    setShowAddForm = _useState22[1];
+  var _useState23 = useState(''),
+    _useState24 = _slicedToArray(_useState23, 2),
+    newCopyContent = _useState24[0],
+    setNewCopyContent = _useState24[1];
+  var _useState25 = useState(MOCK.copyLibrary),
+    _useState26 = _slicedToArray(_useState25, 2),
+    copies = _useState26[0],
+    setCopies = _useState26[1];
+  useEffect(function () {
     if (show) {
-      setLocalSelected(selectedCopies.map(c => c.id));
+      setLocalSelected(selectedCopies.map(function (c) {
+        return c.id;
+      }));
       setShowAddForm(false);
       setNewCopyContent('');
     }
   }, [show, selectedCopies]);
-  const toggleSelect = id => {
+  var toggleSelect = function toggleSelect(id) {
     if (localSelected.includes(id)) {
-      setLocalSelected(localSelected.filter(s => s !== id));
+      setLocalSelected(localSelected.filter(function (s) {
+        return s !== id;
+      }));
     } else {
-      setLocalSelected([...localSelected, id]);
+      setLocalSelected([].concat(_toConsumableArray(localSelected), [id]));
     }
   };
-  const handleAddCopy = () => {
+  var handleAddCopy = function handleAddCopy() {
     if (!newCopyContent.trim()) return;
-    const newCopy = {
-      id: `c_${Date.now()}`,
+    var newCopy = {
+      id: "c_".concat(Date.now()),
       content: newCopyContent.trim(),
       ctr: 0
     };
-    setCopies([newCopy, ...copies]);
-    setLocalSelected([...localSelected, newCopy.id]);
+    setCopies([newCopy].concat(_toConsumableArray(copies)));
+    setLocalSelected([].concat(_toConsumableArray(localSelected), [newCopy.id]));
     setNewCopyContent('');
     setShowAddForm(false);
   };
-  const handleBatchInput = () => {
-    const input = prompt('请输入文案内容，每行一条：');
+  var handleBatchInput = function handleBatchInput() {
+    var input = prompt('请输入文案内容，每行一条：');
     if (!input) return;
-    const lines = input.split('\n').map(s => s.trim()).filter(Boolean);
-    const newCopies = lines.map((content, i) => ({
-      id: `c_batch_${Date.now()}_${i}`,
-      content,
-      ctr: 0
-    }));
-    setCopies([...newCopies, ...copies]);
-    setLocalSelected([...localSelected, ...newCopies.map(c => c.id)]);
+    var lines = input.split('\n').map(function (s) {
+      return s.trim();
+    }).filter(Boolean);
+    var newCopies = lines.map(function (content, i) {
+      return {
+        id: "c_batch_".concat(Date.now(), "_").concat(i),
+        content: content,
+        ctr: 0
+      };
+    });
+    setCopies([].concat(_toConsumableArray(newCopies), _toConsumableArray(copies)));
+    setLocalSelected([].concat(_toConsumableArray(localSelected), _toConsumableArray(newCopies.map(function (c) {
+      return c.id;
+    }))));
   };
-  const handleConfirm = () => {
-    const result = localSelected.map(id => copies.find(c => c.id === id)).filter(Boolean);
+  var handleConfirm = function handleConfirm() {
+    var result = localSelected.map(function (id) {
+      return copies.find(function (c) {
+        return c.id === id;
+      });
+    }).filter(Boolean);
     onConfirm(result);
     onClose();
   };
@@ -922,12 +1072,14 @@ function CopyModal({
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
     className: "modal-content w-full max-w-2xl",
-    onClick: e => e.stopPropagation()
+    onClick: function onClick(e) {
+      return e.stopPropagation();
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between p-4 border-b"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-lg font-bold"
-  }, "选择广告文案（已选 ", localSelected.length, " 条，支持多选）"), /*#__PURE__*/React.createElement("button", {
+  }, "\u9009\u62E9\u5E7F\u544A\u6587\u6848\uFF08\u5DF2\u9009 ", localSelected.length, " \u6761\uFF0C\u652F\u6301\u591A\u9009\uFF09"), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     className: "text-gray-400 hover:text-gray-600"
   }, /*#__PURE__*/React.createElement("i", {
@@ -935,7 +1087,9 @@ function CopyModal({
   }))), /*#__PURE__*/React.createElement("div", {
     className: "px-4 py-2 border-b bg-gray-50 flex gap-3"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowAddForm(!showAddForm),
+    onClick: function onClick() {
+      return setShowAddForm(!showAddForm);
+    },
     className: "btn-secondary text-sm"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-plus mr-1"
@@ -944,7 +1098,7 @@ function CopyModal({
     className: "btn-secondary text-sm"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-list mr-1"
-  }), "批量添加")), showAddForm && /*#__PURE__*/React.createElement("div", {
+  }), "\u6279\u91CF\u6DFB\u52A0")), showAddForm && /*#__PURE__*/React.createElement("div", {
     className: "px-4 py-3 border-b bg-blue-50"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2 items-end"
@@ -952,28 +1106,32 @@ function CopyModal({
     className: "flex-1"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-xs text-gray-600 mb-1"
-  }, "文案内容"), /*#__PURE__*/React.createElement("input", {
+  }, "\u6587\u6848\u5185\u5BB9"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: newCopyContent,
-    onChange: e => setNewCopyContent(e.target.value),
-    placeholder: "输入文案内容",
+    onChange: function onChange(e) {
+      return setNewCopyContent(e.target.value);
+    },
+    placeholder: "\u8F93\u5165\u6587\u6848\u5185\u5BB9",
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   })), /*#__PURE__*/React.createElement("button", {
     onClick: handleAddCopy,
     className: "btn-primary text-sm"
-  }, "添加"))), /*#__PURE__*/React.createElement("div", {
+  }, "\u6DFB\u52A0"))), /*#__PURE__*/React.createElement("div", {
     className: "overflow-y-auto flex-1 p-4",
     style: {
       maxHeight: '55vh'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "space-y-2"
-  }, [...copies].map(copy => {
-    const isSelected = localSelected.includes(copy.id);
+  }, _toConsumableArray(copies).map(function (copy) {
+    var isSelected = localSelected.includes(copy.id);
     return /*#__PURE__*/React.createElement("div", {
       key: copy.id,
-      onClick: () => toggleSelect(copy.id),
-      className: `p-3 border-2 rounded-lg cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`
+      onClick: function onClick() {
+        return toggleSelect(copy.id);
+      },
+      className: "p-3 border-2 rounded-lg cursor-pointer transition-all ".concat(isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300')
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-between"
     }, /*#__PURE__*/React.createElement("span", {
@@ -987,115 +1145,121 @@ function CopyModal({
     className: "p-4 border-t flex justify-between items-center"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "已选择 ", localSelected.length, " 条文案"), /*#__PURE__*/React.createElement("button", {
+  }, "\u5DF2\u9009\u62E9 ", localSelected.length, " \u6761\u6587\u6848"), /*#__PURE__*/React.createElement("button", {
     onClick: handleConfirm,
     className: "btn-primary"
-  }, "确认选择"))));
+  }, "\u786E\u8BA4\u9009\u62E9"))));
 }
 
 // 周历时间网格组件
 // 最小单位：1小时（视觉上每1小时分2个0.5h格子，共48列/天）
-function TimeGrid({
-  value,
-  onChange
-}) {
-  const DAYS = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
-  const HOURS = Array.from({
+function TimeGrid(_ref5) {
+  var value = _ref5.value,
+    onChange = _ref5.onChange;
+  var DAYS = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+  var HOURS = Array.from({
     length: 24
-  }, (_, i) => i); // 0~23 整点
-  const TOTAL_SLOTS = 48; // 48个0.5h格子（每天）
-  const SLOTS_PER_HOUR = 2; // 每1小时=2个格子
+  }, function (_, i) {
+    return i;
+  }); // 0~23 整点
+  var TOTAL_SLOTS = 48; // 48个0.5h格子（每天）
+  var SLOTS_PER_HOUR = 2; // 每1小时=2个格子
 
   // value format: { "0-0": true/false, ... } where key is "dayIndex-slotIndex", slotIndex=0..47
-  const [slots, setSlots] = useState(value || {});
-  const [isSelecting, setIsSelecting] = useState(false);
-  const [selectStart, setSelectStart] = useState(null);
-  useEffect(() => {
+  var _useState27 = useState(value || {}),
+    _useState28 = _slicedToArray(_useState27, 2),
+    slots = _useState28[0],
+    setSlots = _useState28[1];
+  var _useState29 = useState(false),
+    _useState30 = _slicedToArray(_useState29, 2),
+    isSelecting = _useState30[0],
+    setIsSelecting = _useState30[1];
+  var _useState31 = useState(null),
+    _useState32 = _slicedToArray(_useState31, 2),
+    selectStart = _useState32[0],
+    setSelectStart = _useState32[1];
+  useEffect(function () {
     if (value) setSlots(value);
   }, [value]);
 
   // 单击切换单个0.5h格子
-  const handleCellClick = (dayIdx, slotIdx) => {
-    const key = `${dayIdx}-${slotIdx}`;
-    const newSlots = {
-      ...slots
-    };
+  var handleCellClick = function handleCellClick(dayIdx, slotIdx) {
+    var key = "".concat(dayIdx, "-").concat(slotIdx);
+    var newSlots = _objectSpread({}, slots);
     newSlots[key] = !newSlots[key];
     setSlots(newSlots);
     onChange(newSlots);
   };
 
   // 鼠标按下（开始拖选，切换单个0.5h格子）
-  const handleMouseDown = (dayIdx, slotIdx) => {
+  var handleMouseDown = function handleMouseDown(dayIdx, slotIdx) {
     setIsSelecting(true);
     setSelectStart({
-      dayIdx,
-      slotIdx
+      dayIdx: dayIdx,
+      slotIdx: slotIdx
     });
-    const key = `${dayIdx}-${slotIdx}`;
-    const newSlots = {
-      ...slots
-    };
+    var key = "".concat(dayIdx, "-").concat(slotIdx);
+    var newSlots = _objectSpread({}, slots);
     newSlots[key] = !newSlots[key];
     setSlots(newSlots);
     onChange(newSlots);
   };
-  const handleMouseEnter = (dayIdx, slotIdx) => {
+  var handleMouseEnter = function handleMouseEnter(dayIdx, slotIdx) {
     if (!isSelecting || !selectStart) return;
-    const newSlots = {
-      ...slots
-    };
-    const startDay = Math.min(selectStart.dayIdx, dayIdx);
-    const endDay = Math.max(selectStart.dayIdx, dayIdx);
-    const startSlot = Math.min(selectStart.slotIdx, slotIdx);
-    const endSlot = Math.max(selectStart.slotIdx, slotIdx);
-    const startKey = `${selectStart.dayIdx}-${selectStart.slotIdx}`;
-    const shouldSet = !!slots[startKey];
-    for (let d = startDay; d <= endDay; d++) {
-      for (let s = startSlot; s <= endSlot; s++) {
-        newSlots[`${d}-${s}`] = shouldSet;
+    var newSlots = _objectSpread({}, slots);
+    var startDay = Math.min(selectStart.dayIdx, dayIdx);
+    var endDay = Math.max(selectStart.dayIdx, dayIdx);
+    var startSlot = Math.min(selectStart.slotIdx, slotIdx);
+    var endSlot = Math.max(selectStart.slotIdx, slotIdx);
+    var startKey = "".concat(selectStart.dayIdx, "-").concat(selectStart.slotIdx);
+    var shouldSet = !!slots[startKey];
+    for (var d = startDay; d <= endDay; d++) {
+      for (var s = startSlot; s <= endSlot; s++) {
+        newSlots["".concat(d, "-").concat(s)] = shouldSet;
       }
     }
     setSlots(newSlots);
     onChange(newSlots);
   };
-  const handleMouseUp = () => {
+  var handleMouseUp = function handleMouseUp() {
     setIsSelecting(false);
     setSelectStart(null);
   };
-  useEffect(() => {
+  useEffect(function () {
     if (isSelecting) {
       document.addEventListener('mouseup', handleMouseUp);
-      return () => document.removeEventListener('mouseup', handleMouseUp);
+      return function () {
+        return document.removeEventListener('mouseup', handleMouseUp);
+      };
     }
   }, [isSelecting]);
-  const clearAll = () => {
+  var clearAll = function clearAll() {
     setSlots({});
     onChange({});
   };
 
   // 将slot索引转为时间字符串 "HH:MM"
-  const slotToTime = slotIdx => {
-    const h = Math.floor(slotIdx / SLOTS_PER_HOUR);
-    const m = slotIdx % SLOTS_PER_HOUR * 30;
+  var slotToTime = function slotToTime(slotIdx) {
+    var h = Math.floor(slotIdx / SLOTS_PER_HOUR);
+    var m = slotIdx % SLOTS_PER_HOUR * 30;
     return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
   };
 
   // 生成选中时间段描述文字（按0.5h合并，显示每个格子的起止时间）
-  const buildSelectedText = () => {
-    const parts = [];
-    for (let di = 0; di < 7; di++) {
-      let dayRanges = [];
-      let rangeStart = null;
-      for (let si = 0; si <= TOTAL_SLOTS; si++) {
-        const key = `${di}-${si}`;
-        const isSelected = si < TOTAL_SLOTS ? !!slots[key] : false;
+  var buildSelectedText = function buildSelectedText() {
+    var parts = [];
+    for (var di = 0; di < 7; di++) {
+      var dayRanges = [];
+      var rangeStart = null;
+      for (var si = 0; si <= TOTAL_SLOTS; si++) {
+        var key = "".concat(di, "-").concat(si);
+        var isSelected = si < TOTAL_SLOTS ? !!slots[key] : false;
         if (isSelected) {
           if (rangeStart === null) rangeStart = si;
         } else {
           if (rangeStart !== null) {
             // 结束时间 = 该段最后一个格子的结束时间（即下一个格子的开始时间）
-            const endSi = si; // si 是第一个未选中的格子
+            var endSi = si; // si 是第一个未选中的格子
             dayRanges.push(slotToTime(rangeStart) + '-' + slotToTime(endSi));
             rangeStart = null;
           }
@@ -1107,18 +1271,18 @@ function TimeGrid({
     }
     return parts.length > 0 ? parts.join('；') : '';
   };
-  const selectedText = buildSelectedText();
+  var selectedText = buildSelectedText();
 
   // 计算tooltip文本（显示鼠标所在格子的完整时间段）
-  const getTooltip = (dayIdx, slotIdx) => {
+  var getTooltip = function getTooltip(dayIdx, slotIdx) {
     // 找到包含当前格子的连续选中区间
-    let rangeStart = slotIdx,
+    var rangeStart = slotIdx,
       rangeEnd = slotIdx;
-    while (rangeStart > 0 && slots[`${dayIdx}-${rangeStart - 1}`]) rangeStart--;
-    while (rangeEnd < TOTAL_SLOTS - 1 && slots[`${dayIdx}-${rangeEnd + 1}`]) rangeEnd++;
+    while (rangeStart > 0 && slots["".concat(dayIdx, "-").concat(rangeStart - 1)]) rangeStart--;
+    while (rangeEnd < TOTAL_SLOTS - 1 && slots["".concat(dayIdx, "-").concat(rangeEnd + 1)]) rangeEnd++;
     // 只在这个格子被选中时才显示 tooltip
-    if (!slots[`${dayIdx}-${slotIdx}`]) return '';
-    return `${DAYS[dayIdx]} ${slotToTime(rangeStart)}-${slotToTime(rangeEnd + 1)}`;
+    if (!slots["".concat(dayIdx, "-").concat(slotIdx)]) return '';
+    return "".concat(DAYS[dayIdx], " ").concat(slotToTime(rangeStart), "-").concat(slotToTime(rangeEnd + 1));
   };
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1151,7 +1315,7 @@ function TimeGrid({
       color: '#666',
       fontWeight: 400
     }
-  }, "星期\\时间"), /*#__PURE__*/React.createElement("th", {
+  }, "\u661F\u671F\\\u65F6\u95F4"), /*#__PURE__*/React.createElement("th", {
     colSpan: 24,
     style: {
       textAlign: 'center',
@@ -1176,68 +1340,76 @@ function TimeGrid({
     style: {
       background: '#fafafa'
     }
-  }, HOURS.map(h => /*#__PURE__*/React.createElement("th", {
-    key: h,
-    colSpan: 2,
-    style: {
-      textAlign: 'center',
-      fontSize: '11px',
-      color: '#999',
-      fontWeight: 400,
-      padding: '2px 0',
-      borderBottom: '1px solid #e5e7eb',
-      borderRight: h === 11 || h === 23 ? '1px solid #e5e7eb' : '1px solid #f0f0f0'
-    }
-  }, h)))), /*#__PURE__*/React.createElement("tbody", null, DAYS.map((day, di) => /*#__PURE__*/React.createElement("tr", {
-    key: di
-  }, /*#__PURE__*/React.createElement("td", {
-    style: {
-      borderRight: '1px solid #e5e7eb',
-      borderBottom: di === 6 ? 'none' : '1px solid #e5e7eb',
-      padding: '6px 4px',
-      textAlign: 'center',
-      fontSize: '13px',
-      color: '#333',
-      fontWeight: 500,
-      background: '#fafafa',
-      whiteSpace: 'nowrap'
-    }
-  }, day), Array.from({
-    length: TOTAL_SLOTS
-  }, (_, si) => {
-    const key = `${di}-${si}`;
-    const isSelected = !!slots[key];
-    const isHourBoundary = si % SLOTS_PER_HOUR === 0; // 整点边界
-    const isNoonBoundary = si === 24; // 正午分隔
-    return /*#__PURE__*/React.createElement("td", {
-      key: si,
-      onMouseDown: () => handleMouseDown(di, si),
-      onMouseEnter: () => handleMouseEnter(di, si),
-      title: isSelected ? getTooltip(di, si) : `${day} ${slotToTime(si)}`,
+  }, HOURS.map(function (h) {
+    return /*#__PURE__*/React.createElement("th", {
+      key: h,
+      colSpan: 2,
       style: {
-        cursor: 'pointer',
-        borderBottom: di === 6 ? 'none' : '1px solid #f5f5f5',
-        borderRight: isNoonBoundary ? '2px solid #e5e7eb' : isHourBoundary ? '1px solid #e5e7eb' : '1px solid #f0f0f0',
-        padding: 0,
-        userSelect: 'none',
-        width: '2.0833%'
+        textAlign: 'center',
+        fontSize: '11px',
+        color: '#999',
+        fontWeight: 400,
+        padding: '2px 0',
+        borderBottom: '1px solid #e5e7eb',
+        borderRight: h === 11 || h === 23 ? '1px solid #e5e7eb' : '1px solid #f0f0f0'
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, h);
+  }))), /*#__PURE__*/React.createElement("tbody", null, DAYS.map(function (day, di) {
+    return /*#__PURE__*/React.createElement("tr", {
+      key: di
+    }, /*#__PURE__*/React.createElement("td", {
       style: {
-        width: '100%',
-        height: '26px',
-        margin: '1px 0',
-        borderRadius: '2px',
-        backgroundColor: isSelected ? '#3b82f6' : '#f9fafb'
-      },
-      onMouseEnter: e => {
-        if (!isSelected) e.target.style.backgroundColor = '#dbeafe';
-      },
-      onMouseLeave: e => {
-        if (!isSelected) e.target.style.backgroundColor = '#f9fafb';
+        borderRight: '1px solid #e5e7eb',
+        borderBottom: di === 6 ? 'none' : '1px solid #e5e7eb',
+        padding: '6px 4px',
+        textAlign: 'center',
+        fontSize: '13px',
+        color: '#333',
+        fontWeight: 500,
+        background: '#fafafa',
+        whiteSpace: 'nowrap'
       }
+    }, day), Array.from({
+      length: TOTAL_SLOTS
+    }, function (_, si) {
+      var key = "".concat(di, "-").concat(si);
+      var isSelected = !!slots[key];
+      var isHourBoundary = si % SLOTS_PER_HOUR === 0; // 整点边界
+      var isNoonBoundary = si === 24; // 正午分隔
+      return /*#__PURE__*/React.createElement("td", {
+        key: si,
+        onMouseDown: function onMouseDown() {
+          return handleMouseDown(di, si);
+        },
+        onMouseEnter: function onMouseEnter() {
+          return handleMouseEnter(di, si);
+        },
+        title: isSelected ? getTooltip(di, si) : "".concat(day, " ").concat(slotToTime(si)),
+        style: {
+          cursor: 'pointer',
+          borderBottom: di === 6 ? 'none' : '1px solid #f5f5f5',
+          borderRight: isNoonBoundary ? '2px solid #e5e7eb' : isHourBoundary ? '1px solid #e5e7eb' : '1px solid #f0f0f0',
+          padding: 0,
+          userSelect: 'none',
+          width: '2.0833%'
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          width: '100%',
+          height: '26px',
+          margin: '1px 0',
+          borderRadius: '2px',
+          backgroundColor: isSelected ? '#3b82f6' : '#f9fafb'
+        },
+        onMouseEnter: function onMouseEnter(e) {
+          if (!isSelected) e.target.style.backgroundColor = '#dbeafe';
+        },
+        onMouseLeave: function onMouseLeave(e) {
+          if (!isSelected) e.target.style.backgroundColor = '#f9fafb';
+        }
+      }));
     }));
-  }))))), /*#__PURE__*/React.createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -1268,7 +1440,7 @@ function TimeGrid({
       borderRadius: '2px',
       background: '#3b82f6'
     }
-  }), "已选"), /*#__PURE__*/React.createElement("span", {
+  }), "\u5DF2\u9009"), /*#__PURE__*/React.createElement("span", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -1283,7 +1455,7 @@ function TimeGrid({
       background: '#f9fafb',
       border: '1px solid #e5e7eb'
     }
-  }), "未选")), /*#__PURE__*/React.createElement("div", {
+  }), "\u672A\u9009")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -1304,7 +1476,7 @@ function TimeGrid({
       fontSize: '12px',
       color: '#999'
     }
-  }, "未选择任何时段"), /*#__PURE__*/React.createElement("button", {
+  }, "\u672A\u9009\u62E9\u4EFB\u4F55\u65F6\u6BB5"), /*#__PURE__*/React.createElement("button", {
     onClick: clearAll,
     style: {
       fontSize: '12px',
@@ -1314,47 +1486,102 @@ function TimeGrid({
       border: 'none',
       padding: '0'
     }
-  }, "清空"))));
+  }, "\u6E05\u7A7A"))));
 }
 // 主应用
 function App() {
+  var _MOCK$regionCascade$p;
   // ===== 基础配置 =====
   // 省份 ID -> 中文名称映射
-  const provinceNameMap = {};
-  (MOCK.regionCascade.provinces['cn'] || []).forEach(p => {
+  var provinceNameMap = {};
+  (MOCK.regionCascade.provinces['cn'] || []).forEach(function (p) {
     provinceNameMap[p.id] = p.name;
   });
-  const getProvinceNames = ids => ids.map(id => provinceNameMap[id] || id).join('、');
-  const [businessType, setBusinessType] = useState('benefit_A');
-  const [channel, setChannel] = useState('gdt');
-  const [selectedAccountIds, setSelectedAccountIds] = useState([]);
-  const [batchInputText, setBatchInputText] = useState('');
-  const [showBatchInput, setShowBatchInput] = useState(false);
-  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  var getProvinceNames = function getProvinceNames(ids) {
+    return ids.map(function (id) {
+      return provinceNameMap[id] || id;
+    }).join('、');
+  };
+  // 获取所有已选城市名称
+  var getSelectedCityNames = function getSelectedCityNames() {
+    var cities = [];
+    Object.values(geoSelectedCities).forEach(function (cityList) {
+      cities.push.apply(cities, _toConsumableArray(cityList));
+    });
+    return cities.length > 0 ? cities.join('、') : '不限';
+  };
+  var _useState33 = useState('benefit_A'),
+    _useState34 = _slicedToArray(_useState33, 2),
+    businessType = _useState34[0],
+    setBusinessType = _useState34[1];
+  var _useState35 = useState('gdt'),
+    _useState36 = _slicedToArray(_useState35, 2),
+    channel = _useState36[0],
+    setChannel = _useState36[1];
+  var _useState37 = useState([]),
+    _useState38 = _slicedToArray(_useState37, 2),
+    selectedAccountIds = _useState38[0],
+    setSelectedAccountIds = _useState38[1];
+  var _useState39 = useState(''),
+    _useState40 = _slicedToArray(_useState39, 2),
+    batchInputText = _useState40[0],
+    setBatchInputText = _useState40[1];
+  var _useState41 = useState(false),
+    _useState42 = _slicedToArray(_useState41, 2),
+    showBatchInput = _useState42[0],
+    setShowBatchInput = _useState42[1];
+  var _useState43 = useState(false),
+    _useState44 = _slicedToArray(_useState43, 2),
+    showAccountDropdown = _useState44[0],
+    setShowAccountDropdown = _useState44[1];
 
   // ===== 营销单元配置 =====
-  const [specificProduct, setSpecificProduct] = useState('sp_001');
-  const [placement, setPlacement] = useState('wechat_video');
-  const [placementScene, setPlacementScene] = useState('');
-  const [showPlacementModal, setShowPlacementModal] = useState(false);
+  var _useState45 = useState('sp_001'),
+    _useState46 = _slicedToArray(_useState45, 2),
+    specificProduct = _useState46[0],
+    setSpecificProduct = _useState46[1];
+  var _useState47 = useState('wechat_video'),
+    _useState48 = _slicedToArray(_useState47, 2),
+    placement = _useState48[0],
+    setPlacement = _useState48[1];
+  var _useState49 = useState(''),
+    _useState50 = _slicedToArray(_useState49, 2),
+    placementScene = _useState50[0],
+    setPlacementScene = _useState50[1];
+  var _useState51 = useState(false),
+    _useState52 = _slicedToArray(_useState51, 2),
+    showPlacementModal = _useState52[0],
+    setShowPlacementModal = _useState52[1];
   // ===== 营销单元配置 - 定向相关 =====
-  const [targetingSource, setTargetingSource] = useState('package');
+  var _useState53 = useState('package'),
+    _useState54 = _slicedToArray(_useState53, 2),
+    targetingSource = _useState54[0],
+    setTargetingSource = _useState54[1];
   // 用户自建定向包（从 localStorage 读取，与 index.html 共用 ad_targeting_packages）
-  const [userTgtPkgs, setUserTgtPkgs] = useState([]);
-  const [showSaveTgtPkgModal, setShowSaveTgtPkgModal] = useState(false);
-  const [saveTgtPkgName, setSaveTgtPkgName] = useState('');
+  var _useState55 = useState([]),
+    _useState56 = _slicedToArray(_useState55, 2),
+    userTgtPkgs = _useState56[0],
+    setUserTgtPkgs = _useState56[1];
+  var _useState57 = useState(false),
+    _useState58 = _slicedToArray(_useState57, 2),
+    showSaveTgtPkgModal = _useState58[0],
+    setShowSaveTgtPkgModal = _useState58[1];
+  var _useState59 = useState(''),
+    _useState60 = _slicedToArray(_useState59, 2),
+    saveTgtPkgName = _useState60[0],
+    setSaveTgtPkgName = _useState60[1];
   // 加载自建定向包
-  useEffect(() => {
+  useEffect(function () {
     try {
-      const raw = localStorage.getItem('ad_targeting_packages');
+      var raw = localStorage.getItem('ad_targeting_packages');
       if (raw) setUserTgtPkgs(JSON.parse(raw));
     } catch (e) {}
   }, []);
   // 保存自建定向包
-  const doSaveAsTgtPkg = () => {
+  var doSaveAsTgtPkg = function doSaveAsTgtPkg() {
     if (!saveTgtPkgName.trim()) return;
-    const now = Date.now();
-    const pkg = {
+    var now = Date.now();
+    var pkg = {
       id: 'user_tp_' + now,
       name: saveTgtPkgName.trim(),
       region: geoMode === 'unlimited' ? '不限' : geoMode === 'region' ? getProvinceNames(geoSelectedProvinces) : '地图选择',
@@ -1367,7 +1594,7 @@ function App() {
       conversionBehavior: conversionBehavior,
       conversionTimeRange: conversionTimeRange
     };
-    const updated = [...userTgtPkgs, pkg];
+    var updated = [].concat(_toConsumableArray(userTgtPkgs), [pkg]);
     setUserTgtPkgs(updated);
     localStorage.setItem('ad_targeting_packages', JSON.stringify(updated));
     setSaveTgtPkgName('');
@@ -1375,32 +1602,65 @@ function App() {
     notify('定向包已保存', 'success');
   };
   // 删除自建定向包
-  const deleteUserTgtPkg = id => {
-    const updated = userTgtPkgs.filter(p => p.id !== id);
+  var deleteUserTgtPkg = function deleteUserTgtPkg(id) {
+    var updated = userTgtPkgs.filter(function (p) {
+      return p.id !== id;
+    });
     setUserTgtPkgs(updated);
     localStorage.setItem('ad_targeting_packages', JSON.stringify(updated));
     // 同时从已选中移除
-    setSelectedTargetingPackages(selectedTargetingPackages.filter(tid => tid !== id));
+    setSelectedTargetingPackages(selectedTargetingPackages.filter(function (tid) {
+      return tid !== id;
+    }));
   };
   // 改为多选：支持定向包组合（同账户不同定向包 = 多个单元）
-  const [selectedTargetingPackages, setSelectedTargetingPackages] = useState([]);
+  var _useState61 = useState([]),
+    _useState62 = _slicedToArray(_useState61, 2),
+    selectedTargetingPackages = _useState62[0],
+    setSelectedTargetingPackages = _useState62[1];
   // 自定义定向 - 地理位置级联
-  const [geoMode, setGeoMode] = useState('region'); // 'unlimited' | 'region'
-  const [geoSelectedCountry, setGeoSelectedCountry] = useState('cn');
-  // 默认全选所有省份
-  const defaultProvinceIds = (MOCK.regionCascade.provinces['cn'] || []).map(p => p.id);
-  const [geoSelectedProvinces, setGeoSelectedProvinces] = useState(defaultProvinceIds);
-  const [geoSelectedCities, setGeoSelectedCities] = useState({}); // { provinceId: [city1, city2] }
-  const [activeProvinceId, setActiveProvinceId] = useState(defaultProvinceIds[0] || ''); // 默认选中第一个省份，右侧显示城市列表
+  var _useState63 = useState('region'),
+    _useState64 = _slicedToArray(_useState63, 2),
+    geoMode = _useState64[0],
+    setGeoMode = _useState64[1]; // 'unlimited' | 'region'
+  var _useState65 = useState('cn'),
+    _useState66 = _slicedToArray(_useState65, 2),
+    geoSelectedCountry = _useState66[0],
+    setGeoSelectedCountry = _useState66[1];
+  // 默认全选所有省份+城市
+  var defaultProvinceIds = (MOCK.regionCascade.provinces['cn'] || []).map(function (p) {
+    return p.id;
+  });
+  var defaultCitiesMap = {};
+  defaultProvinceIds.forEach(function (pid) {
+    defaultCitiesMap[pid] = _toConsumableArray(MOCK.regionCascade.cities[pid] || []);
+  });
+  var _useState67 = useState(defaultProvinceIds),
+    _useState68 = _slicedToArray(_useState67, 2),
+    geoSelectedProvinces = _useState68[0],
+    setGeoSelectedProvinces = _useState68[1];
+  var _useState69 = useState(defaultCitiesMap),
+    _useState70 = _slicedToArray(_useState69, 2),
+    geoSelectedCities = _useState70[0],
+    setGeoSelectedCities = _useState70[1]; // { provinceId: [city1, city2] }
+  var _useState71 = useState(defaultProvinceIds[0] || ''),
+    _useState72 = _slicedToArray(_useState71, 2),
+    activeProvinceId = _useState72[0],
+    setActiveProvinceId = _useState72[1]; // 默认选中第一个省份，右侧显示城市列表
   // 地点类型（只保留常住地）
-  const [locationTypeResident, setLocationTypeResident] = useState(true);
+  var _useState73 = useState(true),
+    _useState74 = _slicedToArray(_useState73, 2),
+    locationTypeResident = _useState74[0],
+    setLocationTypeResident = _useState74[1];
 
   // 地理位置：默认全选所有省份+城市
-  const selectAllProvinceAndCities = () => {
-    const allProvinceIds = (MOCK.regionCascade.provinces['cn'] || []).map(p => p.id);
-    const allCitiesMap = {};
-    allProvinceIds.forEach(pid => {
-      allCitiesMap[pid] = [...(MOCK.regionCascade.cities[pid] || [])];
+  var selectAllProvinceAndCities = function selectAllProvinceAndCities() {
+    var allProvinceIds = (MOCK.regionCascade.provinces['cn'] || []).map(function (p) {
+      return p.id;
+    });
+    var allCitiesMap = {};
+    allProvinceIds.forEach(function (pid) {
+      allCitiesMap[pid] = _toConsumableArray(MOCK.regionCascade.cities[pid] || []);
     });
     setGeoSelectedProvinces(allProvinceIds);
     setGeoSelectedCities(allCitiesMap);
@@ -1408,195 +1668,359 @@ function App() {
   };
 
   // 年龄
-  const [ageSelections, setAgeSelections] = useState(['unlimited']); // array of selected age keys
-  const [customAgeMin, setCustomAgeMin] = useState('');
-  const [customAgeMax, setCustomAgeMax] = useState('');
+  var _useState75 = useState(['unlimited']),
+    _useState76 = _slicedToArray(_useState75, 2),
+    ageSelections = _useState76[0],
+    setAgeSelections = _useState76[1]; // array of selected age keys
+  var _useState77 = useState(''),
+    _useState78 = _slicedToArray(_useState77, 2),
+    customAgeMin = _useState78[0],
+    setCustomAgeMin = _useState78[1];
+  var _useState79 = useState(''),
+    _useState80 = _slicedToArray(_useState79, 2),
+    customAgeMax = _useState80[0],
+    setCustomAgeMax = _useState80[1];
   // 性别
-  const [genderSelection, setGenderSelection] = useState('unlimited'); // 'unlimited' | 'male' | 'female'
+  var _useState81 = useState('unlimited'),
+    _useState82 = _slicedToArray(_useState81, 2),
+    genderSelection = _useState82[0],
+    setGenderSelection = _useState82[1]; // 'unlimited' | 'male' | 'female'
   // 自定义人群
-  const [audienceMode, setAudienceMode] = useState('unlimited'); // 'unlimited' | 'target' | 'exclude'
+  var _useState83 = useState('unlimited'),
+    _useState84 = _slicedToArray(_useState83, 2),
+    audienceMode = _useState84[0],
+    setAudienceMode = _useState84[1]; // 'unlimited' | 'target' | 'exclude'
   // 自定义人群 - 已选列表
-  const [selectedTargetAudiences, setSelectedTargetAudiences] = useState([]);
-  const [selectedExcludeAudiences, setSelectedExcludeAudiences] = useState([]);
+  var _useState85 = useState([]),
+    _useState86 = _slicedToArray(_useState85, 2),
+    selectedTargetAudiences = _useState86[0],
+    setSelectedTargetAudiences = _useState86[1];
+  var _useState87 = useState([]),
+    _useState88 = _slicedToArray(_useState87, 2),
+    selectedExcludeAudiences = _useState88[0],
+    setSelectedExcludeAudiences = _useState88[1];
   // 人群包列表（可刷新）
-  const [audiencePackageList, setAudiencePackageList] = useState([...MOCK.customAudiences]);
-  const [excludeAudiencePackageList, setExcludeAudiencePackageList] = useState([...MOCK.excludeConversions]);
-  const refreshAudiencePackages = () => {
-    setAudiencePackageList([...MOCK.customAudiences]);
+  var _useState89 = useState(_toConsumableArray(MOCK.customAudiences)),
+    _useState90 = _slicedToArray(_useState89, 2),
+    audiencePackageList = _useState90[0],
+    setAudiencePackageList = _useState90[1];
+  var _useState91 = useState(_toConsumableArray(MOCK.excludeConversions)),
+    _useState92 = _slicedToArray(_useState91, 2),
+    excludeAudiencePackageList = _useState92[0],
+    setExcludeAudiencePackageList = _useState92[1];
+  var refreshAudiencePackages = function refreshAudiencePackages() {
+    setAudiencePackageList(_toConsumableArray(MOCK.customAudiences));
     notify('定向人群包列表已刷新', 'success');
   };
-  const refreshExcludeAudiencePackages = () => {
-    setExcludeAudiencePackageList([...MOCK.excludeConversions]);
+  var refreshExcludeAudiencePackages = function refreshExcludeAudiencePackages() {
+    setExcludeAudiencePackageList(_toConsumableArray(MOCK.excludeConversions));
     notify('排除人群包列表已刷新', 'success');
   };
   // 排除已转化用户
-  const [excludeConvertedMode, setExcludeConvertedMode] = useState('unlimited');
+  var _useState93 = useState('unlimited'),
+    _useState94 = _slicedToArray(_useState93, 2),
+    excludeConvertedMode = _useState94[0],
+    setExcludeConvertedMode = _useState94[1];
   // 转化行为
-  const [conversionBehavior, setConversionBehavior] = useState('optimize'); // 'optimize' | 'custom'
+  var _useState95 = useState('optimize'),
+    _useState96 = _slicedToArray(_useState95, 2),
+    conversionBehavior = _useState96[0],
+    setConversionBehavior = _useState96[1]; // 'optimize' | 'custom'
   // 转化时间区间
-  const [conversionTimeRange, setConversionTimeRange] = useState('7day'); // 'today' | '7day' | '1month' | '3month' | '6month'
-  const [bidAmount, setBidAmount] = useState('');
-  const [dailyBudget, setDailyBudget] = useState('');
-  const [onePartyData, setOnePartyData] = useState(false); // 默认关闭，且锁定
-  const [quickLaunch, setQuickLaunch] = useState(false);
-  const [quickLaunchBudget, setQuickLaunchBudget] = useState('');
-  const [投放日期类型, set投放日期类型] = useState('long_term'); // 'long_term' | 'custom'
-  const [长期投放日期, set长期投放日期] = useState('2026-07-01');
-  const [自定义开始日期, set自定义开始日期] = useState('');
-  const [自定义结束日期, set自定义结束日期] = useState('');
-  const [投放时段模式, set投放时段模式] = useState('multi_slot'); // 'all_day' | 'time_range' | 'multi_slot'
-  const [timeRangeStart, setTimeRangeStart] = useState('');
-  const [timeRangeEnd, setTimeRangeEnd] = useState('');
-  const [timeGridSlots, setTimeGridSlots] = useState({});
-  const [首日开始, set首日开始] = useState(false);
-  const [首日开始时间值, set首日开始时间值] = useState('00:00');
-  const [unitName, setUnitName] = useState('');
-  const [showNameVarDropdown, setShowNameVarDropdown] = useState(false);
-  const nameVariables = ['日期', '定向包名称', '版位', '创建人'];
+  var _useState97 = useState('7day'),
+    _useState98 = _slicedToArray(_useState97, 2),
+    conversionTimeRange = _useState98[0],
+    setConversionTimeRange = _useState98[1]; // 'today' | '7day' | '1month' | '3month' | '6month'
+  var _useState99 = useState(''),
+    _useState100 = _slicedToArray(_useState99, 2),
+    bidAmount = _useState100[0],
+    setBidAmount = _useState100[1];
+  var _useState101 = useState(''),
+    _useState102 = _slicedToArray(_useState101, 2),
+    dailyBudget = _useState102[0],
+    setDailyBudget = _useState102[1];
+  var _useState103 = useState(false),
+    _useState104 = _slicedToArray(_useState103, 2),
+    onePartyData = _useState104[0],
+    setOnePartyData = _useState104[1]; // 默认关闭，且锁定
+  var _useState105 = useState(false),
+    _useState106 = _slicedToArray(_useState105, 2),
+    quickLaunch = _useState106[0],
+    setQuickLaunch = _useState106[1];
+  var _useState107 = useState(''),
+    _useState108 = _slicedToArray(_useState107, 2),
+    quickLaunchBudget = _useState108[0],
+    setQuickLaunchBudget = _useState108[1];
+  var _useState109 = useState('long_term'),
+    _useState110 = _slicedToArray(_useState109, 2),
+    投放日期类型 = _useState110[0],
+    set投放日期类型 = _useState110[1]; // 'long_term' | 'custom'
+  var _useState111 = useState('2026-07-01'),
+    _useState112 = _slicedToArray(_useState111, 2),
+    长期投放日期 = _useState112[0],
+    set长期投放日期 = _useState112[1];
+  var _useState113 = useState(''),
+    _useState114 = _slicedToArray(_useState113, 2),
+    自定义开始日期 = _useState114[0],
+    set自定义开始日期 = _useState114[1];
+  var _useState115 = useState(''),
+    _useState116 = _slicedToArray(_useState115, 2),
+    自定义结束日期 = _useState116[0],
+    set自定义结束日期 = _useState116[1];
+  var _useState117 = useState('multi_slot'),
+    _useState118 = _slicedToArray(_useState117, 2),
+    投放时段模式 = _useState118[0],
+    set投放时段模式 = _useState118[1]; // 'all_day' | 'time_range' | 'multi_slot'
+  var _useState119 = useState(''),
+    _useState120 = _slicedToArray(_useState119, 2),
+    timeRangeStart = _useState120[0],
+    setTimeRangeStart = _useState120[1];
+  var _useState121 = useState(''),
+    _useState122 = _slicedToArray(_useState121, 2),
+    timeRangeEnd = _useState122[0],
+    setTimeRangeEnd = _useState122[1];
+  var _useState123 = useState({}),
+    _useState124 = _slicedToArray(_useState123, 2),
+    timeGridSlots = _useState124[0],
+    setTimeGridSlots = _useState124[1];
+  var _useState125 = useState(false),
+    _useState126 = _slicedToArray(_useState125, 2),
+    首日开始 = _useState126[0],
+    set首日开始 = _useState126[1];
+  var _useState127 = useState('00:00'),
+    _useState128 = _slicedToArray(_useState127, 2),
+    首日开始时间值 = _useState128[0],
+    set首日开始时间值 = _useState128[1];
+  var _useState129 = useState(''),
+    _useState130 = _slicedToArray(_useState129, 2),
+    unitName = _useState130[0],
+    setUnitName = _useState130[1];
+  var _useState131 = useState(false),
+    _useState132 = _slicedToArray(_useState131, 2),
+    showNameVarDropdown = _useState132[0],
+    setShowNameVarDropdown = _useState132[1];
+  var nameVariables = ['日期', '定向包名称', '版位', '创建人'];
 
   // ===== 创意配置 =====
-  const [creativeMax, setCreativeMax] = useState(false);
-  const [creativeEnhanceMax, setCreativeEnhanceMax] = useState(false);
-  const [creativeName, setCreativeName] = useState('');
-  const creativeNameVariables = ['日期', '素材名称', '素材类型'];
-  const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
-  const [selectedCopies, setSelectedCopies] = useState([]);
-  const [videoStrategy, setVideoStrategy] = useState('average');
-  const [copyStrategy, setCopyStrategy] = useState('average');
-  const [landingPageMacro, setLandingPageMacro] = useState('');
-  const [showMaterialModal, setShowMaterialModal] = useState(false);
-  const [showCopyModal, setShowCopyModal] = useState(false);
+  var _useState133 = useState(false),
+    _useState134 = _slicedToArray(_useState133, 2),
+    creativeMax = _useState134[0],
+    setCreativeMax = _useState134[1];
+  var _useState135 = useState(false),
+    _useState136 = _slicedToArray(_useState135, 2),
+    creativeEnhanceMax = _useState136[0],
+    setCreativeEnhanceMax = _useState136[1];
+  var _useState137 = useState(''),
+    _useState138 = _slicedToArray(_useState137, 2),
+    creativeName = _useState138[0],
+    setCreativeName = _useState138[1];
+  var creativeNameVariables = ['日期', '素材名称', '素材类型'];
+  var _useState139 = useState([]),
+    _useState140 = _slicedToArray(_useState139, 2),
+    selectedMaterials = _useState140[0],
+    setSelectedMaterials = _useState140[1]; // {id, name, type, ...}
+  var _useState141 = useState([]),
+    _useState142 = _slicedToArray(_useState141, 2),
+    selectedCopies = _useState142[0],
+    setSelectedCopies = _useState142[1];
+  var _useState143 = useState('average'),
+    _useState144 = _slicedToArray(_useState143, 2),
+    videoStrategy = _useState144[0],
+    setVideoStrategy = _useState144[1];
+  var _useState145 = useState('average'),
+    _useState146 = _slicedToArray(_useState145, 2),
+    copyStrategy = _useState146[0],
+    setCopyStrategy = _useState146[1];
+  var _useState147 = useState(''),
+    _useState148 = _slicedToArray(_useState147, 2),
+    landingPageMacro = _useState148[0],
+    setLandingPageMacro = _useState148[1];
+  var _useState149 = useState(false),
+    _useState150 = _slicedToArray(_useState149, 2),
+    showMaterialModal = _useState150[0],
+    setShowMaterialModal = _useState150[1];
+  var _useState151 = useState(false),
+    _useState152 = _slicedToArray(_useState151, 2),
+    showCopyModal = _useState152[0],
+    setShowCopyModal = _useState152[1];
   // 创意数量分配
-  const [creativeComposeMode, setCreativeComposeMode] = useState('cross_join'); // 'cross_join' | 'fixed'
-  const [composeRule, setComposeRule] = useState({
-    videos: 1,
-    images: 1,
-    copies: 1
-  });
+  var _useState153 = useState('cross_join'),
+    _useState154 = _slicedToArray(_useState153, 2),
+    creativeComposeMode = _useState154[0],
+    setCreativeComposeMode = _useState154[1]; // 'cross_join' | 'fixed'
+  var _useState155 = useState({
+      videos: 1,
+      images: 1,
+      copies: 1
+    }),
+    _useState156 = _slicedToArray(_useState155, 2),
+    composeRule = _useState156[0],
+    setComposeRule = _useState156[1];
 
   // ===== 预览 =====
-  const [showPreview, setShowPreview] = useState(false);
-  const [notification, setNotification] = useState(null);
-  const notify = (msg, type = 'info') => setNotification({
-    msg,
-    type
-  });
+  var _useState157 = useState(false),
+    _useState158 = _slicedToArray(_useState157, 2),
+    showPreview = _useState158[0],
+    setShowPreview = _useState158[1];
+  var _useState159 = useState(null),
+    _useState160 = _slicedToArray(_useState159, 2),
+    notification = _useState160[0],
+    setNotification = _useState160[1];
+  var notify = function notify(msg) {
+    var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'info';
+    return setNotification({
+      msg: msg,
+      type: type
+    });
+  };
 
   // 账户选择
-  const toggleAccount = id => {
+  var toggleAccount = function toggleAccount(id) {
     if (selectedAccountIds.includes(id)) {
-      setSelectedAccountIds(selectedAccountIds.filter(a => a !== id));
+      setSelectedAccountIds(selectedAccountIds.filter(function (a) {
+        return a !== id;
+      }));
     } else {
-      setSelectedAccountIds([...selectedAccountIds, id]);
+      setSelectedAccountIds([].concat(_toConsumableArray(selectedAccountIds), [id]));
     }
   };
-  const handleBatchInput = () => {
-    const tokens = batchInputText.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
-    const matched = [];
-    tokens.forEach(t => {
-      const byId = MOCK.accounts.find(a => a.id === t);
+  var handleBatchInput = function handleBatchInput() {
+    var tokens = batchInputText.split(/[,，\s]+/).map(function (s) {
+      return s.trim();
+    }).filter(Boolean);
+    var matched = [];
+    tokens.forEach(function (t) {
+      var byId = MOCK.accounts.find(function (a) {
+        return a.id === t;
+      });
       if (byId) {
         matched.push(byId.id);
         return;
       }
-      const byName = MOCK.accounts.find(a => a.name.includes(t));
+      var byName = MOCK.accounts.find(function (a) {
+        return a.name.includes(t);
+      });
       if (byName) {
         matched.push(byName.id);
         return;
       }
     });
-    const newIds = [...new Set([...selectedAccountIds, ...matched])];
+    var newIds = _toConsumableArray(new Set([].concat(_toConsumableArray(selectedAccountIds), matched)));
     setSelectedAccountIds(newIds);
     setBatchInputText('');
     setShowBatchInput(false);
-    notify(`已添加 ${matched.length} 个账户，共选择 ${newIds.length} 个`);
+    notify("\u5DF2\u6DFB\u52A0 ".concat(matched.length, " \u4E2A\u8D26\u6237\uFF0C\u5171\u9009\u62E9 ").concat(newIds.length, " \u4E2A"));
   };
 
   // 获取当前账户默认落地页（已拼接宏参数）
-  const getDefaultLandingPage = accountId => {
-    const acc = MOCK.accounts.find(a => a.id === accountId);
+  var getDefaultLandingPage = function getDefaultLandingPage(accountId) {
+    var acc = MOCK.accounts.find(function (a) {
+      return a.id === accountId;
+    });
     if (!acc) return '';
     return acc.kaboshi + '?click_id={click_id}&ad_id={ad_id}';
   };
 
   // 生成创意组合（考虑定向包组合）
-  const getCreativeCombos = () => {
+  var getCreativeCombos = function getCreativeCombos() {
     if (selectedMaterials.length === 0 || selectedCopies.length === 0) return [];
-    const combos = [];
+    var combos = [];
     // 每个定向包 × 每个素材 × 每个文案 = 一个创意
-    const tpCount = selectedTargetingPackages.length || 1; // 若未选定向包，默认为1
-    for (let t = 0; t < Math.max(tpCount, 1); t++) {
-      for (let m of selectedMaterials) {
-        for (let c of selectedCopies) {
-          combos.push({
-            material: m,
-            copy: c,
-            targetingPackageId: selectedTargetingPackages[t] || null
-          });
+    var tpCount = selectedTargetingPackages.length || 1; // 若未选定向包，默认为1
+    for (var t = 0; t < Math.max(tpCount, 1); t++) {
+      var _iterator = _createForOfIteratorHelper(selectedMaterials),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var m = _step.value;
+          var _iterator2 = _createForOfIteratorHelper(selectedCopies),
+            _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+              var c = _step2.value;
+              combos.push({
+                material: m,
+                copy: c,
+                targetingPackageId: selectedTargetingPackages[t] || null
+              });
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
         }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
       }
     }
     return combos;
   };
 
   // 计算搭建总数（新增：定向包组合 + 创意数量分配）
-  const getBuildSummary = () => {
-    const accountCount = selectedAccountIds.length;
-    const materialCount = selectedMaterials.length;
-    const copyCount = selectedCopies.length;
-    const videoCount = selectedMaterials.filter(m => m.type === 'video').length;
-    const imageCount = selectedMaterials.filter(m => m.type === 'image').length;
+  var getBuildSummary = function getBuildSummary() {
+    var accountCount = selectedAccountIds.length;
+    var materialCount = selectedMaterials.length;
+    var copyCount = selectedCopies.length;
+    var videoCount = selectedMaterials.filter(function (m) {
+      return m.type === 'video';
+    }).length;
+    var imageCount = selectedMaterials.filter(function (m) {
+      return m.type === 'image';
+    }).length;
 
     // 单元数 = 账户数 × 定向包数
-    let tpCount = 0;
+    var tpCount = 0;
     if (targetingSource === 'package') {
       tpCount = Math.max(selectedTargetingPackages.length, 1);
     } else {
       tpCount = 1;
     }
-    const unitsPerAccount = tpCount;
-    const totalUnits = accountCount * unitsPerAccount;
+    var unitsPerAccount = tpCount;
+    var totalUnits = accountCount * unitsPerAccount;
 
     // 每个单元的创意数（根据创意数量分配规则）
-    let creativesPerUnit = 0;
+    var creativesPerUnit = 0;
     if (creativeComposeMode === 'cross_join') {
       creativesPerUnit = materialCount * copyCount;
     } else if (creativeComposeMode === 'fixed') {
-      const v = composeRule.videos || 0;
-      const i = composeRule.images || 0;
-      const c = composeRule.copies || 1;
-      const maxByVideo = v > 0 ? Math.floor(videoCount / v) : Infinity;
-      const maxByImage = i > 0 ? Math.floor(imageCount / i) : Infinity;
-      const maxByCopy = Math.floor(copyCount / c);
+      var v = composeRule.videos || 0;
+      var i = composeRule.images || 0;
+      var c = composeRule.copies || 1;
+      var maxByVideo = v > 0 ? Math.floor(videoCount / v) : Infinity;
+      var maxByImage = i > 0 ? Math.floor(imageCount / i) : Infinity;
+      var maxByCopy = Math.floor(copyCount / c);
       creativesPerUnit = Math.min(maxByVideo, maxByImage, maxByCopy);
       if (creativesPerUnit < 0) creativesPerUnit = 0;
     }
-    const totalCreatives = totalUnits * creativesPerUnit;
+    var totalCreatives = totalUnits * creativesPerUnit;
     return {
-      accountCount,
-      tpCount,
-      unitsPerAccount,
-      totalUnits,
-      materialCount,
-      copyCount,
-      videoCount,
-      imageCount,
-      creativesPerUnit,
-      totalCreatives
+      accountCount: accountCount,
+      tpCount: tpCount,
+      unitsPerAccount: unitsPerAccount,
+      totalUnits: totalUnits,
+      materialCount: materialCount,
+      copyCount: copyCount,
+      videoCount: videoCount,
+      imageCount: imageCount,
+      creativesPerUnit: creativesPerUnit,
+      totalCreatives: totalCreatives
     };
   };
 
   // ===== 持久化：从 URL 读取 taskId，localStorage 恢复/保存数据 =====
-  const urlParams = new URLSearchParams(window.location.search);
-  const currentTaskId = urlParams.get('taskId');
+  var urlParams = new URLSearchParams(window.location.search);
+  var currentTaskId = urlParams.get('taskId');
 
   // 恢复草稿（仅挂载时执行一次）
-  useEffect(() => {
+  useEffect(function () {
     if (!currentTaskId) return;
     try {
-      const saved = localStorage.getItem('ad_task_form_' + currentTaskId);
+      var saved = localStorage.getItem('ad_task_form_' + currentTaskId);
       if (saved) {
-        const data = JSON.parse(saved);
+        var data = JSON.parse(saved);
         if (data.selectedAccountIds) setSelectedAccountIds(data.selectedAccountIds);
         if (data.placement) setPlacement(data.placement);
         if (data.unitName) setUnitName(data.unitName);
@@ -1624,51 +2048,51 @@ function App() {
   }, []);
 
   // 保存草稿的函数
-  const doSaveForm = () => {
+  var doSaveForm = function doSaveForm() {
     if (!currentTaskId) return;
     try {
-      const data = {
-        selectedAccountIds,
-        placement,
-        unitName,
-        targetingSource,
-        selectedTargetingPackages,
-        geoMode,
-        geoSelectedCountry,
-        geoSelectedProvinces,
-        geoSelectedCities,
-        locationTypeResident,
-        ageSelections,
-        customAgeMin,
-        customAgeMax,
-        genderSelection,
-        audienceMode,
-        selectedTargetAudiences,
-        selectedExcludeAudiences,
-        excludeConvertedMode,
-        conversionBehavior,
-        conversionTimeRange,
-        bidAmount,
-        dailyBudget,
-        onePartyData,
-        投放日期类型,
-        长期投放日期,
-        自定义开始日期,
-        自定义结束日期,
-        投放时段模式,
-        timeRangeStart,
-        timeRangeEnd,
-        timeGridSlots,
-        首日开始,
-        首日开始时间值,
-        creativeEnhanceMax,
-        selectedMaterials,
-        selectedCopies,
-        videoStrategy,
-        copyStrategy,
-        landingPageMacro,
-        creativeComposeMode,
-        composeRule
+      var data = {
+        selectedAccountIds: selectedAccountIds,
+        placement: placement,
+        unitName: unitName,
+        targetingSource: targetingSource,
+        selectedTargetingPackages: selectedTargetingPackages,
+        geoMode: geoMode,
+        geoSelectedCountry: geoSelectedCountry,
+        geoSelectedProvinces: geoSelectedProvinces,
+        geoSelectedCities: geoSelectedCities,
+        locationTypeResident: locationTypeResident,
+        ageSelections: ageSelections,
+        customAgeMin: customAgeMin,
+        customAgeMax: customAgeMax,
+        genderSelection: genderSelection,
+        audienceMode: audienceMode,
+        selectedTargetAudiences: selectedTargetAudiences,
+        selectedExcludeAudiences: selectedExcludeAudiences,
+        excludeConvertedMode: excludeConvertedMode,
+        conversionBehavior: conversionBehavior,
+        conversionTimeRange: conversionTimeRange,
+        bidAmount: bidAmount,
+        dailyBudget: dailyBudget,
+        onePartyData: onePartyData,
+        投放日期类型: 投放日期类型,
+        长期投放日期: 长期投放日期,
+        自定义开始日期: 自定义开始日期,
+        自定义结束日期: 自定义结束日期,
+        投放时段模式: 投放时段模式,
+        timeRangeStart: timeRangeStart,
+        timeRangeEnd: timeRangeEnd,
+        timeGridSlots: timeGridSlots,
+        首日开始: 首日开始,
+        首日开始时间值: 首日开始时间值,
+        creativeEnhanceMax: creativeEnhanceMax,
+        selectedMaterials: selectedMaterials,
+        selectedCopies: selectedCopies,
+        videoStrategy: videoStrategy,
+        copyStrategy: copyStrategy,
+        landingPageMacro: landingPageMacro,
+        creativeComposeMode: creativeComposeMode,
+        composeRule: composeRule
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
     } catch (e) {
@@ -1677,10 +2101,10 @@ function App() {
   };
 
   // 定期自动保存 + 暴露接口给外部调用
-  useEffect(() => {
-    const timer = setInterval(doSaveForm, 3000);
+  useEffect(function () {
+    var timer = setInterval(doSaveForm, 3000);
     window.__doSaveForm = doSaveForm;
-    window.__getFormData = () => {
+    window.__getFormData = function () {
       doSaveForm();
       try {
         return JSON.parse(localStorage.getItem('ad_task_form_' + currentTaskId) || '{}');
@@ -1688,27 +2112,31 @@ function App() {
         return {};
       }
     };
-    const msgHandler = e => {
+    var msgHandler = function msgHandler(e) {
       if (e.data && e.data.type === 'REQUEST_FORM_SAVE') doSaveForm();
     };
     window.addEventListener('message', msgHandler);
-    return () => {
+    return function () {
       clearInterval(timer);
       window.removeEventListener('message', msgHandler);
     };
   }, []);
 
   // 关键状态变更时立即保存（debounce 用 setTimeout）
-  useEffect(() => {
-    const t = setTimeout(doSaveForm, 500);
-    return () => clearTimeout(t);
+  useEffect(function () {
+    var t = setTimeout(doSaveForm, 500);
+    return function () {
+      return clearTimeout(t);
+    };
   }, [selectedAccountIds, placement, unitName, selectedMaterials, selectedCopies, selectedTargetingPackages]);
   return /*#__PURE__*/React.createElement("div", {
     className: "min-h-screen bg-gray-100"
   }, notification && /*#__PURE__*/React.createElement(Notification, {
     msg: notification.msg,
     type: notification.type,
-    onClose: () => setNotification(null)
+    onClose: function onClose() {
+      return setNotification(null);
+    }
   }), /*#__PURE__*/React.createElement("div", {
     className: "bg-white border-b shadow-sm sticky top-0 z-40"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1717,42 +2145,46 @@ function App() {
     className: "text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-2xl"
-  }, "⚡"), " 腾讯广告搭建流程原型", /*#__PURE__*/React.createElement("span", {
+  }, "\u26A1"), " \u817E\u8BAF\u5E7F\u544A\u642D\u5EFA\u6D41\u7A0B\u539F\u578B", /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-normal text-gray-400 ml-2"
-  }, "完整交互验证版 v2")), /*#__PURE__*/React.createElement("div", {
+  }, "\u5B8C\u6574\u4EA4\u4E92\u9A8C\u8BC1\u7248 v2")), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-3 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "业务类型"), /*#__PURE__*/React.createElement("input", {
+  }, "\u4E1A\u52A1\u7C7B\u578B"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    value: "权益",
+    value: "\u6743\u76CA",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "投放渠道"), /*#__PURE__*/React.createElement("input", {
+  }, "\u6295\u653E\u6E20\u9053"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    value: "广点通",
+    value: "\u5E7F\u70B9\u901A",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "选择账户 ", /*#__PURE__*/React.createElement("span", {
+  }, "\u9009\u62E9\u8D26\u6237 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("div", {
     className: "relative"
   }, /*#__PURE__*/React.createElement("div", {
     className: "border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center",
-    onClick: () => setShowAccountDropdown(!showAccountDropdown)
+    onClick: function onClick() {
+      return setShowAccountDropdown(!showAccountDropdown);
+    }
   }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("span", {
     className: "text-gray-400 text-sm"
-  }, "点击选择账户（支持多选）") : selectedAccountIds.map(id => {
-    const acc = MOCK.accounts.find(a => a.id === id);
+  }, "\u70B9\u51FB\u9009\u62E9\u8D26\u6237\uFF08\u652F\u6301\u591A\u9009\uFF09") : selectedAccountIds.map(function (id) {
+    var acc = MOCK.accounts.find(function (a) {
+      return a.id === id;
+    });
     return /*#__PURE__*/React.createElement("span", {
       key: id,
       className: "tag"
     }, acc ? acc.name : id, /*#__PURE__*/React.createElement("button", {
-      onClick: e => {
+      onClick: function onClick(e) {
         e.stopPropagation();
         toggleAccount(id);
       }
@@ -1765,25 +2197,31 @@ function App() {
     className: "fas fa-chevron-down"
   }))), showAccountDropdown && /*#__PURE__*/React.createElement("div", {
     className: "absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-  }, MOCK.accounts.map(acc => /*#__PURE__*/React.createElement("div", {
-    key: acc.id,
-    onClick: () => toggleAccount(acc.id),
-    className: "px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-3 border-b border-gray-100 last:border-b-0"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: selectedAccountIds.includes(acc.id),
-    onChange: () => {},
-    className: "w-4 h-4 text-blue-600 rounded pointer-events-none"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-medium text-gray-900"
-  }, acc.name), /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-gray-500"
-  }, acc.id, " · ", acc.channel)), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-check text-blue-500"
-  }))))), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowBatchInput(!showBatchInput),
+  }, MOCK.accounts.map(function (acc) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: acc.id,
+      onClick: function onClick() {
+        return toggleAccount(acc.id);
+      },
+      className: "px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-3 border-b border-gray-100 last:border-b-0"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: selectedAccountIds.includes(acc.id),
+      onChange: function onChange() {},
+      className: "w-4 h-4 text-blue-600 rounded pointer-events-none"
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "flex-1"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "text-sm font-medium text-gray-900"
+    }, acc.name), /*#__PURE__*/React.createElement("div", {
+      className: "text-xs text-gray-500"
+    }, acc.id, " \xB7 ", acc.channel)), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-check text-blue-500"
+    }));
+  }))), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setShowBatchInput(!showBatchInput);
+    },
     className: "mt-2 text-sm text-blue-600 hover:text-blue-800"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-edit mr-1"
@@ -1792,16 +2230,18 @@ function App() {
   }, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: batchInputText,
-    onChange: e => setBatchInputText(e.target.value),
-    placeholder: "输入账户ID或名称，逗号/空格分隔",
+    onChange: function onChange(e) {
+      return setBatchInputText(e.target.value);
+    },
+    placeholder: "\u8F93\u5165\u8D26\u6237ID\u6216\u540D\u79F0\uFF0C\u9017\u53F7/\u7A7A\u683C\u5206\u9694",
     className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500",
-    onKeyDown: e => {
+    onKeyDown: function onKeyDown(e) {
       if (e.key === 'Enter') handleBatchInput();
     }
   }), /*#__PURE__*/React.createElement("button", {
     onClick: handleBatchInput,
     className: "btn-primary text-sm"
-  }, "确认")))))), /*#__PURE__*/React.createElement("div", {
+  }, "\u786E\u8BA4")))))), /*#__PURE__*/React.createElement("div", {
     className: "max-w-7xl mx-auto px-6 py-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-xl shadow-sm border overflow-hidden"
@@ -1811,47 +2251,51 @@ function App() {
     className: "text-lg font-bold text-gray-900 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm"
-  }, "2"), "营销单元配置")), /*#__PURE__*/React.createElement("div", {
+  }, "2"), "\u8425\u9500\u5355\u5143\u914D\u7F6E")), /*#__PURE__*/React.createElement("div", {
     className: "p-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "推广产品"), /*#__PURE__*/React.createElement("input", {
+  }, "\u63A8\u5E7F\u4EA7\u54C1"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    value: "运营商产品",
+    value: "\u8FD0\u8425\u5546\u4EA7\u54C1",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "具体产品 ", /*#__PURE__*/React.createElement("span", {
+  }, "\u5177\u4F53\u4EA7\u54C1 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("select", {
     value: specificProduct,
-    onChange: e => setSpecificProduct(e.target.value),
+    onChange: function onChange(e) {
+      return setSpecificProduct(e.target.value);
+    },
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-  }, MOCK.specificProducts.map(sp => /*#__PURE__*/React.createElement("option", {
-    key: sp.id,
-    value: sp.id
-  }, sp.name))))), /*#__PURE__*/React.createElement("div", {
+  }, MOCK.specificProducts.map(function (sp) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: sp.id,
+      value: sp.id
+    }, sp.name);
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "营销载体"), /*#__PURE__*/React.createElement("input", {
+  }, "\u8425\u9500\u8F7D\u4F53"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    value: "页面跳转",
+    value: "\u9875\u9762\u8DF3\u8F6C",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "转化"), /*#__PURE__*/React.createElement("input", {
+  }, "\u8F6C\u5316"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    value: "数据源上报",
+    value: "\u6570\u636E\u6E90\u4E0A\u62A5",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
   }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "投放版位 ", /*#__PURE__*/React.createElement("span", {
+  }, "\u6295\u653E\u7248\u4F4D ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-6"
@@ -1862,43 +2306,51 @@ function App() {
     name: "placement",
     value: "wechat_video",
     checked: placement === 'wechat_video',
-    onChange: e => {
+    onChange: function onChange(e) {
       setPlacement(e.target.value);
       setPlacementScene('');
     },
     className: "w-4 h-4 mr-2 text-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "微信视频号")), /*#__PURE__*/React.createElement("label", {
+  }), /*#__PURE__*/React.createElement("span", null, "\u5FAE\u4FE1\u89C6\u9891\u53F7")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "placement",
     value: "wechat_mp",
     checked: placement === 'wechat_mp',
-    onChange: e => {
+    onChange: function onChange(e) {
       setPlacement(e.target.value);
       setPlacementScene('');
     },
     className: "w-4 h-4 mr-2 text-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "微信公众号与小程序")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }), /*#__PURE__*/React.createElement("span", null, "\u5FAE\u4FE1\u516C\u4F17\u53F7\u4E0E\u5C0F\u7A0B\u5E8F")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "版位定投场景"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowPlacementModal(true),
+  }, "\u7248\u4F4D\u5B9A\u6295\u573A\u666F"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setShowPlacementModal(true);
+    },
     className: "px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[300px]"
   }, /*#__PURE__*/React.createElement("span", {
     className: placementScene ? 'text-gray-900' : 'text-gray-400'
-  }, placementScene === 'unlimited' ? '不限' : placementScene ? placement === 'wechat_video' ? MOCK.videoSceneOptions.filter(o => placementScene.split(',').includes(o.id)).map(o => o.label).join('、') : `已选择 ${placementScene.split(',').length} 个场景` : '点击选择版位定投场景'), /*#__PURE__*/React.createElement("i", {
+  }, placementScene === 'unlimited' ? '不限' : placementScene ? placement === 'wechat_video' ? MOCK.videoSceneOptions.filter(function (o) {
+    return placementScene.split(',').includes(o.id);
+  }).map(function (o) {
+    return o.label;
+  }).join('、') : "\u5DF2\u9009\u62E9 ".concat(placementScene.split(',').length, " \u4E2A\u573A\u666F") : '点击选择版位定投场景'), /*#__PURE__*/React.createElement("i", {
     className: "fas fa-chevron-down ml-2 text-gray-400 text-sm"
   })), /*#__PURE__*/React.createElement(PlacementSceneModal, {
     placement: placement,
     show: showPlacementModal,
-    onClose: () => setShowPlacementModal(false),
+    onClose: function onClose() {
+      return setShowPlacementModal(false);
+    },
     value: placementScene,
     onChange: setPlacementScene
   })), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-semibold text-gray-900 mb-3"
-  }, "定向配置"), /*#__PURE__*/React.createElement("div", {
+  }, "\u5B9A\u5411\u914D\u7F6E"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-4 mb-4"
   }, /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
@@ -1906,86 +2358,100 @@ function App() {
     type: "radio",
     name: "targeting",
     checked: targetingSource === 'package',
-    onChange: () => setTargetingSource('package'),
+    onChange: function onChange() {
+      return setTargetingSource('package');
+    },
     className: "mr-2"
-  }), "定向包"), /*#__PURE__*/React.createElement("label", {
+  }), "\u5B9A\u5411\u5305"), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "targeting",
     checked: targetingSource === 'custom',
-    onChange: () => setTargetingSource('custom'),
+    onChange: function onChange() {
+      return setTargetingSource('custom');
+    },
     className: "mr-2"
-  }), "自定义定向")), targetingSource === 'package' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }), "\u81EA\u5B9A\u4E49\u5B9A\u5411")), targetingSource === 'package' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "选择定向包（可多选，不同定向包将创建不同单元）"), /*#__PURE__*/React.createElement("div", {
+  }, "\u9009\u62E9\u5B9A\u5411\u5305\uFF08\u53EF\u591A\u9009\uFF0C\u4E0D\u540C\u5B9A\u5411\u5305\u5C06\u521B\u5EFA\u4E0D\u540C\u5355\u5143\uFF09"), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-2 mb-3"
-  }, selectedTargetingPackages.map(tpId => {
-    const tp = MOCK.targetingPackages.find(t => t.id === tpId);
+  }, selectedTargetingPackages.map(function (tpId) {
+    var tp = MOCK.targetingPackages.find(function (t) {
+      return t.id === tpId;
+    });
     return tp ? /*#__PURE__*/React.createElement("span", {
       key: tpId,
       className: "tag bg-blue-100 text-blue-800"
     }, tp.name, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setSelectedTargetingPackages(selectedTargetingPackages.filter(id => id !== tpId))
+      onClick: function onClick() {
+        return setSelectedTargetingPackages(selectedTargetingPackages.filter(function (id) {
+          return id !== tpId;
+        }));
+      }
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-times"
     }))) : null;
   })), /*#__PURE__*/React.createElement("select", {
     value: "",
-    onChange: e => {
-      const val = e.target.value;
+    onChange: function onChange(e) {
+      var val = e.target.value;
       if (val && !selectedTargetingPackages.includes(val)) {
-        setSelectedTargetingPackages([...selectedTargetingPackages, val]);
+        setSelectedTargetingPackages([].concat(_toConsumableArray(selectedTargetingPackages), [val]));
       }
     },
     className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, "++ 添加定向包 ++"), MOCK.targetingPackages.map(tp => /*#__PURE__*/React.createElement("option", {
-    key: tp.id,
-    value: tp.id,
-    disabled: selectedTargetingPackages.includes(tp.id)
-  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）", selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : '')), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement("option", {
+  }, "++ \u6DFB\u52A0\u5B9A\u5411\u5305 ++"), MOCK.targetingPackages.map(function (tp) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: tp.id,
+      value: tp.id,
+      disabled: selectedTargetingPackages.includes(tp.id)
+    }, tp.name, "\uFF08", tp.region, "\uFF0C", tp.age, "\u5C81\uFF0C", tp.gender, "\uFF09", selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : '');
+  }), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement("option", {
     disabled: true
-  }, "── 自建定向包 ──"), userTgtPkgs.map(tp => /*#__PURE__*/React.createElement("option", {
-    key: tp.id,
-    value: tp.id,
-    disabled: selectedTargetingPackages.includes(tp.id)
-  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）[自建]", selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : ''))), selectedTargetingPackages.length === 0 && /*#__PURE__*/React.createElement("p", {
+  }, "\u2500\u2500 \u81EA\u5EFA\u5B9A\u5411\u5305 \u2500\u2500"), userTgtPkgs.map(function (tp) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: tp.id,
+      value: tp.id,
+      disabled: selectedTargetingPackages.includes(tp.id)
+    }, tp.name, "\uFF08", tp.region, "\uFF0C", tp.age, "\u5C81\uFF0C", tp.gender, "\uFF09[\u81EA\u5EFA]", selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : '');
+  })), selectedTargetingPackages.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-orange-500 mt-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle mr-1"
-  }), "请至少选择一个定向包"), channel === 'gdt' && selectedTargetingPackages.length > 0 && /*#__PURE__*/React.createElement("p", {
+  }), "\u8BF7\u81F3\u5C11\u9009\u62E9\u4E00\u4E2A\u5B9A\u5411\u5305"), channel === 'gdt' && selectedTargetingPackages.length > 0 && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-blue-500 mt-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle mr-1"
-  }), "广点通渠道：同一定向包内容在同一账户下仅对应一个单元")), targetingSource === 'custom' && /*#__PURE__*/React.createElement("div", {
+  }), "\u5E7F\u70B9\u901A\u6E20\u9053\uFF1A\u540C\u4E00\u5B9A\u5411\u5305\u5185\u5BB9\u5728\u540C\u4E00\u8D26\u6237\u4E0B\u4EC5\u5BF9\u5E94\u4E00\u4E2A\u5355\u5143")), targetingSource === 'custom' && /*#__PURE__*/React.createElement("div", {
     className: "space-y-0"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between pb-4 border-b border-gray-200"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-500"
-  }, "自定义定向配置"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
+  }, "\u81EA\u5B9A\u4E49\u5B9A\u5411\u914D\u7F6E"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
       setSaveTgtPkgName('');
       setShowSaveTgtPkgModal(true);
     },
     className: "px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-save mr-1"
-  }), " 保存为定向包")), /*#__PURE__*/React.createElement("div", {
+  }), " \u4FDD\u5B58\u4E3A\u5B9A\u5411\u5305")), /*#__PURE__*/React.createElement("div", {
     className: "pb-5 border-b border-gray-200"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 mb-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-semibold text-gray-900"
-  }, "地理位置"), /*#__PURE__*/React.createElement("label", {
+  }, "\u5730\u7406\u4F4D\u7F6E"), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer ml-4"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "geo_mode",
     checked: geoMode === 'unlimited',
-    onChange: () => {
+    onChange: function onChange() {
       setGeoMode('unlimited');
       setGeoSelectedProvinces([]);
       setGeoSelectedCities({});
@@ -1994,20 +2460,20 @@ function App() {
     className: "mr-1.5"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-700"
-  }, "不限")), /*#__PURE__*/React.createElement("label", {
+  }, "\u4E0D\u9650")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer ml-4"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "geo_mode",
     checked: geoMode === 'region',
-    onChange: () => {
+    onChange: function onChange() {
       setGeoMode('region');
       selectAllProvinceAndCities();
     },
     className: "mr-1.5"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-700"
-  }, "按区域"))), geoMode === 'region' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, "\u6309\u533A\u57DF"))), geoMode === 'region' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "bg-blue-50/50 rounded-xl p-4 border border-blue-100 mb-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 mb-3"
@@ -2015,99 +2481,96 @@ function App() {
     className: "fas fa-map-marker-alt text-blue-500"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-800"
-  }, "按区域")), /*#__PURE__*/React.createElement("div", {
+  }, "\u6309\u533A\u57DF")), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "border border-gray-200 rounded-lg overflow-hidden bg-white"
   }, /*#__PURE__*/React.createElement("div", {
     className: "px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700"
-  }, "省份（点击查看城市）"), /*#__PURE__*/React.createElement("div", {
+  }, "\u7701\u4EFD\uFF08\u70B9\u51FB\u67E5\u770B\u57CE\u5E02\uFF09"), /*#__PURE__*/React.createElement("div", {
     className: "max-h-52 overflow-y-auto p-1"
-  }, (MOCK.regionCascade.provinces['cn'] || []).map(p => /*#__PURE__*/React.createElement("div", {
-    key: p.id,
-    className: `px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${activeProvinceId === p.id ? 'bg-blue-200 text-blue-800 font-semibold' : ''} ${geoSelectedProvinces.includes(p.id) ? 'text-blue-700' : 'text-gray-700'}`
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: geoSelectedProvinces.includes(p.id),
-    onChange: () => {
-      const pid = p.id;
-      if (geoSelectedProvinces.includes(pid)) {
-        // 取消该省：去掉省份 + 清空该省城市
-        setGeoSelectedProvinces(geoSelectedProvinces.filter(x => x !== pid));
-        const newCities = {
-          ...geoSelectedCities
-        };
-        delete newCities[pid];
-        setGeoSelectedCities(newCities);
-      } else {
-        // 选中该省：添加省份 + 全选该省城市
-        setGeoSelectedProvinces([...geoSelectedProvinces, pid]);
-        setGeoSelectedCities({
-          ...geoSelectedCities,
-          [pid]: [...(MOCK.regionCascade.cities[pid] || [])]
-        });
+  }, (MOCK.regionCascade.provinces['cn'] || []).map(function (p) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: p.id,
+      className: "px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ".concat(activeProvinceId === p.id ? 'bg-blue-200 text-blue-800 font-semibold' : '', " ").concat(geoSelectedProvinces.includes(p.id) ? 'text-blue-700' : 'text-gray-700')
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: geoSelectedProvinces.includes(p.id),
+      onChange: function onChange() {
+        var pid = p.id;
+        if (geoSelectedProvinces.includes(pid)) {
+          // 取消该省：去掉省份 + 清空该省城市
+          setGeoSelectedProvinces(geoSelectedProvinces.filter(function (x) {
+            return x !== pid;
+          }));
+          var newCities = _objectSpread({}, geoSelectedCities);
+          delete newCities[pid];
+          setGeoSelectedCities(newCities);
+        } else {
+          // 选中该省：添加省份 + 全选该省城市
+          setGeoSelectedProvinces([].concat(_toConsumableArray(geoSelectedProvinces), [pid]));
+          setGeoSelectedCities(_objectSpread(_objectSpread({}, geoSelectedCities), {}, _defineProperty({}, pid, _toConsumableArray(MOCK.regionCascade.cities[pid] || []))));
+        }
+      },
+      className: "mr-2 w-3.5 h-3.5 cursor-pointer"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "truncate",
+      onClick: function onClick() {
+        return setActiveProvinceId(p.id);
       }
-    },
-    className: "mr-2 w-3.5 h-3.5 cursor-pointer"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "truncate",
-    onClick: () => setActiveProvinceId(p.id)
-  }, p.name))))), /*#__PURE__*/React.createElement("div", {
+    }, p.name));
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "border border-gray-200 rounded-lg overflow-hidden bg-white"
   }, /*#__PURE__*/React.createElement("div", {
     className: "px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700"
-  }, "城市 ", activeProvinceId ? `· ${MOCK.regionCascade.provinces['cn'].find(p => p.id === activeProvinceId)?.name || ''}` : '（请点击左侧省份）'), /*#__PURE__*/React.createElement("div", {
+  }, "\u57CE\u5E02 ", activeProvinceId ? "\xB7 ".concat(((_MOCK$regionCascade$p = MOCK.regionCascade.provinces['cn'].find(function (p) {
+    return p.id === activeProvinceId;
+  })) === null || _MOCK$regionCascade$p === void 0 ? void 0 : _MOCK$regionCascade$p.name) || '') : '（请点击左侧省份）'), /*#__PURE__*/React.createElement("div", {
     className: "max-h-52 overflow-y-auto p-1"
-  }, activeProvinceId && (MOCK.regionCascade.cities[activeProvinceId] || []).map(city => {
-    const selected = (geoSelectedCities[activeProvinceId] || []).includes(city);
+  }, activeProvinceId && (MOCK.regionCascade.cities[activeProvinceId] || []).map(function (city) {
+    var selected = (geoSelectedCities[activeProvinceId] || []).includes(city);
     return /*#__PURE__*/React.createElement("div", {
       key: city,
-      onClick: () => {
-        const prev = geoSelectedCities[activeProvinceId] || [];
+      onClick: function onClick() {
+        var prev = geoSelectedCities[activeProvinceId] || [];
         if (selected) {
-          setGeoSelectedCities({
-            ...geoSelectedCities,
-            [activeProvinceId]: prev.filter(c => c !== city)
-          });
+          setGeoSelectedCities(_objectSpread(_objectSpread({}, geoSelectedCities), {}, _defineProperty({}, activeProvinceId, prev.filter(function (c) {
+            return c !== city;
+          }))));
         } else {
-          setGeoSelectedCities({
-            ...geoSelectedCities,
-            [activeProvinceId]: [...prev, city]
-          });
+          setGeoSelectedCities(_objectSpread(_objectSpread({}, geoSelectedCities), {}, _defineProperty({}, activeProvinceId, [].concat(_toConsumableArray(prev), [city]))));
         }
       },
-      className: `px-3 py-1.5 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${selected ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`
+      className: "px-3 py-1.5 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ".concat(selected ? 'bg-blue-100 text-blue-700' : 'text-gray-700')
     }, /*#__PURE__*/React.createElement("input", {
       type: "checkbox",
       checked: selected,
-      onChange: () => {
-        const prev = geoSelectedCities[activeProvinceId] || [];
+      onChange: function onChange() {
+        var prev = geoSelectedCities[activeProvinceId] || [];
         if (selected) {
-          setGeoSelectedCities({
-            ...geoSelectedCities,
-            [activeProvinceId]: prev.filter(c => c !== city)
-          });
+          setGeoSelectedCities(_objectSpread(_objectSpread({}, geoSelectedCities), {}, _defineProperty({}, activeProvinceId, prev.filter(function (c) {
+            return c !== city;
+          }))));
         } else {
-          setGeoSelectedCities({
-            ...geoSelectedCities,
-            [activeProvinceId]: [...prev, city]
-          });
+          setGeoSelectedCities(_objectSpread(_objectSpread({}, geoSelectedCities), {}, _defineProperty({}, activeProvinceId, [].concat(_toConsumableArray(prev), [city]))));
         }
         // 同步更新省份选中状态
-        const newCityList = selected ? prev.filter(c => c !== city) : [...prev, city];
-        const allCities = MOCK.regionCascade.cities[activeProvinceId] || [];
+        var newCityList = selected ? prev.filter(function (c) {
+          return c !== city;
+        }) : [].concat(_toConsumableArray(prev), [city]);
+        var allCities = MOCK.regionCascade.cities[activeProvinceId] || [];
         if (newCityList.length === allCities.length) {
           // 全选了该省所有城市 → 确保省份被选中
           if (!geoSelectedProvinces.includes(activeProvinceId)) {
-            setGeoSelectedProvinces([...geoSelectedProvinces, activeProvinceId]);
+            setGeoSelectedProvinces([].concat(_toConsumableArray(geoSelectedProvinces), [activeProvinceId]));
           }
         } else {
           // 没有全选 → 如果城市列表为空则取消省份选中
           if (newCityList.length === 0) {
-            setGeoSelectedProvinces(geoSelectedProvinces.filter(x => x !== activeProvinceId));
-            const newCities = {
-              ...geoSelectedCities
-            };
+            setGeoSelectedProvinces(geoSelectedProvinces.filter(function (x) {
+              return x !== activeProvinceId;
+            }));
+            var newCities = _objectSpread({}, geoSelectedCities);
             delete newCities[activeProvinceId];
             setGeoSelectedCities(newCities);
           }
@@ -2117,35 +2580,37 @@ function App() {
     }), /*#__PURE__*/React.createElement("span", null, city));
   }), !activeProvinceId && /*#__PURE__*/React.createElement("div", {
     className: "px-3 py-4 text-sm text-gray-400 text-center"
-  }, "请点击左侧省份查看城市")))), /*#__PURE__*/React.createElement("div", {
+  }, "\u8BF7\u70B9\u51FB\u5DE6\u4FA7\u7701\u4EFD\u67E5\u770B\u57CE\u5E02")))), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2 mt-3"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      const allPids = (MOCK.regionCascade.provinces['cn'] || []).map(p => p.id);
-      const allCities = {};
-      allPids.forEach(pid => {
-        allCities[pid] = [...(MOCK.regionCascade.cities[pid] || [])];
+    onClick: function onClick() {
+      var allPids = (MOCK.regionCascade.provinces['cn'] || []).map(function (p) {
+        return p.id;
+      });
+      var allCities = {};
+      allPids.forEach(function (pid) {
+        allCities[pid] = _toConsumableArray(MOCK.regionCascade.cities[pid] || []);
       });
       setGeoSelectedProvinces(allPids);
       setGeoSelectedCities(allCities);
     },
     className: "text-xs text-blue-600 hover:text-blue-800"
-  }, "全选全部"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
+  }, "\u5168\u9009\u5168\u90E8"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
       setGeoSelectedProvinces([]);
       setGeoSelectedCities({});
     },
     className: "text-xs text-gray-500 hover:text-gray-700"
-  }, "清空全部")))), geoMode === 'unlimited' && /*#__PURE__*/React.createElement("p", {
+  }, "\u6E05\u7A7A\u5168\u90E8")))), geoMode === 'unlimited' && /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400 py-2 px-3 bg-gray-50 rounded-lg inline-block"
-  }, "已选择\"不限\"，将投放到所有地域"), /*#__PURE__*/React.createElement("div", {
+  }, "\u5DF2\u9009\u62E9\"\u4E0D\u9650\"\uFF0C\u5C06\u6295\u653E\u5230\u6240\u6709\u5730\u57DF"), /*#__PURE__*/React.createElement("div", {
     className: "mt-3 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-semibold text-gray-900 whitespace-nowrap",
     style: {
       lineHeight: '2rem'
     }
-  }, "地点类型"), /*#__PURE__*/React.createElement("label", {
+  }, "\u5730\u70B9\u7C7B\u578B"), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer h-8"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
@@ -2155,13 +2620,13 @@ function App() {
     className: "mr-1.5 w-3.5 h-3.5"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-700"
-  }, "常住地")))), /*#__PURE__*/React.createElement("div", {
+  }, "\u5E38\u4F4F\u5730")))), /*#__PURE__*/React.createElement("div", {
     className: "py-4 border-b border-gray-200"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 mb-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-semibold text-gray-900"
-  }, "年龄"), /*#__PURE__*/React.createElement("div", {
+  }, "\u5E74\u9F84"), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap items-center gap-x-5 gap-y-1 ml-2"
   }, [{
     key: 'unlimited',
@@ -2184,44 +2649,50 @@ function App() {
   }, {
     key: '50+',
     label: '50岁及以上'
-  }].map(opt => /*#__PURE__*/React.createElement("label", {
-    key: opt.key,
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: ageSelections.includes(opt.key),
-    onChange: e => {
-      if (opt.key === 'unlimited') {
-        // 不限：切换选中状态
-        if (ageSelections.includes('unlimited')) {
-          setAgeSelections([]);
+  }].map(function (opt) {
+    return /*#__PURE__*/React.createElement("label", {
+      key: opt.key,
+      className: "flex items-center cursor-pointer"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: ageSelections.includes(opt.key),
+      onChange: function onChange(e) {
+        if (opt.key === 'unlimited') {
+          // 不限：切换选中状态
+          if (ageSelections.includes('unlimited')) {
+            setAgeSelections([]);
+          } else {
+            setAgeSelections(['unlimited']);
+          }
         } else {
-          setAgeSelections(['unlimited']);
+          if (e.target.checked) {
+            // 选中年龄段：取消不限，添加当前年龄段
+            var next = ageSelections.filter(function (k) {
+              return k !== 'unlimited';
+            });
+            if (!next.includes(opt.key)) next.push(opt.key);
+            setAgeSelections(next);
+          } else {
+            // 取消年龄段
+            var _next = ageSelections.filter(function (k) {
+              return k !== opt.key && k !== 'unlimited';
+            });
+            setAgeSelections(_next.length > 0 ? _next : ['unlimited']);
+          }
         }
-      } else {
-        if (e.target.checked) {
-          // 选中年龄段：取消不限，添加当前年龄段
-          let next = ageSelections.filter(k => k !== 'unlimited');
-          if (!next.includes(opt.key)) next.push(opt.key);
-          setAgeSelections(next);
-        } else {
-          // 取消年龄段
-          let next = ageSelections.filter(k => k !== opt.key && k !== 'unlimited');
-          setAgeSelections(next.length > 0 ? next : ['unlimited']);
-        }
-      }
-    },
-    disabled: false,
-    className: "mr-1.5"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: `text-sm ${ageSelections.includes(opt.key) ? 'text-gray-900 font-medium' : 'text-gray-700'}`
-  }, opt.label)))))), /*#__PURE__*/React.createElement("div", {
+      },
+      disabled: false,
+      className: "mr-1.5"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "text-sm ".concat(ageSelections.includes(opt.key) ? 'text-gray-900 font-medium' : 'text-gray-700')
+    }, opt.label));
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "py-4 border-b border-gray-200"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 mb-0"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-semibold text-gray-900"
-  }, "性别"), /*#__PURE__*/React.createElement("div", {
+  }, "\u6027\u522B"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-6 ml-4"
   }, [{
     value: 'unlimited',
@@ -2232,27 +2703,31 @@ function App() {
   }, {
     value: 'female',
     label: '女'
-  }].map(opt => /*#__PURE__*/React.createElement("label", {
-    key: opt.value,
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "gender_sel",
-    value: opt.value,
-    checked: genderSelection === opt.value,
-    onChange: e => setGenderSelection(e.target.value),
-    className: "mr-1.5"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: `text-sm ${genderSelection === opt.value ? 'text-gray-900 font-medium' : 'text-gray-700'}`
-  }, opt.label)))))), /*#__PURE__*/React.createElement("div", {
+  }].map(function (opt) {
+    return /*#__PURE__*/React.createElement("label", {
+      key: opt.value,
+      className: "flex items-center cursor-pointer"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "radio",
+      name: "gender_sel",
+      value: opt.value,
+      checked: genderSelection === opt.value,
+      onChange: function onChange(e) {
+        return setGenderSelection(e.target.value);
+      },
+      className: "mr-1.5"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "text-sm ".concat(genderSelection === opt.value ? 'text-gray-900 font-medium' : 'text-gray-700')
+    }, opt.label));
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "py-4 border-b border-gray-200"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 mb-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-semibold text-gray-900"
-  }, "自定义人群"), /*#__PURE__*/React.createElement("i", {
+  }, "\u81EA\u5B9A\u4E49\u4EBA\u7FA4"), /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle text-gray-300 ml-1 text-xs cursor-help",
-    title: "通过上传用户包等方式排除特定人群"
+    title: "\u901A\u8FC7\u4E0A\u4F20\u7528\u6237\u5305\u7B49\u65B9\u5F0F\u6392\u9664\u7279\u5B9A\u4EBA\u7FA4"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-6 ml-4"
   }, /*#__PURE__*/React.createElement("label", {
@@ -2262,22 +2737,26 @@ function App() {
     name: "audience_mode",
     value: "unlimited",
     checked: audienceMode === 'unlimited',
-    onChange: e => setAudienceMode(e.target.value),
+    onChange: function onChange(e) {
+      return setAudienceMode(e.target.value);
+    },
     className: "mr-1.5"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "不限")), /*#__PURE__*/React.createElement("label", {
+  }, "\u4E0D\u9650")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "audience_mode",
     value: "exclude",
     checked: audienceMode === 'exclude',
-    onChange: e => setAudienceMode(e.target.value),
+    onChange: function onChange(e) {
+      return setAudienceMode(e.target.value);
+    },
     className: "mr-1.5"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "排除人群")))), audienceMode === 'exclude' && /*#__PURE__*/React.createElement("div", {
+  }, "\u6392\u9664\u4EBA\u7FA4")))), audienceMode === 'exclude' && /*#__PURE__*/React.createElement("div", {
     className: "ml-[72px] bg-orange-50 border border-orange-200 rounded-xl p-4 animate-fadeIn"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-3"
@@ -2287,49 +2766,57 @@ function App() {
     className: "fas fa-user-slash text-orange-500"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-bold text-orange-800"
-  }, "选择排除人群包")), /*#__PURE__*/React.createElement("button", {
+  }, "\u9009\u62E9\u6392\u9664\u4EBA\u7FA4\u5305")), /*#__PURE__*/React.createElement("button", {
     onClick: refreshExcludeAudiencePackages,
     className: "text-xs text-orange-600 hover:text-orange-800 border border-orange-200 rounded px-2 py-1 hover:bg-orange-100"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-sync-alt mr-1"
-  }), "刷新列表")), /*#__PURE__*/React.createElement("select", {
+  }), "\u5237\u65B0\u5217\u8868")), /*#__PURE__*/React.createElement("select", {
     value: "",
-    onChange: e => {
-      const val = e.target.value;
+    onChange: function onChange(e) {
+      var val = e.target.value;
       if (val && !selectedExcludeAudiences.includes(val)) {
-        setSelectedExcludeAudiences([...selectedExcludeAudiences, val]);
+        setSelectedExcludeAudiences([].concat(_toConsumableArray(selectedExcludeAudiences), [val]));
       }
     },
     className: "w-full px-3 py-2 border border-orange-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-orange-500 mb-3"
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, "++ 添加排除人群包 ++"), excludeAudiencePackageList.map(ep => /*#__PURE__*/React.createElement("option", {
-    key: ep.id,
-    value: ep.id,
-    disabled: selectedExcludeAudiences.includes(ep.id)
-  }, ep.name, selectedExcludeAudiences.includes(ep.id) ? ' ✓ 已选' : ''))), selectedExcludeAudiences.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "++ \u6DFB\u52A0\u6392\u9664\u4EBA\u7FA4\u5305 ++"), excludeAudiencePackageList.map(function (ep) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: ep.id,
+      value: ep.id,
+      disabled: selectedExcludeAudiences.includes(ep.id)
+    }, ep.name, selectedExcludeAudiences.includes(ep.id) ? ' ✓ 已选' : '');
+  })), selectedExcludeAudiences.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-1"
-  }, selectedExcludeAudiences.map(id => {
-    const pkg = excludeAudiencePackageList.find(e => e.id === id);
+  }, selectedExcludeAudiences.map(function (id) {
+    var pkg = excludeAudiencePackageList.find(function (e) {
+      return e.id === id;
+    });
     return pkg ? /*#__PURE__*/React.createElement("span", {
       key: id,
       className: "tag bg-orange-100 text-orange-800"
     }, pkg.name, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setSelectedExcludeAudiences(selectedExcludeAudiences.filter(i => i !== id))
+      onClick: function onClick() {
+        return setSelectedExcludeAudiences(selectedExcludeAudiences.filter(function (i) {
+          return i !== id;
+        }));
+      }
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-times"
     }))) : null;
   })), selectedExcludeAudiences.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-orange-400"
-  }, "未选择任何排除人群包"))), /*#__PURE__*/React.createElement("div", {
+  }, "\u672A\u9009\u62E9\u4EFB\u4F55\u6392\u9664\u4EBA\u7FA4\u5305"))), /*#__PURE__*/React.createElement("div", {
     className: "py-4 border-b border-gray-200"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 mb-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-semibold text-gray-900"
-  }, "排除已转化用户"), /*#__PURE__*/React.createElement("i", {
+  }, "\u6392\u9664\u5DF2\u8F6C\u5316\u7528\u6237"), /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle text-gray-300 ml-1 text-xs cursor-help",
-    title: "排除已经完成转化的用户，避免重复触达"
+    title: "\u6392\u9664\u5DF2\u7ECF\u5B8C\u6210\u8F6C\u5316\u7684\u7528\u6237\uFF0C\u907F\u514D\u91CD\u590D\u89E6\u8FBE"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap items-center gap-x-5 gap-y-1 ml-4"
   }, [{
@@ -2347,25 +2834,29 @@ function App() {
   }, {
     v: 'same_group',
     l: '同集团'
-  }].map(opt => /*#__PURE__*/React.createElement("label", {
-    key: opt.v,
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "exclude_conv",
-    value: opt.v,
-    checked: excludeConvertedMode === opt.v,
-    onChange: e => setExcludeConvertedMode(e.target.value),
-    className: "mr-1.5"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: `text-sm ${excludeConvertedMode === opt.v ? 'text-gray-900 font-medium' : 'text-gray-700'}`
-  }, opt.l)))))), excludeConvertedMode !== 'unlimited' && /*#__PURE__*/React.createElement("div", {
+  }].map(function (opt) {
+    return /*#__PURE__*/React.createElement("label", {
+      key: opt.v,
+      className: "flex items-center cursor-pointer"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "radio",
+      name: "exclude_conv",
+      value: opt.v,
+      checked: excludeConvertedMode === opt.v,
+      onChange: function onChange(e) {
+        return setExcludeConvertedMode(e.target.value);
+      },
+      className: "mr-1.5"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "text-sm ".concat(excludeConvertedMode === opt.v ? 'text-gray-900 font-medium' : 'text-gray-700')
+    }, opt.l));
+  })))), excludeConvertedMode !== 'unlimited' && /*#__PURE__*/React.createElement("div", {
     className: "py-4 animate-fadeIn"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 mb-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-semibold text-gray-900"
-  }, "转化行为"), /*#__PURE__*/React.createElement("div", {
+  }, "\u8F6C\u5316\u884C\u4E3A"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-6 ml-4"
   }, /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
@@ -2374,15 +2865,17 @@ function App() {
     name: "conv_behavior",
     value: "optimize",
     checked: conversionBehavior === 'optimize',
-    onChange: e => setConversionBehavior(e.target.value),
+    onChange: function onChange(e) {
+      return setConversionBehavior(e.target.value);
+    },
     className: "mr-1.5"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "优化目标")))), /*#__PURE__*/React.createElement("div", {
+  }, "\u4F18\u5316\u76EE\u6807")))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 mb-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-semibold text-gray-900"
-  }, "转化时间区间"), /*#__PURE__*/React.createElement("div", {
+  }, "\u8F6C\u5316\u65F6\u95F4\u533A\u95F4"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-6 ml-4"
   }, [{
     v: 'today',
@@ -2399,105 +2892,117 @@ function App() {
   }, {
     v: '6month',
     l: '6个月'
-  }].map(opt => /*#__PURE__*/React.createElement("label", {
-    key: opt.v,
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "conv_time",
-    value: opt.v,
-    checked: conversionTimeRange === opt.v,
-    onChange: e => setConversionTimeRange(e.target.value),
-    className: "mr-1.5"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: `text-sm ${conversionTimeRange === opt.v ? 'text-gray-900 font-medium' : 'text-gray-700'}`
-  }, opt.l)))))))), /*#__PURE__*/React.createElement("div", {
+  }].map(function (opt) {
+    return /*#__PURE__*/React.createElement("label", {
+      key: opt.v,
+      className: "flex items-center cursor-pointer"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "radio",
+      name: "conv_time",
+      value: opt.v,
+      checked: conversionTimeRange === opt.v,
+      onChange: function onChange(e) {
+        return setConversionTimeRange(e.target.value);
+      },
+      className: "mr-1.5"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "text-sm ".concat(conversionTimeRange === opt.v ? 'text-gray-900 font-medium' : 'text-gray-700')
+    }, opt.l));
+  })))))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-semibold text-gray-900 mb-3"
-  }, "出价与预算"), /*#__PURE__*/React.createElement("div", {
+  }, "\u51FA\u4EF7\u4E0E\u9884\u7B97"), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "计费方式"), /*#__PURE__*/React.createElement("input", {
+  }, "\u8BA1\u8D39\u65B9\u5F0F"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: "oCPM",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "出价场景"), /*#__PURE__*/React.createElement("input", {
+  }, "\u51FA\u4EF7\u573A\u666F"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    value: "常规投放",
+    value: "\u5E38\u89C4\u6295\u653E",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "出价（元）", /*#__PURE__*/React.createElement("span", {
+  }, "\u51FA\u4EF7\uFF08\u5143\uFF09", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("input", {
     type: "number",
     value: bidAmount,
-    onChange: e => setBidAmount(e.target.value),
-    placeholder: "输入出价金额",
+    onChange: function onChange(e) {
+      return setBidAmount(e.target.value);
+    },
+    placeholder: "\u8F93\u5165\u51FA\u4EF7\u91D1\u989D",
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "日预算（元）"), /*#__PURE__*/React.createElement("input", {
+  }, "\u65E5\u9884\u7B97\uFF08\u5143\uFF09"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     value: dailyBudget,
-    onChange: e => setDailyBudget(e.target.value),
-    placeholder: "输入日预算，0=不限",
+    onChange: function onChange(e) {
+      return setDailyBudget(e.target.value);
+    },
+    placeholder: "\u8F93\u5165\u65E5\u9884\u7B97\uFF0C0=\u4E0D\u9650",
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "一方数据跑量加强"), /*#__PURE__*/React.createElement("div", {
+  }, "\u4E00\u65B9\u6570\u636E\u8DD1\u91CF\u52A0\u5F3A"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-green-600"
-  }, "关闭"), /*#__PURE__*/React.createElement("button", {
+  }, "\u5173\u95ED"), /*#__PURE__*/React.createElement("button", {
     disabled: true,
     className: "relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
   }, /*#__PURE__*/React.createElement("span", {
     className: "inline-block h-4 w-4 transform rounded-full bg-white translate-x-1"
   })), /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-400"
-  }, "开启"), /*#__PURE__*/React.createElement("span", {
+  }, "\u5F00\u542F"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-400 ml-2"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-lock mr-1"
-  }), "已锁定为关闭"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }), "\u5DF2\u9501\u5B9A\u4E3A\u5173\u95ED"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "一键起量"), /*#__PURE__*/React.createElement("div", {
+  }, "\u4E00\u952E\u8D77\u91CF"), /*#__PURE__*/React.createElement("div", {
     className: "space-y-2"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4"
   }, /*#__PURE__*/React.createElement("span", {
-    className: `text-sm font-medium ${!quickLaunch ? 'text-gray-400' : 'text-green-600'}`
-  }, "关闭"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setQuickLaunch(!quickLaunch),
-    className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${quickLaunch ? 'bg-blue-500' : 'bg-gray-300'}`
+    className: "text-sm font-medium ".concat(!quickLaunch ? 'text-gray-400' : 'text-green-600')
+  }, "\u5173\u95ED"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setQuickLaunch(!quickLaunch);
+    },
+    className: "relative inline-flex h-6 w-11 items-center rounded-full transition-colors ".concat(quickLaunch ? 'bg-blue-500' : 'bg-gray-300')
   }, /*#__PURE__*/React.createElement("span", {
-    className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${quickLaunch ? 'translate-x-6' : 'translate-x-1'}`
+    className: "inline-block h-4 w-4 transform rounded-full bg-white transition-transform ".concat(quickLaunch ? 'translate-x-6' : 'translate-x-1')
   })), /*#__PURE__*/React.createElement("span", {
-    className: `text-sm font-medium ${quickLaunch ? 'text-green-600' : 'text-gray-400'}`
-  }, "开启")), quickLaunch && /*#__PURE__*/React.createElement("input", {
+    className: "text-sm font-medium ".concat(quickLaunch ? 'text-green-600' : 'text-gray-400')
+  }, "\u5F00\u542F")), quickLaunch && /*#__PURE__*/React.createElement("input", {
     type: "number",
     value: quickLaunchBudget,
-    onChange: e => setQuickLaunchBudget(e.target.value),
-    placeholder: "输入一键起量预算（必填）",
+    onChange: function onChange(e) {
+      return setQuickLaunchBudget(e.target.value);
+    },
+    placeholder: "\u8F93\u5165\u4E00\u952E\u8D77\u91CF\u9884\u7B97\uFF08\u5FC5\u586B\uFF09",
     className: "w-full px-3 py-2 border border-orange-300 rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
   }))))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-semibold text-gray-900 mb-4"
-  }, "投放设置"), /*#__PURE__*/React.createElement("div", {
+  }, "\u6295\u653E\u8BBE\u7F6E"), /*#__PURE__*/React.createElement("div", {
     className: "mb-6"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "投放日期"), /*#__PURE__*/React.createElement("div", {
+  }, "\u6295\u653E\u65E5\u671F"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-6 mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
@@ -2505,145 +3010,175 @@ function App() {
     type: "radio",
     name: "date_type",
     checked: 投放日期类型 === 'custom',
-    onChange: () => set投放日期类型('custom'),
+    onChange: function onChange() {
+      return set投放日期类型('custom');
+    },
     className: "mr-2"
-  }), "指定开始及结束日期"), /*#__PURE__*/React.createElement("label", {
+  }), "\u6307\u5B9A\u5F00\u59CB\u53CA\u7ED3\u675F\u65E5\u671F"), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "date_type",
     checked: 投放日期类型 === 'long_term',
-    onChange: () => set投放日期类型('long_term'),
+    onChange: function onChange() {
+      return set投放日期类型('long_term');
+    },
     className: "mr-2"
-  }), "长期投放")), 投放日期类型 === 'long_term' ? /*#__PURE__*/React.createElement("div", {
+  }), "\u957F\u671F\u6295\u653E")), 投放日期类型 === 'long_term' ? /*#__PURE__*/React.createElement("div", {
     className: "relative w-full max-w-xs"
   }, /*#__PURE__*/React.createElement("input", {
     type: "date",
     value: 长期投放日期,
-    onChange: e => set长期投放日期(e.target.value),
+    onChange: function onChange(e) {
+      return set长期投放日期(e.target.value);
+    },
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   })) : /*#__PURE__*/React.createElement("div", {
     className: "flex gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     type: "date",
     value: 自定义开始日期,
-    onChange: e => set自定义开始日期(e.target.value),
-    placeholder: "开始日期",
+    onChange: function onChange(e) {
+      return set自定义开始日期(e.target.value);
+    },
+    placeholder: "\u5F00\u59CB\u65E5\u671F",
     className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     type: "date",
     value: 自定义结束日期,
-    onChange: e => set自定义结束日期(e.target.value),
-    placeholder: "结束日期",
+    onChange: function onChange(e) {
+      return set自定义结束日期(e.target.value);
+    },
+    placeholder: "\u7ED3\u675F\u65E5\u671F",
     className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   })))), /*#__PURE__*/React.createElement("div", {
     className: "mb-5"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-3"
-  }, "投放时段"), /*#__PURE__*/React.createElement("div", {
+  }, "\u6295\u653E\u65F6\u6BB5"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 mb-4"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600 mr-2"
-  }, "选择时段"), /*#__PURE__*/React.createElement("label", {
+  }, "\u9009\u62E9\u65F6\u6BB5"), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer mr-5"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "time_mode",
     checked: 投放时段模式 === 'all_day',
-    onChange: () => set投放时段模式('all_day'),
+    onChange: function onChange() {
+      return set投放时段模式('all_day');
+    },
     className: "mr-1.5"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "全天")), /*#__PURE__*/React.createElement("label", {
+  }, "\u5168\u5929")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer mr-5"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "time_mode",
     checked: 投放时段模式 === 'time_range',
-    onChange: () => set投放时段模式('time_range'),
+    onChange: function onChange() {
+      return set投放时段模式('time_range');
+    },
     className: "mr-1.5"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "指定开始时间和结束时间")), /*#__PURE__*/React.createElement("label", {
+  }, "\u6307\u5B9A\u5F00\u59CB\u65F6\u95F4\u548C\u7ED3\u675F\u65F6\u95F4")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "time_mode",
     checked: 投放时段模式 === 'multi_slot',
-    onChange: () => set投放时段模式('multi_slot'),
+    onChange: function onChange() {
+      return set投放时段模式('multi_slot');
+    },
     className: "mr-1.5"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "指定多个时段"))), 投放时段模式 === 'time_range' && /*#__PURE__*/React.createElement("div", {
+  }, "\u6307\u5B9A\u591A\u4E2A\u65F6\u6BB5"))), 投放时段模式 === 'time_range' && /*#__PURE__*/React.createElement("div", {
     className: "flex gap-4 items-center p-4 bg-gray-50 rounded-lg border border-gray-200 max-w-xl"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex-1"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-xs text-gray-500 mb-1"
-  }, "开始时间"), /*#__PURE__*/React.createElement("input", {
+  }, "\u5F00\u59CB\u65F6\u95F4"), /*#__PURE__*/React.createElement("input", {
     type: "time",
     value: timeRangeStart,
-    onChange: e => setTimeRangeStart(e.target.value),
+    onChange: function onChange(e) {
+      return setTimeRangeStart(e.target.value);
+    },
     className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-full"
   })), /*#__PURE__*/React.createElement("span", {
     className: "text-gray-400 mt-5"
-  }, "至"), /*#__PURE__*/React.createElement("div", {
+  }, "\u81F3"), /*#__PURE__*/React.createElement("div", {
     className: "flex-1"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-xs text-gray-500 mb-1"
-  }, "结束时间"), /*#__PURE__*/React.createElement("input", {
+  }, "\u7ED3\u675F\u65F6\u95F4"), /*#__PURE__*/React.createElement("input", {
     type: "time",
     value: timeRangeEnd,
-    onChange: e => setTimeRangeEnd(e.target.value),
+    onChange: function onChange(e) {
+      return setTimeRangeEnd(e.target.value);
+    },
     className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-full"
   }))), 投放时段模式 === 'multi_slot' && /*#__PURE__*/React.createElement(TimeGrid, {
     value: timeGridSlots,
     onChange: setTimeGridSlots
   }), 投放时段模式 === 'all_day' && /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400 py-2 px-4 bg-gray-50 rounded-lg inline-block"
-  }, "已选择\"全天\"，将在所有时间段投放")), /*#__PURE__*/React.createElement("div", {
+  }, "\u5DF2\u9009\u62E9\"\u5168\u5929\"\uFF0C\u5C06\u5728\u6240\u6709\u65F6\u95F4\u6BB5\u6295\u653E")), /*#__PURE__*/React.createElement("div", {
     className: "mb-5"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     className: "text-sm font-medium text-gray-700"
-  }, "首日开始时间"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => set首日开始(!首日开始),
-    className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${首日开始 ? 'bg-blue-500' : 'bg-gray-300'}`
+  }, "\u9996\u65E5\u5F00\u59CB\u65F6\u95F4"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return set首日开始(!首日开始);
+    },
+    className: "relative inline-flex h-6 w-11 items-center rounded-full transition-colors ".concat(首日开始 ? 'bg-blue-500' : 'bg-gray-300')
   }, /*#__PURE__*/React.createElement("span", {
-    className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${首日开始 ? 'translate-x-6' : 'translate-x-1'}`
+    className: "inline-block h-4 w-4 transform rounded-full bg-white transition-transform ".concat(首日开始 ? 'translate-x-6' : 'translate-x-1')
   })), /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-500"
   }, 首日开始 ? '已开启' : '未开启')), 首日开始 && /*#__PURE__*/React.createElement("div", {
     className: "ml-1 flex items-center gap-3 animate-fadeIn"
   }, /*#__PURE__*/React.createElement("label", {
     className: "text-xs text-gray-500"
-  }, "选择开始时间"), /*#__PURE__*/React.createElement("input", {
+  }, "\u9009\u62E9\u5F00\u59CB\u65F6\u95F4"), /*#__PURE__*/React.createElement("input", {
     type: "time",
     value: 首日开始时间值,
-    onChange: e => set首日开始时间值(e.target.value),
+    onChange: function onChange(e) {
+      return set首日开始时间值(e.target.value);
+    },
     className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-400"
-  }, "广告将在投放首日该时间开始投放"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, "\u5E7F\u544A\u5C06\u5728\u6295\u653E\u9996\u65E5\u8BE5\u65F6\u95F4\u5F00\u59CB\u6295\u653E"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "营销单元名称 ", /*#__PURE__*/React.createElement("span", {
+  }, "\u8425\u9500\u5355\u5143\u540D\u79F0 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 max-w-md"
   }, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: unitName,
-    onChange: e => setUnitName(e.target.value),
-    placeholder: "输入营销单元名称",
+    onChange: function onChange(e) {
+      return setUnitName(e.target.value);
+    },
+    placeholder: "\u8F93\u5165\u8425\u9500\u5355\u5143\u540D\u79F0",
     className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 text-sm text-gray-500"
-  }, nameVariables.map(v => /*#__PURE__*/React.createElement("span", {
-    key: v,
-    onClick: () => setUnitName(unitName + '{' + v + '}'),
-    className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-  }, "+", v)))))))), /*#__PURE__*/React.createElement("div", {
+  }, nameVariables.map(function (v) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: v,
+      onClick: function onClick() {
+        return setUnitName(unitName + '{' + v + '}');
+      },
+      className: "text-blue-500 hover:text-blue-700 cursor-pointer"
+    }, "+", v);
+  }))))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-xl shadow-sm border overflow-hidden"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
@@ -2651,118 +3186,142 @@ function App() {
     className: "text-lg font-bold text-gray-900 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm"
-  }, "3"), "创意配置")), /*#__PURE__*/React.createElement("div", {
+  }, "3"), "\u521B\u610F\u914D\u7F6E")), /*#__PURE__*/React.createElement("div", {
     className: "p-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "创意增强Max"), /*#__PURE__*/React.createElement("div", {
+  }, "\u521B\u610F\u589E\u5F3AMax"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4"
   }, /*#__PURE__*/React.createElement("span", {
-    className: `text-sm font-medium ${!creativeEnhanceMax ? 'text-green-600' : 'text-gray-400'}`
-  }, "关闭"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setCreativeEnhanceMax(!creativeEnhanceMax),
-    className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${creativeEnhanceMax ? 'bg-blue-500' : 'bg-gray-300'}`
+    className: "text-sm font-medium text-green-600"
+  }, "\u5173\u95ED"), /*#__PURE__*/React.createElement("button", {
+    disabled: true,
+    className: "relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
   }, /*#__PURE__*/React.createElement("span", {
-    className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${creativeEnhanceMax ? 'translate-x-6' : 'translate-x-1'}`
+    className: "inline-block h-4 w-4 transform rounded-full bg-white translate-x-1"
   })), /*#__PURE__*/React.createElement("span", {
-    className: `text-sm font-medium ${creativeEnhanceMax ? 'text-green-600' : 'text-gray-400'}`
-  }, "开启"), creativeEnhanceMax && /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-orange-500"
+    className: "text-sm font-medium text-gray-400"
+  }, "\u5F00\u542F"), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400 ml-2"
   }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-exclamation-triangle mr-1"
-  }), "仅支持关闭"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "fas fa-lock mr-1"
+  }), "\u5DF2\u9501\u5B9A\u4E3A\u5173\u95ED"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "创意名称"), /*#__PURE__*/React.createElement("div", {
+  }, "\u521B\u610F\u540D\u79F0"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: creativeName,
-    onChange: e => setCreativeName(e.target.value),
-    placeholder: "输入创意名称（支持变量）",
+    onChange: function onChange(e) {
+      return setCreativeName(e.target.value);
+    },
+    placeholder: "\u8F93\u5165\u521B\u610F\u540D\u79F0\uFF08\u652F\u6301\u53D8\u91CF\uFF09",
     className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 text-sm text-gray-500"
-  }, creativeNameVariables.map(v => /*#__PURE__*/React.createElement("span", {
-    key: v,
-    onClick: () => setCreativeName(creativeName + '{' + v + '}'),
-    className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-  }, "+", v))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, creativeNameVariables.map(function (v) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: v,
+      onClick: function onClick() {
+        return setCreativeName(creativeName + '{' + v + '}');
+      },
+      className: "text-blue-500 hover:text-blue-700 cursor-pointer"
+    }, "+", v);
+  })))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "创意素材 ", /*#__PURE__*/React.createElement("span", {
+  }, "\u521B\u610F\u7D20\u6750 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
-  }, "*"), "（已选 ", selectedMaterials.length, "/100 个，可多次选择）"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
+  }, "*"), "\uFF08\u5DF2\u9009 ", selectedMaterials.length, "/100 \u4E2A\uFF0C\u53EF\u591A\u6B21\u9009\u62E9\uFF09"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
       setShowMaterialModal(true);
     },
     className: "btn-secondary"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-photo-video mr-2"
-  }), "选择素材（视频/图片）"), selectedMaterials.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }), "\u9009\u62E9\u7D20\u6750\uFF08\u89C6\u9891/\u56FE\u7247\uFF09"), selectedMaterials.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-blue-900 font-medium mb-2"
-  }, "已选素材："), /*#__PURE__*/React.createElement("div", {
+  }, "\u5DF2\u9009\u7D20\u6750\uFF1A"), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-2"
-  }, selectedMaterials.map(m => /*#__PURE__*/React.createElement("span", {
-    key: m.id,
-    className: "inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-200 rounded text-xs"
-  }, m.type === 'video' ? '🎬' : '🖼️', " ", m.name, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setSelectedMaterials(selectedMaterials.filter(sm => sm.id !== m.id)),
-    className: "text-red-500 hover:text-red-700 ml-1"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-times"
-  }))))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, selectedMaterials.map(function (m) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: m.id,
+      className: "inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-200 rounded text-xs"
+    }, m.type === 'video' ? '🎬' : '🖼️', " ", m.name, /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        return setSelectedMaterials(selectedMaterials.filter(function (sm) {
+          return sm.id !== m.id;
+        }));
+      },
+      className: "text-red-500 hover:text-red-700 ml-1"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-times"
+    })));
+  })))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "广告文案 ", /*#__PURE__*/React.createElement("span", {
+  }, "\u5E7F\u544A\u6587\u6848 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
-  }, "*"), "（已选 ", selectedCopies.length, " 条，支持多选和批量添加）"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowCopyModal(true),
+  }, "*"), "\uFF08\u5DF2\u9009 ", selectedCopies.length, " \u6761\uFF0C\u652F\u6301\u591A\u9009\u548C\u6279\u91CF\u6DFB\u52A0\uFF09"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setShowCopyModal(true);
+    },
     className: "btn-secondary"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-font mr-2"
-  }), "选择广告文案"), selectedCopies.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }), "\u9009\u62E9\u5E7F\u544A\u6587\u6848"), selectedCopies.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "mt-3 p-3 bg-green-50 border border-green-200 rounded-lg"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-green-900 font-medium mb-2"
-  }, "已选文案："), /*#__PURE__*/React.createElement("div", {
+  }, "\u5DF2\u9009\u6587\u6848\uFF1A"), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-2"
-  }, selectedCopies.map(c => /*#__PURE__*/React.createElement("span", {
-    key: c.id,
-    className: "inline-flex items-center gap-1 px-2 py-1 bg-white border border-green-200 rounded text-xs"
-  }, "📝 ", c.content, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setSelectedCopies(selectedCopies.filter(sc => sc.id !== c.id)),
-    className: "text-red-500 hover:text-red-700 ml-1"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-times"
-  }))))))), selectedMaterials.length > 0 && selectedCopies.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, selectedCopies.map(function (c) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: c.id,
+      className: "inline-flex items-center gap-1 px-2 py-1 bg-white border border-green-200 rounded text-xs"
+    }, "\uD83D\uDCDD ", c.content, /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        return setSelectedCopies(selectedCopies.filter(function (sc) {
+          return sc.id !== c.id;
+        }));
+      },
+      className: "text-red-500 hover:text-red-700 ml-1"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-times"
+    })));
+  })))), selectedMaterials.length > 0 && selectedCopies.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "bg-blue-50 border border-blue-200 rounded-lg p-4"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-blue-900 mb-2"
-  }, "创意组合预览"), creativeComposeMode === 'cross_join' ? /*#__PURE__*/React.createElement("p", {
+  }, "\u521B\u610F\u7EC4\u5408\u9884\u89C8"), creativeComposeMode === 'cross_join' ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-blue-700"
-  }, "交叉组合：", /*#__PURE__*/React.createElement("span", {
+  }, "\u4EA4\u53C9\u7EC4\u5408\uFF1A", /*#__PURE__*/React.createElement("span", {
     className: "font-bold"
-  }, selectedMaterials.length, "素材 × ", selectedCopies.length, "文案 = ", selectedMaterials.length * selectedCopies.length), " 个创意/单元") : /*#__PURE__*/React.createElement("p", {
+  }, selectedMaterials.length, "\u7D20\u6750 \xD7 ", selectedCopies.length, "\u6587\u6848 = ", selectedMaterials.length * selectedCopies.length), " \u4E2A\u521B\u610F/\u5355\u5143") : /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-blue-700"
-  }, "固定分配：每创意 ", composeRule.videos, "视频 + ", composeRule.images, "图片 + ", composeRule.copies, "文案， 预计可生成 ", /*#__PURE__*/React.createElement("span", {
+  }, "\u56FA\u5B9A\u5206\u914D\uFF1A\u6BCF\u521B\u610F ", composeRule.videos, "\u89C6\u9891 + ", composeRule.images, "\u56FE\u7247 + ", composeRule.copies, "\u6587\u6848\uFF0C \u9884\u8BA1\u53EF\u751F\u6210 ", /*#__PURE__*/React.createElement("span", {
     className: "font-bold"
-  }, (() => {
-    const videoCount = selectedMaterials.filter(m => m.type === 'video').length;
-    const imageCount = selectedMaterials.filter(m => m.type === 'image').length;
-    const copyCount = selectedCopies.length;
-    const maxByVideo = composeRule.videos > 0 ? Math.floor(videoCount / composeRule.videos) : Infinity;
-    const maxByImage = composeRule.images > 0 ? Math.floor(imageCount / composeRule.images) : Infinity;
-    const maxByCopy = Math.floor(copyCount / composeRule.copies);
+  }, function () {
+    var videoCount = selectedMaterials.filter(function (m) {
+      return m.type === 'video';
+    }).length;
+    var imageCount = selectedMaterials.filter(function (m) {
+      return m.type === 'image';
+    }).length;
+    var copyCount = selectedCopies.length;
+    var maxByVideo = composeRule.videos > 0 ? Math.floor(videoCount / composeRule.videos) : Infinity;
+    var maxByImage = composeRule.images > 0 ? Math.floor(imageCount / composeRule.images) : Infinity;
+    var maxByCopy = Math.floor(copyCount / composeRule.copies);
     return Math.min(maxByVideo, maxByImage, maxByCopy);
-  })()), " 个创意/单元")), /*#__PURE__*/React.createElement("div", {
+  }()), " \u4E2A\u521B\u610F/\u5355\u5143")), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-gray-900 mb-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-layer-group mr-2 text-blue-500"
-  }), "创意数量分配"), /*#__PURE__*/React.createElement("p", {
+  }), "\u521B\u610F\u6570\u91CF\u5206\u914D"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
-  }, "定义每个创意由多少个素材和文案组成"), /*#__PURE__*/React.createElement("div", {
+  }, "\u5B9A\u4E49\u6BCF\u4E2A\u521B\u610F\u7531\u591A\u5C11\u4E2A\u7D20\u6750\u548C\u6587\u6848\u7EC4\u6210"), /*#__PURE__*/React.createElement("div", {
     className: "space-y-3"
   }, /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
@@ -2771,163 +3330,180 @@ function App() {
     name: "compose_mode",
     value: "cross_join",
     checked: creativeComposeMode === 'cross_join',
-    onChange: e => setCreativeComposeMode(e.target.value),
+    onChange: function onChange(e) {
+      return setCreativeComposeMode(e.target.value);
+    },
     className: "mr-2"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "交叉组合（当前：", selectedMaterials.length, "素材 × ", selectedCopies.length, "文案 = ", selectedMaterials.length * selectedCopies.length, "创意）")), /*#__PURE__*/React.createElement("label", {
+  }, "\u4EA4\u53C9\u7EC4\u5408\uFF08\u5F53\u524D\uFF1A", selectedMaterials.length, "\u7D20\u6750 \xD7 ", selectedCopies.length, "\u6587\u6848 = ", selectedMaterials.length * selectedCopies.length, "\u521B\u610F\uFF09")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "compose_mode",
     value: "fixed",
     checked: creativeComposeMode === 'fixed',
-    onChange: e => setCreativeComposeMode(e.target.value),
+    onChange: function onChange(e) {
+      return setCreativeComposeMode(e.target.value);
+    },
     className: "mr-2"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "固定数量分配")), creativeComposeMode === 'fixed' && /*#__PURE__*/React.createElement("div", {
+  }, "\u56FA\u5B9A\u6570\u91CF\u5206\u914D")), creativeComposeMode === 'fixed' && /*#__PURE__*/React.createElement("div", {
     className: "ml-6 bg-gray-50 border border-gray-200 rounded-xl p-4 animate-fadeIn"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
-  }, "设置每个创意包含的素材和文案数量："), /*#__PURE__*/React.createElement("div", {
+  }, "\u8BBE\u7F6E\u6BCF\u4E2A\u521B\u610F\u5305\u542B\u7684\u7D20\u6750\u548C\u6587\u6848\u6570\u91CF\uFF1A"), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-3 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-xs text-gray-600 mb-1"
-  }, "视频数/创意"), /*#__PURE__*/React.createElement("input", {
+  }, "\u89C6\u9891\u6570/\u521B\u610F"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "0",
     max: "10",
     value: composeRule.videos,
-    onChange: e => setComposeRule({
-      ...composeRule,
-      videos: Math.max(0, parseInt(e.target.value) || 0)
-    }),
+    onChange: function onChange(e) {
+      return setComposeRule(_objectSpread(_objectSpread({}, composeRule), {}, {
+        videos: Math.max(0, parseInt(e.target.value) || 0)
+      }));
+    },
     className: "w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-xs text-gray-600 mb-1"
-  }, "图片数/创意"), /*#__PURE__*/React.createElement("input", {
+  }, "\u56FE\u7247\u6570/\u521B\u610F"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "0",
     max: "10",
     value: composeRule.images,
-    onChange: e => setComposeRule({
-      ...composeRule,
-      images: Math.max(0, parseInt(e.target.value) || 0)
-    }),
+    onChange: function onChange(e) {
+      return setComposeRule(_objectSpread(_objectSpread({}, composeRule), {}, {
+        images: Math.max(0, parseInt(e.target.value) || 0)
+      }));
+    },
     className: "w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-xs text-gray-600 mb-1"
-  }, "文案数/创意"), /*#__PURE__*/React.createElement("input", {
+  }, "\u6587\u6848\u6570/\u521B\u610F"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
     max: "10",
     value: composeRule.copies,
-    onChange: e => setComposeRule({
-      ...composeRule,
-      copies: Math.max(1, parseInt(e.target.value) || 1)
-    }),
+    onChange: function onChange(e) {
+      return setComposeRule(_objectSpread(_objectSpread({}, composeRule), {}, {
+        copies: Math.max(1, parseInt(e.target.value) || 1)
+      }));
+    },
     className: "w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "mt-3 p-3 bg-white rounded-lg border border-gray-200"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-1"
-  }, "预估可生成创意数："), (() => {
-    const videoCount = selectedMaterials.filter(m => m.type === 'video').length;
-    const imageCount = selectedMaterials.filter(m => m.type === 'image').length;
-    const copyCount = selectedCopies.length;
-    const perCreative = (composeRule.videos || 0) + (composeRule.images || 0);
-    let maxCreatives = 0;
+  }, "\u9884\u4F30\u53EF\u751F\u6210\u521B\u610F\u6570\uFF1A"), function () {
+    var videoCount = selectedMaterials.filter(function (m) {
+      return m.type === 'video';
+    }).length;
+    var imageCount = selectedMaterials.filter(function (m) {
+      return m.type === 'image';
+    }).length;
+    var copyCount = selectedCopies.length;
+    var perCreative = (composeRule.videos || 0) + (composeRule.images || 0);
+    var maxCreatives = 0;
     if (perCreative > 0 && composeRule.copies > 0) {
-      const maxByVideo = composeRule.videos > 0 ? Math.floor(videoCount / composeRule.videos) : Infinity;
-      const maxByImage = composeRule.images > 0 ? Math.floor(imageCount / composeRule.images) : Infinity;
-      const maxByCopy = Math.floor(copyCount / composeRule.copies);
+      var maxByVideo = composeRule.videos > 0 ? Math.floor(videoCount / composeRule.videos) : Infinity;
+      var maxByImage = composeRule.images > 0 ? Math.floor(imageCount / composeRule.images) : Infinity;
+      var maxByCopy = Math.floor(copyCount / composeRule.copies);
       maxCreatives = Math.min(maxByVideo, maxByImage, maxByCopy);
     }
     return /*#__PURE__*/React.createElement("p", {
       className: "text-lg font-bold text-blue-600"
-    }, maxCreatives, " 个创意");
-  })(), /*#__PURE__*/React.createElement("p", {
+    }, maxCreatives, " \u4E2A\u521B\u610F");
+  }(), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
-  }, "规则：每创意 ", composeRule.videos, "视频 + ", composeRule.images, "图片 + ", composeRule.copies, "文案"))))), /*#__PURE__*/React.createElement("div", {
+  }, "\u89C4\u5219\uFF1A\u6BCF\u521B\u610F ", composeRule.videos, "\u89C6\u9891 + ", composeRule.images, "\u56FE\u7247 + ", composeRule.copies, "\u6587\u6848"))))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "素材分配策略"), /*#__PURE__*/React.createElement("select", {
+  }, "\u7D20\u6750\u5206\u914D\u7B56\u7565"), /*#__PURE__*/React.createElement("select", {
     value: videoStrategy,
-    onChange: e => setVideoStrategy(e.target.value),
+    onChange: function onChange(e) {
+      return setVideoStrategy(e.target.value);
+    },
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }, /*#__PURE__*/React.createElement("option", {
     value: "average"
-  }, "平均分配"), /*#__PURE__*/React.createElement("option", {
+  }, "\u5E73\u5747\u5206\u914D"), /*#__PURE__*/React.createElement("option", {
     value: "copy"
-  }, "复制分配（所有账户用相同素材）"), /*#__PURE__*/React.createElement("option", {
+  }, "\u590D\u5236\u5206\u914D\uFF08\u6240\u6709\u8D26\u6237\u7528\u76F8\u540C\u7D20\u6750\uFF09"), /*#__PURE__*/React.createElement("option", {
     value: "random"
-  }, "随机分配"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, "\u968F\u673A\u5206\u914D"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "广告文案分配策略"), /*#__PURE__*/React.createElement("select", {
+  }, "\u5E7F\u544A\u6587\u6848\u5206\u914D\u7B56\u7565"), /*#__PURE__*/React.createElement("select", {
     value: copyStrategy,
-    onChange: e => setCopyStrategy(e.target.value),
+    onChange: function onChange(e) {
+      return setCopyStrategy(e.target.value);
+    },
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }, /*#__PURE__*/React.createElement("option", {
     value: "average"
-  }, "平均分配"), /*#__PURE__*/React.createElement("option", {
+  }, "\u5E73\u5747\u5206\u914D"), /*#__PURE__*/React.createElement("option", {
     value: "copy"
-  }, "复制分配（所有账户用相同文案）"), /*#__PURE__*/React.createElement("option", {
+  }, "\u590D\u5236\u5206\u914D\uFF08\u6240\u6709\u8D26\u6237\u7528\u76F8\u540C\u6587\u6848\uFF09"), /*#__PURE__*/React.createElement("option", {
     value: "random"
-  }, "随机分配")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, "\u968F\u673A\u5206\u914D")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "落地页（卡博士链接 + 宏参数已自动拼接）"), selectedAccountIds.length > 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "\u843D\u5730\u9875\uFF08\u5361\u535A\u58EB\u94FE\u63A5 + \u5B8F\u53C2\u6570\u5DF2\u81EA\u52A8\u62FC\u63A5\uFF09"), selectedAccountIds.length > 0 ? /*#__PURE__*/React.createElement("div", {
     className: "space-y-2"
-  }, selectedAccountIds.map(id => {
-    const acc = MOCK.accounts.find(a => a.id === id);
-    const landingUrl = acc ? acc.kaboshi + '?click_id={click_id}&ad_id={ad_id}' : '';
+  }, selectedAccountIds.map(function (id) {
+    var acc = MOCK.accounts.find(function (a) {
+      return a.id === id;
+    });
+    var landingUrl = acc ? acc.kaboshi + '?click_id={click_id}&ad_id={ad_id}' : '';
     return acc ? /*#__PURE__*/React.createElement("div", {
       key: id,
       className: "p-3 bg-gray-50 border border-gray-200 rounded-lg"
     }, /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-gray-500 mb-1"
-    }, acc.name, " 的落地页："), /*#__PURE__*/React.createElement("code", {
+    }, acc.name, " \u7684\u843D\u5730\u9875\uFF1A"), /*#__PURE__*/React.createElement("code", {
       className: "text-sm text-gray-700 break-all"
     }, landingUrl)) : null;
   })) : /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
-  }, "请先选择账户，落地页将自动生成"), /*#__PURE__*/React.createElement("p", {
+  }, "\u8BF7\u5148\u9009\u62E9\u8D26\u6237\uFF0C\u843D\u5730\u9875\u5C06\u81EA\u52A8\u751F\u6210"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-2"
-  }, "✅ 宏参数已默认拼接：click_id、ad_id")), /*#__PURE__*/React.createElement("div", {
+  }, "\u2705 \u5B8F\u53C2\u6570\u5DF2\u9ED8\u8BA4\u62FC\u63A5\uFF1Aclick_id\u3001ad_id")), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "品牌形象"), /*#__PURE__*/React.createElement("input", {
+  }, "\u54C1\u724C\u5F62\u8C61"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    value: "视频号",
+    value: "\u89C6\u9891\u53F7",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "营销组件"), /*#__PURE__*/React.createElement("input", {
+  }, "\u8425\u9500\u7EC4\u4EF6"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    value: "浮层卡片",
+    value: "\u6D6E\u5C42\u5361\u7247",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
   }), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
-  }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
+  }, "\u6240\u6709\u521B\u610F\u5171\u7528\u540C\u4E00\u4E2A\u54C1\u724C\u5F62\u8C61\u548C\u8425\u9500\u7EC4\u4EF6"))))), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-center gap-4 pb-8"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
+    onClick: function onClick() {
       if (selectedAccountIds.length === 0) {
         notify('请先选择至少一个账户', 'error');
         return;
       }
-      const summary = getBuildSummary();
-      notify(`配置已准备好，共 ${summary.accountCount} 个账户，将创建 ${summary.totalUnits} 个单元、${summary.totalCreatives} 个创意`, 'success');
+      var summary = getBuildSummary();
+      notify("\u914D\u7F6E\u5DF2\u51C6\u5907\u597D\uFF0C\u5171 ".concat(summary.accountCount, " \u4E2A\u8D26\u6237\uFF0C\u5C06\u521B\u5EFA ").concat(summary.totalUnits, " \u4E2A\u5355\u5143\u3001").concat(summary.totalCreatives, " \u4E2A\u521B\u610F"), 'success');
     },
     className: "btn-primary text-lg px-8 py-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-paper-plane mr-2"
-  }), "应用配置到所有账户"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
+  }), "\u5E94\u7528\u914D\u7F6E\u5230\u6240\u6709\u8D26\u6237"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
       if (selectedAccountIds.length === 0) {
         notify('请先选择账户', 'error');
         return;
@@ -2937,22 +3513,24 @@ function App() {
     className: "btn-secondary text-lg px-8 py-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-eye mr-2"
-  }), "预览全部")), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }), "\u9884\u89C8\u5168\u90E8")), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-xl shadow-sm border p-6 mb-8"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-bold text-gray-900 mb-4"
-  }, "账户配置进度"), /*#__PURE__*/React.createElement("div", {
+  }, "\u8D26\u6237\u914D\u7F6E\u8FDB\u5EA6"), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-  }, selectedAccountIds.map(id => {
-    const acc = MOCK.accounts.find(a => a.id === id);
-    const hasTargeting = targetingSource === 'package' ? selectedTargetingPackages.length > 0 : geoSelectedProvinces.length > 0 || geoMode === 'unlimited';
-    const hasBid = bidAmount !== '';
-    const hasMaterial = selectedMaterials.length > 0;
-    const hasCopy = selectedCopies.length > 0;
-    const doneCount = [hasTargeting, hasBid, hasMaterial, hasCopy].filter(Boolean).length;
-    const totalCount = 4;
-    const pct = Math.round(doneCount / totalCount * 100);
-    const tpCount = targetingSource === 'package' ? Math.max(selectedTargetingPackages.length, 1) : 1;
+  }, selectedAccountIds.map(function (id) {
+    var acc = MOCK.accounts.find(function (a) {
+      return a.id === id;
+    });
+    var hasTargeting = targetingSource === 'package' ? selectedTargetingPackages.length > 0 : geoSelectedProvinces.length > 0 || geoMode === 'unlimited';
+    var hasBid = bidAmount !== '';
+    var hasMaterial = selectedMaterials.length > 0;
+    var hasCopy = selectedCopies.length > 0;
+    var doneCount = [hasTargeting, hasBid, hasMaterial, hasCopy].filter(Boolean).length;
+    var totalCount = 4;
+    var pct = Math.round(doneCount / totalCount * 100);
+    var tpCount = targetingSource === 'package' ? Math.max(selectedTargetingPackages.length, 1) : 1;
     return /*#__PURE__*/React.createElement("div", {
       key: id,
       className: "border border-gray-200 rounded-lg p-4"
@@ -2967,63 +3545,71 @@ function App() {
     }, /*#__PURE__*/React.createElement("div", {
       className: "bg-blue-500 h-2 rounded-full transition-all",
       style: {
-        width: `${pct}%`
+        width: "".concat(pct, "%")
       }
     })), /*#__PURE__*/React.createElement("div", {
       className: "space-y-1 text-xs"
     }, /*#__PURE__*/React.createElement("p", {
       className: hasTargeting ? 'text-green-600' : 'text-gray-400'
-    }, hasTargeting ? '✓' : '○', " 定向配置 ", targetingSource === 'package' && selectedTargetingPackages.length > 0 ? `(${selectedTargetingPackages.length}包)` : ''), /*#__PURE__*/React.createElement("p", {
+    }, hasTargeting ? '✓' : '○', " \u5B9A\u5411\u914D\u7F6E ", targetingSource === 'package' && selectedTargetingPackages.length > 0 ? "(".concat(selectedTargetingPackages.length, "\u5305)") : ''), /*#__PURE__*/React.createElement("p", {
       className: hasBid ? 'text-green-600' : 'text-gray-400'
-    }, hasBid ? '✓' : '○', " 出价设定"), /*#__PURE__*/React.createElement("p", {
+    }, hasBid ? '✓' : '○', " \u51FA\u4EF7\u8BBE\u5B9A"), /*#__PURE__*/React.createElement("p", {
       className: hasMaterial ? 'text-green-600' : 'text-gray-400'
-    }, hasMaterial ? '✓' : '○', " 创意素材(", selectedMaterials.length, ")"), /*#__PURE__*/React.createElement("p", {
+    }, hasMaterial ? '✓' : '○', " \u521B\u610F\u7D20\u6750(", selectedMaterials.length, ")"), /*#__PURE__*/React.createElement("p", {
       className: hasCopy ? 'text-green-600' : 'text-gray-400'
-    }, hasCopy ? '✓' : '○', " 广告文案(", selectedCopies.length, ")"), /*#__PURE__*/React.createElement("p", {
+    }, hasCopy ? '✓' : '○', " \u5E7F\u544A\u6587\u6848(", selectedCopies.length, ")"), /*#__PURE__*/React.createElement("p", {
       className: "text-blue-600 font-medium"
-    }, "单元数：", tpCount)));
+    }, "\u5355\u5143\u6570\uFF1A", tpCount)));
   })))), /*#__PURE__*/React.createElement(MaterialModal, {
     show: showMaterialModal,
-    onClose: () => setShowMaterialModal(false),
-    onConfirm: materials => {
+    onClose: function onClose() {
+      return setShowMaterialModal(false);
+    },
+    onConfirm: function onConfirm(materials) {
       setSelectedMaterials(materials);
       setShowMaterialModal(false);
     },
     selectedMaterials: selectedMaterials
   }), /*#__PURE__*/React.createElement(CopyModal, {
     show: showCopyModal,
-    onClose: () => setShowCopyModal(false),
-    onConfirm: copies => {
+    onClose: function onClose() {
+      return setShowCopyModal(false);
+    },
+    onConfirm: function onConfirm(copies) {
       setSelectedCopies(copies);
       setShowCopyModal(false);
     },
     selectedCopies: selectedCopies
-  }), showPreview && (() => {
-    const summary = getBuildSummary();
-    const {
-      accountCount,
-      tpCount,
-      unitsPerAccount,
-      totalUnits,
-      materialCount,
-      copyCount,
-      creativesPerUnit,
-      totalCreatives
-    } = summary;
+  }), showPreview && function (_MOCK$businessTypes$f, _MOCK$specificProduct) {
+    var summary = getBuildSummary();
+    var accountCount = summary.accountCount,
+      tpCount = summary.tpCount,
+      unitsPerAccount = summary.unitsPerAccount,
+      totalUnits = summary.totalUnits,
+      materialCount = summary.materialCount,
+      copyCount = summary.copyCount,
+      creativesPerUnit = summary.creativesPerUnit,
+      totalCreatives = summary.totalCreatives;
     return /*#__PURE__*/React.createElement("div", {
       className: "modal-overlay",
-      onClick: () => setShowPreview(false)
+      onClick: function onClick() {
+        return setShowPreview(false);
+      }
     }, /*#__PURE__*/React.createElement("div", {
       className: "modal-content w-full max-w-3xl",
-      onClick: e => e.stopPropagation()
+      onClick: function onClick(e) {
+        return e.stopPropagation();
+      }
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-between p-5 border-b"
     }, /*#__PURE__*/React.createElement("h3", {
       className: "text-lg font-bold text-gray-900"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-chart-pie mr-2 text-blue-500"
-    }), "搭建配置预览"), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setShowPreview(false),
+    }), "\u642D\u5EFA\u914D\u7F6E\u9884\u89C8"), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        return setShowPreview(false);
+      },
       className: "text-gray-400 hover:text-gray-600"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-times"
@@ -3036,25 +3622,25 @@ function App() {
       className: "bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white mb-6 text-center shadow-xl"
     }, /*#__PURE__*/React.createElement("p", {
       className: "text-sm opacity-80 mb-3"
-    }, "搭建总量预览"), /*#__PURE__*/React.createElement("div", {
+    }, "\u642D\u5EFA\u603B\u91CF\u9884\u89C8"), /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-center gap-3 flex-wrap text-2xl font-bold"
     }, /*#__PURE__*/React.createElement("span", {
       className: "bg-white/20 px-4 py-2 rounded-xl"
-    }, accountCount, " 个账户"), /*#__PURE__*/React.createElement("span", {
+    }, accountCount, " \u4E2A\u8D26\u6237"), /*#__PURE__*/React.createElement("span", {
       class: "text-3xl"
-    }, "×"), /*#__PURE__*/React.createElement("span", {
+    }, "\xD7"), /*#__PURE__*/React.createElement("span", {
       className: "bg-white/20 px-4 py-2 rounded-xl"
-    }, unitsPerAccount, " 个单元/账户"), /*#__PURE__*/React.createElement("span", {
+    }, unitsPerAccount, " \u4E2A\u5355\u5143/\u8D26\u6237"), /*#__PURE__*/React.createElement("span", {
       class: "text-3xl"
-    }, "×"), /*#__PURE__*/React.createElement("span", {
+    }, "\xD7"), /*#__PURE__*/React.createElement("span", {
       className: "bg-white/20 px-4 py-2 rounded-xl"
-    }, copyCount, " 条文案")), /*#__PURE__*/React.createElement("div", {
+    }, copyCount, " \u6761\u6587\u6848")), /*#__PURE__*/React.createElement("div", {
       className: "mt-5 pt-5 border-t border-white/30"
     }, /*#__PURE__*/React.createElement("p", {
       className: "text-5xl font-extrabold tracking-tight"
     }, totalCreatives.toLocaleString()), /*#__PURE__*/React.createElement("p", {
       className: "text-base opacity-80 mt-1"
-    }, "共搭建 ", totalCreatives.toLocaleString(), " 个创意"))), /*#__PURE__*/React.createElement("div", {
+    }, "\u5171\u642D\u5EFA ", totalCreatives.toLocaleString(), " \u4E2A\u521B\u610F"))), /*#__PURE__*/React.createElement("div", {
       className: "grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
     }, /*#__PURE__*/React.createElement("div", {
       className: "bg-blue-50 border border-blue-200 rounded-xl p-4 text-center"
@@ -3062,25 +3648,25 @@ function App() {
       className: "text-3xl font-bold text-blue-600"
     }, accountCount), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-blue-700 mt-1"
-    }, "选择账户")), /*#__PURE__*/React.createElement("div", {
+    }, "\u9009\u62E9\u8D26\u6237")), /*#__PURE__*/React.createElement("div", {
       className: "bg-green-50 border border-green-200 rounded-xl p-4 text-center"
     }, /*#__PURE__*/React.createElement("p", {
       className: "text-3xl font-bold text-green-600"
     }, totalUnits), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-green-700 mt-1"
-    }, "总单元数（", accountCount, "×", unitsPerAccount, "）")), /*#__PURE__*/React.createElement("div", {
+    }, "\u603B\u5355\u5143\u6570\uFF08", accountCount, "\xD7", unitsPerAccount, "\uFF09")), /*#__PURE__*/React.createElement("div", {
       className: "bg-orange-50 border border-orange-200 rounded-xl p-4 text-center"
     }, /*#__PURE__*/React.createElement("p", {
       className: "text-3xl font-bold text-orange-600"
     }, materialCount), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-orange-700 mt-1"
-    }, "素材数")), /*#__PURE__*/React.createElement("div", {
+    }, "\u7D20\u6750\u6570")), /*#__PURE__*/React.createElement("div", {
       className: "bg-purple-50 border border-purple-200 rounded-xl p-4 text-center"
     }, /*#__PURE__*/React.createElement("p", {
       className: "text-3xl font-bold text-purple-600"
     }, copyCount), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-purple-700 mt-1"
-    }, "广告文案"))), targetingSource === 'package' && selectedTargetingPackages.length > 0 && /*#__PURE__*/React.createElement("div", {
+    }, "\u5E7F\u544A\u6587\u6848"))), targetingSource === 'package' && selectedTargetingPackages.length > 0 && /*#__PURE__*/React.createElement("div", {
       className: "border border-blue-200 rounded-xl overflow-hidden mb-6"
     }, /*#__PURE__*/React.createElement("div", {
       className: "bg-blue-50 px-4 py-3 border-b border-blue-200"
@@ -3088,10 +3674,12 @@ function App() {
       className: "text-sm font-semibold text-blue-900"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-bullseye mr-2"
-    }), "定向包明细（每包 = 1 单元/账户）")), /*#__PURE__*/React.createElement("div", {
+    }), "\u5B9A\u5411\u5305\u660E\u7EC6\uFF08\u6BCF\u5305 = 1 \u5355\u5143/\u8D26\u6237\uFF09")), /*#__PURE__*/React.createElement("div", {
       className: "divide-y divide-blue-100"
-    }, selectedTargetingPackages.map((tpId, idx) => {
-      const tp = MOCK.targetingPackages.find(t => t.id === tpId);
+    }, selectedTargetingPackages.map(function (tpId, idx) {
+      var tp = MOCK.targetingPackages.find(function (t) {
+        return t.id === tpId;
+      });
       return tp ? /*#__PURE__*/React.createElement("div", {
         key: tpId,
         className: "px-4 py-3 flex items-center justify-between hover:bg-blue-50"
@@ -3103,9 +3691,9 @@ function App() {
         className: "text-sm font-medium text-gray-900"
       }, tp.name), /*#__PURE__*/React.createElement("p", {
         className: "text-xs text-gray-500"
-      }, tp.region, " | ", tp.age, "岁 | ", tp.gender))), /*#__PURE__*/React.createElement("span", {
+      }, tp.region, " | ", tp.age, "\u5C81 | ", tp.gender))), /*#__PURE__*/React.createElement("span", {
         className: "text-xs text-blue-600 font-medium"
-      }, accountCount, " 账户 × 1 单元")) : null;
+      }, accountCount, " \u8D26\u6237 \xD7 1 \u5355\u5143")) : null;
     }))), /*#__PURE__*/React.createElement("div", {
       className: "border border-gray-200 rounded-xl overflow-hidden"
     }, /*#__PURE__*/React.createElement("div", {
@@ -3114,10 +3702,12 @@ function App() {
       className: "text-sm font-semibold text-gray-700"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-list-ul mr-2"
-    }), "各账户搭建明细")), /*#__PURE__*/React.createElement("div", {
+    }), "\u5404\u8D26\u6237\u642D\u5EFA\u660E\u7EC6")), /*#__PURE__*/React.createElement("div", {
       className: "divide-y divide-gray-100"
-    }, selectedAccountIds.map((id, idx) => {
-      const acc = MOCK.accounts.find(a => a.id === id);
+    }, selectedAccountIds.map(function (id, idx) {
+      var acc = MOCK.accounts.find(function (a) {
+        return a.id === id;
+      });
       return /*#__PURE__*/React.createElement("div", {
         key: id,
         className: "px-4 py-3 flex items-center justify-between hover:bg-gray-50"
@@ -3129,141 +3719,158 @@ function App() {
         className: "text-sm font-medium text-gray-900"
       }, acc ? acc.name : id), /*#__PURE__*/React.createElement("p", {
         className: "text-xs text-gray-400"
-      }, acc?.kaboshi ? acc.kaboshi.substring(0, 35) + '...' : ''))), /*#__PURE__*/React.createElement("div", {
+      }, acc !== null && acc !== void 0 && acc.kaboshi ? acc.kaboshi.substring(0, 35) + '...' : ''))), /*#__PURE__*/React.createElement("div", {
         className: "text-right"
       }, /*#__PURE__*/React.createElement("p", {
         className: "text-sm font-bold text-gray-900"
-      }, unitsPerAccount, " 单元 × ", copyCount, " 文案 × ", materialCount, " 素材 = ", /*#__PURE__*/React.createElement("span", {
+      }, unitsPerAccount, " \u5355\u5143 \xD7 ", copyCount, " \u6587\u6848 \xD7 ", materialCount, " \u7D20\u6750 = ", /*#__PURE__*/React.createElement("span", {
         className: "text-blue-600"
-      }, totalCreatives / accountCount, " 创意"))));
+      }, totalCreatives / accountCount, " \u521B\u610F"))));
     }))), /*#__PURE__*/React.createElement("div", {
       className: "mt-6 bg-gray-50 rounded-xl p-4"
     }, /*#__PURE__*/React.createElement("h4", {
       className: "text-sm font-semibold text-gray-700 mb-3"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-cog mr-2"
-    }), "关键配置摘要"), /*#__PURE__*/React.createElement("div", {
+    }), "\u5173\u952E\u914D\u7F6E\u6458\u8981"), /*#__PURE__*/React.createElement("div", {
       className: "grid grid-cols-2 gap-x-6 gap-y-2 text-sm"
     }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
       className: "text-gray-500"
-    }, "业务类型："), /*#__PURE__*/React.createElement("span", {
+    }, "\u4E1A\u52A1\u7C7B\u578B\uFF1A"), /*#__PURE__*/React.createElement("span", {
       className: "font-medium"
-    }, MOCK.businessTypes.find(b => b.id === businessType)?.name)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    }, (_MOCK$businessTypes$f = MOCK.businessTypes.find(function (b) {
+      return b.id === businessType;
+    })) === null || _MOCK$businessTypes$f === void 0 ? void 0 : _MOCK$businessTypes$f.name)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
       className: "text-gray-500"
-    }, "投放版位："), /*#__PURE__*/React.createElement("span", {
+    }, "\u6295\u653E\u7248\u4F4D\uFF1A"), /*#__PURE__*/React.createElement("span", {
       className: "font-medium"
     }, placement === 'wechat_video' ? '微信视频号' : '微信公众号与小程序')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
       className: "text-gray-500"
-    }, "具体产品："), /*#__PURE__*/React.createElement("span", {
+    }, "\u5177\u4F53\u4EA7\u54C1\uFF1A"), /*#__PURE__*/React.createElement("span", {
       className: "font-medium"
-    }, MOCK.specificProducts.find(sp => sp.id === specificProduct)?.name)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    }, (_MOCK$specificProduct = MOCK.specificProducts.find(function (sp) {
+      return sp.id === specificProduct;
+    })) === null || _MOCK$specificProduct === void 0 ? void 0 : _MOCK$specificProduct.name)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
       className: "text-gray-500"
-    }, "出价："), /*#__PURE__*/React.createElement("span", {
+    }, "\u51FA\u4EF7\uFF1A"), /*#__PURE__*/React.createElement("span", {
       className: "font-medium"
-    }, bidAmount ? `¥${bidAmount}` : '未设置')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    }, bidAmount ? "\xA5".concat(bidAmount) : '未设置')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
       className: "text-gray-500"
-    }, "定向方式："), /*#__PURE__*/React.createElement("span", {
+    }, "\u5B9A\u5411\u65B9\u5F0F\uFF1A"), /*#__PURE__*/React.createElement("span", {
       className: "font-medium"
-    }, targetingSource === 'package' ? '定向包：' + (selectedTargetingPackages.length > 0 ? `${selectedTargetingPackages.length} 个定向包` : '未选择') : '自定义定向')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    }, targetingSource === 'package' ? '定向包：' + (selectedTargetingPackages.length > 0 ? "".concat(selectedTargetingPackages.length, " \u4E2A\u5B9A\u5411\u5305") : '未选择') : '自定义定向')), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
       className: "text-gray-500"
-    }, "营销单元名称："), /*#__PURE__*/React.createElement("span", {
+    }, "\u8425\u9500\u5355\u5143\u540D\u79F0\uFF1A"), /*#__PURE__*/React.createElement("span", {
       className: "font-medium"
     }, unitName || '未设置'))))), /*#__PURE__*/React.createElement("div", {
       className: "p-5 border-t flex justify-end gap-3"
     }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setShowPreview(false),
+      onClick: function onClick() {
+        return setShowPreview(false);
+      },
       className: "btn-secondary"
-    }, "关闭"), /*#__PURE__*/React.createElement("button", {
-      onClick: () => {
+    }, "\u5173\u95ED"), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
         setShowPreview(false);
-        notify(`已确认搭建 ${accountCount} 个账户 × ${totalUnits} 个单元，共 ${totalCreatives} 个创意`, 'success');
+        notify("\u5DF2\u786E\u8BA4\u642D\u5EFA ".concat(accountCount, " \u4E2A\u8D26\u6237 \xD7 ").concat(totalUnits, " \u4E2A\u5355\u5143\uFF0C\u5171 ").concat(totalCreatives, " \u4E2A\u521B\u610F"), 'success');
       },
       className: "btn-primary"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-check mr-2"
-    }), "确认搭建"))));
-  })(), showSaveTgtPkgModal && /*#__PURE__*/React.createElement("div", {
+    }), "\u786E\u8BA4\u642D\u5EFA"))));
+  }(), showSaveTgtPkgModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
-    onClick: () => setShowSaveTgtPkgModal(false)
+    onClick: function onClick() {
+      return setShowSaveTgtPkgModal(false);
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "modal-content w-full max-w-lg",
-    onClick: e => e.stopPropagation()
+    onClick: function onClick(e) {
+      return e.stopPropagation();
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "font-semibold text-gray-900"
-  }, "保存为定向包"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowSaveTgtPkgModal(false),
+  }, "\u4FDD\u5B58\u4E3A\u5B9A\u5411\u5305"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setShowSaveTgtPkgModal(false);
+    },
     className: "text-gray-400 hover:text-gray-600 text-xl"
-  }, "×")), /*#__PURE__*/React.createElement("div", {
+  }, "\xD7")), /*#__PURE__*/React.createElement("div", {
     className: "p-6 space-y-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "定向包名称 ", /*#__PURE__*/React.createElement("span", {
+  }, "\u5B9A\u5411\u5305\u540D\u79F0 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("input", {
     value: saveTgtPkgName,
-    onChange: e => setSaveTgtPkgName(e.target.value),
-    placeholder: "输入定向包名称",
+    onChange: function onChange(e) {
+      return setSaveTgtPkgName(e.target.value);
+    },
+    placeholder: "\u8F93\u5165\u5B9A\u5411\u5305\u540D\u79F0",
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   })), /*#__PURE__*/React.createElement("div", {
     className: "bg-gray-50 border border-gray-200 rounded-lg p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-3"
-  }, "当前配置摘要"), /*#__PURE__*/React.createElement("div", {
+  }, "\u5F53\u524D\u914D\u7F6E\u6458\u8981"), /*#__PURE__*/React.createElement("div", {
     className: "mb-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-500"
-  }, "地理位置："), /*#__PURE__*/React.createElement("span", {
+  }, "\u5730\u7406\u4F4D\u7F6E\uFF1A"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-900 ml-1"
-  }, geoMode === 'unlimited' ? '不限' : geoMode === 'region' ? geoSelectedProvinces.length > 0 ? getProvinceNames(geoSelectedProvinces) : '已选择省份' : '地图选择')), /*#__PURE__*/React.createElement("div", {
+  }, geoMode === 'unlimited' ? '不限' : geoMode === 'region' ? Object.values(geoSelectedCities).flat().length > 0 ? Object.values(geoSelectedCities).flat().join('、') : '已选择城市' : '地图选择')), /*#__PURE__*/React.createElement("div", {
     className: "mb-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-500"
-  }, "年龄："), /*#__PURE__*/React.createElement("span", {
+  }, "\u5E74\u9F84\uFF1A"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-900 ml-1"
-  }, ageSelections.includes('unlimited') ? '不限' : ageSelections.filter(a => a !== 'unlimited').join('、'))), /*#__PURE__*/React.createElement("div", {
+  }, ageSelections.includes('unlimited') ? '不限' : ageSelections.filter(function (a) {
+    return a !== 'unlimited';
+  }).join('、'))), /*#__PURE__*/React.createElement("div", {
     className: "mb-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-500"
-  }, "性别："), /*#__PURE__*/React.createElement("span", {
+  }, "\u6027\u522B\uFF1A"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-900 ml-1"
   }, genderSelection === 'unlimited' ? '不限' : genderSelection)), /*#__PURE__*/React.createElement("div", {
     className: "mb-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-500"
-  }, "排除已转化用户："), /*#__PURE__*/React.createElement("span", {
+  }, "\u6392\u9664\u5DF2\u8F6C\u5316\u7528\u6237\uFF1A"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-900 ml-1"
   }, excludeConvertedMode === 'unlimited' ? '不限' : excludeConvertedMode)), /*#__PURE__*/React.createElement("div", {
     className: "mb-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-500"
-  }, "自定义人群："), /*#__PURE__*/React.createElement("span", {
+  }, "\u81EA\u5B9A\u4E49\u4EBA\u7FA4\uFF1A"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-900 ml-1"
   }, audienceMode === 'unlimited' ? '不限' : '排除人群：' + selectedExcludeAudiences.join('、'))), /*#__PURE__*/React.createElement("div", {
     className: "mb-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-500"
-  }, "转化行为："), /*#__PURE__*/React.createElement("span", {
+  }, "\u8F6C\u5316\u884C\u4E3A\uFF1A"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-900 ml-1"
   }, conversionBehavior === 'optimize' ? '优化行为' : '指定行为：' + (window.__customConversionName || '已选择指定行为'))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-500"
-  }, "转化时间区间："), /*#__PURE__*/React.createElement("span", {
+  }, "\u8F6C\u5316\u65F6\u95F4\u533A\u95F4\uFF1A"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-900 ml-1"
   }, conversionTimeRange === 'today' ? '今天' : conversionTimeRange === '7day' ? '最近7天' : conversionTimeRange === '1month' ? '最近1个月' : conversionTimeRange === '3month' ? '最近3个月' : '最近6个月'))), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500"
-  }, "将保存以上配置为定向包，可在「定向包」模式下重复使用。")), /*#__PURE__*/React.createElement("div", {
+  }, "\u5C06\u4FDD\u5B58\u4EE5\u4E0A\u914D\u7F6E\u4E3A\u5B9A\u5411\u5305\uFF0C\u53EF\u5728\u300C\u5B9A\u5411\u5305\u300D\u6A21\u5F0F\u4E0B\u91CD\u590D\u4F7F\u7528\u3002")), /*#__PURE__*/React.createElement("div", {
     className: "px-6 py-4 border-t flex gap-2 justify-end"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
+    onClick: function onClick() {
       setSaveTgtPkgName('');
       setShowSaveTgtPkgModal(false);
     },
     className: "btn-secondary text-sm"
-  }, "取消"), /*#__PURE__*/React.createElement("button", {
+  }, "\u53D6\u6D88"), /*#__PURE__*/React.createElement("button", {
     onClick: doSaveAsTgtPkg,
     className: "btn-primary text-sm"
-  }, "保存")))));
+  }, "\u4FDD\u5B58")))));
 }
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(/*#__PURE__*/React.createElement(App, null));
+
+window.App = App;
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));

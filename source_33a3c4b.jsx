@@ -857,6 +857,20 @@ function TimeGrid({ value, onChange }) {
 // 主应用
 function App() {
   // ===== 基础配置 =====
+  // 省份 ID -> 中文名称映射
+  const provinceNameMap = {};
+  (MOCK.regionCascade.provinces['cn'] || []).forEach(p => { provinceNameMap[p.id] = p.name; });
+  const getProvinceNames = (ids) => ids.map(id => provinceNameMap[id] || id).join('、');
+  // 获取所有已选城市名称
+  const getSelectedCityNames = () => {
+    const cities = [];
+    Object.values(geoSelectedCities).forEach(cityList => {
+      cities.push(...cityList);
+    });
+    return cities.length > 0 ? cities.join('、') : '不限';
+  };
+
+
   const [businessType, setBusinessType] = useState('benefit_A');
   const [channel, setChannel] = useState('gdt');
   const [selectedAccountIds, setSelectedAccountIds] = useState([]);
@@ -889,7 +903,7 @@ function App() {
     const pkg = {
       id: 'user_tp_' + now,
       name: saveTgtPkgName.trim(),
-      region: geoMode === 'unlimited' ? '不限' : (geoMode === 'region' ? geoSelectedProvinces.join(',') : '地图选择'),
+      region: geoMode === 'unlimited' ? '不限' : (geoMode === 'region' ? getProvinceNames(geoSelectedProvinces) : '地图选择'),
       age: ageSelections.includes('unlimited') ? '不限' : ageSelections.join(','),
       gender: genderSelection === 'unlimited' ? '不限' : genderSelection,
       excludeConverted: excludeConvertedMode,
@@ -917,12 +931,32 @@ function App() {
   // 改为多选：支持定向包组合（同账户不同定向包 = 多个单元）
   const [selectedTargetingPackages, setSelectedTargetingPackages] = useState([]);
   // 自定义定向 - 地理位置级联
-  const [geoMode, setGeoMode] = useState('region'); // 'unlimited' | 'region' | 'map'
+  const [geoMode, setGeoMode] = useState('region'); // 'unlimited' | 'region'
   const [geoSelectedCountry, setGeoSelectedCountry] = useState('cn');
-  const [geoSelectedProvinces, setGeoSelectedProvinces] = useState([]);
-  const [geoSelectedCities, setGeoSelectedCities] = useState({}); // { provinceId: [city1, city2] }
+  // 默认全选所有省份+城市
+  const defaultProvinceIds = (MOCK.regionCascade.provinces['cn'] || []).map(p => p.id);
+  const defaultCitiesMap = {};
+  defaultProvinceIds.forEach(pid => {
+    defaultCitiesMap[pid] = [...(MOCK.regionCascade.cities[pid] || [])];
+  });
+  const [geoSelectedProvinces, setGeoSelectedProvinces] = useState(defaultProvinceIds);
+  const [geoSelectedCities, setGeoSelectedCities] = useState(defaultCitiesMap); // { provinceId: [city1, city2] }
+  const [activeProvinceId, setActiveProvinceId] = useState(defaultProvinceIds[0] || ''); // 默认选中第一个省份，右侧显示城市列表
   // 地点类型（只保留常住地）
   const [locationTypeResident, setLocationTypeResident] = useState(true);
+
+  // 地理位置：默认全选所有省份+城市
+  const selectAllProvinceAndCities = () => {
+    const allProvinceIds = (MOCK.regionCascade.provinces['cn'] || []).map(p => p.id);
+    const allCitiesMap = {};
+    allProvinceIds.forEach(pid => {
+      allCitiesMap[pid] = [...(MOCK.regionCascade.cities[pid] || [])];
+    });
+    setGeoSelectedProvinces(allProvinceIds);
+    setGeoSelectedCities(allCitiesMap);
+    setActiveProvinceId(allProvinceIds.length > 0 ? allProvinceIds[0] : '');
+  };
+
   // 年龄
   const [ageSelections, setAgeSelections] = useState(['unlimited']); // array of selected age keys
   const [customAgeMin, setCustomAgeMin] = useState('');
@@ -967,9 +1001,14 @@ function App() {
   const [首日开始, set首日开始] = useState(false);
   const [首日开始时间值, set首日开始时间值] = useState('00:00');
   const [unitName, setUnitName] = useState('');
-
+  const [showNameVarDropdown, setShowNameVarDropdown] = useState(false);
+  const nameVariables = ['日期', '定向包名称', '版位', '创建人'];
+  
   // ===== 创意配置 =====
+  const [creativeMax, setCreativeMax] = useState(false);
   const [creativeEnhanceMax, setCreativeEnhanceMax] = useState(false);
+  const [creativeName, setCreativeName] = useState('');
+  const creativeNameVariables = ['日期', '素材名称', '素材类型'];
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
@@ -1389,74 +1428,49 @@ function App() {
                     <div className="flex items-center gap-1 mb-3">
                       <span className="text-sm font-semibold text-gray-900">地理位置</span>
                       <label className="flex items-center cursor-pointer ml-4">
-                        <input type="radio" name="geo_mode" checked={geoMode === 'unlimited'} onChange={() => setGeoMode('unlimited')} className="mr-1.5" />
+                        <input type="radio" name="geo_mode" checked={geoMode === 'unlimited'} onChange={() => { setGeoMode('unlimited'); setGeoSelectedProvinces([]); setGeoSelectedCities({}); setActiveProvinceId(''); }} className="mr-1.5" />
                         <span className="text-sm text-gray-700">不限</span>
                       </label>
                       <label className="flex items-center cursor-pointer ml-4">
-                        <input type="radio" name="geo_mode" checked={geoMode === 'region'} onChange={() => setGeoMode('region')} className="mr-1.5" />
+                        <input type="radio" name="geo_mode" checked={geoMode === 'region'} onChange={() => { setGeoMode('region'); selectAllProvinceAndCities(); }} className="mr-1.5" />
                         <span className="text-sm text-gray-700">按区域</span>
-                      </label>
-                      <label className="flex items-center cursor-pointer ml-4">
-                        <input type="radio" name="geo_mode" checked={geoMode === 'map'} onChange={() => setGeoMode('map')} className="mr-1.5" />
-                        <span className="text-sm text-gray-700">从地图选择</span>
                       </label>
                     </div>
 
                     {geoMode === 'region' && (
                       <>
-                        {/* 按区域选择器 */}
+                        {/* 按区域选择器：省份+城市双栏 */}
                         <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100 mb-3">
                           <div className="flex items-center gap-2 mb-3">
                             <i className="fas fa-map-marker-alt text-blue-500"></i>
                             <span className="text-sm font-medium text-gray-800">按区域</span>
-                            <div className="ml-auto flex items-center gap-2">
-                              <button className="text-xs text-blue-600 hover:text-blue-800"><i className="fas fa-file-import mr-1"></i>批量导入区域</button>
-                            </div>
                           </div>
 
-                          {/* 搜索框 */}
-                          <div className="relative mb-3">
-                            <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                            <input type="text" placeholder="搜索国家、省、市、区、商圈" className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" />
-                          </div>
-
-                          {/* 三级级联：国家 → 省 → 市 */}
-                          <div className="grid grid-cols-3 gap-3">
-                            {/* 国家列 */}
-                            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                              <div className="px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700 flex items-center justify-between">
-                                <span>{MOCK.regionCascade.countries.find(c => c.id === geoSelectedCountry)?.name || '选择'}</span>
-                                <i className="fas fa-chevron-right text-gray-400 text-xs"></i>
-                              </div>
-                              <div className="max-h-48 overflow-y-auto p-1">
-                                {MOCK.regionCascade.countries.map(c => (
-                                  <div key={c.id} onClick={() => { setGeoSelectedCountry(c.id); setGeoSelectedProvinces([]); setGeoSelectedCities({}); }} className={`px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 rounded ${geoSelectedCountry === c.id ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-700'}`}>
-                                    {c.name}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
+                          <div className="grid grid-cols-2 gap-3">
                             {/* 省份列 */}
                             <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                              <div className="px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700 flex items-center justify-between">
-                                <span>省份</span>
-                                <i className="fas fa-chevron-right text-gray-400 text-xs"></i>
-                              </div>
-                              <div className="max-h-48 overflow-y-auto p-1">
-                                {(MOCK.regionCascade.provinces[geoSelectedCountry] || []).map(p => (
-                                  <div key={p.id} onClick={() => {
-                                    if (geoSelectedProvinces.includes(p.id)) {
-                                      setGeoSelectedProvinces(geoSelectedProvinces.filter(x => x !== p.id));
-                                      const newCities = {...geoSelectedCities};
-                                      delete newCities[p.id];
-                                      setGeoSelectedCities(newCities);
-                                    } else {
-                                      setGeoSelectedProvinces([...geoSelectedProvinces, p.id]);
-                                    }
-                                  }} className={`px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${geoSelectedProvinces.includes(p.id) ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-700'}`}>
-                                    <input type="checkbox" checked={geoSelectedProvinces.includes(p.id)} readOnly className="mr-2 w-3.5 h-3.5" />
-                                    {p.name}
+                              <div className="px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700">省份（点击查看城市）</div>
+                              <div className="max-h-52 overflow-y-auto p-1">
+                                {(MOCK.regionCascade.provinces['cn'] || []).map(p => (
+                                  <div key={p.id}
+                                    
+                                    className={`px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${activeProvinceId === p.id ? 'bg-blue-200 text-blue-800 font-semibold' : ''} ${geoSelectedProvinces.includes(p.id) ? 'text-blue-700' : 'text-gray-700'}`}
+                                  >
+                                    <input type="checkbox" checked={geoSelectedProvinces.includes(p.id)} onChange={() => {
+                                      const pid = p.id;
+                                      if (geoSelectedProvinces.includes(pid)) {
+                                        // 取消该省：去掉省份 + 清空该省城市
+                                        setGeoSelectedProvinces(geoSelectedProvinces.filter(x => x !== pid));
+                                        const newCities = { ...geoSelectedCities };
+                                        delete newCities[pid];
+                                        setGeoSelectedCities(newCities);
+                                      } else {
+                                        // 选中该省：添加省份 + 全选该省城市
+                                        setGeoSelectedProvinces([...geoSelectedProvinces, pid]);
+                                        setGeoSelectedCities({ ...geoSelectedCities, [pid]: [...(MOCK.regionCascade.cities[pid] || [])] });
+                                      }
+                                    }} className="mr-2 w-3.5 h-3.5 cursor-pointer" />
+                                    <span className="truncate" onClick={() => setActiveProvinceId(p.id)}>{p.name}</span>
                                   </div>
                                 ))}
                               </div>
@@ -1465,36 +1479,65 @@ function App() {
                             {/* 城市列 */}
                             <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
                               <div className="px-3 py-2 bg-gray-50 border-b text-sm font-medium text-gray-700">
-                                城市
+                                城市 {activeProvinceId ? `· ${MOCK.regionCascade.provinces['cn'].find(p => p.id === activeProvinceId)?.name || ''}` : '（请点击左侧省份）'}
                               </div>
-                              <div className="max-h-48 overflow-y-auto p-1">
-                                {(() => {
-                                  // 收集所有已选省份的城市
-                                  let allCities = [];
-                                  geoSelectedProvinces.forEach(pid => {
-                                    const cities = MOCK.regionCascade.cities[pid] || [];
-                                    allCities = [...allCities, ...cities.map(c => ({provinceId: pid, name: c}))];
-                                  });
-                                  if (allCities.length === 0) return <div className="px-3 py-4 text-sm text-gray-400 text-center">请先选择省份</div>;
-                                  return allCities.map((city, idx) => {
-                                    const selected = (geoSelectedCities[city.provinceId] || []).includes(city.name);
-                                    return (
-                                      <div key={`${city.provinceId}-${idx}`} onClick={() => {
-                                        const prev = geoSelectedCities[city.provinceId] || [];
+                              <div className="max-h-52 overflow-y-auto p-1">
+                                {activeProvinceId && ((MOCK.regionCascade.cities[activeProvinceId] || []).map(city => {
+                                  const selected = (geoSelectedCities[activeProvinceId] || []).includes(city);
+                                  return (
+                                    <div key={city} onClick={() => {
+                                      const prev = geoSelectedCities[activeProvinceId] || [];
+                                      if (selected) {
+                                        setGeoSelectedCities({...geoSelectedCities, [activeProvinceId]: prev.filter(c => c !== city)});
+                                      } else {
+                                        setGeoSelectedCities({...geoSelectedCities, [activeProvinceId]: [...prev, city]});
+                                      }
+                                    }} className={`px-3 py-1.5 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${selected ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`}>
+                                      <input type="checkbox" checked={selected} onChange={() => {
+                                        const prev = geoSelectedCities[activeProvinceId] || [];
                                         if (selected) {
-                                          setGeoSelectedCities({...geoSelectedCities, [city.provinceId]: prev.filter(c => c !== city.name)});
+                                          setGeoSelectedCities({...geoSelectedCities, [activeProvinceId]: prev.filter(c => c !== city)});
                                         } else {
-                                          setGeoSelectedCities({...geoSelectedCities, [city.provinceId]: [...prev, city.name]});
+                                          setGeoSelectedCities({...geoSelectedCities, [activeProvinceId]: [...prev, city]});
                                         }
-                                      }} className={`px-3 py-1.5 text-sm cursor-pointer hover:bg-blue-50 rounded flex items-center ${selected ? 'bg-blue-100 text-blue-700' : 'text-gray-700'}`}>
-                                        <input type="checkbox" checked={selected} readOnly className="mr-2 w-3.5 h-3.5" />
-                                        <span className="truncate">{city.name}</span>
-                                      </div>
-                                    );
-                                  });
-                                })()}
+                                        // 同步更新省份选中状态
+                                        const newCityList = selected ? prev.filter(c => c !== city) : [...prev, city];
+                                        const allCities = (MOCK.regionCascade.cities[activeProvinceId] || []);
+                                        if (newCityList.length === allCities.length) {
+                                          // 全选了该省所有城市 → 确保省份被选中
+                                          if (!geoSelectedProvinces.includes(activeProvinceId)) {
+                                            setGeoSelectedProvinces([...geoSelectedProvinces, activeProvinceId]);
+                                          }
+                                        } else {
+                                          // 没有全选 → 如果城市列表为空则取消省份选中
+                                          if (newCityList.length === 0) {
+                                            setGeoSelectedProvinces(geoSelectedProvinces.filter(x => x !== activeProvinceId));
+                                            const newCities = {...geoSelectedCities};
+                                            delete newCities[activeProvinceId];
+                                            setGeoSelectedCities(newCities);
+                                          }
+                                        }
+                                      }} className="mr-2 w-3.5 h-3.5 cursor-pointer" />
+                                      <span>{city}</span>
+                                    </div>
+                                  );
+                                }))}
+                                {!activeProvinceId && (
+                                  <div className="px-3 py-4 text-sm text-gray-400 text-center">请点击左侧省份查看城市</div>
+                                )}
                               </div>
                             </div>
+                          </div>
+                          {/* 省份全选/取消快捷操作 */}
+                          <div className="flex gap-2 mt-3">
+                            <button onClick={() => {
+                              const allPids = (MOCK.regionCascade.provinces['cn'] || []).map(p => p.id);
+                              const allCities = {};
+                              allPids.forEach(pid => { allCities[pid] = [...(MOCK.regionCascade.cities[pid] || [])]; });
+                              setGeoSelectedProvinces(allPids);
+                              setGeoSelectedCities(allCities);
+                            }} className="text-xs text-blue-600 hover:text-blue-800">全选全部</button>
+                            <button onClick={() => { setGeoSelectedProvinces([]); setGeoSelectedCities({}); }} className="text-xs text-gray-500 hover:text-gray-700">清空全部</button>
                           </div>
                         </div>
                       </>
@@ -1504,22 +1547,16 @@ function App() {
                       <p className="text-sm text-gray-400 py-2 px-3 bg-gray-50 rounded-lg inline-block">已选择"不限"，将投放到所有地域</p>
                     )}
 
-                    {geoMode === 'map' && (
-                      <p className="text-sm text-gray-400 py-2 px-3 bg-gray-50 rounded-lg inline-block">从地图选择功能暂未实现原型演示</p>
-                    )}
+
 
                     {/* 地点类型 */}
-                    <div className="mt-3 flex items-start gap-2">
-                      <span className="text-sm font-semibold text-gray-900 whitespace-nowrap pt-1">地点类型</span>
-                      <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-                        <label className="flex items-center cursor-pointer">
-                          <input type="checkbox" checked={locationTypeResident} onChange={e => setLocationTypeResident(e.target.checked)} className="mr-1.5" />
-                          <span className="text-sm">常住地</span>
-                          <i className="fas fa-info-circle text-gray-300 ml-1 text-xs cursor-help" title="常住地：用户常驻在该区域"></i>
-                        </label>
-                      </div>
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-900 whitespace-nowrap" style={{lineHeight:'2rem'}}>地点类型</span>
+                      <label className="flex items-center cursor-pointer h-8">
+                        <input type="radio" name="location_type" checked={true} readOnly className="mr-1.5 w-3.5 h-3.5" />
+                        <span className="text-sm text-gray-700">常住地</span>
+                      </label>
                     </div>
-                    <p className="text-xs text-gray-400 mt-2 pl-[60px]">微信流量当前不支持「近到访」，且仅支持投放国内（含港澳地区）及部分外国区域</p>
                   </div>
 
                   {/* ===== 年龄 ===== */}
@@ -1594,15 +1631,11 @@ function App() {
                   <div className="py-4 border-b border-gray-200">
                     <div className="flex items-center gap-1 mb-3">
                       <span className="text-sm font-semibold text-gray-900">自定义人群</span>
-                      <i className="fas fa-info-circle text-gray-300 ml-1 text-xs cursor-help" title="通过上传用户包等方式定向或排除特定人群"></i>
+                      <i className="fas fa-info-circle text-gray-300 ml-1 text-xs cursor-help" title="通过上传用户包等方式排除特定人群"></i>
                       <div className="flex items-center gap-6 ml-4">
                         <label className="flex items-center cursor-pointer">
                           <input type="radio" name="audience_mode" value="unlimited" checked={audienceMode === 'unlimited'} onChange={e => setAudienceMode(e.target.value)} className="mr-1.5" />
                           <span className="text-sm">不限</span>
-                        </label>
-                        <label className="flex items-center cursor-pointer">
-                          <input type="radio" name="audience_mode" value="target" checked={audienceMode === 'target'} onChange={e => setAudienceMode(e.target.value)} className="mr-1.5" />
-                          <span className="text-sm">定向人群</span>
                         </label>
                         <label className="flex items-center cursor-pointer">
                           <input type="radio" name="audience_mode" value="exclude" checked={audienceMode === 'exclude'} onChange={e => setAudienceMode(e.target.value)} className="mr-1.5" />
@@ -1611,53 +1644,6 @@ function App() {
                       </div>
                     </div>
 
-                    {/* 定向人群：下拉选择人群包 + 刷新 */}
-                    {audienceMode === 'target' && (
-                      <div className="ml-[72px] bg-blue-50 border border-blue-200 rounded-xl p-4 animate-fadeIn">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <i className="fas fa-users text-blue-500"></i>
-                            <span className="text-sm font-bold text-blue-800">选择定向人群包</span>
-                          </div>
-                          <button onClick={refreshAudiencePackages} className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-100">
-                            <i className="fas fa-sync-alt mr-1"></i>刷新列表
-                          </button>
-                        </div>
-                        <select
-                          value=""
-                          onChange={e => {
-                            const val = e.target.value;
-                            if (val && !selectedTargetAudiences.includes(val)) {
-                              setSelectedTargetAudiences([...selectedTargetAudiences, val]);
-                            }
-                          }}
-                          className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-3"
-                        >
-                          <option value="">++ 添加人群包 ++</option>
-                          {audiencePackageList.map(ap => (
-                            <option key={ap.id} value={ap.id} disabled={selectedTargetAudiences.includes(ap.id)}>
-                              {ap.name}{selectedTargetAudiences.includes(ap.id) ? ' ✓ 已选' : ''}
-                            </option>
-                          ))}
-                        </select>
-                        {selectedTargetAudiences.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {selectedTargetAudiences.map(id => {
-                              const pkg = audiencePackageList.find(a => a.id === id);
-                              return pkg ? (
-                                <span key={id} className="tag bg-blue-100 text-blue-800">
-                                  {pkg.name}
-                                  <button onClick={() => setSelectedTargetAudiences(selectedTargetAudiences.filter(i => i !== id))}><i className="fas fa-times"></i></button>
-                                </span>
-                              ) : null;
-                            })}
-                          </div>
-                        )}
-                        {selectedTargetAudiences.length === 0 && (
-                          <p className="text-xs text-blue-400">未选择任何人群包，将不限定向人群</p>
-                        )}
-                      </div>
-                    )}
 
                     {/* 排除人群：下拉选择人群包 + 刷新 */}
                     {audienceMode === 'exclude' && (
@@ -1961,13 +1947,20 @@ function App() {
               {/* 营销单元名称 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销单元名称 <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  value={unitName}
-                  onChange={e => setUnitName(e.target.value)}
-                  placeholder="输入营销单元名称"
-                  className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div className="flex items-center gap-2 max-w-md">
+                  <input
+                    type="text"
+                    value={unitName}
+                    onChange={e => setUnitName(e.target.value)}
+                    placeholder="输入营销单元名称"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                    {nameVariables.map(v => (
+                      <span key={v} onClick={() => setUnitName(unitName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1982,21 +1975,38 @@ function App() {
             </h2>
           </div>
           <div className="p-6 space-y-6">
-            {/* 创意增强Max */}
+            {/* 创意增强Max - 已禁用，锁定为关闭 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">创意增强Max</label>
               <div className="flex items-center gap-4">
-                <span className={`text-sm font-medium ${!creativeEnhanceMax ? 'text-green-600' : 'text-gray-400'}`}>关闭</span>
+                <span className="text-sm font-medium text-green-600">关闭</span>
                 <button
-                  onClick={() => setCreativeEnhanceMax(!creativeEnhanceMax)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${creativeEnhanceMax ? 'bg-blue-500' : 'bg-gray-300'}`}
+                  disabled
+                  className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
                 >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${creativeEnhanceMax ? 'translate-x-6' : 'translate-x-1'}`} />
+                  <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
                 </button>
-                <span className={`text-sm font-medium ${creativeEnhanceMax ? 'text-green-600' : 'text-gray-400'}`}>开启</span>
-                {creativeEnhanceMax && (
-                  <span className="text-xs text-orange-500"><i className="fas fa-exclamation-triangle mr-1"></i>仅支持关闭</span>
-                )}
+                <span className="text-sm font-medium text-gray-400">开启</span>
+                <span className="text-xs text-gray-400 ml-2"><i className="fas fa-lock mr-1"></i>已锁定为关闭</span>
+              </div>
+            </div>
+
+            {/* 创意名称 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">创意名称</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={creativeName}
+                  onChange={e => setCreativeName(e.target.value)}
+                  placeholder="输入创意名称（支持变量）"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  {creativeNameVariables.map(v => (
+                    <span key={v} onClick={() => setCreativeName(creativeName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -2432,7 +2442,7 @@ function App() {
                       <div className="mb-2">
                         <span className="text-xs text-gray-500">地理位置：</span>
                         <span className="text-xs text-gray-900 ml-1">
-                          {geoMode === 'unlimited' ? '不限' : (geoMode === 'region' ? (geoSelectedProvinces.length > 0 ? geoSelectedProvinces.join('、') : '已选择省份') : '地图选择')}
+                            {geoMode === 'unlimited' ? '不限' : (geoMode === 'region' ? (Object.values(geoSelectedCities).flat().length > 0 ? Object.values(geoSelectedCities).flat().join('、') : '已选择城市') : '地图选择')}
                         </span>
                       </div>
                       
@@ -2464,7 +2474,7 @@ function App() {
                       <div className="mb-2">
                         <span className="text-xs text-gray-500">自定义人群：</span>
                         <span className="text-xs text-gray-900 ml-1">
-                          {audienceMode === 'unlimited' ? '不限' : (audienceMode === 'target' ? '指定人群：' + selectedTargetAudiences.join('、') : '排除人群：' + selectedExcludeAudiences.join('、'))}
+                          {audienceMode === 'unlimited' ? '不限' : '排除人群：' + selectedExcludeAudiences.join('、')}
                         </span>
                       </div>
 
