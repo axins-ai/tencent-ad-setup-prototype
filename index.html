@@ -167,7 +167,7 @@
                   </div>
                   <div style="display:flex;gap:8px;margin-top:8px;">
                     <button onclick="window.selectAllTgtPkgProvincesAndCities();window.renderTgtPkgProvinceList();" style="font-size:12px;color:#3b82f6;cursor:pointer;background:none;border:none;padding:4px 8px;">全选全部</button>
-                    <button onclick="tgtPkgSelectedProvinces=[];tgtPkgSelectedCities={};tgtPkgActiveProvince='';window.renderTgtPkgProvinceList();window.updateTgtPkgGeoCount();" style="font-size:12px;color:#6b7280;cursor:pointer;background:none;border:none;padding:4px 8px;">清空全部</button>
+                    <button onclick="tgtPkgSelectedProvinces=[];tgtPkgSelectedCities={};tgtPkgActiveProvince='';window.renderTgtPkgProvinceList();window.updateTgtPkgGeoCount();var cityContainer=document.getElementById('tgt-pkg-city-list');if(cityContainer)cityContainer.innerHTML='<div style=&quot;font-size:12px;color:#9ca3af;padding:8px;&quot;>点击左侧省份查看城市</div>';" style="font-size:12px;color:#6b7280;cursor:pointer;background:none;border:none;padding:4px 8px;">清空全部</button>
                   </div>
                 </div>
               </div>
@@ -670,7 +670,14 @@
       if (tgtPkgSelectedProvinces.length === 0) {
         window.selectAllTgtPkgProvincesAndCities();
       }
+      // 确保有激活的省份
+      if (!tgtPkgActiveProvince && regionData.length > 0) {
+        tgtPkgActiveProvince = regionData[0].province;
+      }
       window.renderTgtPkgProvinceList();
+      if (tgtPkgActiveProvince) {
+        window.renderTgtPkgCityList(tgtPkgActiveProvince);
+      }
     } else {
       regionDiv.style.display = 'none';
       // 不限：清空选择
@@ -687,8 +694,14 @@
     regionData.forEach(function(item) {
       tgtPkgSelectedCities[item.province] = [].concat(item.cities);
     });
-    tgtPkgActiveProvince = '';
+    // 默认激活第一个省份，确保城市列表显示
+    tgtPkgActiveProvince = regionData.length > 0 ? regionData[0].province : '';
     window.updateTgtPkgGeoCount();
+    // 渲染省份和城市列表
+    window.renderTgtPkgProvinceList();
+    if (tgtPkgActiveProvince) {
+      window.renderTgtPkgCityList(tgtPkgActiveProvince);
+    }
   };
 
 
