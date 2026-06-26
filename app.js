@@ -1620,8 +1620,7 @@ function App() {
   const creativeNameVariables = ['日期', '素材名称', '素材类型'];
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
-  const [videoStrategy, setVideoStrategy] = useState('average');
-  const [copyStrategy, setCopyStrategy] = useState('average');
+  const [creativeStrategy, setCreativeStrategy] = useState('copy');
   const [landingPageMacro, setLandingPageMacro] = useState('');
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
@@ -3002,32 +3001,18 @@ function App() {
   })(), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
   }, "规则：每创意 ", composeRule.videos, "视频 + ", composeRule.images, "图片 + ", composeRule.copies, "文案")))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "mb-4"
+  }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "素材分配策略"), /*#__PURE__*/React.createElement("select", {
-    value: videoStrategy,
-    onChange: e => setVideoStrategy(e.target.value),
+  }, "创意分配策略"), /*#__PURE__*/React.createElement("select", {
+    value: creativeStrategy,
+    onChange: e => setCreativeStrategy(e.target.value),
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }, /*#__PURE__*/React.createElement("option", {
-    value: "average"
-  }, "平均分配"), /*#__PURE__*/React.createElement("option", {
     value: "copy"
-  }, "复制分配（所有账户用相同素材）"), /*#__PURE__*/React.createElement("option", {
-    value: "random"
-  }, "随机分配"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "广告文案分配策略"), /*#__PURE__*/React.createElement("select", {
-    value: copyStrategy,
-    onChange: e => setCopyStrategy(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  }, /*#__PURE__*/React.createElement("option", {
+  }, "复制分配"), /*#__PURE__*/React.createElement("option", {
     value: "average"
-  }, "平均分配"), /*#__PURE__*/React.createElement("option", {
-    value: "copy"
-  }, "复制分配（所有账户用相同文案）"), /*#__PURE__*/React.createElement("option", {
-    value: "random"
-  }, "随机分配")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, "平均分配"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
   }, "落地页（卡博士链接 + 宏参数已自动拼接）"), selectedAccountIds.length > 0 ? /*#__PURE__*/React.createElement("div", {
     className: "space-y-2"
