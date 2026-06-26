@@ -207,6 +207,47 @@ const MOCK = {
     id: 'ec_002',
     name: '已转化用户'
   }],
+  // 已有营销单元（按账户分类，用于"已有营销单元上新增创意"场景）
+  existingMarketingUnits: {
+    'acc_001': [{
+      id: 'mu_001',
+      name: '春节营销活动A'
+    }, {
+      id: 'mu_002',
+      name: '五一促销计划B'
+    }, {
+      id: 'mu_003',
+      name: '暑期推广专项C'
+    }],
+    'acc_002': [{
+      id: 'mu_004',
+      name: '上海移动品牌宣传'
+    }, {
+      id: 'mu_005',
+      name: '5G套餐推广'
+    }],
+    'acc_003': [{
+      id: 'mu_006',
+      name: '广州移动老用户回馈'
+    }, {
+      id: 'mu_007',
+      name: '新用户首月免费'
+    }, {
+      id: 'mu_008',
+      name: '家庭套餐推广'
+    }],
+    'acc_004': [{
+      id: 'mu_009',
+      name: '深圳移动流量包'
+    }],
+    'acc_005': [{
+      id: 'mu_010',
+      name: '杭州移动校园推广'
+    }, {
+      id: 'mu_011',
+      name: '青年卡专项'
+    }]
+  },
   // 素材库（视频+图片），带消耗/CTR/CVR数据
   videoMaterials: Array.from({
     length: 50
@@ -1460,6 +1501,9 @@ function App() {
   const [batchInputText, setBatchInputText] = useState('');
   const [showBatchInput, setShowBatchInput] = useState(false);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  // 营销单元模式：新建营销单元 / 已有营销单元上新增创意
+  const [marketingUnitMode, setMarketingUnitMode] = useState('new'); // 'new' | 'existing'
+  const [selectedExistingMarketingUnits, setSelectedExistingMarketingUnits] = useState({}); // { accountId: marketingUnitId }
 
   // ===== 营销单元配置 =====
   // 业务单元
@@ -1776,6 +1820,8 @@ function App() {
         if (data.selectedCopies) setSelectedCopies(data.selectedCopies);
         if (data.creativeComposeMode) setCreativeComposeMode(data.creativeComposeMode);
         if (data.composeRule) setComposeRule(data.composeRule);
+        if (data.marketingUnitMode) setMarketingUnitMode(data.marketingUnitMode);
+        if (data.selectedExistingMarketingUnits) setSelectedExistingMarketingUnits(data.selectedExistingMarketingUnits);
         notify('已恢复上次保存的草稿', 'success');
       }
     } catch (e) {
@@ -1828,7 +1874,9 @@ function App() {
         copyStrategy,
         landingPageMacro,
         creativeComposeMode,
-        composeRule
+        composeRule,
+        marketingUnitMode,
+        selectedExistingMarketingUnits
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
     } catch (e) {
@@ -1975,7 +2023,33 @@ function App() {
     className: "text-lg font-bold text-gray-900 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm"
-  }, "2"), "营销单元配置")), /*#__PURE__*/React.createElement("div", {
+  }, "2"), "营销单元配置"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4 mt-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-gray-700"
+  }, "选择模式："), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "marketing_unit_mode",
+    value: "new",
+    checked: marketingUnitMode === 'new',
+    onChange: e => setMarketingUnitMode(e.target.value),
+    className: "w-4 h-4 mr-2 text-blue-600"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "新建营销单元")), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "marketing_unit_mode",
+    value: "existing",
+    checked: marketingUnitMode === 'existing',
+    onChange: e => setMarketingUnitMode(e.target.value),
+    className: "w-4 h-4 mr-2 text-blue-600"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "已有营销单元上新增创意")))), marketingUnitMode === 'new' && /*#__PURE__*/React.createElement("div", {
     className: "p-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -2826,7 +2900,40 @@ function App() {
     key: v,
     onClick: () => setUnitName(unitName + '{' + v + '}'),
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-  }, "+", v)))))))), /*#__PURE__*/React.createElement("div", {
+  }, "+", v))))))), marketingUnitMode === 'existing' && /*#__PURE__*/React.createElement("div", {
+    className: "p-6 space-y-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-sm text-yellow-800 font-medium"
+  }, "已在已有营销单元上新增创意模式，请为每个账户选择要添加创意的营销单元")), selectedAccountIds.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "text-sm text-orange-500"
+  }, "请先在上方选择账户"), selectedAccountIds.map(accId => {
+    const acc = MOCK.accounts.find(a => a.id === accId);
+    const marketingUnits = MOCK.existingMarketingUnits[accId] || [];
+    return /*#__PURE__*/React.createElement("div", {
+      key: accId,
+      className: "border border-gray-200 rounded-lg p-4"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-3 mb-3"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex-1 text-sm font-medium text-gray-900"
+    }, acc ? acc.name : accId)), /*#__PURE__*/React.createElement("select", {
+      value: selectedExistingMarketingUnits[accId] || '',
+      onChange: e => setSelectedExistingMarketingUnits(prev => ({
+        ...prev,
+        [accId]: e.target.value
+      })),
+      className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+    }, /*#__PURE__*/React.createElement("option", {
+      value: ""
+    }, "-- 请选择营销单元 --"), marketingUnits.map(mu => /*#__PURE__*/React.createElement("option", {
+      key: mu.id,
+      value: mu.id
+    }, mu.id, " - ", mu.name))), marketingUnits.length === 0 && /*#__PURE__*/React.createElement("p", {
+      className: "text-xs text-gray-400 mt-1"
+    }, "该账户下暂无已有营销单元"));
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-xl shadow-sm border overflow-hidden"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
