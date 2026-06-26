@@ -1708,6 +1708,9 @@ function App() {
   const [selectedVideoChannel, setSelectedVideoChannel] = useState('');
   // 营销组件
   const [marketingComponent, setMarketingComponent] = useState('floating_card'); // 'floating_card' | 'action_button'
+  // 单创意配置
+  const [copiesPerCreative, setCopiesPerCreative] = useState(1); // 单创意文案数
+  const [materialsPerCreative, setMaterialsPerCreative] = useState(1); // 单创意素材数
 
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
@@ -1857,6 +1860,8 @@ function App() {
         if (data.selectedBrandImage) setSelectedBrandImage(data.selectedBrandImage);
         if (data.selectedVideoChannel) setSelectedVideoChannel(data.selectedVideoChannel);
         if (data.marketingComponent) setMarketingComponent(data.marketingComponent);
+        if (data.copiesPerCreative !== undefined) setCopiesPerCreative(data.copiesPerCreative);
+        if (data.materialsPerCreative !== undefined) setMaterialsPerCreative(data.materialsPerCreative);
         notify('已恢复上次保存的草稿', 'success');
       }
     } catch (e) {
@@ -1915,7 +1920,9 @@ function App() {
         brandImageType,
         selectedBrandImage,
         selectedVideoChannel,
-        marketingComponent
+        marketingComponent,
+        copiesPerCreative,
+        materialsPerCreative
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
     } catch (e) {
@@ -3186,6 +3193,30 @@ function App() {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "单创意文案数"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "1",
+    max: "10",
+    value: copiesPerCreative || 1,
+    onChange: e => setCopiesPerCreative(parseInt(e.target.value) || 1),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400 mt-1"
+  }, "每个创意包含的文案数量")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "单创意素材数"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "1",
+    max: "10",
+    value: materialsPerCreative || 1,
+    onChange: e => setMaterialsPerCreative(parseInt(e.target.value) || 1),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400 mt-1"
+  }, "每个创意包含的素材数量（视频+图片）"))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
   }, "素材分配策略"), /*#__PURE__*/React.createElement("select", {
     value: videoStrategy,
     onChange: e => setVideoStrategy(e.target.value),
@@ -3255,18 +3286,6 @@ function App() {
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       if (selectedAccountIds.length === 0) {
-        notify('请先选择至少一个账户', 'error');
-        return;
-      }
-      const summary = getBuildSummary();
-      notify(`配置已准备好，共 ${summary.accountCount} 个账户，将创建 ${summary.totalUnits} 个单元、${summary.totalCreatives} 个创意`, 'success');
-    },
-    className: "btn-primary text-lg px-8 py-3"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-paper-plane mr-2"
-  }), "应用配置到所有账户"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      if (selectedAccountIds.length === 0) {
         notify('请先选择账户', 'error');
         return;
       }
@@ -3275,52 +3294,7 @@ function App() {
     className: "btn-secondary text-lg px-8 py-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-eye mr-2"
-  }), "预览全部")), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "bg-white rounded-xl shadow-sm border p-6 mb-8"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-md font-bold text-gray-900 mb-4"
-  }, "账户配置进度"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-  }, selectedAccountIds.map(id => {
-    const acc = MOCK.accounts.find(a => a.id === id);
-    const hasTargeting = targetingSource === 'package' ? selectedTargetingPackages.length > 0 : geoSelectedProvinces.length > 0 || geoMode === 'unlimited';
-    const hasBid = bidAmount !== '';
-    const hasMaterial = selectedMaterials.length > 0;
-    const hasCopy = selectedCopies.length > 0;
-    const doneCount = [hasTargeting, hasBid, hasMaterial, hasCopy].filter(Boolean).length;
-    const totalCount = 4;
-    const pct = Math.round(doneCount / totalCount * 100);
-    const tpCount = targetingSource === 'package' ? Math.max(selectedTargetingPackages.length, 1) : 1;
-    return /*#__PURE__*/React.createElement("div", {
-      key: id,
-      className: "border border-gray-200 rounded-lg p-4"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between mb-2"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "font-medium text-gray-900 text-sm"
-    }, acc ? acc.name : id), /*#__PURE__*/React.createElement("span", {
-      className: "text-xs text-gray-500"
-    }, pct, "%")), /*#__PURE__*/React.createElement("div", {
-      className: "w-full bg-gray-200 rounded-full h-2 mb-3"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "bg-blue-500 h-2 rounded-full transition-all",
-      style: {
-        width: `${pct}%`
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      className: "space-y-1 text-xs"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: hasTargeting ? 'text-green-600' : 'text-gray-400'
-    }, hasTargeting ? '✓' : '○', " 定向配置 ", targetingSource === 'package' && selectedTargetingPackages.length > 0 ? `(${selectedTargetingPackages.length}包)` : ''), /*#__PURE__*/React.createElement("p", {
-      className: hasBid ? 'text-green-600' : 'text-gray-400'
-    }, hasBid ? '✓' : '○', " 出价设定"), /*#__PURE__*/React.createElement("p", {
-      className: hasMaterial ? 'text-green-600' : 'text-gray-400'
-    }, hasMaterial ? '✓' : '○', " 创意素材(", selectedMaterials.length, ")"), /*#__PURE__*/React.createElement("p", {
-      className: hasCopy ? 'text-green-600' : 'text-gray-400'
-    }, hasCopy ? '✓' : '○', " 广告文案(", selectedCopies.length, ")"), /*#__PURE__*/React.createElement("p", {
-      className: "text-blue-600 font-medium"
-    }, "单元数：", tpCount)));
-  })))), /*#__PURE__*/React.createElement(MaterialModal, {
+  }), "预览全部"))), /*#__PURE__*/React.createElement(MaterialModal, {
     show: showMaterialModal,
     onClose: () => setShowMaterialModal(false),
     onConfirm: materials => {
