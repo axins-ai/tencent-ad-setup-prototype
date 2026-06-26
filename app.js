@@ -1621,6 +1621,26 @@ function App() {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [creativeStrategy, setCreativeStrategy] = useState('copy');
+
+  // 品牌形象相关
+  const [brandImageType, setBrandImageType] = useState('custom'); // custom: 自定义, video: 视频号
+  const [selectedBrandImage, setSelectedBrandImage] = useState('');
+  const [selectedVideoChannel, setSelectedVideoChannel] = useState('');
+
+  // 营销组件相关
+  const [marketingComponent, setMarketingComponent] = useState('float_card'); // float_card: 浮层卡片, action_button: 行动按钮
+  const [buttonText, setButtonText] = useState('立即领取');
+  const [floatCardImage, setFloatCardImage] = useState(''); // 浮层卡片图片
+  const [floatCardCopies, setFloatCardCopies] = useState([{
+    text: '月月都能领会员',
+    limit: '7/10'
+  }, {
+    text: '填写手机号领取立即有效',
+    limit: '11/14'
+  }, {
+    text: '立即领取',
+    limit: ''
+  }]);
   const [landingPageMacro, setLandingPageMacro] = useState('');
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
@@ -3032,24 +3052,180 @@ function App() {
   }, "请先选择账户，落地页将自动生成"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-2"
   }, "✅ 宏参数已默认拼接：click_id、ad_id")), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "mb-5"
+  }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "品牌形象"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: "视频号",
-    disabled: true,
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, "品牌形象"), /*#__PURE__*/React.createElement("select", {
+    value: brandImageType,
+    onChange: e => setBrandImageType(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "custom"
+  }, "自定义"), /*#__PURE__*/React.createElement("option", {
+    value: "video"
+  }, "视频号")), brandImageType === 'custom' && /*#__PURE__*/React.createElement("div", {
+    className: "mt-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-medium text-gray-600 mb-1"
+  }, "选择品牌形象图片"), /*#__PURE__*/React.createElement("select", {
+    value: selectedBrandImage,
+    onChange: e => setSelectedBrandImage(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "请选择品牌形象图片"), /*#__PURE__*/React.createElement("option", {
+    value: "brand_001"
+  }, "品牌形象图1 - 中国移动Logo"), /*#__PURE__*/React.createElement("option", {
+    value: "brand_002"
+  }, "品牌形象图2 - 官方认证标识"), /*#__PURE__*/React.createElement("option", {
+    value: "brand_003"
+  }, "品牌形象图3 - 活动主视觉"))), brandImageType === 'video' && /*#__PURE__*/React.createElement("div", {
+    className: "mt-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-medium text-gray-600 mb-1"
+  }, "选择视频号"), /*#__PURE__*/React.createElement("select", {
+    value: selectedVideoChannel,
+    onChange: e => setSelectedVideoChannel(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "请选择视频号"), /*#__PURE__*/React.createElement("option", {
+    value: "video_001"
+  }, "中国移动官方视频号"), /*#__PURE__*/React.createElement("option", {
+    value: "video_002"
+  }, "中国移动活动视频号"), /*#__PURE__*/React.createElement("option", {
+    value: "video_003"
+  }, "中国移动客服视频号")))), /*#__PURE__*/React.createElement("div", {
+    className: "mb-5"
+  }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "营销组件"), /*#__PURE__*/React.createElement("input", {
+  }, "营销组件"), /*#__PURE__*/React.createElement("select", {
+    value: marketingComponent,
+    onChange: e => setMarketingComponent(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "float_card"
+  }, "浮层卡片"), /*#__PURE__*/React.createElement("option", {
+    value: "action_button"
+  }, "行动按钮")), marketingComponent === 'action_button' && /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 p-4 bg-blue-50 rounded-lg border border-blue-200"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-medium text-gray-700 mb-1"
+  }, "按钮文案"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    value: "浮层卡片",
-    disabled: true,
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
+    value: buttonText,
+    onChange: e => setButtonText(e.target.value),
+    placeholder: "输入按钮文案",
+    className: "w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
-  }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
+  }, "建议使用引导性文案，如\"立即领取\"、\"马上申请\"")), marketingComponent === 'float_card' && /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-4"
+  }, /*#__PURE__*/React.createElement("h4", {
+    className: "text-sm font-semibold text-gray-900"
+  }, "新建浮层卡片-图文复合"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 text-xs text-gray-500"
+  }, /*#__PURE__*/React.createElement("span", null, "命名"), /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-edit cursor-pointer hover:text-blue-500"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "mb-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "图片"), /*#__PURE__*/React.createElement("div", {
+    className: "border-2 border-dashed border-gray-300 rounded-lg p-6 flex items-center justify-center min-h-[120px] bg-white"
+  }, floatCardImage ? /*#__PURE__*/React.createElement("div", {
+    className: "text-center"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: floatCardImage,
+    alt: "浮层卡片图片",
+    className: "max-h-[100px] mx-auto"
+  })) : /*#__PURE__*/React.createElement("div", {
+    className: "text-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "inline-flex items-center justify-center w-16 h-16 mb-2"
+  }, /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 100 100",
+    className: "w-16 h-16"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "10",
+    y: "20",
+    width: "80",
+    height: "60",
+    rx: "4",
+    fill: "#09C"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "50",
+    y: "45",
+    "text-anchor": "middle",
+    fill: "#fff",
+    fontSize: "12",
+    fontWeight: "bold"
+  }, "中国"), /*#__PURE__*/React.createElement("text", {
+    x: "50",
+    y: "60",
+    "text-anchor": "middle",
+    fill: "#fff",
+    fontSize: "12",
+    fontWeight: "bold"
+  }, "移动"), /*#__PURE__*/React.createElement("text", {
+    x: "50",
+    y: "75",
+    "text-anchor": "middle",
+    fill: "#fff",
+    fontSize: "9"
+  }, "China Mobile"), /*#__PURE__*/React.createElement("circle", {
+    cx: "30",
+    cy: "35",
+    r: "12",
+    fill: "none",
+    stroke: "#fff",
+    strokeWidth: "2"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M24 35 Q30 28 36 35 Q30 42 24 35Z",
+    fill: "#FFD700"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M30 23 Q37 30 30 37 Q23 30 30 23Z",
+    fill: "#E0F0FF"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M18 35 Q25 28 32 35 Q25 42 18 35Z",
+    fill: "#0099CC"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M28 35 Q35 28 42 35 Q35 42 28 35Z",
+    fill: "#66CCFF"
+  }))), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400"
+  }, "点击上传或拖拽图片到此处")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "文案"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-2"
+  }, floatCardCopies.map((copy, idx) => /*#__PURE__*/React.createElement("div", {
+    key: idx,
+    className: "flex items-center gap-3 bg-white rounded-lg px-4 py-3 border border-gray-200"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: copy.text,
+    onChange: e => {
+      const newCopies = [...floatCardCopies];
+      newCopies[idx].text = e.target.value;
+      setFloatCardCopies(newCopies);
+    },
+    placeholder: `文案 ${idx + 1}`,
+    className: "flex-1 text-sm outline-none bg-transparent"
+  }), copy.limit && /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400 whitespace-nowrap"
+  }, copy.limit), !copy.limit && /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-chevron-down text-xs text-gray-400"
+  }))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setFloatCardCopies([...floatCardCopies, {
+      text: '',
+      limit: ''
+    }]),
+    className: "w-full text-center text-sm text-blue-500 hover:text-blue-700 py-2 border border-dashed border-gray-300 rounded-lg hover:border-blue-400 transition-colors"
+  }, "+ 添加文案")))), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400 mt-1"
+  }, "所有创意共用同一个品牌形象和营销组件")))), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-center gap-4 pb-8"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
