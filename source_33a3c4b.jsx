@@ -10,6 +10,53 @@ const MOCK = {
   channels: [
     { id: 'gdt', name: '广点通' }
   ],
+  // 业务单元
+  businessUnits: [
+    { id: 'baiju', name: '白驹' },
+    { id: 'fenghua', name: '烽华' },
+    { id: 'fuwei', name: '服微' }
+  ],
+  // 营销目的
+  marketingObjectives: [
+    { id: 'lead', name: '线索留咨' },
+    { id: 'sales', name: '商品销售' }
+  ],
+  // 产品（按业务单元分类）
+  productsByBusinessUnit: {
+    'baiju': [
+      { id: 'bj_001', name: '白驹产品A' },
+      { id: 'bj_002', name: '白驹产品B' },
+      { id: 'bj_003', name: '白驹产品C' }
+    ],
+    'fenghua': [
+      { id: 'fh_001', name: '烽华产品X' },
+      { id: 'fh_002', name: '烽华产品Y' },
+      { id: 'fh_003', name: '烽华产品Z' }
+    ],
+    'fuwei': [
+      { id: 'fw_001', name: '服微产品1' },
+      { id: 'fw_002', name: '服微产品2' },
+      { id: 'fw_003', name: '服微产品3' }
+    ]
+  },
+  // 转化目标（按业务单元分类）
+  conversionsByBusinessUnit: {
+    'baiju': [
+      { id: 'bj_conv_001', name: '白驹-表单提交' },
+      { id: 'bj_conv_002', name: '白驹-在线咨询' },
+      { id: 'bj_conv_003', name: '白驹-电话咨询' }
+    ],
+    'fenghua': [
+      { id: 'fh_conv_001', name: '烽华-商品购买' },
+      { id: 'fh_conv_002', name: '烽华-加入购物车' },
+      { id: 'fh_conv_003', name: '烽华-收藏商品' }
+    ],
+    'fuwei': [
+      { id: 'fw_conv_001', name: '服微-预约咨询' },
+      { id: 'fw_conv_002', name: '服微-服务购买' },
+      { id: 'fw_conv_003', name: '服微-关注公众号' }
+    ]
+  },
   accounts: [
     { id: 'acc_001', name: '账户001-北京移动', kaboshi: 'https://kaboshi.example.com/acc001' },
     { id: 'acc_002', name: '账户002-上海移动', kaboshi: 'https://kaboshi.example.com/acc002' },
@@ -900,7 +947,23 @@ function App() {
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
 
   // ===== 营销单元配置 =====
-  const [specificProduct, setSpecificProduct] = useState('sp_001');
+  // 业务单元
+  const [businessUnit, setBusinessUnit] = useState('baiju');
+  // 营销目的
+  const [marketingObjective, setMarketingObjective] = useState('lead');
+  // 产品（根据业务单元动态变化）
+  const getProductsForBusinessUnit = () => {
+    return MOCK.productsByBusinessUnit[businessUnit] || [];
+  };
+  const [specificProduct, setSpecificProduct] = useState(() => {
+    const products = MOCK.productsByBusinessUnit['baiju'] || [];
+    return products.length > 0 ? products[0].id : '';
+  });
+  // 当业务单元变化时，重置产品选择
+  useEffect(() => {
+    const products = MOCK.productsByBusinessUnit[businessUnit] || [];
+    setSpecificProduct(products.length > 0 ? products[0].id : '');
+  }, [businessUnit]);
   const [placement, setPlacement] = useState('wechat_video');
   const [placementScene, setPlacementScene] = useState('');
   const [showPlacementModal, setShowPlacementModal] = useState(false);
@@ -1002,6 +1065,16 @@ function App() {
   };
   // 排除已转化用户
   const [excludeConvertedMode, setExcludeConvertedMode] = useState('unlimited');
+  // 转化目标（根据业务单元选择）
+  const [conversionGoal, setConversionGoal] = useState(() => {
+    const conversions = MOCK.conversionsByBusinessUnit['baiju'] || [];
+    return conversions.length > 0 ? conversions[0].id : '';
+  });
+  // 当业务单元变化时，重置转化目标
+  useEffect(() => {
+    const conversions = MOCK.conversionsByBusinessUnit[businessUnit] || [];
+    setConversionGoal(conversions.length > 0 ? conversions[0].id : '');
+  }, [businessUnit]);
   // 转化行为
   const [conversionBehavior, setConversionBehavior] = useState('optimize'); // 'optimize' | 'custom'
   // 转化时间区间
@@ -1311,29 +1384,45 @@ function App() {
             </h2>
           </div>
           <div className="p-6 space-y-6">
-            {/* 推广产品 & 具体产品 */}
+            {/* 业务单元 & 营销目的 & 推广产品 & 产品 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">业务单元 <span className="text-red-500">*</span></label>
+                <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                  {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">营销目的 <span className="text-red-500">*</span></label>
+                <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                  {MOCK.marketingObjectives.map(mo => <option key={mo.id} value={mo.id}>{mo.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">推广产品</label>
                 <input type="text" value="运营商产品" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">具体产品 <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">产品 <span className="text-red-500">*</span></label>
                 <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                  {MOCK.specificProducts.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
+                  {getProductsForBusinessUnit().map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
                 </select>
               </div>
             </div>
 
             {/* 营销载体 & 转化 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销载体</label>
                 <input type="text" value="页面跳转" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">转化</label>
-                <input type="text" value="数据源上报" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
+                <select value={conversionGoal} onChange={e => setConversionGoal(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                  {(MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => <option key={conv.id} value={conv.id}>{conv.name}</option>)}
+                </select>
               </div>
             </div>
 
@@ -2410,9 +2499,11 @@ function App() {
               <div className="mt-6 bg-gray-50 rounded-xl p-4">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3"><i className="fas fa-cog mr-2"></i>关键配置摘要</h4>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                  <div><span className="text-gray-500">业务类型：</span><span className="font-medium">{MOCK.businessTypes.find(b => b.id === businessType)?.name}</span></div>
+                  <div><span className="text-gray-500">业务单元：</span><span className="font-medium">{MOCK.businessUnits.find(b => b.id === businessUnit)?.name}</span></div>
+                  <div><span className="text-gray-500">营销目的：</span><span className="font-medium">{MOCK.marketingObjectives.find(m => m.id === marketingObjective)?.name}</span></div>
+                  <div><span className="text-gray-500">产品：</span><span className="font-medium">{getProductsForBusinessUnit().find(sp => sp.id === specificProduct)?.name}</span></div>
+                  <div><span className="text-gray-500">转化：</span><span className="font-medium">{(MOCK.conversionsByBusinessUnit[businessUnit] || []).find(c => c.id === conversionGoal)?.name}</span></div>
                   <div><span className="text-gray-500">投放版位：</span><span className="font-medium">{placement === 'wechat_video' ? '微信视频号' : '微信公众号与小程序'}</span></div>
-                  <div><span className="text-gray-500">具体产品：</span><span className="font-medium">{MOCK.specificProducts.find(sp => sp.id === specificProduct)?.name}</span></div>
                   <div><span className="text-gray-500">出价：</span><span className="font-medium">{bidAmount ? `¥${bidAmount}` : '未设置'}</span></div>
                   <div><span className="text-gray-500">定向方式：</span><span className="font-medium">{targetingSource === 'package' ? '定向包：' + (selectedTargetingPackages.length > 0 ? `${selectedTargetingPackages.length} 个定向包` : '未选择') : '自定义定向'}</span></div>
                   <div><span className="text-gray-500">营销单元名称：</span><span className="font-medium">{unitName || '未设置'}</span></div>
