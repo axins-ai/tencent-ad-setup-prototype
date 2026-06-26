@@ -2240,7 +2240,7 @@ function App() {
     className: "fas fa-user-slash text-orange-500"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-bold text-orange-800"
-  }, "按账户配置排除人群包（不选=不排除）")), /*#__PURE__*/React.createElement("button", {
+  }, "按账户配置排除人群包（必选）")), /*#__PURE__*/React.createElement("button", {
     onClick: refreshExcludeAudiencePackages,
     className: "text-xs text-orange-600 hover:text-orange-800 border border-orange-200 rounded px-2 py-1 hover:bg-orange-100"
   }, /*#__PURE__*/React.createElement("i", {
@@ -2264,8 +2264,9 @@ function App() {
       })),
       className: "px-2 py-1 border border-orange-200 rounded text-xs outline-none focus:ring-1 focus:ring-orange-500 min-w-[100px]"
     }, /*#__PURE__*/React.createElement("option", {
-      value: ""
-    }, "不排除"), excludeAudiencePackageList.map(ep => /*#__PURE__*/React.createElement("option", {
+      value: "",
+      disabled: true
+    }, "请选择排除人群包"), excludeAudiencePackageList.map(ep => /*#__PURE__*/React.createElement("option", {
       key: ep.id,
       value: ep.id
     }, ep.name))));
@@ -3206,26 +3207,7 @@ function App() {
     value: "copy"
   }, "复制分配（所有账户用相同文案）"), /*#__PURE__*/React.createElement("option", {
     value: "random"
-  }, "随机分配")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "落地页（卡博士链接 + 宏参数已自动拼接）"), selectedAccountIds.length > 0 ? /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-1"
-  }, selectedAccountIds.map(id => {
-    const acc = MOCK.accounts.find(a => a.id === id);
-    const landingUrl = acc ? acc.kaboshi + '?click_id={click_id}&ad_id={ad_id}' : '';
-    return acc ? /*#__PURE__*/React.createElement("div", {
-      key: id,
-      className: "p-1 bg-gray-50 border border-gray-100 rounded text-xs"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-gray-500"
-    }, acc.name, "："), /*#__PURE__*/React.createElement("code", {
-      className: "text-gray-700 break-all"
-    }, landingUrl)) : null;
-  })) : /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-gray-400"
-  }, "请先选择账户，落地页将自动生成"), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400 mt-1"
-  }, "✅ 宏参数已默认拼接：click_id、ad_id")), /*#__PURE__*/React.createElement("div", {
+  }, "随机分配")))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
