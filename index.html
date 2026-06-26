@@ -225,12 +225,8 @@
                 </label>
               </div>
               <div id="tgt-pkg-audience-config" style="display:none;">
-                <select id="tgt-pkg-audience-select" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;">
-                  <option value="">-- 选择排除人群包 --</option>
-                  <option value="ca_001">上周访问用户</option>
-                  <option value="ca_002">近30天活跃用户</option>
-                  <option value="ca_003">高价值用户</option>
-                </select>
+                <div style="margin-bottom:8px;font-size:13px;color:#666;">为每个账户选择要排除的人群包（不选则不排除）</div>
+                <div id="tgt-pkg-audience-account-list"></div>
               </div>
             </div>
 
@@ -437,7 +433,15 @@
     { id: 'ca_002', name: '近30天活跃用户' },
     { id: 'ca_003', name: '高价值用户' }
   ];
-;
+  // 账户数据（用于排除人群按账户配置）
+  var tgtPkgAccounts = [
+    { id: 'acc_001', name: '账户001-北京移动' },
+    { id: 'acc_002', name: '账户002-上海移动' },
+    { id: 'acc_003', name: '账户003-广州移动' },
+    { id: 'acc_004', name: '账户004-深圳移动' },
+    { id: 'acc_005', name: '账户005-杭州移动' }
+  ];
+
   window.hideDropdown = function() {
     var chDd2 = document.getElementById('channel-dropdown');
     if (chDd2) chDd2.style.display = 'none';
@@ -841,6 +845,28 @@
     var mode = document.querySelector('input[name="tgt-pkg-audience-mode"]:checked').value;
     var config = document.getElementById('tgt-pkg-audience-config');
     if (config) config.style.display = (mode !== 'unlimited') ? 'block' : 'none';
+    // 生成账户列表
+    if (mode !== 'unlimited') renderAudienceAccountList();
+  };
+
+
+  // 生成排除人群账户列表（按账户配置）
+  window.renderAudienceAccountList = function() {
+    var container = document.getElementById("tgt-pkg-audience-account-list");
+    if (!container) return;
+    var html = "";
+    tgtPkgAccounts.forEach(function(acc) {
+      html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;padding:8px 12px;background:#f9fafb;border-radius:8px;">';
+      html += '<div style="flex:1;font-size:14px;color:#333;">' + acc.name + '</div>';
+      html += '<select id="audience-select-' + acc.id + '" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;min-width:180px;">';
+      html += '<option value="">-- 不排除 --</option>';
+      customAudiences.forEach(function(ca) {
+        html += '<option value="' + ca.id + '">' + ca.name + '</option>';
+      });
+      html += '</select>';
+      html += '</div>';
+    });
+    container.innerHTML = html;
   };
 
   window.toggleTgtPkgConversion = function() {
