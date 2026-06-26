@@ -2943,38 +2943,39 @@ function App() {
     onClick: () => setUnitName(unitName + '{' + v + '}'),
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
   }, "+", v))))))), marketingUnitMode === 'existing' && /*#__PURE__*/React.createElement("div", {
-    className: "p-6 space-y-6"
+    className: "p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4"
+    className: "bg-yellow-50 border border-yellow-200 rounded-lg p-2 md:col-span-2 lg:col-span-3"
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-yellow-800 font-medium"
-  }, "已在已有营销单元上新增创意模式，请为每个账户选择要添加创意的营销单元")), selectedAccountIds.length === 0 && /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-orange-500"
+    className: "text-xs text-yellow-800 font-medium"
+  }, "已有营销单元上新增创意：请为每个账户选择营销单元")), selectedAccountIds.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "text-sm text-orange-500 md:col-span-2 lg:col-span-3"
   }, "请先在上方选择账户"), selectedAccountIds.map(accId => {
     const acc = MOCK.accounts.find(a => a.id === accId);
     const marketingUnits = MOCK.existingMarketingUnits[accId] || [];
     return /*#__PURE__*/React.createElement("div", {
       key: accId,
-      className: "border border-gray-200 rounded-lg p-4"
+      className: "border border-gray-200 rounded-lg p-2"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-3 mb-3"
+      className: "flex items-center gap-1 mb-1"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "flex-1 text-sm font-medium text-gray-900"
+      className: "flex-1 text-xs font-medium text-gray-900 truncate"
     }, acc ? acc.name : accId)), /*#__PURE__*/React.createElement("select", {
       value: selectedExistingMarketingUnits[accId] || '',
       onChange: e => setSelectedExistingMarketingUnits(prev => ({
         ...prev,
         [accId]: e.target.value
       })),
-      className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+      className: "w-full px-2 py-1 border border-gray-300 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500"
     }, /*#__PURE__*/React.createElement("option", {
-      value: ""
-    }, "-- 请选择营销单元 --"), marketingUnits.map(mu => /*#__PURE__*/React.createElement("option", {
+      value: "",
+      disabled: true
+    }, "选择营销单元"), marketingUnits.map(mu => /*#__PURE__*/React.createElement("option", {
       key: mu.id,
       value: mu.id
     }, mu.id, " - ", mu.name))), marketingUnits.length === 0 && /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-gray-400 mt-1"
-    }, "该账户下暂无已有营销单元"));
+      className: "text-xs text-gray-400 mt-0.5"
+    }, "暂无"));
   }))), /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-xl shadow-sm border overflow-hidden"
   }, /*#__PURE__*/React.createElement("div", {
