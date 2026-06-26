@@ -1853,6 +1853,10 @@ function App() {
         if (data.composeRule) setComposeRule(data.composeRule);
         if (data.marketingUnitMode) setMarketingUnitMode(data.marketingUnitMode);
         if (data.selectedExistingMarketingUnits) setSelectedExistingMarketingUnits(data.selectedExistingMarketingUnits);
+        if (data.brandImageType) setBrandImageType(data.brandImageType);
+        if (data.selectedBrandImage) setSelectedBrandImage(data.selectedBrandImage);
+        if (data.selectedVideoChannel) setSelectedVideoChannel(data.selectedVideoChannel);
+        if (data.marketingComponent) setMarketingComponent(data.marketingComponent);
         notify('已恢复上次保存的草稿', 'success');
       }
     } catch (e) {
@@ -1907,7 +1911,11 @@ function App() {
         creativeComposeMode,
         composeRule,
         marketingUnitMode,
-        selectedExistingMarketingUnits
+        selectedExistingMarketingUnits,
+        brandImageType,
+        selectedBrandImage,
+        selectedVideoChannel,
+        marketingComponent
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
     } catch (e) {
@@ -2239,27 +2247,29 @@ function App() {
     className: "fas fa-sync-alt mr-1"
   }), "刷新列表")), selectedAccountIds.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-orange-400"
-  }, "请先在上方选择账户"), selectedAccountIds.map(accId => {
+  }, "请先在上方选择账户"), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-2 gap-2"
+  }, selectedAccountIds.map(accId => {
     const acc = MOCK.accounts.find(a => a.id === accId);
     return /*#__PURE__*/React.createElement("div", {
       key: accId,
-      className: "flex items-center gap-3 mb-2 p-2 bg-white rounded-lg"
+      className: "flex items-center gap-2 mb-1 p-1 bg-white rounded border border-orange-100"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "flex-1 text-sm text-gray-900"
+      className: "flex-1 text-xs text-gray-900 truncate"
     }, acc ? acc.name : accId), /*#__PURE__*/React.createElement("select", {
       value: accountAudienceMap[accId] || '',
       onChange: e => setAccountAudienceMap(prev => ({
         ...prev,
         [accId]: e.target.value
       })),
-      className: "px-3 py-1.5 border border-orange-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-orange-500 min-w-[160px]"
+      className: "px-2 py-1 border border-orange-200 rounded text-xs outline-none focus:ring-1 focus:ring-orange-500 min-w-[100px]"
     }, /*#__PURE__*/React.createElement("option", {
       value: ""
-    }, "-- 不排除 --"), excludeAudiencePackageList.map(ep => /*#__PURE__*/React.createElement("option", {
+    }, "不排除"), excludeAudiencePackageList.map(ep => /*#__PURE__*/React.createElement("option", {
       key: ep.id,
       value: ep.id
     }, ep.name))));
-  }))), /*#__PURE__*/React.createElement("div", {
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-semibold text-gray-900 mb-3"
