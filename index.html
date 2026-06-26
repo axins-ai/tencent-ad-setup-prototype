@@ -279,24 +279,6 @@
               </div>
             </div>
           </div>
-            <!-- 自定义人群 -->
-            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
-              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">自定义人群</div>
-              <div style="display:flex;gap:16px;margin-bottom:12px;">
-                <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-audience-mode" value="unlimited" checked style="margin-right:6px;">
-                  <span style="font-size:14px;">不限</span>
-                </label>
-                <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-audience-mode" value="exclude" style="margin-right:6px;">
-                  <span style="font-size:14px;">排除人群</span>
-                </label>
-              </div>
-              <div id="tgt-pkg-audience-config" style="display:none;">
-                <div style="margin-bottom:8px;font-size:13px;color:#666;">为每个账户选择要排除的人群包（不选则不排除）</div>
-                <div id="tgt-pkg-audience-account-list"></div>
-              </div>
-            </div>
 
           <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
             <button style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
@@ -841,33 +823,11 @@
     input.focus();
   };
 
-  window.toggleTgtPkgAudience = function() {
-    var mode = document.querySelector('input[name="tgt-pkg-audience-mode"]:checked').value;
-    var config = document.getElementById('tgt-pkg-audience-config');
-    if (config) config.style.display = (mode !== 'unlimited') ? 'block' : 'none';
-    // 生成账户列表
-    if (mode !== 'unlimited') renderAudienceAccountList();
-  };
+  
 
 
   // 生成排除人群账户列表（按账户配置）
-  window.renderAudienceAccountList = function() {
-    var container = document.getElementById("tgt-pkg-audience-account-list");
-    if (!container) return;
-    var html = "";
-    tgtPkgAccounts.forEach(function(acc) {
-      html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;padding:8px 12px;background:#f9fafb;border-radius:8px;">';
-      html += '<div style="flex:1;font-size:14px;color:#333;">' + acc.name + '</div>';
-      html += '<select id="audience-select-' + acc.id + '" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;min-width:180px;">';
-      html += '<option value="">-- 不排除 --</option>';
-      customAudiences.forEach(function(ca) {
-        html += '<option value="' + ca.id + '">' + ca.name + '</option>';
-      });
-      html += '</select>';
-      html += '</div>';
-    });
-    container.innerHTML = html;
-  };
+  
 
   window.toggleTgtPkgConversion = function() {
     var mode = document.querySelector('input[name="tgt-pkg-exclude"]:checked').value;
@@ -1089,13 +1049,6 @@
     // 重置性别
     var elGender = document.querySelector('input[name="tgt-pkg-gender"][value="不限"]');
     if (elGender) elGender.checked = true;
-    // 重置自定义人群
-    var elAudMode = document.querySelector('input[name="tgt-pkg-audience-mode"][value="unlimited"]');
-    if (elAudMode) elAudMode.checked = true;
-    var elAudConfig = document.getElementById('tgt-pkg-audience-config');
-    if (elAudConfig) elAudConfig.style.display = 'none';
-    var elAudInput = document.getElementById('tgt-pkg-audience-input');
-    if (elAudInput) elAudInput.value = '';
     // 重置排除已转化
     var el = document.querySelector('input[name="tgt-pkg-exclude"][value="unlimited"]');
 
@@ -1158,20 +1111,6 @@
     // 性别
     var genderRadio = document.querySelector('input[name="tgt-pkg-gender"][value="' + (tp.gender || '不限') + '"]');
     if (genderRadio) genderRadio.checked = true;
-    // 自定义人群
-    var audMode = tp.audienceMode || 'unlimited';
-    if (audMode === 'target') audMode = 'exclude'; // 原型已去掉「定向人群」
-    if (audMode !== 'unlimited') {
-      document.querySelector('input[name="tgt-pkg-audience-mode"][value="' + tp.audienceMode + '"]').checked = true;
-      var elAudConfig2 = document.getElementById('tgt-pkg-audience-config');
-      if (elAudConfig2) elAudConfig2.style.display = 'block';
-    } else {
-      var elAudMode = document.querySelector('input[name="tgt-pkg-audience-mode"][value="unlimited"]');
-    if (elAudMode) elAudMode.checked = true;
-      var elAudConfig3 = document.getElementById('tgt-pkg-audience-config');
-      if (elAudConfig3) elAudConfig3.style.display = 'none';
-    }
-    document.getElementById('tgt-pkg-audience-input').value = tp.audienceInput || '';
     // 排除已转化
     if (tp.excludeConverted && tp.excludeConverted !== 'unlimited') {
       document.querySelector('input[name="tgt-pkg-exclude"][value="' + tp.excludeConverted + '"]').checked = true;
@@ -1212,12 +1151,6 @@
     // 获取排除已转化用户
     var excludeConverted = document.querySelector('input[name="tgt-pkg-exclude"]:checked').value;
     // 获取自定义人群
-    var audienceMode = document.querySelector('input[name="tgt-pkg-audience-mode"]:checked').value;
-    var audienceInput = '';
-    if (audienceMode !== 'unlimited') {
-      audienceInput = document.getElementById('tgt-pkg-audience-input').value.trim();
-    }
-    // 获取转化行为
     var conversionBehavior = document.querySelector('input[name="tgt-pkg-conversion-behavior"]:checked').value;
     var conversionInput = '';
     if (conversionBehavior !== 'optimize') {
@@ -1233,8 +1166,6 @@
       age: age,
       gender: gender,
       excludeConverted: excludeConverted,
-      audienceMode: audienceMode,
-      audienceInput: audienceInput,
       conversionBehavior: conversionBehavior,
       conversionInput: conversionInput,
       conversionTimeRange: conversionTimeRange
@@ -1404,26 +1335,6 @@
     });
   };
   // 渲染人群包列表
-  window.renderTgtPkgAudienceList = function() {
-    var container = document.getElementById('tgt-pkg-audience-list');
-    if (!container) return;
-    container.innerHTML = '';
-    if (typeof customAudiences === 'undefined') return;
-    customAudiences.forEach(function(aud) {
-      var label = document.createElement('label');
-      label.style.cssText = 'display:flex;align-items:center;padding:6px 12px;background:#f9fafb;border-radius:6px;cursor:pointer;font-size:13px;';
-      var cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.value = aud.id;
-      cb.name = 'tgt-pkg-audience';
-      cb.style.marginRight = '6px';
-      label.appendChild(cb);
-      label.appendChild(document.createTextNode(aud.name));
-      container.appendChild(label);
-    });
-  };
-
-
   // 初始化年龄选项
   if (window.renderTgtPkgAgeOptions) window.renderTgtPkgAgeOptions();
   // 绑定新建定向包按钮
@@ -1488,10 +1399,6 @@
     var geoRadios = document.querySelectorAll('input[name="tgt-pkg-geo-mode"]');
     geoRadios.forEach(function(r) {
       r.addEventListener('change', function() { if (window.toggleTgtPkgGeoMode) toggleTgtPkgGeoMode(); });
-    });
-    var audienceRadios = document.querySelectorAll('input[name="tgt-pkg-audience-mode"]');
-    audienceRadios.forEach(function(r) {
-      r.addEventListener('change', function() { if (window.toggleTgtPkgAudience) toggleTgtPkgAudience(); });
     });
 
     // -- 定向包列表：事件委托 --
