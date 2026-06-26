@@ -3207,24 +3207,24 @@ function App() {
   }, "复制分配（所有账户用相同文案）"), /*#__PURE__*/React.createElement("option", {
     value: "random"
   }, "随机分配")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
+    className: "block text-sm font-medium text-gray-700 mb-1"
   }, "落地页（卡博士链接 + 宏参数已自动拼接）"), selectedAccountIds.length > 0 ? /*#__PURE__*/React.createElement("div", {
-    className: "space-y-2"
+    className: "grid grid-cols-1 md:grid-cols-2 gap-1"
   }, selectedAccountIds.map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
     const landingUrl = acc ? acc.kaboshi + '?click_id={click_id}&ad_id={ad_id}' : '';
     return acc ? /*#__PURE__*/React.createElement("div", {
       key: id,
-      className: "p-3 bg-gray-50 border border-gray-200 rounded-lg"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-gray-500 mb-1"
-    }, acc.name, " 的落地页："), /*#__PURE__*/React.createElement("code", {
-      className: "text-sm text-gray-700 break-all"
+      className: "p-1 bg-gray-50 border border-gray-100 rounded text-xs"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-gray-500"
+    }, acc.name, "："), /*#__PURE__*/React.createElement("code", {
+      className: "text-gray-700 break-all"
     }, landingUrl)) : null;
   })) : /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
   }, "请先选择账户，落地页将自动生成"), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400 mt-2"
+    className: "text-xs text-gray-400 mt-1"
   }, "✅ 宏参数已默认拼接：click_id、ad_id")), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
