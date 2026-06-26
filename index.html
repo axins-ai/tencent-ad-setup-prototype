@@ -211,25 +211,6 @@
               </div>
             </div>
 
-            <!-- 自定义人群 -->
-            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
-              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">自定义人群</div>
-              <div style="display:flex;gap:16px;margin-bottom:12px;">
-                <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-audience-mode" value="unlimited" checked style="margin-right:6px;">
-                  <span style="font-size:14px;">不限</span>
-                </label>
-                <label style="display:flex;align-items:center;cursor:pointer;">
-                  <input type="radio" name="tgt-pkg-audience-mode" value="exclude" style="margin-right:6px;">
-                  <span style="font-size:14px;">排除人群</span>
-                </label>
-              </div>
-              <div id="tgt-pkg-audience-config" style="display:none;">
-                <div style="margin-bottom:8px;font-size:13px;color:#666;">为每个账户选择要排除的人群包（不选则不排除）</div>
-                <div id="tgt-pkg-audience-account-list"></div>
-              </div>
-            </div>
-
             <!-- 排除已转化 -->
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">排除已转化用户</div>
@@ -298,6 +279,25 @@
               </div>
             </div>
           </div>
+            <!-- 自定义人群 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">自定义人群</div>
+              <div style="display:flex;gap:16px;margin-bottom:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="unlimited" checked style="margin-right:6px;">
+                  <span style="font-size:14px;">不限</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-audience-mode" value="exclude" style="margin-right:6px;">
+                  <span style="font-size:14px;">排除人群</span>
+                </label>
+              </div>
+              <div id="tgt-pkg-audience-config" style="display:none;">
+                <div style="margin-bottom:8px;font-size:13px;color:#666;">为每个账户选择要排除的人群包（不选则不排除）</div>
+                <div id="tgt-pkg-audience-account-list"></div>
+              </div>
+            </div>
+
           <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
             <button style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
             <button style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
