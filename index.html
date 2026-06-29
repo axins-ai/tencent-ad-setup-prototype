@@ -6,44 +6,31 @@
 <title>AdBatch 原型</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="region-data.js">  
-  // ========== 文案库功能 ==========
-  var copyTexts = [];
+    <script src="region-data.js">
+  // ========= 文案库功能 =========
   var copyBatchMode = false;
-  var selectedCopyIds = new Set();
-  
-  // 加载文案数据
-  try {
-    copyTexts = JSON.parse(localStorage.getItem('ad_copy_texts') || '[]');
-  } catch(e) { copyTexts = []; }
-  
-  // 保存文案数据
+  var selectedCopyIds = {};
+  try { copyTexts = JSON.parse(localStorage.getItem('ad_copy_texts') || '[]'); } catch(e) { copyTexts = []; }
+
   function saveCopyTexts() {
     try { localStorage.setItem('ad_copy_texts', JSON.stringify(copyTexts)); } catch(e) {}
   }
-  
-  // 渲染文案列表
+
   window.renderCopyList = function() {
-    var rows El = document.getElementById('copy-rows');
+    var rowsEl = document.getElementById('copy-rows');
     var emptyEl = document.getElementById('copy-empty-state');
     var contentEl = document.getElementById('copy-library-content');
     if (!rowsEl) return;
-    
-    // 获取搜索和排序值
     var searchVal = '';
     var searchInput = document.getElementById('copy-search-input');
     if (searchInput) searchVal = searchInput.value.toLowerCase();
     var sortVal = 'newest';
     var sortSelect = document.getElementById('copy-sort-select');
     if (sortSelect) sortVal = sortSelect.value;
-    
-    // 过滤
     var filtered = copyTexts.filter(function(c) {
       if (!searchVal) return true;
       return (c.content || '').toLowerCase().indexOf(searchVal) !== -1;
     });
-    
-    // 排序
     filtered.sort(function(a, b) {
       if (sortVal === 'newest') return (b.createdAt || 0) - (a.createdAt || 0);
       if (sortVal === 'oldest') return (a.createdAt || 0) - (b.createdAt || 0);
@@ -51,73 +38,59 @@
       if (sortVal === 'ctr-low') return (a.ctr || 0) - (b.ctr || 0);
       return 0;
     });
-    
     if (filtered.length === 0) {
       rowsEl.innerHTML = '';
       if (emptyEl) emptyEl.style.display = 'block';
       if (contentEl) contentEl.style.display = 'none';
       return;
     }
-    
     if (emptyEl) emptyEl.style.display = 'none';
     if (contentEl) contentEl.style.display = 'block';
-    
     var html = '';
     filtered.forEach(function(copy, idx) {
-      var checked = selectedCopyIds.has(copy.id) ? 'checked' : '';
+      var checked = selectedCopyIds[copy.id] ? 'checked' : '';
       var checkboxDisplay = copyBatchMode ? 'display:block;' : 'display:none;';
       var charCount = (copy.content || '').length;
       var ctr = copy.ctr || 0;
-      var ctrBadge = ctr > 0 ? '<span style="background:#dcfce7;color:#166534;font-size:12px;padding:2px 8px;border-radius:999px;">CTR ' + ctr.toFixed(2) + '%</span>' : '<span style="color:#9ca3af;font-size:12px;">暂无数据</span>';
-      
-      html += '<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #f3f4f6;hover:background:#f9fafb;" onmouseover="this.style.background=\'#f9fafb\'" onmouseout="this.style.background=\'transparent\'">'
+      var ctrBadge = ctr > 0
+        ? '<span style="background:#dcfce7;color:#166534;font-size:12px;padding:2px 8px;border-radius:999px;">CTR ' + ctr.toFixed(2) + '%</span>'
+        : '<span style="color:#9ca3af;font-size:12px;">暂无数据</span>';
+      var escaped = (copy.content || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      html += '<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #f3f4f6;">'
         + '<div style="' + checkboxDisplay + 'width:40px;text-align:center;">'
-        + '<input type="checkbox" ' + checked + ' onchange="toggleCopySelection(\'' + copy.id + '\')" style="cursor:pointer;accent-color:#1890FF;">'
+        + '<input type="checkbox" ' + checked + ' onchange="window.toggleCopySelection(\'' + copy.id + '\')" style="cursor:pointer;accent-color:#1890FF;">'
         + '</div>'
         + '<div style="flex:0.5;text-align:center;font-size:14px;color:#6b7280;">' + (idx + 1) + '</div>'
-        + '<div style="flex:3;font-size:14px;color:#111827;">' + escapeHtml(copy.content || '') + '</div>'
+        + '<div style="flex:3;font-size:14px;color:#111827;">' + escaped + '</div>'
         + '<div style="flex:1;text-align:center;font-size:13px;color:#6b7280;">' + charCount + ' 字</div>'
         + '<div style="flex:1;text-align:center;">' + ctrBadge + '</div>'
         + '<div style="flex:1;text-align:right;font-size:13px;">'
-        + '<button onclick="editCopy(\'' + copy.id + '\')" style="background:none;border:none;color:#1890FF;cursor:pointer;margin-right:12px;font-size:13px;">编辑</button>'
-        + '<button onclick="deleteCopy(\'' + copy.id + '\')" style="background:none;border:none;color:#ff4d4f;cursor:pointer;font-size:13px;">删除</button>'
+        + '<button onclick="window.editCopy(\'' + copy.id + '\')" style="background:none;border:none;color:#1890FF;cursor:pointer;margin-right:12px;font-size:13px;">编辑</button>'
+        + '<button onclick="window.deleteCopy(\'' + copy.id + '\')" style="background:none;border:none;color:#ff4d4f;cursor:pointer;font-size:13px;">删除</button>'
         + '</div>'
         + '</div>';
     });
     rowsEl.innerHTML = html;
   };
-  
-  // HTML 转义
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  
-  // 搜索过滤
-  window.filterCopyList = function() {
-    renderCopyList();
-  };
-  
-  // 排序
-  window.sortCopyList = function() {
-    renderCopyList();
-  };
-  
-  // 切换批量模式
+
+  window.filterCopyList = function() { window.renderCopyList(); };
+  window.sortCopyList = function() { window.renderCopyList(); };
+
   window.toggleBatchMode = function() {
     copyBatchMode = !copyBatchMode;
-    selectedCopyIds.clear();
-    var checkboxCol = document.getElementById('copy-checkbox-col');
-    var batchBar = document.getElementById('batch-action-bar');
-    var btnBatch = document.getElementById('btn-batch-mode');
-    if (checkboxCol) checkboxCol.style.display = copyBatchMode ? 'block' : 'none';
-    if (batchBar) batchBar.style.display = copyBatchMode ? 'flex' : 'none';
-    if (btnBatch) btnBatch.innerHTML = copyBatchMode ? '<i class="fas fa-times" style="margin-right:4px;"></i>取消批量' : '<i class="fas fa-tasks" style="margin-right:4px;"></i>批量管理';
-    renderCopyList();
+    selectedCopyIds = {};
+    var col = document.getElementById('copy-checkbox-col');
+    var bar = document.getElementById('batch-action-bar');
+    var btn = document.getElementById('btn-batch-mode');
+    if (col) col.style.display = copyBatchMode ? 'block' : 'none';
+    if (bar) bar.style.display = copyBatchMode ? 'flex' : 'none';
+    if (btn) btn.innerHTML = copyBatchMode
+      ? '<i class="fas fa-times" style="margin-right:4px;"></i>取消批量'
+      : '<i class="fas fa-tasks" style="margin-right:4px;"></i>批量管理';
+    window.renderCopyList();
   };
-  
-  // 全选/取消全选
-  window.toggleSelectAllCopies = function(masterCb) {
+
+  window.toggleSelectAllCopies = function(master) {
     var searchVal = '';
     var searchInput = document.getElementById('copy-search-input');
     if (searchInput) searchVal = searchInput.value.toLowerCase();
@@ -125,133 +98,92 @@
       if (!searchVal) return true;
       return (c.content || '').toLowerCase().indexOf(searchVal) !== -1;
     });
-    if (masterCb.checked) {
-      filtered.forEach(function(c) { selectedCopyIds.add(c.id); });
+    if (master.checked) {
+      filtered.forEach(function(c) { selectedCopyIds[c.id] = true; });
     } else {
-      filtered.forEach(function(c) { selectedCopyIds.delete(c.id); });
+      filtered.forEach(function(c) { delete selectedCopyIds[c.id]; });
     }
-    updateSelectedCount();
-    renderCopyList();
-  };
-  
-  // 切换单条文案选择
-  window.toggleCopySelection = function(id) {
-    if (selectedCopyIds.has(id)) {
-      selectedCopyIds.delete(id);
-    } else {
-      selectedCopyIds.add(id);
-    }
-    updateSelectedCount();
-  };
-  
-  // 更新选择计数
-  function updateSelectedCount() {
     var countEl = document.getElementById('selected-copy-count');
-    if (countEl) countEl.textContent = selectedCopyIds.size;
-  }
-  
-  // 打开新增/编辑文案弹窗
+    if (countEl) countEl.textContent = Object.keys(selectedCopyIds).length;
+    window.renderCopyList();
+  };
+
+  window.toggleCopySelection = function(id) {
+    if (selectedCopyIds[id]) delete selectedCopyIds[id];
+    else selectedCopyIds[id] = true;
+    var countEl = document.getElementById('selected-copy-count');
+    if (countEl) countEl.textContent = Object.keys(selectedCopyIds).length;
+  };
+
   window.openCopyForm = function(id) {
     var modal = document.getElementById('copy-form-modal');
     var title = document.getElementById('copy-form-title');
     var input = document.getElementById('copy-content-input');
     var charCount = document.getElementById('copy-char-count');
     if (!modal || !input) return;
-    
     if (id) {
-      // 编辑模式
       var copy = copyTexts.find(function(c) { return c.id === id; });
       if (!copy) return;
       if (title) title.textContent = '编辑文案';
       input.value = copy.content || '';
       input.dataset.editId = id;
     } else {
-      // 新增模式
       if (title) title.textContent = '新增文案';
       input.value = '';
       delete input.dataset.editId;
     }
-    if (charCount) charCount.textContent = (input.value.length || 0) + ' 字';
+    if (charCount) charCount.textContent = input.value.length + ' 字';
     modal.style.display = 'flex';
   };
-  
-  // 关闭弹窗
+
   window.closeCopyForm = function() {
     var modal = document.getElementById('copy-form-modal');
     if (modal) modal.style.display = 'none';
   };
-  
-  // 保存文案
+
   window.saveCopy = function() {
     var input = document.getElementById('copy-content-input');
     if (!input) return;
     var content = input.value.trim();
-    if (!content) {
-      alert('请输入文案内容');
-      return;
-    }
-    
+    if (!content) { alert('请输入文案内容'); return; }
     if (input.dataset.editId) {
-      // 编辑
       var idx = copyTexts.findIndex(function(c) { return c.id === input.dataset.editId; });
-      if (idx !== -1) {
-        copyTexts[idx].content = content;
-        copyTexts[idx].updatedAt = Date.now();
-      }
+      if (idx !== -1) { copyTexts[idx].content = content; copyTexts[idx].updatedAt = Date.now(); }
     } else {
-      // 新增
-      copyTexts.push({
-        id: 'copy_' + Date.now(),
-        content: content,
-        ctr: 0,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      });
+      copyTexts.push({ id:'copy_'+Date.now(), content:content, ctr:0, createdAt:Date.now(), updatedAt:Date.now() });
     }
-    
     saveCopyTexts();
-    closeCopyForm();
-    renderCopyList();
+    window.closeCopyForm();
+    window.renderCopyList();
   };
-  
-  // 编辑文案
-  window.editCopy = function(id) {
-    openCopyForm(id);
-  };
-  
-  // 删除文案
+
+  window.editCopy = function(id) { window.openCopyForm(id); };
+
   window.deleteCopy = function(id) {
     if (!confirm('确定删除这条文案？')) return;
     copyTexts = copyTexts.filter(function(c) { return c.id !== id; });
-    selectedCopyIds.delete(id);
+    delete selectedCopyIds[id];
     saveCopyTexts();
-    renderCopyList();
+    window.renderCopyList();
   };
-  
-  // 批量删除
+
   window.batchDeleteCopies = function() {
-    if (selectedCopyIds.size === 0) {
-      alert('请先选择要删除的文案');
-      return;
-    }
-    if (!confirm('确定删除选中的 ' + selectedCopyIds.size + ' 条文案？')) return;
-    copyTexts = copyTexts.filter(function(c) { return !selectedCopyIds.has(c.id); });
-    selectedCopyIds.clear();
+    var keys = Object.keys(selectedCopyIds);
+    if (keys.length === 0) { alert('请先选择要删除的文案'); return; }
+    if (!confirm('确定删除选中的 ' + keys.length + ' 条文案？')) return;
+    copyTexts = copyTexts.filter(function(c) { return !selectedCopyIds[c.id]; });
+    selectedCopyIds = {};
     saveCopyTexts();
-    toggleBatchMode(); // 退出批量模式
-    renderCopyList();
+    window.toggleBatchMode();
+    window.renderCopyList();
   };
-  
-  // 更新字数统计
+
   window.updateCopyCharCount = function() {
     var input = document.getElementById('copy-content-input');
     var charCount = document.getElementById('copy-char-count');
-    if (input && charCount) {
-      charCount.textContent = input.value.length + ' 字';
-    }
+    if (input && charCount) charCount.textContent = input.value.length + ' 字';
   };
-  
-  // 打开批量添加弹窗
+
   window.openBatchAddModal = function() {
     var modal = document.getElementById('copy-batch-modal');
     var input = document.getElementById('copy-batch-input');
@@ -260,14 +192,12 @@
     if (input) input.value = '';
     if (countEl) countEl.textContent = '共 0 条';
   };
-  
-  // 关闭批量添加弹窗
+
   window.closeBatchAddModal = function() {
     var modal = document.getElementById('copy-batch-modal');
     if (modal) modal.style.display = 'none';
   };
-  
-  // 更新批量计数
+
   window.updateBatchCount = function() {
     var input = document.getElementById('copy-batch-input');
     var countEl = document.getElementById('batch-count');
@@ -276,28 +206,18 @@
       countEl.textContent = '共 ' + lines.length + ' 条';
     }
   };
-  
-  // 保存批量添加
+
   window.saveBatchCopies = function() {
     var input = document.getElementById('copy-batch-input');
     if (!input) return;
-    var lines = input.value.split('\\n').filter(function(l) { return l.trim(); });
-    if (lines.length === 0) {
-      alert('请输入文案内容');
-      return;
-    }
+    var lines = input.value.split('\n').filter(function(l) { return l.trim(); });
+    if (lines.length === 0) { alert('请输入文案内容'); return; }
     lines.forEach(function(line) {
-      copyTexts.push({
-        id: 'copy_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-        content: line.trim(),
-        ctr: 0,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      });
+      copyTexts.push({ id:'copy_'+Date.now()+'_'+Math.random().toString(36).substr(2,5), content:line.trim(), ctr:0, createdAt:Date.now(), updatedAt:Date.now() });
     });
     saveCopyTexts();
-    closeBatchAddModal();
-    renderCopyList();
+    window.closeBatchAddModal();
+    window.renderCopyList();
   };
 
 </script>
@@ -361,7 +281,7 @@
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理批量创意搭建任务</p>
         </div>
         <div style="position:relative;">
-          <button onclick="toggleDropdown()" style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
+          <button onclick="window.toggleDropdown()" style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
             <i class="fas fa-plus"></i>新增批创任务
             <i class="fas fa-chevron-down" style="font-size:12px;"></i>
           </button>
@@ -630,8 +550,6 @@
         </div>
       </div>
     </div>
-
-              </div>
 <!-- 视图：创意资产（暂空） -->
     <div id="view-creative-assets" style="display:none;padding:32px 24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
@@ -656,34 +574,29 @@
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告文案</p>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <!-- 搜索 -->
           <div style="position:relative;">
-            <input id="copy-search-input" type="text" placeholder="搜索文案..." oninput="filterCopyList()" style="padding:8px 12px 8px 32px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;width:180px;box-sizing:border-box;">
+            <input id="copy-search-input" type="text" placeholder="搜索文案..." oninput="window.filterCopyList()" style="padding:8px 12px 8px 32px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;width:180px;box-sizing:border-box;">
             <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:13px;"></i>
           </div>
-          <!-- 排序 -->
-          <select id="copy-sort-select" onchange="sortCopyList()" style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;background:white;cursor:pointer;">
+          <select id="copy-sort-select" onchange="window.sortCopyList()" style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;background:white;cursor:pointer;">
             <option value="newest">按创建时间 ↓</option>
             <option value="oldest">按创建时间 ↑</option>
             <option value="ctr-high">按点击率从高到低</option>
             <option value="ctr-low">按点击率从低到高</option>
           </select>
-          <!-- 批量管理 -->
-          <button onclick="toggleBatchMode()" id="btn-batch-mode" style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:8px;background:white;cursor:pointer;font-size:14px;color:#333;">
+          <button onclick="window.toggleBatchMode()" id="btn-batch-mode" style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:8px;background:white;cursor:pointer;font-size:14px;color:#333;">
             <i class="fas fa-tasks" style="margin-right:4px;"></i>批量管理
           </button>
-          <!-- 新增文案 -->
-          <button onclick="openCopyForm()" style="background:#1890FF;color:white;font-size:14px;padding:8px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <button onclick="window.openCopyForm()" style="background:#1890FF;color:white;font-size:14px;padding:8px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
             <i class="fas fa-plus"></i> 新增文案
           </button>
         </div>
       </div>
 
-      <!-- 文案列表 -->
       <div id="copy-library-content" style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
         <div style="display:flex;align-items:center;padding:14px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">
           <div id="copy-checkbox-col" style="display:none;width:40px;text-align:center;">
-            <input type="checkbox" onchange="toggleSelectAllCopies(this)" style="cursor:pointer;accent-color:#1890FF;">
+            <input type="checkbox" onchange="window.toggleSelectAllCopies(this)" style="cursor:pointer;accent-color:#1890FF;">
           </div>
           <div style="flex:0.5;text-align:center;">序号</div>
           <div style="flex:3;">文案内容</div>
@@ -694,24 +607,23 @@
         <div id="copy-rows"></div>
       </div>
 
-      <!-- 空状态 -->
       <div id="copy-empty-state" style="display:none;text-align:center;padding:80px 0;color:#9ca3af;">
         <div style="font-size:48px;margin-bottom:16px;">📝</div>
         <p style="font-size:18px;margin:0 0 8px 0;">暂无文案</p>
         <p style="font-size:14px;margin:8px 0 0 0;">点击「新增文案」添加第一条文案</p>
       </div>
+    </div>
 
-      <!-- 批量操作栏 -->
-      <div id="batch-action-bar" style="display:none;position:fixed;bottom:0;left:256px;right:0;background:white;border-top:1px solid #e5e7eb;padding:16px 24px;box-shadow:0 -2px 8px rgba(0,0,0,0.1);z-index:200;display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:14px;color:#333;">
-          已选择 <span id="selected-copy-count" style="font-weight:600;color:#1890FF;">0</span> 条文案
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="toggleBatchMode()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
-          <button onclick="batchDeleteCopies()" style="padding:8px 20px;background:#ff4d4f;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px;">
-            <i class="fas fa-trash"></i> 删除选中
-          </button>
-        </div>
+    <!-- 批量操作栏 -->
+    <div id="batch-action-bar" style="display:none;position:fixed;bottom:0;left:256px;right:0;background:white;border-top:1px solid #e5e7eb;padding:16px 24px;box-shadow:0 -2px 8px rgba(0,0,0,0.1);z-index:200;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:14px;color:#333;">
+        已选择 <span id="selected-copy-count" style="font-weight:600;color:#1890FF;">0</span> 条文案
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="window.toggleBatchMode()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
+        <button onclick="window.batchDeleteCopies()" style="padding:8px 20px;background:#ff4d4f;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-trash"></i> 删除选中
+        </button>
       </div>
     </div>
 
@@ -720,18 +632,18 @@
       <div style="background:white;border-radius:12px;width:90vw;max-width:600px;">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
           <h3 style="font-size:16px;font-weight:600;margin:0;" id="copy-form-title">新增文案</h3>
-          <button onclick="closeCopyForm()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
+          <button onclick="window.closeCopyForm()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
         </div>
         <div style="padding:20px;">
-          <textarea id="copy-content-input" placeholder="输入文案内容..." oninput="updateCopyCharCount()" style="width:100%;height:120px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
+          <textarea id="copy-content-input" placeholder="输入文案内容..." oninput="window.updateCopyCharCount()" style="width:100%;height:120px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
           <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
             <span style="font-size:12px;color:#9ca3af;" id="copy-char-count">0 字</span>
             <span style="font-size:12px;color:#9ca3af;">建议控制在 20-50 字</span>
           </div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
-          <button onclick="closeCopyForm()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
-          <button onclick="saveCopy()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
+          <button onclick="window.closeCopyForm()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
+          <button onclick="window.saveCopy()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
         </div>
       </div>
     </div>
@@ -741,19 +653,20 @@
       <div style="background:white;border-radius:12px;width:90vw;max-width:600px;">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
           <h3 style="font-size:16px;font-weight:600;margin:0;">批量添加文案</h3>
-          <button onclick="closeBatchAddModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
+          <button onclick="window.closeBatchAddModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
         </div>
         <div style="padding:20px;">
           <p style="font-size:14px;color:#6b7280;margin:0 0 12px 0;">每行一条文案，系统将自动拆分</p>
-          <textarea id="copy-batch-input" oninput="updateBatchCount()" placeholder="输入文案内容，每行一条&#10;例如：&#10;限时优惠，立即办理！&#10;新用户专享，首月免费&#10;高速流量，畅享无忧" style="width:100%;height:200px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
+          <textarea id="copy-batch-input" oninput="window.updateBatchCount()" placeholder="输入文案内容，每行一条&#10;例如：&#10;限时优惠，立即办理！&#10;新用户专享，首月免费&#10;高速流量，畅享无忧" style="width:100%;height:200px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
           <div style="margin-top:8px;font-size:12px;color:#9ca3af;" id="batch-count">共 0 条</div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
-          <button onclick="closeBatchAddModal()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
-          <button onclick="saveBatchCopies()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">确认添加</button>
+          <button onclick="window.closeBatchAddModal()" style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
+          <button onclick="window.saveBatchCopies()" style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">确认添加</button>
         </div>
       </div>
     </div>
+
 
 
   </div>
@@ -793,17 +706,21 @@
   } catch(e) {}
 
   // ========== 下拉菜单 ==========
-
   // 切换下拉菜单显示/隐藏
   window.toggleDropdown = function() {
     var dd = document.getElementById('channel-dropdown');
     if (!dd) return;
-    if (dd.style.display === 'block') {
-      dd.style.display = 'none';
-    } else {
-      dd.style.display = 'block';
-    }
+    dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
   };
+  // 点击页面其他地方时关闭下拉
+  document.addEventListener('click', function(e) {
+    var dd = document.getElementById('channel-dropdown');
+    if (!dd || dd.style.display !== 'block') return;
+    var btn = e.target.closest('button[onclick*="toggleDropdown"]');
+    var inDropdown = e.target.closest('#channel-dropdown');
+    if (!btn && !inDropdown) dd.style.display = 'none';
+  });
+
   window.showDropdown = function() {
     var chDd = document.getElementById('channel-dropdown');
     if (chDd) chDd.style.display = 'block';
@@ -1795,10 +1712,7 @@
       var el = document.getElementById(id);
       if (el) el.addEventListener('click', function() { showView(viewNames[i]); });
     });
-
-    // -- 新增批创任务 下拉 --
-    // 点击事件由按钮的 onclick="toggleDropdown()" 触发
-    }
+}
     // 广点通选项
     var gdtItem = document.querySelector('[data-channel="gdt"]');
     if (gdtItem) {
