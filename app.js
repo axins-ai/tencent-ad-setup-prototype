@@ -207,6 +207,30 @@ const MOCK = {
     id: 'ec_002',
     name: '已转化用户'
   }],
+  // 品牌形象 & 视频号
+  brandImages: [{
+    id: 'bi_001',
+    name: '品牌形象1',
+    url: 'https://example.com/bi1.jpg'
+  }, {
+    id: 'bi_002',
+    name: '品牌形象2',
+    url: 'https://example.com/bi2.jpg'
+  }, {
+    id: 'bi_003',
+    name: '品牌形象3',
+    url: 'https://example.com/bi3.jpg'
+  }],
+  videoAccounts: [{
+    id: 'va_001',
+    name: '视频号A'
+  }, {
+    id: 'va_002',
+    name: '视频号B'
+  }, {
+    id: 'va_003',
+    name: '视频号C'
+  }],
   // 素材库（视频+图片），带消耗/CTR/CVR数据
   videoMaterials: Array.from({
     length: 50
@@ -1632,6 +1656,11 @@ function App() {
     images: 1,
     copies: 1
   });
+  // 品牌形象 & 营销组件
+  const [brandImageType, setBrandImageType] = useState('video_account'); // 'custom' | 'video_account'
+  const [selectedBrandImage, setSelectedBrandImage] = useState(null); // {id, name, url}
+  const [selectedVideoAccount, setSelectedVideoAccount] = useState(null); // {id, name}
+  const [marketingComponentType, setMarketingComponentType] = useState('floating_card'); // 'floating_card' | 'action_button'
 
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
@@ -3083,19 +3112,49 @@ function App() {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "品牌形象"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: "视频号",
-    disabled: true,
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, "品牌形象"), /*#__PURE__*/React.createElement("select", {
+    value: brandImageType,
+    onChange: e => setBrandImageType(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none mb-2"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "custom"
+  }, "自定义"), /*#__PURE__*/React.createElement("option", {
+    value: "video_account"
+  }, "视频号")), brandImageType === 'custom' && /*#__PURE__*/React.createElement("select", {
+    value: selectedBrandImage ? selectedBrandImage.id : '',
+    onChange: e => {
+      const bi = MOCK.brandImages.find(x => x.id === e.target.value);
+      setSelectedBrandImage(bi || null);
+    },
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "选择品牌形象图片"), MOCK.brandImages.map(bi => /*#__PURE__*/React.createElement("option", {
+    key: bi.id,
+    value: bi.id
+  }, bi.name))), brandImageType === 'video_account' && /*#__PURE__*/React.createElement("select", {
+    value: selectedVideoAccount ? selectedVideoAccount.id : '',
+    onChange: e => {
+      const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
+      setSelectedVideoAccount(va || null);
+    },
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "选择视频号"), MOCK.videoAccounts.map(va => /*#__PURE__*/React.createElement("option", {
+    key: va.id,
+    value: va.id
+  }, va.name)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "营销组件"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: "浮层卡片",
-    disabled: true,
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
-  }), /*#__PURE__*/React.createElement("p", {
+  }, "营销组件"), /*#__PURE__*/React.createElement("select", {
+    value: marketingComponentType,
+    onChange: e => setMarketingComponentType(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "floating_card"
+  }, "浮层卡片"), /*#__PURE__*/React.createElement("option", {
+    value: "action_button"
+  }, "行动按钮")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
   }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-center gap-4 pb-8"
