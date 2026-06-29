@@ -2125,29 +2125,50 @@ function App() {
     onChange: setPlacementScene
   })), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-3"
   }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-md font-semibold text-gray-900 mb-3"
-  }, "自定义人群配置"), /*#__PURE__*/React.createElement("p", {
+    className: "text-md font-semibold text-gray-900"
+  }, "自定义人群配置"), selectedAccountIds.length > 3 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      // 批量设置：将所有账户设为相同配置
+      const firstAccountId = selectedAccountIds[0];
+      const firstSettings = getAccountAudience(firstAccountId);
+      const newSettings = {};
+      selectedAccountIds.forEach(id => {
+        newSettings[id] = {
+          ...firstSettings
+        };
+      });
+      setAccountAudienceSettings(newSettings);
+      notify('已将所有账户的人群配置同步为第一个账户的配置', 'success');
+    },
+    className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-copy mr-1"
+  }), "批量同步配置")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
   }, "每个账户需单独完成自定义人群配置，显示账户内已接受的人群包列表"), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
   }, "请先选择账户") : /*#__PURE__*/React.createElement("div", {
-    className: "space-y-4"
+    className: "space-y-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     if (!acc) return null;
     const audienceSettings = getAccountAudience(accountId);
     return /*#__PURE__*/React.createElement("div", {
       key: accountId,
-      className: "border border-gray-200 rounded-lg p-4 bg-gray-50"
+      className: "border border-gray-200 rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-2 mb-3"
+      className: "flex items-center justify-between"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-2 flex-1"
     }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-user-friends text-blue-500"
+      className: "fas fa-user-friends text-blue-500 text-sm"
     }), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm font-semibold text-gray-900"
-    }, acc.name)), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-4 mb-3"
+      className: "text-sm font-semibold text-gray-900 mr-4"
+    }, acc.name), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-3"
     }, /*#__PURE__*/React.createElement("label", {
       className: "flex items-center cursor-pointer"
     }, /*#__PURE__*/React.createElement("input", {
@@ -2158,9 +2179,9 @@ function App() {
       onChange: () => updateAccountAudience(accountId, {
         mode: 'unlimited'
       }),
-      className: "mr-1.5"
+      className: "mr-1.5 w-3.5 h-3.5"
     }), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm"
+      className: "text-xs"
     }, "不限")), /*#__PURE__*/React.createElement("label", {
       className: "flex items-center cursor-pointer"
     }, /*#__PURE__*/React.createElement("input", {
@@ -2171,21 +2192,17 @@ function App() {
       onChange: () => updateAccountAudience(accountId, {
         mode: 'exclude'
       }),
-      className: "mr-1.5"
+      className: "mr-1.5 w-3.5 h-3.5"
     }), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm"
-    }, "排除人群"))), audienceSettings.mode === 'exclude' && /*#__PURE__*/React.createElement("div", {
-      className: "bg-orange-50 border border-orange-200 rounded-lg p-3 animate-fadeIn"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between mb-2"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-sm font-bold text-orange-800"
-    }, "选择排除人群包"), /*#__PURE__*/React.createElement("button", {
+      className: "text-xs"
+    }, "排除人群")))), audienceSettings.mode === 'exclude' && /*#__PURE__*/React.createElement("button", {
       onClick: () => refreshExcludeAudiencePackages(accountId),
-      className: "text-xs text-orange-600 hover:text-orange-800 border border-orange-200 rounded px-2 py-1 hover:bg-orange-100"
+      className: "text-xs text-orange-600 hover:text-orange-800 ml-2"
     }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-sync-alt mr-1"
-    }), "刷新列表")), /*#__PURE__*/React.createElement("select", {
+      className: "fas fa-sync-alt"
+    }))), audienceSettings.mode === 'exclude' && /*#__PURE__*/React.createElement("div", {
+      className: "mt-2 animate-fadeIn"
+    }, /*#__PURE__*/React.createElement("select", {
       value: "",
       onChange: e => {
         const val = e.target.value;
@@ -2195,7 +2212,7 @@ function App() {
           });
         }
       },
-      className: "w-full px-3 py-2 border border-orange-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-orange-500 mb-2"
+      className: "w-full px-2 py-1.5 border border-orange-200 rounded text-xs outline-none focus:ring-1 focus:ring-orange-500 mb-1"
     }, /*#__PURE__*/React.createElement("option", {
       value: ""
     }, "++ 添加排除人群包 ++"), excludeAudiencePackageList.map(ep => /*#__PURE__*/React.createElement("option", {
@@ -2203,22 +2220,21 @@ function App() {
       value: ep.id,
       disabled: audienceSettings.excludeList.includes(ep.id)
     }, ep.name, audienceSettings.excludeList.includes(ep.id) ? ' ✓ 已选' : ''))), audienceSettings.excludeList.length > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "flex flex-wrap gap-1"
+      className: "flex flex-wrap gap-1 mt-1"
     }, audienceSettings.excludeList.map(id => {
       const pkg = excludeAudiencePackageList.find(e => e.id === id);
       return pkg ? /*#__PURE__*/React.createElement("span", {
         key: id,
-        className: "tag bg-orange-100 text-orange-800"
+        className: "tag bg-orange-100 text-orange-800 text-xs px-1.5 py-0.5"
       }, pkg.name, /*#__PURE__*/React.createElement("button", {
         onClick: () => updateAccountAudience(accountId, {
           excludeList: audienceSettings.excludeList.filter(i => i !== id)
-        })
+        }),
+        className: "ml-0.5"
       }, /*#__PURE__*/React.createElement("i", {
-        className: "fas fa-times"
+        className: "fas fa-times text-xs"
       }))) : null;
-    })), audienceSettings.excludeList.length === 0 && /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-orange-400"
-    }, "未选择任何排除人群包")));
+    }))));
   }))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h3", {
