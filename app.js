@@ -2131,7 +2131,6 @@ function App() {
     className: "text-md font-semibold text-gray-900"
   }, "自定义人群配置"), selectedAccountIds.length > 3 && /*#__PURE__*/React.createElement("button", {
     onClick: () => {
-      // 批量设置：将所有账户设为相同配置
       const firstAccountId = selectedAccountIds[0];
       const firstSettings = getAccountAudience(firstAccountId);
       const newSettings = {};
@@ -2146,29 +2145,33 @@ function App() {
     className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-copy mr-1"
-  }), "批量同步配置")), /*#__PURE__*/React.createElement("p", {
+  }), "批量同步")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
-  }, "每个账户需单独完成自定义人群配置，显示账户内已接受的人群包列表"), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
+  }, "每个账户需单独配置，支持批量同步"), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
   }, "请先选择账户") : /*#__PURE__*/React.createElement("div", {
-    className: "space-y-2"
+    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     if (!acc) return null;
     const audienceSettings = getAccountAudience(accountId);
     return /*#__PURE__*/React.createElement("div", {
       key: accountId,
-      className: "border border-gray-200 rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+      className: "border border-gray-200 rounded-lg p-2.5 bg-gray-50 hover:bg-gray-100 transition-colors"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-2 flex-1"
+      className: "flex items-center gap-1.5 mb-2"
     }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-user-friends text-blue-500 text-sm"
+      className: "fas fa-user-friends text-blue-500 text-xs"
     }), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm font-semibold text-gray-900 mr-4"
-    }, acc.name), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-3"
+      className: "text-xs font-semibold text-gray-900 truncate flex-1",
+      title: acc.name
+    }, acc.name), audienceSettings.mode === 'exclude' && /*#__PURE__*/React.createElement("button", {
+      onClick: () => refreshExcludeAudiencePackages(accountId),
+      className: "text-xs text-orange-600 hover:text-orange-800 flex-shrink-0"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-sync-alt"
+    }))), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-2 mb-2"
     }, /*#__PURE__*/React.createElement("label", {
       className: "flex items-center cursor-pointer"
     }, /*#__PURE__*/React.createElement("input", {
@@ -2179,7 +2182,7 @@ function App() {
       onChange: () => updateAccountAudience(accountId, {
         mode: 'unlimited'
       }),
-      className: "mr-1.5 w-3.5 h-3.5"
+      className: "mr-1 w-3 h-3"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text-xs"
     }, "不限")), /*#__PURE__*/React.createElement("label", {
@@ -2192,16 +2195,11 @@ function App() {
       onChange: () => updateAccountAudience(accountId, {
         mode: 'exclude'
       }),
-      className: "mr-1.5 w-3.5 h-3.5"
+      className: "mr-1 w-3 h-3"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text-xs"
-    }, "排除人群")))), audienceSettings.mode === 'exclude' && /*#__PURE__*/React.createElement("button", {
-      onClick: () => refreshExcludeAudiencePackages(accountId),
-      className: "text-xs text-orange-600 hover:text-orange-800 ml-2"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-sync-alt"
-    }))), audienceSettings.mode === 'exclude' && /*#__PURE__*/React.createElement("div", {
-      className: "mt-2 animate-fadeIn"
+    }, "排除"))), audienceSettings.mode === 'exclude' && /*#__PURE__*/React.createElement("div", {
+      className: "animate-fadeIn"
     }, /*#__PURE__*/React.createElement("select", {
       value: "",
       onChange: e => {
@@ -2212,21 +2210,21 @@ function App() {
           });
         }
       },
-      className: "w-full px-2 py-1.5 border border-orange-200 rounded text-xs outline-none focus:ring-1 focus:ring-orange-500 mb-1"
+      className: "w-full px-1.5 py-1 border border-orange-200 rounded text-xs outline-none focus:ring-1 focus:ring-orange-500"
     }, /*#__PURE__*/React.createElement("option", {
       value: ""
-    }, "++ 添加排除人群包 ++"), excludeAudiencePackageList.map(ep => /*#__PURE__*/React.createElement("option", {
+    }, "+ 排除人群包 +"), excludeAudiencePackageList.map(ep => /*#__PURE__*/React.createElement("option", {
       key: ep.id,
       value: ep.id,
       disabled: audienceSettings.excludeList.includes(ep.id)
-    }, ep.name, audienceSettings.excludeList.includes(ep.id) ? ' ✓ 已选' : ''))), audienceSettings.excludeList.length > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "flex flex-wrap gap-1 mt-1"
+    }, ep.name.length > 10 ? ep.name.substring(0, 10) + '...' : ep.name, audienceSettings.excludeList.includes(ep.id) ? ' ✓' : ''))), audienceSettings.excludeList.length > 0 && /*#__PURE__*/React.createElement("div", {
+      className: "flex flex-wrap gap-0.5 mt-1"
     }, audienceSettings.excludeList.map(id => {
       const pkg = excludeAudiencePackageList.find(e => e.id === id);
       return pkg ? /*#__PURE__*/React.createElement("span", {
         key: id,
-        className: "tag bg-orange-100 text-orange-800 text-xs px-1.5 py-0.5"
-      }, pkg.name, /*#__PURE__*/React.createElement("button", {
+        className: "tag bg-orange-100 text-orange-800 text-xs px-1 py-0"
+      }, pkg.name.length > 8 ? pkg.name.substring(0, 8) + '...' : pkg.name, /*#__PURE__*/React.createElement("button", {
         onClick: () => updateAccountAudience(accountId, {
           excludeList: audienceSettings.excludeList.filter(i => i !== id)
         }),
