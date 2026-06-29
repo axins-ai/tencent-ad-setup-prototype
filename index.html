@@ -361,7 +361,7 @@
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理批量创意搭建任务</p>
         </div>
         <div style="position:relative;">
-          <button style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
+          <button onclick="toggleDropdown()" style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
             <i class="fas fa-plus"></i>新增批创任务
             <i class="fas fa-chevron-down" style="font-size:12px;"></i>
           </button>
@@ -793,6 +793,17 @@
   } catch(e) {}
 
   // ========== 下拉菜单 ==========
+
+  // 切换下拉菜单显示/隐藏
+  window.toggleDropdown = function() {
+    var dd = document.getElementById('channel-dropdown');
+    if (!dd) return;
+    if (dd.style.display === 'block') {
+      dd.style.display = 'none';
+    } else {
+      dd.style.display = 'block';
+    }
+  };
   window.showDropdown = function() {
     var chDd = document.getElementById('channel-dropdown');
     if (chDd) chDd.style.display = 'block';
@@ -1786,11 +1797,7 @@
     });
 
     // -- 新增批创任务 下拉 --
-    var ddTrigger = document.querySelector('#channel-dropdown').parentElement;
-    var ddMenu = document.getElementById('channel-dropdown');
-    if (ddTrigger) {
-      ddTrigger.addEventListener('mouseenter', function() { ddMenu.style.display = 'block'; });
-      ddTrigger.addEventListener('mouseleave', function() { ddMenu.style.display = 'none'; });
+    // 点击事件由按钮的 onclick="toggleDropdown()" 触发
     }
     // 广点通选项
     var gdtItem = document.querySelector('[data-channel="gdt"]');
