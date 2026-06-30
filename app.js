@@ -569,7 +569,7 @@ function Notification({
   }, [onClose]);
   const bg = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
   return /*#__PURE__*/React.createElement("div", {
-    className: `fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${bg} max-w-sm text-center`
+    className: `fixed top-16 left-1/2 -translate-x-1/2 z-[10000] px-4 py-3 rounded-lg shadow-2xl text-white ${bg} max-w-sm text-center`
   }, msg);
 }
 
