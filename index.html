@@ -42,7 +42,7 @@
 
         <button id="menu-creative-assets" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
           <i class="fas fa-crown" style="width:18px;text-align:center;font-size:14px;"></i>
-          品牌形象
+          创意资产
         </button>
 
         <button id="menu-copy-library" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
@@ -336,13 +336,11 @@
         </div>
       </div>
     </div>
-
-              </div>
 <!-- 视图：品牌形象 -->
     <div id="view-creative-assets" style="display:none;padding:32px 24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
         <div>
-          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">品牌形象</h2>
+          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">创意资产</h2>
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告投放使用的品牌头像</p>
         </div>
         <button onclick="openBrandImageModal()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
@@ -353,14 +351,14 @@
       <div id="brand-image-list" style="display:flex;flex-wrap:wrap;gap:16px;"></div>
       <div id="brand-image-empty" style="text-align:center;padding:60px 0;color:#9ca3af;display:block;">
         <div style="font-size:48px;margin-bottom:16px;">👑</div>
-        <p style="font-size:16px;color:#666;">暂无品牌形象，点击上方按钮批量添加</p>
+        <p style="font-size:16px;color:#666;">暂无创意资产，点击上方按钮批量添加</p>
       </div>
 
       <!-- 批量添加品牌形象弹窗 -->
       <div id="brand-image-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
         <div style="background:white;border-radius:12px;width:90vw;max-width:580px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:17px;font-weight:600;margin:0;color:#1f2937;">批量添加品牌形象</h3>
+            <h3 style="font-size:17px;font-weight:600;margin:0;color:#1f2937;">批量添加创意资产</h3>
             <button onclick="closeBrandImageModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9ca3af;line-height:1;padding:0 4px;">×</button>
           </div>
           <div style="padding:24px;overflow-y:auto;flex:1;">
@@ -1352,8 +1350,8 @@
     biSelectedFiles = [];
     var modal = document.getElementById('brand-image-modal');
     if (modal) modal.style.display = 'flex';
-    if (id) document.getElementById('cp-modal-title').textContent = '编辑品牌形象';
-    else document.getElementById('cp-modal-title').textContent = '批量添加品牌形象';
+    if (id) document.getElementById('cp-modal-title').textContent = '编辑创意资产';
+    else document.getElementById('cp-modal-title').textContent = '批量添加创意资产';
   };
   window.closeBrandImageModal = function() {
     var m = document.getElementById('brand-image-modal');
@@ -1436,7 +1434,7 @@
 
   window.editBrandImage = function(id) { openBrandImageModal(id); };
   window.deleteBrandImage = function(id) {
-    if (!confirm('确定要删除该品牌形象吗？')) return;
+    if (!confirm('确定要删除该创意资产吗？')) return;
     brandImages = brandImages.filter(function(b) { return b.id !== id; });
     try { localStorage.setItem('ad_brand_images', JSON.stringify(brandImages)); } catch(e) {}
     renderBrandImageList();
