@@ -41,13 +41,13 @@
         </button>
 
         <button id="menu-creative-assets" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
-          <i class="fas fa-image" style="width:18px;text-align:center;font-size:14px;"></i>
-          创意资产
+          <i class="fas fa-crown" style="width:18px;text-align:center;font-size:14px;"></i>
+          品牌形象
         </button>
 
         <button id="menu-copy-library" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:none;background:transparent;color:#333;font-weight:400;font-size:14px;cursor:pointer;margin-top:2px;">
-          <i class="fas fa-font" style="width:18px;text-align:center;font-size:14px;"></i>
-          文案库
+          <i class="fas fa-file-alt" style="width:18px;text-align:center;font-size:14px;"></i>
+          文案包
         </button>
       </div>
     </nav>
@@ -338,53 +338,128 @@
     </div>
 
               </div>
-<!-- 视图：创意资产（暂空） -->
+<!-- 视图：品牌形象 -->
     <div id="view-creative-assets" style="display:none;padding:32px 24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
         <div>
-          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">创意资产</h2>
-          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告创意素材</p>
+          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">品牌形象</h2>
+          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告投放使用的品牌头像</p>
         </div>
+        <button onclick="openBrandImageModal()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-plus"></i> 批量添加
+        </button>
       </div>
-      <div style="text-align:center;padding:80px 0;color:#9ca3af;">
-        <div style="font-size:48px;margin-bottom:16px;">🖼️</div>
-        <p style="font-size:18px;margin:0 0 8px 0;">功能开发中</p>
-        <p style="font-size:14px;margin:8px 0 0 0;">创意资产管理功能即将上线</p>
+      <!-- 品牌形象列表 -->
+      <div id="brand-image-list" style="display:flex;flex-wrap:wrap;gap:16px;"></div>
+      <div id="brand-image-empty" style="text-align:center;padding:60px 0;color:#9ca3af;display:block;">
+        <div style="font-size:48px;margin-bottom:16px;">👑</div>
+        <p style="font-size:16px;color:#666;">暂无品牌形象，点击上方按钮批量添加</p>
+      </div>
+
+      <!-- 批量添加品牌形象弹窗 -->
+      <div id="brand-image-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;width:90vw;max-width:580px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #e5e7eb;">
+            <h3 style="font-size:17px;font-weight:600;margin:0;color:#1f2937;">批量添加品牌形象</h3>
+            <button onclick="closeBrandImageModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9ca3af;line-height:1;padding:0 4px;">×</button>
+          </div>
+          <div style="padding:24px;overflow-y:auto;flex:1;">
+            <!-- 账号信息 -->
+            <div style="margin-bottom:20px;">
+              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 账号信息</label>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <select id="bi-account-select" style="flex:1;padding:9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;background:#fff;" onchange="onBiAccountChange()">
+                  <option value="">请选择</option>
+                  <option value="acc_001">账户001-北京移动</option>
+                  <option value="acc_002">账户002-上海移动</option>
+                  <option value="acc_003">账户003-广州移动</option>
+                </select>
+                <button onclick="onBiBatchSelect()" id="bi-batch-btn" style="padding:9px 14px;background:#f3f4f6;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#374151;white-space:nowrap;">批量</button>
+              </div>
+            </div>
+            <!-- 头像 -->
+            <div style="margin-bottom:20px;">
+              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 头像</label>
+              <button type="button" onclick="triggerBiFileInput()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:1px dashed #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">
+                <i class="fas fa-plus" style="color:#9ca3af;"></i> 添加头像
+              </button>
+              <input type="file" id="bi-file-input" accept=".jpg,.jpeg,.png" multiple onchange="onBiFilesSelected(event)" style="display:none;">
+              <div style="margin-top:8px;font-size:13px;color:#6b7280;">
+                图片尺寸：512*512 像素
+              </div>
+              <div style="font-size:13px;color:#6b7280;">
+                图片格式：大小需要在50KB以内，仅支持jpg和png格式
+              </div>
+              <!-- 已选图片预览 -->
+              <div id="bi-preview-area" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;"></div>
+            </div>
+            <!-- 名称 -->
+            <div style="margin-bottom:12px;">
+              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 名称</label>
+              <div style="position:relative;">
+                <input type="text" id="bi-name-input" placeholder="请输入名称" maxlength="100" oninput="document.getElementById('bi-name-count').textContent=this.value.length+'/100'"
+                  style="width:100%;padding:9px 100px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
+                <span id="bi-name-count" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:#9ca3af;">0/100</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid #e5e7eb;">
+            <button onclick="closeBrandImageModal()" style="padding:9px 24px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">取消</button>
+            <button onclick="saveBrandImages()" style="padding:9px 24px;background:#1890FF;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;">确定</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- 视图：文案库 -->
+    <!-- 视图：文案包 -->
     <div id="view-copy-library" style="display:none;padding:32px 24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
         <div>
-          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">文案库</h2>
-          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告文案</p>
+          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">文案包</h2>
+          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告文案组合（单条文案不超过30字）</p>
         </div>
-        <button style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
-          <i class="fas fa-plus"></i> 新增文案
+        <button onclick="openCopyPkgModal()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-plus"></i> 新增文案包
         </button>
       </div>
-      <div id="copy-library-content" style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-        <div style="display:flex;align-items:center;padding:14px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">
-          <div style="flex:0.5;text-align:center;">序号</div>
-          <div style="flex:3;">文案内容</div>
-          <div style="flex:1;text-align:right;">操作</div>
-        </div>
-        <div id="copy-rows"></div>
+      <!-- 文案包列表 -->
+      <div id="copy-pkg-list"></div>
+      <div id="copy-pkg-empty" style="text-align:center;padding:60px 0;color:#9ca3af;display:block;">
+        <div style="font-size:48px;margin-bottom:16px;">📝</div>
+        <p style="font-size:16px;color:#666;">暂无文案包，点击上方按钮新增</p>
       </div>
-      <!-- 新增文案弹窗 -->
-      <div id="copy-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
-        <div style="background:white;border-radius:12px;width:90vw;max-width:700px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:16px;font-weight:600;margin:0;">新增文案</h3>
-            <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
+
+      <!-- 新增/编辑文案包弹窗 -->
+      <div id="copy-pkg-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;width:92vw;max-width:700px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #e5e7eb;">
+            <h3 id="cp-modal-title" style="font-size:17px;font-weight:600;margin:0;color:#1f2937;">新增文案包</h3>
+            <button onclick="closeCopyPkgModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9ca3af;line-height:1;padding:0 4px;">×</button>
           </div>
-          <div style="padding:20px;">
-            <textarea id="copy-content-input" placeholder="输入文案内容..." style="width:100%;height:120px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+          <div style="padding:24px;overflow-y:auto;flex:1;">
+            <!-- 包名称 -->
+            <div style="margin-bottom:20px;">
+              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 包名称</label>
+              <input type="text" id="cp-name-input" placeholder="输入文案包名称" maxlength="50"
+                style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
+            </div>
+            <!-- 文案列表 -->
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <label style="font-size:14px;font-weight:500;color:#374151;"><span style="color:red">*</span> 文案内容</label>
+                <span style="font-size:12px;color:#9ca3af;">单条不超过30字（含标点符号）</span>
+              </div>
+              <div id="cp-copy-list">
+                <!-- 动态生成文案行 -->
+              </div>
+              <button type="button" onclick="addCopyRow()" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:7px 14px;background:#f9fafb;border:1px dashed #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#374151;">
+                <i class="fas fa-plus" style="font-size:11px;color:#9ca3af;"></i> 添加一条文案
+              </button>
+            </div>
           </div>
-          <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
-            <button style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
-            <button style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
+          <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid #e5e7eb;">
+            <button onclick="closeCopyPkgModal()" style="padding:9px 24px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">取消</button>
+            <button onclick="saveCopyPkg()" style="padding:9px 24px;background:#1890FF;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;">保存</button>
           </div>
         </div>
       </div>
@@ -456,7 +531,8 @@
     // 刷新数据
     if (name === 'task-list') renderTaskList();
     if (name === 'targeting-packages') renderTgtPkgList();
-    if (name === 'copy-library') renderCopyList();
+    if (name === 'creative-assets') renderBrandImageList();
+    if (name === 'copy-library') renderCopyPkgList();
   };
 
   // 显示任务列表（兼容旧调用）
@@ -1231,62 +1307,259 @@
     renderTgtPkgList();
   };
 
-  // ========== 文案库 ==========
-  window.renderCopyList = function() {
-    var container = document.getElementById('copy-rows');
-    if (!container) return;
-    if (copyTexts.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:40px 0;color:#9ca3af;font-size:14px;">暂无文案，点击「新增文案」创建</div>';
+  // ========== 品牌形象 ==========
+  var brandImages = [];
+  try { brandImages = JSON.parse(localStorage.getItem('ad_brand_images') || '[]'); } catch(e) {}
+  var biSelectedFiles = [];
+  var editingBrandImageId = null;
+
+  window.renderBrandImageList = function() {
+    var listEl = document.getElementById('brand-image-list');
+    var emptyEl = document.getElementById('brand-image-empty');
+    if (!listEl) return;
+    if (brandImages.length === 0) {
+      listEl.innerHTML = '';
+      if (emptyEl) emptyEl.style.display = 'block';
       return;
     }
+    if (emptyEl) emptyEl.style.display = 'none';
     var html = '';
-    copyTexts.forEach(function(cp, idx) {
-      html += '<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;">' +
-        '<div style="flex:0.5;text-align:center;color:#9ca3af;font-size:13px;">' + (idx + 1) + '</div>' +
-        '<div style="flex:3;color:#333;line-height:1.6;">' + escapeHtml(cp.content) + '</div>' +
-        '<div style="flex:1;display:flex;justify-content:flex-end;gap:6px;">' +
-          '<button data-idx="' + idx + '" data-action="edit" style="padding:5px 12px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;">编辑</button>' +
-          '<button data-idx="' + idx + '" data-action="delete" style="padding:5px 12px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;">删除</button>' +
+    brandImages.forEach(function(bi, idx) {
+      html += '<div style="width:180px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;background:white;">' +
+        '<div style="height:140px;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
+          '<img src="' + (bi.thumb || '') + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" style="max-width:100%;max-height:100%;object-fit:cover;">' +
+          '<div style="display:none;font-size:32px;color:#d1d5db;">👑</div>' +
         '</div>' +
-      '</div>';
+        '<div style="padding:10px 12px;">' +
+          '<div style="font-size:13px;color:#374151;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(bi.name) + '">' + escapeHtml(bi.name) + '</div>' +
+          '<div style="font-size:11px;color:#9ca3af;">' + (bi.accountName || '-') + '</div>' +
+        '</div>' +
+        '<div style="display:flex;padding:0 8px 10px;gap:6px;">' +
+          '<button onclick="editBrandImage(\'' + bi.id + '\')" style="flex:1;padding:4px 0;background:white;border:1px solid #e5e7eb;border-radius:4px;cursor:pointer;font-size:11px;color:#374151;">编辑</button>' +
+          '<button onclick="deleteBrandImage(\'' + bi.id + '\')" style="flex:1;padding:4px 0;background:white;border:1px solid #ffa39e;border-radius:4px;cursor:pointer;font-size:11px;color:#ff4d4f;">删除</button>' +
+        '</div></div>';
+    });
+    listEl.innerHTML = html;
+  };
+
+  window.openBrandImageModal = function(id) {
+    editingBrandImageId = id || null;
+    document.getElementById('bi-account-select').value = id ? '' : '';
+    document.getElementById('bi-name-input').value = id ? '' : '';
+    document.getElementById('bi-name-count').textContent = '0/100';
+    var previewArea = document.getElementById('bi-preview-area');
+    if (previewArea) previewArea.innerHTML = '';
+    biSelectedFiles = [];
+    var modal = document.getElementById('brand-image-modal');
+    if (modal) modal.style.display = 'flex';
+    if (id) document.getElementById('cp-modal-title').textContent = '编辑品牌形象';
+    else document.getElementById('cp-modal-title').textContent = '批量添加品牌形象';
+  };
+  window.closeBrandImageModal = function() {
+    var m = document.getElementById('brand-image-modal');
+    if (m) m.style.display = 'none';
+    editingBrandImageId = null;
+    biSelectedFiles = [];
+  };
+
+  window.triggerBiFileInput = function() { document.getElementById('bi-file-input').click(); };
+  window.onBiFilesSelected = function(e) {
+    var files = e.target.files;
+    if (!files.length) return;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      // 简单校验
+      if (f.size > 50 * 1024) { alert(f.name + ' 超过50KB限制'); continue; }
+      var ext = f.name.split('.').pop().toLowerCase();
+      if (!['jpg', 'jpeg', 'png'].includes(ext)) { alert(f.name + ' 格式不支持，仅支持jpg和png'); continue; }
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        biSelectedFiles.push({ name: f.name, dataUrl: ev.target.result });
+        renderBiPreview();
+      };
+      reader.readAsDataURL(f);
+    }
+    e.target.value = '';
+  };
+
+  function renderBiPreview() {
+    var area = document.getElementById('bi-preview-area');
+    if (!area) return;
+    var html = '';
+    biSelectedFiles.forEach(function(f, idx) {
+      html += '<div style="position:relative;width:64px;height:64px;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;">' +
+        '<img src="' + f.dataUrl + '" style="width:100%;height:100%;object-fit:cover;">' +
+        '<button onclick="removeBiFile(' + idx + ')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#ef4444;color:white;border:none;border-radius:999px;cursor:pointer;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>' +
+        '</div>';
+    });
+    area.innerHTML = html;
+  }
+  window.removeBiFile = function(idx) { biSelectedFiles.splice(idx, 1); renderBiPreview(); };
+  window.onBiAccountChange = function() {};
+  window.onBiBatchSelect = function() { alert('批量选择账号功能（原型）'); };
+
+  window.saveBrandImages = function() {
+    var accountId = document.getElementById('bi-account-select').value;
+    var name = document.getElementById('bi-name-input').value.trim();
+    if (!accountId) { alert('请选择账号信息'); return; }
+    if (!name) { alert('请输入名称'); return; }
+    if (biSelectedFiles.length === 0 && !editingBrandImageId) { alert('请添加头像图片'); return; }
+
+    var accountEl = document.getElementById('bi-account-select');
+    var accText = accountEl.options[accountEl.selectedIndex] ? accountEl.options[accountEl.selectedIndex].text : '';
+
+    if (editingBrandImageId) {
+      // 编辑模式
+      var idx = brandImages.findIndex(function(b) { return b.id === editingBrandImageId; });
+      if (idx >= 0) {
+        if (biSelectedFiles.length > 0) brandImages[idx].thumb = biSelectedFiles[0].dataUrl;
+        brandImages[idx].name = name;
+        brandImages[idx].accountName = accText;
+        brandImages[idx].accountId = accountId;
+      }
+    } else {
+      // 新增模式
+      biSelectedFiles.forEach(function(f) {
+        brandImages.push({
+          id: 'bi_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          name: name,
+          thumb: f.dataUrl,
+          accountName: accText,
+          accountId: accountId
+        });
+      });
+    }
+    try { localStorage.setItem('ad_brand_images', JSON.stringify(brandImages)); } catch(e) {}
+    closeBrandImageModal();
+    renderBrandImageList();
+  };
+
+  window.editBrandImage = function(id) { openBrandImageModal(id); };
+  window.deleteBrandImage = function(id) {
+    if (!confirm('确定要删除该品牌形象吗？')) return;
+    brandImages = brandImages.filter(function(b) { return b.id !== id; });
+    try { localStorage.setItem('ad_brand_images', JSON.stringify(brandImages)); } catch(e) {}
+    renderBrandImageList();
+  };
+
+  // ========== 文案包 ==========
+  var copyPackages = []; // [{id, name, copies: ['文案1','文案2']}]
+  try { copyPackages = JSON.parse(localStorage.getItem('ad_copy_packages') || '[]'); } catch(e) {}
+
+  window.renderCopyPkgList = function() {
+    var container = document.getElementById('copy-pkg-list');
+    var emptyEl = document.getElementById('copy-pkg-empty');
+    if (!container) return;
+    if (copyPackages.length === 0) {
+      container.innerHTML = '';
+      if (emptyEl) emptyEl.style.display = 'block';
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+    var html = '';
+    copyPackages.forEach(function(pkg, idx) {
+      html += '<div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:18px 20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<span style="font-size:15px;font-weight:600;color:#111827;">' + escapeHtml(pkg.name) + '</span>' +
+            '<span style="font-size:12px;color:#fff;background:#1890FF;padding:2px 10px;border-radius:10px;">' + pkg.copies.length + ' 条</span>' +
+          '</div>' +
+          '<div style="display:flex;gap:8px;">' +
+            '<button onclick="editCopyPkg(' + idx + ')" style="padding:5px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#374151;"><i class="fas fa-edit" style="margin-right:4px;"></i>编辑</button>' +
+            '<button onclick="deleteCopyPkg(' + idx + ')" style="padding:5px 14px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;"><i class="fas fa-trash" style="margin-right:4px;"></i>删除</button>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      pkg.copies.forEach(function(c, ci) {
+        html += '<span style="display:inline-block;padding:5px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:13px;color:#166534;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(c) + '">' + escapeHtml(c) + '<span style="color:#9ca3af;font-size:11px;margin-left:3px;">(' + c.length + '/30)</span></span>';
+      });
+      html += '</div></div>';
     });
     container.innerHTML = html;
   };
 
-  var editingCopyIdx = -1;
-  window.openCopyForm = function() {
-    editingCopyIdx = -1;
-    document.getElementById('copy-content-input').value = '';
-    var cfm = document.getElementById('copy-form-modal');
-    if (cfm) cfm.style.display = 'flex';
-  };
-  window.editCopy = function(idx) {
-    editingCopyIdx = idx;
-    document.getElementById('copy-content-input').value = copyTexts[idx].content || '';
-    var cfm = document.getElementById('copy-form-modal');
-    if (cfm) cfm.style.display = 'flex';
-  };
-  window.closeCopyForm = function() {
-    var cfm2 = document.getElementById('copy-form-modal');
-    if (cfm2) cfm2.style.display = 'none';
-  };
-  window.saveCopy = function() {
-    var content = document.getElementById('copy-content-input').value.trim();
-    if (!content) { alert('请输入文案内容'); return; }
-    if (editingCopyIdx >= 0) {
-      copyTexts[editingCopyIdx].content = content;
+  var editingPkgIdx = -1;
+  window.openCopyPkgModal = function(idx) {
+    editingPkgIdx = idx >= 0 ? idx : -1;
+    document.getElementById('cp-name-input').value = idx >= 0 ? copyPackages[idx].name : '';
+    var listEl = document.getElementById('cp-copy-list');
+    if (listEl) listEl.innerHTML = '';
+    if (idx >= 0) {
+      document.getElementById('cp-modal-title').textContent = '编辑文案包';
+      copyPackages[idx].copies.forEach(function(c) { addCopyRow(c); });
     } else {
-      copyTexts.push({ id: 'cp_' + Date.now(), content: content });
+      document.getElementById('cp-modal-title').textContent = '新增文案包';
+      addCopyRow('');
     }
-    try { localStorage.setItem('ad_copy_texts', JSON.stringify(copyTexts)); } catch(e) {}
-    closeCopyForm();
-    renderCopyList();
+    var m = document.getElementById('copy-pkg-modal');
+    if (m) m.style.display = 'flex';
   };
-  window.deleteCopy = function(idx) {
-    if (!confirm('确定要删除该文案吗？')) return;
-    copyTexts.splice(idx, 1);
-    try { localStorage.setItem('ad_copy_texts', JSON.stringify(copyTexts)); } catch(e) {}
-    renderCopyList();
+  window.closeCopyPkgModal = function() {
+    var m = document.getElementById('copy-pkg-modal');
+    if (m) m.style.display = 'none';
+    editingPkgIdx = -1;
+  };
+
+  var copyRowCounter = 0;
+  window.addCopyRow = function(defaultVal) {
+    var listEl = document.getElementById('cp-copy-list');
+    if (!listEl) return;
+    copyRowCounter++;
+    var rid = 'cr_' + copyRowCounter;
+    var val = defaultVal || '';
+    var div = document.createElement('div');
+    div.id = rid;
+    div.className = 'cp-row';
+    div.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+    div.innerHTML =
+      '<input type="text" maxlength="30" placeholder="输入文案内容..." value="' + escapeHtml(val) + '"' +
+        ' class="cp-text-input" data-rid="' + rid + '"' +
+        ' style="flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;"' +
+        ' oninput="var v=this.value;if(v.length>30){this.value=v.substring(0,30);}this.nextSibling.textContent=v.length+\'/30\';">' +
+      '<span style="font-size:12px;color:#9ca3af;white-space:nowrap;min-width:28px;">' + (val ? val.length : 0) + '/30</span>' +
+      '<button type="button" onclick="removeCopyRow(\'' + rid + '\')" style="padding:5px 8px;background:none;border:1px solid #fecaca;border-radius:4px;cursor:pointer;font-size:13px;color:#ef4444;" title="删除这条"><i class="fas fa-times"></i></button>';
+    listEl.appendChild(div);
+    // 绑定回车添加下一行
+    var input = div.querySelector('.cp-text-input');
+    if (input) input.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); addCopyRow(''); } });
+  };
+  window.removeCopyRow = function(rid) {
+    var el = document.getElementById(rid);
+    if (el) el.remove();
+  };
+
+  window.saveCopyPkg = function() {
+    var name = document.getElementById('cp-name-input').value.trim();
+    if (!name) { alert('请输入包名称'); return; }
+    var rows = document.querySelectorAll('.cp-row .cp-text-input');
+    var copies = [];
+    rows.forEach(function(r) {
+      var v = r.value.trim();
+      if (v) copies.push(v);
+    });
+    if (copies.length === 0) { alert('请至少添加一条文案'); return; }
+
+    if (editingPkgIdx >= 0) {
+      copyPackages[editingPkgIdx].name = name;
+      copyPackages[editingPkgIdx].copies = copies;
+    } else {
+      copyPackages.push({
+        id: 'pkg_' + Date.now(),
+        name: name,
+        copies: copies
+      });
+    }
+    try { localStorage.setItem('ad_copy_packages', JSON.stringify(copyPackages)); } catch(e) {}
+    closeCopyPkgModal();
+    renderCopyPkgList();
+  };
+
+  window.editCopyPkg = function(idx) { openCopyPkgModal(idx); };
+  window.deleteCopyPkg = function(idx) {
+    if (!confirm('确定要删除该文案包吗？')) return;
+    copyPackages.splice(idx, 1);
+    try { localStorage.setItem('ad_copy_packages', JSON.stringify(copyPackages)); } catch(e) {}
+    renderCopyPkgList();
   };
 
   // ========== 工具函数 ==========
@@ -1496,17 +1769,30 @@
       });
     }
 
-    // -- 文案库：事件委托 --
-    var copyContainer = document.getElementById('copy-rows');
-    if (copyContainer) {
-      copyContainer.addEventListener('click', function(e) {
+    // -- 文案包：事件委托 --
+    var copyPkgContainer = document.getElementById('copy-pkg-list');
+    if (copyPkgContainer) {
+      copyPkgContainer.addEventListener('click', function(e) {
         var btn = e.target.closest('button');
         if (!btn) return;
         var idx = btn.getAttribute('data-idx');
         if (idx === null) return;
         idx = parseInt(idx);
-        if (btn.textContent.indexOf('编辑') >= 0) editCopy(idx);
-        if (btn.textContent.indexOf('删除') >= 0) deleteCopy(idx);
+        if (btn.textContent.indexOf('编辑') >= 0) editCopyPkg(idx);
+        if (btn.textContent.indexOf('删除') >= 0) deleteCopyPkg(idx);
+      });
+    }
+
+    // -- 品牌形象：事件委托 --
+    var brandContainer = document.getElementById('brand-image-list');
+    if (brandContainer) {
+      brandContainer.addEventListener('click', function(e) {
+        var btn = e.target.closest('button');
+        if (!btn) return;
+        var id = btn.getAttribute('data-id');
+        if (!id) return;
+        if (btn.textContent.indexOf('编辑') >= 0) editBrandImage(id);
+        if (btn.textContent.indexOf('删除') >= 0) deleteBrandImage(id);
       });
     }
 

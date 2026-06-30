@@ -92,6 +92,17 @@ const MOCK = {
     { id: 'ec_001', name: '已提交表单用户' },
     { id: 'ec_002', name: '已转化用户' }
   ],
+  // 品牌形象 & 视频号
+  brandImages: [
+    { id: 'bi_001', name: '品牌形象1', url: 'https://example.com/bi1.jpg' },
+    { id: 'bi_002', name: '品牌形象2', url: 'https://example.com/bi2.jpg' },
+    { id: 'bi_003', name: '品牌形象3', url: 'https://example.com/bi3.jpg' },
+  ],
+  videoAccounts: [
+    { id: 'va_001', name: '视频号A' },
+    { id: 'va_002', name: '视频号B' },
+    { id: 'va_003', name: '视频号C' },
+  ],
   // 素材库（视频+图片），带消耗/CTR/CVR数据
   videoMaterials: Array.from({length: 50}, (_, i) => ({
     id: `v_${String(i+1).padStart(3,'0')}`,
@@ -1047,21 +1058,30 @@ function App() {
   const [customAgeMax, setCustomAgeMax] = useState('');
   // 性别
   const [genderSelection, setGenderSelection] = useState('unlimited'); // 'unlimited' | 'male' | 'female'
-  // 自定义人群
-  const [audienceMode, setAudienceMode] = useState('unlimited'); // 'unlimited' | 'target' | 'exclude'
-  // 自定义人群 - 已选列表
-  const [selectedTargetAudiences, setSelectedTargetAudiences] = useState([]);
-  const [selectedExcludeAudiences, setSelectedExcludeAudiences] = useState([]);
+  // 自定义人群（按账户分别配置）
+  const [accountAudienceSettings, setAccountAudienceSettings] = useState({}); // { [accountId]: { mode: 'unlimited'|'exclude', excludeList: [] } }
   // 人群包列表（可刷新）
   const [audiencePackageList, setAudiencePackageList] = useState([...MOCK.customAudiences]);
   const [excludeAudiencePackageList, setExcludeAudiencePackageList] = useState([...MOCK.excludeConversions]);
-  const refreshAudiencePackages = () => {
+  const refreshAudiencePackages = (accountId) => {
+    // 模拟刷新，实际应该根据账户ID从后端获取
     setAudiencePackageList([...MOCK.customAudiences]);
-    notify('定向人群包列表已刷新', 'success');
+    notify(`账户 ${accountId} 的人群包列表已刷新`, 'success');
   };
-  const refreshExcludeAudiencePackages = () => {
+  const refreshExcludeAudiencePackages = (accountId) => {
     setExcludeAudiencePackageList([...MOCK.excludeConversions]);
-    notify('排除人群包列表已刷新', 'success');
+    notify(`账户 ${accountId} 的排除人群包列表已刷新`, 'success');
+  };
+  // 获取账户的人群配置
+  const getAccountAudience = (accountId) => {
+    return accountAudienceSettings[accountId] || { mode: 'unlimited', excludeList: [] };
+  };
+  // 更新账户的人群配置
+  const updateAccountAudience = (accountId, updates) => {
+    setAccountAudienceSettings(prev => ({
+      ...prev,
+      [accountId]: { ...getAccountAudience(accountId), ...updates }
+    }));
   };
   // 排除已转化用户
   const [excludeConvertedMode, setExcludeConvertedMode] = useState('unlimited');
@@ -1113,6 +1133,11 @@ function App() {
   // 创意数量分配
   const [creativeComposeMode, setCreativeComposeMode] = useState('cross_join'); // 'cross_join' | 'fixed'
   const [composeRule, setComposeRule] = useState({ videos: 1, images: 1, copies: 1 });
+  // 品牌形象 & 营销组件
+  const [brandImageType, setBrandImageType] = useState('video_account'); // 'custom' | 'video_account'
+  const [selectedBrandImage, setSelectedBrandImage] = useState(null); // {id, name, url}
+  const [selectedVideoAccount, setSelectedVideoAccount] = useState(null); // {id, name}
+  const [marketingComponentType, setMarketingComponentType] = useState('floating_card'); // 'floating_card' | 'action_button'
 
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
@@ -1462,6 +1487,97 @@ function App() {
               />
             </div>
 
+            {/* 自定义人群配置（网格布局：一行多个账户） */}
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-md font-semibold text-gray-900">自定义人群配置</h3>
+                {selectedAccountIds.length > 3 && (
+                  <button
+                    onClick={() => {
+                      const firstAccountId = selectedAccountIds[0];
+                      const firstSettings = getAccountAudience(firstAccountId);
+                      const newSettings = {};
+                      selectedAccountIds.forEach(id => { newSettings[id] = { ...firstSettings }; });
+                      setAccountAudienceSettings(newSettings);
+                      notify('已将所有账户的人群配置同步为第一个账户的配置', 'success');
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
+                  >
+                    <i className="fas fa-copy mr-1"></i>批量同步
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mb-3">每个账户需单独配置，支持批量同步</p>
+              {selectedAccountIds.length === 0 ? (
+                <p className="text-sm text-gray-400">请先选择账户</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {selectedAccountIds.map(accountId => {
+                    const acc = MOCK.accounts.find(a => a.id === accountId);
+                    if (!acc) return null;
+                    const audienceSettings = getAccountAudience(accountId);
+                    return (
+                      <div key={accountId} className="border border-gray-200 rounded-lg p-2.5 bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <i className="fas fa-user-friends text-blue-500 text-xs"></i>
+                          <span className="text-xs font-semibold text-gray-900 truncate flex-1" title={acc.name}>{acc.name}</span>
+                          {audienceSettings.mode === 'exclude' && (
+                            <button onClick={() => refreshExcludeAudiencePackages(accountId)} className="text-xs text-orange-600 hover:text-orange-800 flex-shrink-0">
+                              <i className="fas fa-sync-alt"></i>
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <label className="flex items-center cursor-pointer">
+                            <input type="radio" name={`audience_mode_${accountId}`} value="unlimited" checked={audienceSettings.mode === 'unlimited'} onChange={() => updateAccountAudience(accountId, { mode: 'unlimited' })} className="mr-1 w-3 h-3" />
+                            <span className="text-xs">不限</span>
+                          </label>
+                          <label className="flex items-center cursor-pointer">
+                            <input type="radio" name={`audience_mode_${accountId}`} value="exclude" checked={audienceSettings.mode === 'exclude'} onChange={() => updateAccountAudience(accountId, { mode: 'exclude' })} className="mr-1 w-3 h-3" />
+                            <span className="text-xs">排除</span>
+                          </label>
+                        </div>
+                        {audienceSettings.mode === 'exclude' && (
+                          <div className="animate-fadeIn">
+                            <select
+                              value=""
+                              onChange={e => {
+                                const val = e.target.value;
+                                if (val && !audienceSettings.excludeList.includes(val)) {
+                                  updateAccountAudience(accountId, { excludeList: [...audienceSettings.excludeList, val] });
+                                }
+                              }}
+                              className="w-full px-1.5 py-1 border border-orange-200 rounded text-xs outline-none focus:ring-1 focus:ring-orange-500"
+                            >
+                              <option value="">+ 排除人群包 +</option>
+                              {excludeAudiencePackageList.map(ep => (
+                                <option key={ep.id} value={ep.id} disabled={audienceSettings.excludeList.includes(ep.id)}>
+                                  {ep.name.length > 10 ? ep.name.substring(0, 10) + '...' : ep.name}{audienceSettings.excludeList.includes(ep.id) ? ' ✓' : ''}
+                                </option>
+                              ))}
+                            </select>
+                            {audienceSettings.excludeList.length > 0 && (
+                              <div className="flex flex-wrap gap-0.5 mt-1">
+                                {audienceSettings.excludeList.map(id => {
+                                  const pkg = excludeAudiencePackageList.find(e => e.id === id);
+                                  return pkg ? (
+                                    <span key={id} className="tag bg-orange-100 text-orange-800 text-xs px-1 py-0">
+                                      {pkg.name.length > 8 ? pkg.name.substring(0, 8) + '...' : pkg.name}
+                                      <button onClick={() => updateAccountAudience(accountId, { excludeList: audienceSettings.excludeList.filter(i => i !== id) })} className="ml-0.5"><i className="fas fa-times text-xs"></i></button>
+                                    </span>
+                                  ) : null;
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             {/* 定向配置 */}
             <div className="border-t pt-4">
               <h3 className="text-md font-semibold text-gray-900 mb-3">定向配置</h3>
@@ -1735,73 +1851,6 @@ function App() {
                         ))}
                       </div>
                     </div>
-                  </div>
-
-                  {/* ===== 自定义人群 ===== */}
-                  <div className="py-4 border-b border-gray-200">
-                    <div className="flex items-center gap-1 mb-3">
-                      <span className="text-sm font-semibold text-gray-900">自定义人群</span>
-                      <i className="fas fa-info-circle text-gray-300 ml-1 text-xs cursor-help" title="通过上传用户包等方式排除特定人群"></i>
-                      <div className="flex items-center gap-6 ml-4">
-                        <label className="flex items-center cursor-pointer">
-                          <input type="radio" name="audience_mode" value="unlimited" checked={audienceMode === 'unlimited'} onChange={e => setAudienceMode(e.target.value)} className="mr-1.5" />
-                          <span className="text-sm">不限</span>
-                        </label>
-                        <label className="flex items-center cursor-pointer">
-                          <input type="radio" name="audience_mode" value="exclude" checked={audienceMode === 'exclude'} onChange={e => setAudienceMode(e.target.value)} className="mr-1.5" />
-                          <span className="text-sm">排除人群</span>
-                        </label>
-                      </div>
-                    </div>
-
-
-                    {/* 排除人群：下拉选择人群包 + 刷新 */}
-                    {audienceMode === 'exclude' && (
-                      <div className="ml-[72px] bg-orange-50 border border-orange-200 rounded-xl p-4 animate-fadeIn">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <i className="fas fa-user-slash text-orange-500"></i>
-                            <span className="text-sm font-bold text-orange-800">选择排除人群包</span>
-                          </div>
-                          <button onClick={refreshExcludeAudiencePackages} className="text-xs text-orange-600 hover:text-orange-800 border border-orange-200 rounded px-2 py-1 hover:bg-orange-100">
-                            <i className="fas fa-sync-alt mr-1"></i>刷新列表
-                          </button>
-                        </div>
-                        <select
-                          value=""
-                          onChange={e => {
-                            const val = e.target.value;
-                            if (val && !selectedExcludeAudiences.includes(val)) {
-                              setSelectedExcludeAudiences([...selectedExcludeAudiences, val]);
-                            }
-                          }}
-                          className="w-full px-3 py-2 border border-orange-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-orange-500 mb-3"
-                        >
-                          <option value="">++ 添加排除人群包 ++</option>
-                          {excludeAudiencePackageList.map(ep => (
-                            <option key={ep.id} value={ep.id} disabled={selectedExcludeAudiences.includes(ep.id)}>
-                              {ep.name}{selectedExcludeAudiences.includes(ep.id) ? ' ✓ 已选' : ''}
-                            </option>
-                          ))}
-                        </select>
-                        {selectedExcludeAudiences.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {selectedExcludeAudiences.map(id => {
-                              const pkg = excludeAudiencePackageList.find(e => e.id === id);
-                              return pkg ? (
-                                <span key={id} className="tag bg-orange-100 text-orange-800">
-                                  {pkg.name}
-                                  <button onClick={() => setSelectedExcludeAudiences(selectedExcludeAudiences.filter(i => i !== id))}><i className="fas fa-times"></i></button>
-                                </span>
-                              ) : null;
-                            })}
-                          </div>
-                        )}
-                        {selectedExcludeAudiences.length === 0 && (
-                          <p className="text-xs text-orange-400">未选择任何排除人群包</p>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {/* ===== 排除已转化用户 ===== */}
@@ -2299,11 +2348,47 @@ function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">品牌形象</label>
-                <input type="text" value="视频号" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none mb-2">
+                  <option value="custom">自定义</option>
+                  <option value="video_account">视频号</option>
+                </select>
+                {brandImageType === 'custom' && (
+                  <select
+                    value={selectedBrandImage ? selectedBrandImage.id : ''}
+                    onChange={e => {
+                      const bi = MOCK.brandImages.find(x => x.id === e.target.value);
+                      setSelectedBrandImage(bi || null);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  >
+                    <option value="">选择品牌形象图片</option>
+                    {MOCK.brandImages.map(bi => (
+                      <option key={bi.id} value={bi.id}>{bi.name}</option>
+                    ))}
+                  </select>
+                )}
+                {brandImageType === 'video_account' && (
+                  <select
+                    value={selectedVideoAccount ? selectedVideoAccount.id : ''}
+                    onChange={e => {
+                      const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
+                      setSelectedVideoAccount(va || null);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  >
+                    <option value="">选择视频号</option>
+                    {MOCK.videoAccounts.map(va => (
+                      <option key={va.id} value={va.id}>{va.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销组件</label>
-                <input type="text" value="浮层卡片" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                  <option value="floating_card">浮层卡片</option>
+                  <option value="action_button">行动按钮</option>
+                </select>
                 <p className="text-xs text-gray-400 mt-1">所有创意共用同一个品牌形象和营销组件</p>
               </div>
             </div>
