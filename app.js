@@ -569,7 +569,7 @@ function Notification({
   }, [onClose]);
   const bg = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
   return /*#__PURE__*/React.createElement("div", {
-    className: `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${bg} max-w-sm`
+    className: `fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${bg} max-w-sm text-center`
   }, msg);
 }
 
@@ -1680,6 +1680,10 @@ function App() {
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
   const [notification, setNotification] = useState(null);
+  // ===== 运行配置 =====
+  const [runMode, setRunMode] = useState('immediate'); // 'immediate' | 'scheduled'
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('');
   const notify = (msg, type = 'info') => setNotification({
     msg,
     type
@@ -3205,20 +3209,46 @@ function App() {
   }, "行动按钮")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
   }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-xl shadow-sm border p-6 mb-8"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-md font-bold text-gray-900 mb-4"
+  }, "运行配置"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-6 mb-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "runMode",
+    checked: runMode === 'immediate',
+    onChange: () => setRunMode('immediate'),
+    className: "mr-2"
+  }), /*#__PURE__*/React.createElement("span", null, "立即运行")), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "runMode",
+    checked: runMode === 'scheduled',
+    onChange: () => setRunMode('scheduled'),
+    className: "mr-2"
+  }), /*#__PURE__*/React.createElement("span", null, "定时运行"))), runMode === 'scheduled' && /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "定时日期"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: scheduledDate,
+    onChange: e => setScheduledDate(e.target.value),
+    className: "px-3 py-2 border border-gray-300 rounded-lg"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "定时时间"), /*#__PURE__*/React.createElement("input", {
+    type: "time",
+    value: scheduledTime,
+    onChange: e => setScheduledTime(e.target.value),
+    className: "px-3 py-2 border border-gray-300 rounded-lg"
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-center gap-4 pb-8"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      if (selectedAccountIds.length === 0) {
-        notify('请先选择至少一个账户', 'error');
-        return;
-      }
-      const summary = getBuildSummary();
-      notify(`配置已准备好，共 ${summary.accountCount} 个账户，将创建 ${summary.totalUnits} 个单元、${summary.totalCreatives} 个创意`, 'success');
-    },
-    className: "btn-primary text-lg px-8 py-3"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-paper-plane mr-2"
-  }), "应用配置到所有账户"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       if (selectedAccountIds.length === 0) {
         notify('请先选择账户', 'error');
@@ -3226,10 +3256,25 @@ function App() {
       }
       setShowPreview(true);
     },
-    className: "btn-secondary text-lg px-8 py-3"
+    className: "btn-primary text-lg px-8 py-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-eye mr-2"
-  }), "预览全部")), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }), "预览全部"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (selectedAccountIds.length === 0) {
+        notify('请先选择账户', 'error');
+        return;
+      }
+      if (runMode === 'scheduled' && (!scheduledDate || !scheduledTime)) {
+        notify('请设置定时日期和时间', 'error');
+        return;
+      }
+      notify(`任务已提交${runMode === 'scheduled' ? `，将在 ${scheduledDate} ${scheduledTime} 运行` : '，将立即运行'}`, 'success');
+    },
+    className: "btn-secondary text-lg px-8 py-3"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-play mr-2"
+  }), runMode === 'immediate' ? '立即运行' : '定时运行')), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-xl shadow-sm border p-6 mb-8"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-bold text-gray-900 mb-4"

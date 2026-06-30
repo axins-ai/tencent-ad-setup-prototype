@@ -586,6 +586,28 @@
     alert('定时运行功能开发中，当前为原型版本');
   };
 
+  // ========= 复制任务 =========
+  window.copyTask = function(taskId) {
+    var task = tasks.find(function(t) { return t.id === taskId; });
+    if (!task) return;
+    var newTask = JSON.parse(JSON.stringify(task));
+    newTask.id = 'task_' + Date.now();
+    newTask.name = task.name + '（副本）';
+    newTask.createdAt = new Date().toISOString();
+    newTask.status = 'draft';
+    tasks.push(newTask);
+    try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
+    // 复制表单数据
+    var formData = localStorage.getItem('ad_task_form_' + taskId);
+    if (formData) {
+      try { localStorage.setItem('ad_task_form_' + newTask.id, formData); } catch(e) {}
+    }
+    renderTaskList();
+    if (confirm('任务已复制！是否立即编辑？')) {
+      openForm(newTask.id);
+    }
+  };
+
   // ========== 渲染任务列表 ==========
   function renderTaskList() {
     var container = document.getElementById('task-list-content');
@@ -627,9 +649,8 @@
         '<div style="flex:0.8;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
         '<div style="flex:1;color:#6b7280;">' + escapeHtml(tpDisplay) + '</div>' +
         '<div style="flex:1;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
-        '<div style="flex:1.2;display:flex;justify-content:flex-end;gap:8px;">' +
-          '<button data-task-id="' + task.id + '" data-action="edit" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-pen" style="margin-right:4px;"></i>编辑</button>' +
-          '<button data-task-id="' + task.id + '" data-action="schedule" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-clock" style="margin-right:4px;"></i>定时运行</button>' +
+        '<div style="display:flex;justify-content:flex-end;gap:8px;">' +
+          '<button data-task-id="' + task.id + '" data-action="copy" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-copy" style="margin-right:4px;"></i>复制</button>' +
           '<button data-task-id="' + task.id + '" data-action="delete" style="padding:6px 14px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;"><i class="fas fa-trash" style="margin-right:4px;"></i>删除</button>' +
         '</div>' +
       '</div>';
@@ -1738,9 +1759,8 @@
         if (!btn) return;
         var taskId = btn.getAttribute('data-task-id');
         if (!taskId) return;
-        if (btn.textContent.indexOf('编辑') >= 0) editTask(taskId);
+        if (btn.textContent.indexOf('复制') >= 0) copyTask(taskId);
         if (btn.textContent.indexOf('删除') >= 0) deleteTask(taskId);
-        if (btn.textContent.indexOf('定时') >= 0) scheduleTask(taskId);
       });
     }
 

@@ -277,7 +277,7 @@ function Notification({ msg, type, onClose }) {
   useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, [onClose]);
   const bg = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
   return (
-    <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${bg} max-w-sm`}>
+    <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${bg} max-w-sm text-center`}>
       {msg}
     </div>
   );
@@ -1142,6 +1142,10 @@ function App() {
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
   const [notification, setNotification] = useState(null);
+  // ===== 运行配置 =====
+  const [runMode, setRunMode] = useState('immediate'); // 'immediate' | 'scheduled'
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('');
 
   const notify = (msg, type = 'info') => setNotification({ msg, type });
 
@@ -2395,26 +2399,56 @@ function App() {
           </div>
         </div>
 
+        {/* ===== 运行配置 ===== */}
+        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
+          <h3 className="text-md font-bold text-gray-900 mb-4">运行配置</h3>
+          <div className="flex items-center gap-6 mb-4">
+            <label className="flex items-center cursor-pointer">
+              <input type="radio" name="runMode" checked={runMode === 'immediate'} onChange={() => setRunMode('immediate')} className="mr-2" />
+              <span>立即运行</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+              <input type="radio" name="runMode" checked={runMode === 'scheduled'} onChange={() => setRunMode('scheduled')} className="mr-2" />
+              <span>定时运行</span>
+            </label>
+          </div>
+          {runMode === 'scheduled' && (
+            <div className="flex items-center gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">定时日期</label>
+                <input type="date" value={scheduledDate} onChange={e => setScheduledDate(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">定时时间</label>
+                <input type="time" value={scheduledTime} onChange={e => setScheduledTime(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg" />
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* ===== 操作按钮 ===== */}
         <div className="flex justify-center gap-4 pb-8">
-          <button
-            onClick={() => {
-              if (selectedAccountIds.length === 0) { notify('请先选择至少一个账户', 'error'); return; }
-              const summary = getBuildSummary();
-              notify(`配置已准备好，共 ${summary.accountCount} 个账户，将创建 ${summary.totalUnits} 个单元、${summary.totalCreatives} 个创意`, 'success');
-            }}
-            className="btn-primary text-lg px-8 py-3"
-          >
-            <i className="fas fa-paper-plane mr-2"></i>应用配置到所有账户
-          </button>
           <button
             onClick={() => {
               if (selectedAccountIds.length === 0) { notify('请先选择账户', 'error'); return; }
               setShowPreview(true);
             }}
-            className="btn-secondary text-lg px-8 py-3"
+            className="btn-primary text-lg px-8 py-3"
           >
             <i className="fas fa-eye mr-2"></i>预览全部
+          </button>
+          <button
+            onClick={() => {
+              if (selectedAccountIds.length === 0) { notify('请先选择账户', 'error'); return; }
+              if (runMode === 'scheduled' && (!scheduledDate || !scheduledTime)) {
+                notify('请设置定时日期和时间', 'error');
+                return;
+              }
+              notify(`任务已提交${runMode === 'scheduled' ? `，将在 ${scheduledDate} ${scheduledTime} 运行` : '，将立即运行'}`, 'success');
+            }}
+            className="btn-secondary text-lg px-8 py-3"
+          >
+            <i className="fas fa-play mr-2"></i>{runMode === 'immediate' ? '立即运行' : '定时运行'}
           </button>
         </div>
 
