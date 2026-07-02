@@ -106,29 +106,54 @@ const MOCK = {
   },
   accounts: [{
     id: 'acc_001',
-    name: '账户001-北京移动',
+    name: 'acc_001-北京移动',
     kaboshi: 'https://kaboshi.example.com/acc001',
     businessUnit: 'baiju'
   }, {
     id: 'acc_002',
-    name: '账户002-上海移动',
+    name: 'acc_002-上海移动',
     kaboshi: 'https://kaboshi.example.com/acc002',
     businessUnit: 'baiju'
   }, {
     id: 'acc_003',
-    name: '账户003-广州移动',
+    name: 'acc_003-广州移动',
     kaboshi: 'https://kaboshi.example.com/acc003',
-    businessUnit: 'fenghua'
+    businessUnit: 'baiju'
   }, {
     id: 'acc_004',
-    name: '账户004-深圳移动',
+    name: 'acc_004-深圳移动',
     kaboshi: 'https://kaboshi.example.com/acc004',
     businessUnit: 'fenghua'
   }, {
     id: 'acc_005',
-    name: '账户005-杭州移动',
+    name: 'acc_005-杭州移动',
     kaboshi: 'https://kaboshi.example.com/acc005',
+    businessUnit: 'fenghua'
+  }, {
+    id: 'acc_006',
+    name: 'acc_006-成都移动',
+    kaboshi: 'https://kaboshi.example.com/acc006',
+    businessUnit: 'fenghua'
+  }, {
+    id: 'acc_007',
+    name: 'acc_007-武汉移动',
+    kaboshi: 'https://kaboshi.example.com/acc007',
     businessUnit: 'fuwei'
+  }, {
+    id: 'acc_008',
+    name: 'acc_008-南京移动',
+    kaboshi: 'https://kaboshi.example.com/acc008',
+    businessUnit: 'fuwei'
+  }, {
+    id: 'acc_009',
+    name: 'acc_009-西安移动',
+    kaboshi: 'https://kaboshi.example.com/acc009',
+    businessUnit: 'fuwei'
+  }, {
+    id: 'acc_010',
+    name: 'acc_010-重庆移动',
+    kaboshi: 'https://kaboshi.example.com/acc010',
+    businessUnit: 'baiju'
   }],
   specificProducts: [{
     id: 'sp_001',
@@ -2353,23 +2378,61 @@ function App() {
     className: "flex items-center justify-between mb-3"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-semibold text-gray-900"
-  }, "自定义人群配置"), selectedAccountIds.length > 3 && /*#__PURE__*/React.createElement("button", {
+  }, "自定义人群配置"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
+      // 刷新所有账户的人群包列表
+      setAudiencePackageList([...MOCK.customAudiences, {
+        id: 'ca_004',
+        name: '近期转化用户'
+      }, {
+        id: 'ca_005',
+        name: '高活跃度用户'
+      }]);
+      setExcludeAudiencePackageList([...MOCK.excludeConversions, {
+        id: 'ec_003',
+        name: '已注册用户'
+      }]);
+      notify('所有人脸包列表已刷新', 'success');
+    },
+    className: "text-xs text-green-600 hover:text-green-800 border border-green-200 rounded px-2 py-1 hover:bg-green-50"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-sync-alt mr-1"
+  }), "刷新人群包"), selectedAccountIds.length > 1 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      // 检查所选账户是否有相同人群包
       const firstAccountId = selectedAccountIds[0];
-      const firstSettings = getAccountAudience(firstAccountId);
+      const firstAudience = getAccountAudience(firstAccountId);
+
+      // 获取所有账户都可用的人群包（模拟：这里假设acc_001-acc_005有相同人群包）
+      const syncableAccounts = selectedAccountIds.filter(id => {
+        // 模拟逻辑：acc_001-acc_005 属于同一业务单元，有相同人群包
+        const acc = MOCK.accounts.find(a => a.id === id);
+        if (!acc) return false;
+        // 白驹和烽华的账户有相同人群包
+        return ['baiju', 'fenghua'].includes(acc.businessUnit);
+      });
+      if (syncableAccounts.length < 2) {
+        notify('所选账户中没有可同步的人群包（需要属于同一业务单元）', 'error');
+        return;
+      }
       const newSettings = {};
-      selectedAccountIds.forEach(id => {
+      syncableAccounts.forEach(id => {
         newSettings[id] = {
-          ...firstSettings
+          ...firstAudience
         };
       });
-      setAccountAudienceSettings(newSettings);
-      notify('已将所有账户的人群配置同步为第一个账户的配置', 'success');
+      setAccountAudienceSettings(prev => ({
+        ...prev,
+        ...newSettings
+      }));
+      notify(`已将 ${syncableAccounts.length} 个账户的人群配置同步为 ${firstAccountId} 的配置`, 'success');
     },
     className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-copy mr-1"
-  }), "批量同步")), /*#__PURE__*/React.createElement("p", {
+  }), "批量同步")))), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
   }, "每个账户需单独配置，支持批量同步"), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
@@ -3502,52 +3565,7 @@ function App() {
     className: "btn-secondary text-lg px-8 py-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-play mr-2"
-  }), runMode === 'immediate' ? '立即运行' : '定时运行')), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "bg-white rounded-xl shadow-sm border p-6 mb-8"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-md font-bold text-gray-900 mb-4"
-  }, "账户配置进度"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-  }, selectedAccountIds.map(id => {
-    const acc = MOCK.accounts.find(a => a.id === id);
-    const hasTargeting = targetingSource === 'package' ? selectedTargetingPackages.length > 0 : geoSelectedProvinces.length > 0 || geoMode === 'unlimited';
-    const hasBid = bidAmount !== '';
-    const hasMaterial = selectedMaterials.length > 0;
-    const hasCopy = selectedCopies.length > 0;
-    const doneCount = [hasTargeting, hasBid, hasMaterial, hasCopy].filter(Boolean).length;
-    const totalCount = 4;
-    const pct = Math.round(doneCount / totalCount * 100);
-    const tpCount = targetingSource === 'package' ? Math.max(selectedTargetingPackages.length, 1) : 1;
-    return /*#__PURE__*/React.createElement("div", {
-      key: id,
-      className: "border border-gray-200 rounded-lg p-4"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between mb-2"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "font-medium text-gray-900 text-sm"
-    }, acc ? acc.name : id), /*#__PURE__*/React.createElement("span", {
-      className: "text-xs text-gray-500"
-    }, pct, "%")), /*#__PURE__*/React.createElement("div", {
-      className: "w-full bg-gray-200 rounded-full h-2 mb-3"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "bg-blue-500 h-2 rounded-full transition-all",
-      style: {
-        width: `${pct}%`
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      className: "space-y-1 text-xs"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: hasTargeting ? 'text-green-600' : 'text-gray-400'
-    }, hasTargeting ? '✓' : '○', " 定向配置 ", targetingSource === 'package' && selectedTargetingPackages.length > 0 ? `(${selectedTargetingPackages.length}包)` : ''), /*#__PURE__*/React.createElement("p", {
-      className: hasBid ? 'text-green-600' : 'text-gray-400'
-    }, hasBid ? '✓' : '○', " 出价设定"), /*#__PURE__*/React.createElement("p", {
-      className: hasMaterial ? 'text-green-600' : 'text-gray-400'
-    }, hasMaterial ? '✓' : '○', " 创意素材(", selectedMaterials.length, ")"), /*#__PURE__*/React.createElement("p", {
-      className: hasCopy ? 'text-green-600' : 'text-gray-400'
-    }, hasCopy ? '✓' : '○', " 广告文案(", selectedCopies.length, ")"), /*#__PURE__*/React.createElement("p", {
-      className: "text-blue-600 font-medium"
-    }, "单元数：", tpCount)));
-  })))), /*#__PURE__*/React.createElement(MaterialModal, {
+  }), runMode === 'immediate' ? '立即运行' : '定时运行')), /*#__PURE__*/React.createElement(MaterialModal, {
     show: showMaterialModal,
     onClose: () => setShowMaterialModal(false),
     onConfirm: materials => {
