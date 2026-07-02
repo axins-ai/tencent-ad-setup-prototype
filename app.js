@@ -1953,104 +1953,33 @@ function App() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "max-w-7xl mx-auto px-4"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 py-2"
+    className: "flex items-center gap-4 py-2.5"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-1.5 flex-shrink-0"
+    className: "flex items-center gap-2 flex-shrink-0"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-base"
   }, "⚡"), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold text-gray-700 hidden md:inline whitespace-nowrap"
-  }, "广告搭建")), /*#__PURE__*/React.createElement("select", {
-    value: businessUnit,
-    onChange: e => setBusinessUnit(e.target.value),
-    className: "flex-shrink-0 px-2 py-1.5 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[90px]"
-  }, MOCK.businessUnits.map(bu => /*#__PURE__*/React.createElement("option", {
-    key: bu.id,
-    value: bu.id
-  }, bu.name))), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 min-w-0 relative"
+    className: "text-sm font-bold text-gray-700 whitespace-nowrap"
+  }, "广告搭建")), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "flex-shrink-0 flex items-center gap-1.5 ml-auto"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "border border-gray-300 rounded-lg px-2 py-1.5 cursor-pointer bg-white min-h-[30px] flex flex-wrap gap-1 items-center text-xs",
-    onClick: () => {
-      setShowAccountDropdown(!showAccountDropdown);
-      setAccountSearchText('');
-    }
-  }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("span", {
-    className: "text-gray-400"
-  }, "选择账户...") : selectedAccountIds.slice(0, 3).map(id => {
-    const acc = MOCK.accounts.find(a => a.id === id);
-    return /*#__PURE__*/React.createElement("span", {
-      key: id,
-      className: "tag text-2xs py-0.5 px-1.5"
-    }, acc ? acc.name.split('-')[1] || acc.name : id, /*#__PURE__*/React.createElement("button", {
-      onClick: e => {
-        e.stopPropagation();
-        toggleAccount(id);
-      }
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-times",
-      style: {
-        fontSize: '8px'
-      }
-    })));
-  }), selectedAccountIds.length > 3 && /*#__PURE__*/React.createElement("span", {
-    className: "text-2xs text-blue-600 font-medium"
-  }, "+", selectedAccountIds.length - 3), /*#__PURE__*/React.createElement("span", {
-    className: "ml-auto text-gray-400 text-2xs"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-chevron-down"
-  }))), showAccountDropdown && /*#__PURE__*/React.createElement("div", {
-    className: "absolute z-50 w-full mt-0.5 bg-white border border-gray-200 rounded-lg shadow-lg"
+    className: "w-20 bg-gray-200 rounded-full h-2"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "p-1.5 border-b"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: accountSearchText,
-    onChange: e => setAccountSearchText(e.target.value),
-    placeholder: "搜索账户...",
-    className: "w-full px-2 py-1 border border-gray-200 rounded text-xs outline-none focus:ring-1 focus:ring-blue-400",
-    onClick: e => e.stopPropagation(),
-    autoFocus: true
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "max-h-40 overflow-y-auto"
-  }, filteredAccounts.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    className: "px-3 py-3 text-xs text-gray-400 text-center"
-  }, "无匹配账户") : filteredAccounts.map(acc => /*#__PURE__*/React.createElement("div", {
-    key: acc.id,
-    onClick: () => toggleAccount(acc.id),
-    className: "px-3 py-1.5 cursor-pointer hover:bg-blue-50 flex items-center gap-2 text-xs border-b border-gray-50 last:border-b-0"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: selectedAccountIds.includes(acc.id),
-    onChange: () => {},
-    className: "w-3 h-3 rounded pointer-events-none"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "flex-1 truncate"
-  }, acc.name), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-check text-blue-500",
-    style: {
-      fontSize: '10px'
-    }
-  })))))), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "flex-shrink-0 flex items-center gap-1.5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-16 bg-gray-200 rounded-full h-1.5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-500 h-1.5 rounded-full transition-all",
+    className: "bg-blue-500 h-2 rounded-full transition-all",
     style: {
       width: `${overallProgress}%`
     }
   })), /*#__PURE__*/React.createElement("span", {
-    className: "text-2xs text-gray-500 w-6"
+    className: "text-xs text-gray-500"
   }, overallProgress, "%")), validationErrors.length > 0 && /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowValidationSummary(!showValidationSummary),
-    className: "flex-shrink-0 text-2xs text-red-500 hover:text-red-700 border border-red-200 rounded px-1.5 py-1 whitespace-nowrap"
+    className: "flex-shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1 whitespace-nowrap"
   }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-exclamation-circle mr-0.5"
-  }), validationErrors.length, "项")), showValidationSummary && validationErrors.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "border-t bg-red-50 px-4 py-1"
+    className: "fas fa-exclamation-circle mr-1"
+  }), validationErrors.length, "项未完成")), showValidationSummary && validationErrors.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "border-t bg-red-50 px-4 py-1.5"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 text-2xs text-red-700 flex-wrap"
+    className: "flex items-center gap-2 text-xs text-red-700 flex-wrap"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-triangle"
   }), /*#__PURE__*/React.createElement("span", null, "请完善："), validationErrors.map((err, i) => /*#__PURE__*/React.createElement("span", {
@@ -2061,20 +1990,21 @@ function App() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1"
   }, [{
+    id: 'section-basic',
+    label: '基础配置',
+    icon: 'fa-cog'
+  }, {
     id: 'section-unit',
     label: '营销单元',
-    icon: 'fa-bullseye',
-    color: 'blue'
+    icon: 'fa-bullseye'
   }, {
     id: 'section-creative',
     label: '创意配置',
-    icon: 'fa-paint-brush',
-    color: 'green'
+    icon: 'fa-paint-brush'
   }, {
     id: 'section-run',
     label: '运行配置',
-    icon: 'fa-play',
-    color: 'purple'
+    icon: 'fa-play'
   }].map(s => /*#__PURE__*/React.createElement("a", {
     key: s.id,
     href: '#' + s.id,
@@ -2107,15 +2037,105 @@ function App() {
   }), selectedAccountIds.length, "个账户"))), /*#__PURE__*/React.createElement("div", {
     className: "max-w-7xl mx-auto px-6 py-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
+    id: "section-basic",
+    className: "bg-white rounded-xl shadow-sm border overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "text-lg font-bold text-gray-900 flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm"
+  }, "1"), "基础配置", /*#__PURE__*/React.createElement("span", {
+    className: "ml-auto text-xs text-gray-400 font-normal"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-info-circle mr-1"
+  }), "选择业务单元和投放账户"))), /*#__PURE__*/React.createElement("div", {
+    className: "p-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-2 gap-6"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "业务单元 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*")), /*#__PURE__*/React.createElement("select", {
+    value: businessUnit,
+    onChange: e => setBusinessUnit(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, MOCK.businessUnits.map(bu => /*#__PURE__*/React.createElement("option", {
+    key: bu.id,
+    value: bu.id
+  }, bu.name, "（", bu.id, "）")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "选择账户 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*")), /*#__PURE__*/React.createElement("div", {
+    className: "relative"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center text-sm",
+    onClick: () => {
+      setShowAccountDropdown(!showAccountDropdown);
+      setAccountSearchText('');
+    }
+  }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("span", {
+    className: "text-gray-400"
+  }, "点击选择账户（支持多选）") : selectedAccountIds.slice(0, 3).map(id => {
+    const acc = MOCK.accounts.find(a => a.id === id);
+    return /*#__PURE__*/React.createElement("span", {
+      key: id,
+      className: "tag"
+    }, acc ? acc.name : id, /*#__PURE__*/React.createElement("button", {
+      onClick: e => {
+        e.stopPropagation();
+        toggleAccount(id);
+      }
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-times"
+    })));
+  }), selectedAccountIds.length > 3 && /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-blue-600 font-medium ml-1"
+  }, "+", selectedAccountIds.length - 3), /*#__PURE__*/React.createElement("span", {
+    className: "ml-auto text-gray-400 text-xs"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-chevron-down"
+  }))), showAccountDropdown && /*#__PURE__*/React.createElement("div", {
+    className: "absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-2 border-b"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: accountSearchText,
+    onChange: e => setAccountSearchText(e.target.value),
+    placeholder: "搜索账户名称或ID...",
+    className: "w-full px-3 py-1.5 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400",
+    onClick: e => e.stopPropagation(),
+    autoFocus: true
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "max-h-48 overflow-y-auto"
+  }, filteredAccounts.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "px-3 py-4 text-sm text-gray-400 text-center"
+  }, "无匹配账户") : filteredAccounts.map(acc => /*#__PURE__*/React.createElement("div", {
+    key: acc.id,
+    onClick: () => toggleAccount(acc.id),
+    className: "px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-3 text-sm border-b border-gray-100 last:border-b-0"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: selectedAccountIds.includes(acc.id),
+    onChange: () => {},
+    className: "w-4 h-4 text-blue-600 rounded pointer-events-none"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "flex-1"
+  }, acc.name), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-check text-blue-500"
+  })))))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-unit",
     className: "bg-white rounded-xl shadow-sm border overflow-hidden"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h2", {
     className: "text-lg font-bold text-gray-900 flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-bullseye text-blue-500"
-  }), "营销单元配置", /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm"
+  }, "2"), "营销单元配置", /*#__PURE__*/React.createElement("span", {
     className: "ml-auto text-xs text-gray-400 font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "far fa-clock mr-1"
@@ -3006,9 +3026,9 @@ function App() {
     className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h2", {
     className: "text-lg font-bold text-gray-900 flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-paint-brush text-green-500"
-  }), "创意配置", /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm"
+  }, "3"), "创意配置", /*#__PURE__*/React.createElement("span", {
     className: "ml-auto text-xs text-gray-400 font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "far fa-clock mr-1"

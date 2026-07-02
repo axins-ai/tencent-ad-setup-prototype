@@ -1354,99 +1354,38 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       {notification && <Notification msg={notification.msg} type={notification.type} onClose={() => setNotification(null)} />}
 
-      {/* ===== 顶部：基础配置（精简窄条）===== */}
+      {/* ===== 顶部：精简信息栏 ===== */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-3 py-2">
+          <div className="flex items-center gap-4 py-2.5">
             {/* 标题 */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <span className="text-base">⚡</span>
-              <span className="text-xs font-bold text-gray-700 hidden md:inline whitespace-nowrap">广告搭建</span>
+              <span className="text-sm font-bold text-gray-700 whitespace-nowrap">广告搭建</span>
             </div>
 
-            {/* 业务单元 */}
-            <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
-              className="flex-shrink-0 px-2 py-1.5 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[90px]">
-              {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}</option>)}
-            </select>
-
-            {/* 账户选择 */}
-            <div className="flex-1 min-w-0 relative">
-              <div
-                className="border border-gray-300 rounded-lg px-2 py-1.5 cursor-pointer bg-white min-h-[30px] flex flex-wrap gap-1 items-center text-xs"
-                onClick={() => { setShowAccountDropdown(!showAccountDropdown); setAccountSearchText(''); }}
-              >
-                {selectedAccountIds.length === 0 ? (
-                  <span className="text-gray-400">选择账户...</span>
-                ) : (
-                  selectedAccountIds.slice(0, 3).map(id => {
-                    const acc = MOCK.accounts.find(a => a.id === id);
-                    return (
-                      <span key={id} className="tag text-2xs py-0.5 px-1.5">
-                        {acc ? acc.name.split('-')[1] || acc.name : id}
-                        <button onClick={(e) => { e.stopPropagation(); toggleAccount(id); }}><i className="fas fa-times" style={{fontSize:'8px'}}></i></button>
-                      </span>
-                    );
-                  })
-                )}
-                {selectedAccountIds.length > 3 && (
-                  <span className="text-2xs text-blue-600 font-medium">+{selectedAccountIds.length - 3}</span>
-                )}
-                <span className="ml-auto text-gray-400 text-2xs"><i className="fas fa-chevron-down"></i></span>
-              </div>
-              {showAccountDropdown && (
-                <div className="absolute z-50 w-full mt-0.5 bg-white border border-gray-200 rounded-lg shadow-lg">
-                  <div className="p-1.5 border-b">
-                    <input type="text" value={accountSearchText} onChange={e => setAccountSearchText(e.target.value)}
-                      placeholder="搜索账户..."
-                      className="w-full px-2 py-1 border border-gray-200 rounded text-xs outline-none focus:ring-1 focus:ring-blue-400"
-                      onClick={e => e.stopPropagation()} autoFocus
-                    />
-                  </div>
-                  <div className="max-h-40 overflow-y-auto">
-                    {filteredAccounts.length === 0 ? (
-                      <div className="px-3 py-3 text-xs text-gray-400 text-center">无匹配账户</div>
-                    ) : (
-                      filteredAccounts.map(acc => (
-                        <div key={acc.id} onClick={() => toggleAccount(acc.id)}
-                          className="px-3 py-1.5 cursor-pointer hover:bg-blue-50 flex items-center gap-2 text-xs border-b border-gray-50 last:border-b-0"
-                        >
-                          <input type="checkbox" checked={selectedAccountIds.includes(acc.id)} onChange={() => {}}
-                            className="w-3 h-3 rounded pointer-events-none" />
-                          <span className="flex-1 truncate">{acc.name}</span>
-                          {selectedAccountIds.includes(acc.id) && (
-                            <i className="fas fa-check text-blue-500" style={{fontSize:'10px'}}></i>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 进度条 */}
+            {/* 进度条 — 仅展示 */}
             {selectedAccountIds.length > 0 && (
-              <div className="flex-shrink-0 flex items-center gap-1.5">
-                <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                  <div className="bg-blue-500 h-1.5 rounded-full transition-all" style={{width: `${overallProgress}%`}}></div>
+              <div className="flex-shrink-0 flex items-center gap-1.5 ml-auto">
+                <div className="w-20 bg-gray-200 rounded-full h-2">
+                  <div className="bg-blue-500 h-2 rounded-full transition-all" style={{width: `${overallProgress}%`}}></div>
                 </div>
-                <span className="text-2xs text-gray-500 w-6">{overallProgress}%</span>
+                <span className="text-xs text-gray-500">{overallProgress}%</span>
               </div>
             )}
 
             {/* 校验提示 */}
             {validationErrors.length > 0 && (
               <button onClick={() => setShowValidationSummary(!showValidationSummary)}
-                className="flex-shrink-0 text-2xs text-red-500 hover:text-red-700 border border-red-200 rounded px-1.5 py-1 whitespace-nowrap">
-                <i className="fas fa-exclamation-circle mr-0.5"></i>{validationErrors.length}项
+                className="flex-shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1 whitespace-nowrap">
+                <i className="fas fa-exclamation-circle mr-1"></i>{validationErrors.length}项未完成
               </button>
             )}
           </div>
           {/* 错误详情条 */}
           {showValidationSummary && validationErrors.length > 0 && (
-            <div className="border-t bg-red-50 px-4 py-1">
-              <div className="flex items-center gap-2 text-2xs text-red-700 flex-wrap">
+            <div className="border-t bg-red-50 px-4 py-1.5">
+              <div className="flex items-center gap-2 text-xs text-red-700 flex-wrap">
                 <i className="fas fa-exclamation-triangle"></i>
                 <span>请完善：</span>
                 {validationErrors.map((err, i) => (
@@ -1462,9 +1401,10 @@ function App() {
       <div className="bg-white border-b sticky top-[56px] z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1">
           {[
-            {id:'section-unit', label:'营销单元', icon:'fa-bullseye', color:'blue'},
-            {id:'section-creative', label:'创意配置', icon:'fa-paint-brush', color:'green'},
-            {id:'section-run', label:'运行配置', icon:'fa-play', color:'purple'},
+            {id:'section-basic', label:'基础配置', icon:'fa-cog'},
+            {id:'section-unit', label:'营销单元', icon:'fa-bullseye'},
+            {id:'section-creative', label:'创意配置', icon:'fa-paint-brush'},
+            {id:'section-run', label:'运行配置', icon:'fa-play'},
           ].map(s => (
             <a key={s.id} href={'#'+s.id} onClick={e => { e.preventDefault(); document.getElementById(s.id)?.scrollIntoView({behavior:'smooth'}); }}
               className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-md text-gray-600 whitespace-nowrap transition-colors"
@@ -1484,11 +1424,89 @@ function App() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
-        {/* ===== 中间：营销单元配置 ===== */}
+        {/* ===== 1. 基础配置 ===== */}
+        <div id="section-basic" className="bg-white rounded-xl shadow-sm border overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
+              基础配置
+              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="fas fa-info-circle mr-1"></i>选择业务单元和投放账户</span>
+            </h2>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">业务单元 <span className="text-red-500">*</span></label>
+                <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                  {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">选择账户 <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <div
+                    className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center text-sm"
+                    onClick={() => { setShowAccountDropdown(!showAccountDropdown); setAccountSearchText(''); }}
+                  >
+                    {selectedAccountIds.length === 0 ? (
+                      <span className="text-gray-400">点击选择账户（支持多选）</span>
+                    ) : (
+                      selectedAccountIds.slice(0, 3).map(id => {
+                        const acc = MOCK.accounts.find(a => a.id === id);
+                        return (
+                          <span key={id} className="tag">
+                            {acc ? acc.name : id}
+                            <button onClick={(e) => { e.stopPropagation(); toggleAccount(id); }}><i className="fas fa-times"></i></button>
+                          </span>
+                        );
+                      })
+                    )}
+                    {selectedAccountIds.length > 3 && (
+                      <span className="text-xs text-blue-600 font-medium ml-1">+{selectedAccountIds.length - 3}</span>
+                    )}
+                    <span className="ml-auto text-gray-400 text-xs"><i className="fas fa-chevron-down"></i></span>
+                  </div>
+                  {showAccountDropdown && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                      <div className="p-2 border-b">
+                        <input type="text" value={accountSearchText} onChange={e => setAccountSearchText(e.target.value)}
+                          placeholder="搜索账户名称或ID..."
+                          className="w-full px-3 py-1.5 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400"
+                          onClick={e => e.stopPropagation()} autoFocus
+                        />
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        {filteredAccounts.length === 0 ? (
+                          <div className="px-3 py-4 text-sm text-gray-400 text-center">无匹配账户</div>
+                        ) : (
+                          filteredAccounts.map(acc => (
+                            <div key={acc.id} onClick={() => toggleAccount(acc.id)}
+                              className="px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-3 text-sm border-b border-gray-100 last:border-b-0"
+                            >
+                              <input type="checkbox" checked={selectedAccountIds.includes(acc.id)} onChange={() => {}}
+                                className="w-4 h-4 text-blue-600 rounded pointer-events-none" />
+                              <span className="flex-1">{acc.name}</span>
+                              {selectedAccountIds.includes(acc.id) && (
+                                <i className="fas fa-check text-blue-500"></i>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== 2. 营销单元配置 ===== */}
         <div id="section-unit" className="bg-white rounded-xl shadow-sm border overflow-hidden">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <i className="fas fa-bullseye text-blue-500"></i>
+              <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
               营销单元配置
               <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
             </h2>
@@ -2208,7 +2226,7 @@ function App() {
         <div id="section-creative" className="bg-white rounded-xl shadow-sm border overflow-hidden">
           <div className="bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <i className="fas fa-paint-brush text-green-500"></i>
+              <span className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
               创意配置
               <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、落地页</span>
             </h2>
