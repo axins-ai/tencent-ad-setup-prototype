@@ -58,11 +58,11 @@ const MOCK = {
     ]
   },
   accounts: [
-    { id: 'acc_001', name: '账户001-北京移动', kaboshi: 'https://kaboshi.example.com/acc001' },
-    { id: 'acc_002', name: '账户002-上海移动', kaboshi: 'https://kaboshi.example.com/acc002' },
-    { id: 'acc_003', name: '账户003-广州移动', kaboshi: 'https://kaboshi.example.com/acc003' },
-    { id: 'acc_004', name: '账户004-深圳移动', kaboshi: 'https://kaboshi.example.com/acc004' },
-    { id: 'acc_005', name: '账户005-杭州移动', kaboshi: 'https://kaboshi.example.com/acc005' },
+    { id: 'acc_001', name: '账户001-北京移动', kaboshi: 'https://kaboshi.example.com/acc001', businessUnit: 'baiju' },
+    { id: 'acc_002', name: '账户002-上海移动', kaboshi: 'https://kaboshi.example.com/acc002', businessUnit: 'baiju' },
+    { id: 'acc_003', name: '账户003-广州移动', kaboshi: 'https://kaboshi.example.com/acc003', businessUnit: 'fenghua' },
+    { id: 'acc_004', name: '账户004-深圳移动', kaboshi: 'https://kaboshi.example.com/acc004', businessUnit: 'fenghua' },
+    { id: 'acc_005', name: '账户005-杭州移动', kaboshi: 'https://kaboshi.example.com/acc005', businessUnit: 'fuwei' },
   ],
   specificProducts: [
     { id: 'sp_001', name: '移动大王卡19元档' },
@@ -277,7 +277,7 @@ function Notification({ msg, type, onClose }) {
   useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, [onClose]);
   const bg = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
   return (
-    <div className={`fixed top-16 left-1/2 -translate-x-1/2 z-[10000] px-4 py-3 rounded-lg shadow-2xl text-white ${bg} max-w-sm text-center`}>
+    <div className={`fixed left-1/2 -translate-x-1/2 px-4 py-3 rounded-lg shadow-2xl text-white ${bg} max-w-sm text-center`} style={{top: '4rem', zIndex: 10000}}>
       {msg}
     </div>
   );
@@ -970,10 +970,11 @@ function App() {
     const products = MOCK.productsByBusinessUnit['baiju'] || [];
     return products.length > 0 ? products[0].id : '';
   });
-  // 当业务单元变化时，重置产品选择
+  // 当业务单元变化时，重置产品选择 + 清空已选账户
   useEffect(() => {
     const products = MOCK.productsByBusinessUnit[businessUnit] || [];
     setSpecificProduct(products.length > 0 ? products[0].id : '');
+    setSelectedAccountIds([]);
   }, [businessUnit]);
   const [placement, setPlacement] = useState('wechat_video');
   const [placementScene, setPlacementScene] = useState('');
@@ -1325,14 +1326,12 @@ function App() {
             <span className="text-2xl">⚡</span> 腾讯广告搭建流程原型
             <span className="text-sm font-normal text-gray-400 ml-2">完整交互验证版 v2</span>
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">业务类型</label>
-              <input type="text" value="权益" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">投放渠道</label>
-              <input type="text" value="广点通" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">业务单元 <span className="text-red-500">*</span></label>
+              <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">选择账户 <span className="text-red-500">*</span></label>
@@ -1358,7 +1357,7 @@ function App() {
                 </div>
                 {showAccountDropdown && (
                   <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {MOCK.accounts.map(acc => (
+                    {MOCK.accounts.filter(acc => acc.businessUnit === businessUnit).map(acc => (
                       <div
                         key={acc.id}
                         onClick={() => toggleAccount(acc.id)}
@@ -1413,14 +1412,8 @@ function App() {
             </h2>
           </div>
           <div className="p-6 space-y-6">
-            {/* 业务单元 & 营销目的 & 推广产品 & 产品 */}
+            {/* 营销目的 & 推广产品 & 产品 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">业务单元 <span className="text-red-500">*</span></label>
-                <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                  {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
-                </select>
-              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销目的 <span className="text-red-500">*</span></label>
                 <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">

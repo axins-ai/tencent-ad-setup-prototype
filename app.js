@@ -107,23 +107,28 @@ const MOCK = {
   accounts: [{
     id: 'acc_001',
     name: '账户001-北京移动',
-    kaboshi: 'https://kaboshi.example.com/acc001'
+    kaboshi: 'https://kaboshi.example.com/acc001',
+    businessUnit: 'baiju'
   }, {
     id: 'acc_002',
     name: '账户002-上海移动',
-    kaboshi: 'https://kaboshi.example.com/acc002'
+    kaboshi: 'https://kaboshi.example.com/acc002',
+    businessUnit: 'baiju'
   }, {
     id: 'acc_003',
     name: '账户003-广州移动',
-    kaboshi: 'https://kaboshi.example.com/acc003'
+    kaboshi: 'https://kaboshi.example.com/acc003',
+    businessUnit: 'fenghua'
   }, {
     id: 'acc_004',
     name: '账户004-深圳移动',
-    kaboshi: 'https://kaboshi.example.com/acc004'
+    kaboshi: 'https://kaboshi.example.com/acc004',
+    businessUnit: 'fenghua'
   }, {
     id: 'acc_005',
     name: '账户005-杭州移动',
-    kaboshi: 'https://kaboshi.example.com/acc005'
+    kaboshi: 'https://kaboshi.example.com/acc005',
+    businessUnit: 'fuwei'
   }],
   specificProducts: [{
     id: 'sp_001',
@@ -569,7 +574,11 @@ function Notification({
   }, [onClose]);
   const bg = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
   return /*#__PURE__*/React.createElement("div", {
-    className: `fixed top-16 left-1/2 -translate-x-1/2 z-[10000] px-4 py-3 rounded-lg shadow-2xl text-white ${bg} max-w-sm text-center`
+    className: `fixed left-1/2 -translate-x-1/2 px-4 py-3 rounded-lg shadow-2xl text-white ${bg} max-w-sm text-center`,
+    style: {
+      top: '4rem',
+      zIndex: 10000
+    }
   }, msg);
 }
 
@@ -1498,10 +1507,11 @@ function App() {
     const products = MOCK.productsByBusinessUnit['baiju'] || [];
     return products.length > 0 ? products[0].id : '';
   });
-  // 当业务单元变化时，重置产品选择
+  // 当业务单元变化时，重置产品选择 + 清空已选账户
   useEffect(() => {
     const products = MOCK.productsByBusinessUnit[businessUnit] || [];
     setSpecificProduct(products.length > 0 ? products[0].id : '');
+    setSelectedAccountIds([]);
   }, [businessUnit]);
   const [placement, setPlacement] = useState('wechat_video');
   const [placementScene, setPlacementScene] = useState('');
@@ -1927,22 +1937,19 @@ function App() {
   }, "⚡"), " 腾讯广告搭建流程原型", /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-normal text-gray-400 ml-2"
   }, "完整交互验证版 v2")), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-3 gap-4"
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "业务类型"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: "权益",
-    disabled: true,
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "投放渠道"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: "广点通",
-    disabled: true,
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, "业务单元 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*")), /*#__PURE__*/React.createElement("select", {
+    value: businessUnit,
+    onChange: e => setBusinessUnit(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, MOCK.businessUnits.map(bu => /*#__PURE__*/React.createElement("option", {
+    key: bu.id,
+    value: bu.id
+  }, bu.name, "（", bu.id, "）")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "选择账户 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
@@ -1972,7 +1979,7 @@ function App() {
     className: "fas fa-chevron-down"
   }))), showAccountDropdown && /*#__PURE__*/React.createElement("div", {
     className: "absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-  }, MOCK.accounts.map(acc => /*#__PURE__*/React.createElement("div", {
+  }, MOCK.accounts.filter(acc => acc.businessUnit === businessUnit).map(acc => /*#__PURE__*/React.createElement("div", {
     key: acc.id,
     onClick: () => toggleAccount(acc.id),
     className: "px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-3 border-b border-gray-100 last:border-b-0"
@@ -2023,17 +2030,6 @@ function App() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "业务单元 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, "*")), /*#__PURE__*/React.createElement("select", {
-    value: businessUnit,
-    onChange: e => setBusinessUnit(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-  }, MOCK.businessUnits.map(bu => /*#__PURE__*/React.createElement("option", {
-    key: bu.id,
-    value: bu.id
-  }, bu.name, "（", bu.id, "）")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "营销目的 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
