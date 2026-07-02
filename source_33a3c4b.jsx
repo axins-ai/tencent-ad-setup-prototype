@@ -1361,7 +1361,7 @@ function App() {
 
       {/* ===== 顶部：精简信息栏 ===== */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-screen-xl mx-auto px-4">
           <div className="flex items-center gap-4 py-2.5">
             {/* 标题 */}
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -1404,7 +1404,7 @@ function App() {
 
       {/* ===== 快捷导航 ===== */}
       <div className="bg-white border-b sticky top-[56px] z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1">
+        <div className="max-w-screen-xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1">
           {[
             {id:'section-basic', label:'基础配置', icon:'fa-cog'},
             {id:'section-unit', label:'营销单元', icon:'fa-bullseye'},
@@ -1428,7 +1428,7 @@ function App() {
           )}
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+      <div className="max-w-screen-xl mx-auto px-6 py-6 space-y-6">
         {/* ===== 1. 基础配置 ===== */}
         <div id="section-basic" className="bg-white rounded-xl shadow-sm border">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">

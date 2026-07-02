@@ -1977,7 +1977,7 @@ function App() {
   }), /*#__PURE__*/React.createElement("div", {
     className: "bg-white border-b shadow-sm sticky top-0 z-40"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "max-w-7xl mx-auto px-4"
+    className: "max-w-screen-xl mx-auto px-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4 py-2.5"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2014,7 +2014,7 @@ function App() {
   }, err)))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-white border-b sticky top-[56px] z-30 shadow-sm"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1"
+    className: "max-w-screen-xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1"
   }, [{
     id: 'section-basic',
     label: '基础配置',
@@ -2061,7 +2061,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-users mr-1"
   }), selectedAccountIds.length, "个账户"))), /*#__PURE__*/React.createElement("div", {
-    className: "max-w-7xl mx-auto px-6 py-6 space-y-6"
+    className: "max-w-screen-xl mx-auto px-6 py-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     id: "section-basic",
     className: "bg-white rounded-xl shadow-sm border"
