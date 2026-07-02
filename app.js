@@ -2274,7 +2274,7 @@ function App() {
     className: "btn-primary text-sm"
   }, "确认导入"))))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-unit",
-    className: "bg-white rounded-xl shadow-sm border overflow-hidden"
+    className: "bg-white rounded-xl shadow-sm border"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h2", {
