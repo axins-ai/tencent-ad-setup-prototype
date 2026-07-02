@@ -2150,16 +2150,17 @@ function App() {
     className: "w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0"
   }), /*#__PURE__*/React.createElement("span", {
     className: "flex-1 truncate min-w-0"
-  }, acc.name), /*#__PURE__*/React.createElement("a", {
-    href: acc.kaboshi || '#',
+  }, acc.name), acc.kaboshi && /*#__PURE__*/React.createElement("a", {
+    href: acc.kaboshi,
     target: "_blank",
     rel: "noreferrer",
     onClick: e => e.stopPropagation(),
-    className: "text-xs text-green-600 hover:text-green-800 hover:underline whitespace-nowrap flex-shrink-0 max-w-[180px] truncate",
-    title: acc.kaboshi || '落地页'
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-external-link-alt mr-0.5"
-  }), "落地页"), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
+    className: "text-xs text-green-600 hover:text-green-800 hover:underline flex-shrink-0 truncate",
+    style: {
+      maxWidth: '260px'
+    },
+    title: acc.kaboshi
+  }, acc.kaboshi), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
     className: "fas fa-check text-blue-500 flex-shrink-0"
   })))))), /*#__PURE__*/React.createElement("div", {
     className: "mt-2 flex items-center gap-2"

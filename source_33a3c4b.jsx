@@ -1492,12 +1492,15 @@ function App() {
                               <input type="checkbox" checked={selectedAccountIds.includes(acc.id)} onChange={() => {}}
                                 className="w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0" />
                               <span className="flex-1 truncate min-w-0">{acc.name}</span>
-                              <a href={acc.kaboshi || '#'} target="_blank" rel="noreferrer"
-                                onClick={e => e.stopPropagation()}
-                                className="text-xs text-green-600 hover:text-green-800 hover:underline whitespace-nowrap flex-shrink-0 max-w-[180px] truncate"
-                                title={acc.kaboshi || '落地页'}>
-                                <i className="fas fa-external-link-alt mr-0.5"></i>落地页
-                              </a>
+                              {acc.kaboshi && (
+                                <a href={acc.kaboshi} target="_blank" rel="noreferrer"
+                                  onClick={e => e.stopPropagation()}
+                                  className="text-xs text-green-600 hover:text-green-800 hover:underline flex-shrink-0 truncate"
+                                  style={{ maxWidth: '260px' }}
+                                  title={acc.kaboshi}>
+                                  {acc.kaboshi}
+                                </a>
+                              )}
                               {selectedAccountIds.includes(acc.id) && (
                                 <i className="fas fa-check text-blue-500 flex-shrink-0"></i>
                               )}
