@@ -846,7 +846,7 @@ function TimeGrid({ value, onChange }) {
   };
 
   return (
-    <div style={{border:'1px solid #e5e7eb', borderRadius:'8px', overflowX:'auto'}}>
+    <div style={{border:'1px solid #e5e7eb', borderRadius:'8px', maxWidth:'100%', overflowX:'auto'}}>
       <table cellSpacing={0} cellPadding={0} style={{width:'900px', borderCollapse:'collapse', fontSize:'13px', tableLayout:'fixed', minWidth:'900px'}}>
         <thead>
           <tr style={{background:'#fafafa'}}>

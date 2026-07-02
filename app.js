@@ -1293,6 +1293,7 @@ function TimeGrid({
     style: {
       border: '1px solid #e5e7eb',
       borderRadius: '8px',
+      maxWidth: '100%',
       overflowX: 'auto'
     }
   }, /*#__PURE__*/React.createElement("table", {
