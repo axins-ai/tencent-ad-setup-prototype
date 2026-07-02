@@ -3431,24 +3431,25 @@ function App() {
     value: "random"
   }, "随机分配")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "落地页（卡博士链接 + 宏参数已自动拼接）"), selectedAccountIds.length > 0 ? /*#__PURE__*/React.createElement("div", {
-    className: "space-y-2"
+  }, "落地页（卡博士链接）"), selectedAccountIds.length > 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "border border-gray-200 rounded-lg overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-h-60 overflow-y-auto divide-y divide-gray-100"
   }, selectedAccountIds.map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
-    const landingUrl = acc ? acc.kaboshi + '?click_id={click_id}&ad_id={ad_id}' : '';
     return acc ? /*#__PURE__*/React.createElement("div", {
       key: id,
-      className: "p-3 bg-gray-50 border border-gray-200 rounded-lg"
+      className: "p-3 hover:bg-gray-50"
     }, /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-gray-500 mb-1"
-    }, acc.name, " 的落地页："), /*#__PURE__*/React.createElement("code", {
-      className: "text-sm text-gray-700 break-all"
-    }, landingUrl)) : null;
-  })) : /*#__PURE__*/React.createElement("p", {
+    }, acc.name), /*#__PURE__*/React.createElement("code", {
+      className: "text-sm text-blue-600 break-all"
+    }, acc.kaboshi)) : null;
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "bg-gray-50 px-3 py-2 text-xs text-gray-400 border-t"
+  }, "✅ 宏参数（click_id、ad_id）将在投放时自动拼接")) : /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
-  }, "请先选择账户，落地页将自动生成"), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400 mt-2"
-  }, "✅ 宏参数已默认拼接：click_id、ad_id")), /*#__PURE__*/React.createElement("div", {
+  }, "请先选择账户，落地页将自动生成")), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"

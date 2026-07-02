@@ -2550,26 +2550,29 @@ function App() {
               </div>
             </div>
 
-            {/* 落地页（默认已拼接宏参数） */}
+            {/* 落地页 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">落地页（卡博士链接 + 宏参数已自动拼接）</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">落地页（卡博士链接）</label>
               {selectedAccountIds.length > 0 ? (
-                <div className="space-y-2">
-                  {selectedAccountIds.map(id => {
-                    const acc = MOCK.accounts.find(a => a.id === id);
-                    const landingUrl = acc ? acc.kaboshi + '?click_id={click_id}&ad_id={ad_id}' : '';
-                    return acc ? (
-                      <div key={id} className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                        <p className="text-xs text-gray-500 mb-1">{acc.name} 的落地页：</p>
-                        <code className="text-sm text-gray-700 break-all">{landingUrl}</code>
-                      </div>
-                    ) : null;
-                  })}
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="max-h-60 overflow-y-auto divide-y divide-gray-100">
+                    {selectedAccountIds.map(id => {
+                      const acc = MOCK.accounts.find(a => a.id === id);
+                      return acc ? (
+                        <div key={id} className="p-3 hover:bg-gray-50">
+                          <p className="text-xs text-gray-500 mb-1">{acc.name}</p>
+                          <code className="text-sm text-blue-600 break-all">{acc.kaboshi}</code>
+                        </div>
+                      ) : null;
+                    })}
+                  </div>
+                  <div className="bg-gray-50 px-3 py-2 text-xs text-gray-400 border-t">
+                    ✅ 宏参数（click_id、ad_id）将在投放时自动拼接
+                  </div>
                 </div>
               ) : (
                 <p className="text-sm text-gray-400">请先选择账户，落地页将自动生成</p>
               )}
-              <p className="text-xs text-gray-400 mt-2">✅ 宏参数已默认拼接：click_id、ad_id</p>
             </div>
 
             {/* 品牌形象 & 营销组件 */}
