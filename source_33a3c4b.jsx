@@ -58,16 +58,16 @@ const MOCK = {
     ]
   },
   accounts: [
-    { id: 'acc_001', name: 'acc_001-北京移动', kaboshi: 'https://kaboshi.example.com/acc001', businessUnit: 'baiju' },
-    { id: 'acc_002', name: 'acc_002-上海移动', kaboshi: 'https://kaboshi.example.com/acc002', businessUnit: 'baiju' },
-    { id: 'acc_003', name: 'acc_003-广州移动', kaboshi: 'https://kaboshi.example.com/acc003', businessUnit: 'baiju' },
-    { id: 'acc_004', name: 'acc_004-深圳移动', kaboshi: 'https://kaboshi.example.com/acc004', businessUnit: 'fenghua' },
-    { id: 'acc_005', name: 'acc_005-杭州移动', kaboshi: 'https://kaboshi.example.com/acc005', businessUnit: 'fenghua' },
-    { id: 'acc_006', name: 'acc_006-成都移动', kaboshi: 'https://kaboshi.example.com/acc006', businessUnit: 'fenghua' },
-    { id: 'acc_007', name: 'acc_007-武汉移动', kaboshi: 'https://kaboshi.example.com/acc007', businessUnit: 'fuwei' },
-    { id: 'acc_008', name: 'acc_008-南京移动', kaboshi: 'https://kaboshi.example.com/acc008', businessUnit: 'fuwei' },
-    { id: 'acc_009', name: 'acc_009-西安移动', kaboshi: 'https://kaboshi.example.com/acc009', businessUnit: 'fuwei' },
-    { id: 'acc_010', name: 'acc_010-重庆移动', kaboshi: 'https://kaboshi.example.com/acc010', businessUnit: 'baiju' },
+    { id: 'acc_001', name: 'acc_001-北京移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG001', businessUnit: 'baiju' },
+    { id: 'acc_002', name: 'acc_002-上海移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG002', businessUnit: 'baiju' },
+    { id: 'acc_003', name: 'acc_003-广州移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG003', businessUnit: 'baiju' },
+    { id: 'acc_004', name: 'acc_004-深圳移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG004', businessUnit: 'fenghua' },
+    { id: 'acc_005', name: 'acc_005-杭州移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG005', businessUnit: 'fenghua' },
+    { id: 'acc_006', name: 'acc_006-成都移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG006', businessUnit: 'fenghua' },
+    { id: 'acc_007', name: 'acc_007-武汉移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG007', businessUnit: 'fuwei' },
+    { id: 'acc_008', name: 'acc_008-南京移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG008', businessUnit: 'fuwei' },
+    { id: 'acc_009', name: 'acc_009-西安移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG009', businessUnit: 'fuwei' },
+    { id: 'acc_010', name: 'acc_010-重庆移动', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG010', businessUnit: 'baiju' },
   ],
   specificProducts: [
     { id: 'sp_001', name: '移动大王卡19元档' },
@@ -846,8 +846,8 @@ function TimeGrid({ value, onChange }) {
   };
 
   return (
-    <div style={{border:'1px solid #e5e7eb', borderRadius:'8px', overflow:'hidden'}}>
-      <table cellSpacing={0} cellPadding={0} style={{width:'100%', borderCollapse:'collapse', fontSize:'13px', tableLayout:'fixed'}}>
+    <div style={{border:'1px solid #e5e7eb', borderRadius:'8px', overflowX:'auto'}}>
+      <table cellSpacing={0} cellPadding={0} style={{width:'900px', borderCollapse:'collapse', fontSize:'13px', tableLayout:'fixed', minWidth:'900px'}}>
         <thead>
           <tr style={{background:'#fafafa'}}>
             <th rowSpan={2} style={{width:'60px', borderRight:'1px solid #e5e7eb', borderBottom:'1px solid #e5e7eb', padding:'8px 4px', textAlign:'center', fontSize:'12px', color:'#666', fontWeight:400}}>星期\时间</th>
@@ -1215,11 +1215,11 @@ function App() {
     notify(`已添加 ${matched.length} 个账户，共选择 ${newIds.length} 个`);
   };
 
-  // 获取当前账户默认落地页（已拼接宏参数）
+  // 获取当前账户落地页（纯URL，宏参数投放时自动拼接）
   const getDefaultLandingPage = (accountId) => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     if (!acc) return '';
-    return acc.kaboshi + '?click_id={click_id}&ad_id={ad_id}';
+    return acc.kaboshi || '';
   };
 
   // 生成创意组合（考虑定向包组合）
@@ -1487,13 +1487,19 @@ function App() {
                         ) : (
                           filteredAccounts.map(acc => (
                             <div key={acc.id} onClick={() => toggleAccount(acc.id)}
-                              className="px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-3 text-sm border-b border-gray-100 last:border-b-0"
+                              className="px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-2 text-sm border-b border-gray-100 last:border-b-0"
                             >
                               <input type="checkbox" checked={selectedAccountIds.includes(acc.id)} onChange={() => {}}
-                                className="w-4 h-4 text-blue-600 rounded pointer-events-none" />
-                              <span className="flex-1">{acc.name}</span>
+                                className="w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0" />
+                              <span className="flex-1 truncate min-w-0">{acc.name}</span>
+                              <a href={acc.kaboshi || '#'} target="_blank" rel="noreferrer"
+                                onClick={e => e.stopPropagation()}
+                                className="text-xs text-green-600 hover:text-green-800 hover:underline whitespace-nowrap flex-shrink-0 max-w-[180px] truncate"
+                                title={acc.kaboshi || '落地页'}>
+                                <i className="fas fa-external-link-alt mr-0.5"></i>落地页
+                              </a>
                               {selectedAccountIds.includes(acc.id) && (
-                                <i className="fas fa-check text-blue-500"></i>
+                                <i className="fas fa-check text-blue-500 flex-shrink-0"></i>
                               )}
                             </div>
                           ))
@@ -2548,31 +2554,6 @@ function App() {
                   <option value="random">随机分配</option>
                 </select>
               </div>
-            </div>
-
-            {/* 落地页 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">落地页（卡博士链接）</label>
-              {selectedAccountIds.length > 0 ? (
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="max-h-60 overflow-y-auto divide-y divide-gray-100">
-                    {selectedAccountIds.map(id => {
-                      const acc = MOCK.accounts.find(a => a.id === id);
-                      return acc ? (
-                        <div key={id} className="p-3 hover:bg-gray-50">
-                          <p className="text-xs text-gray-500 mb-1">{acc.name}</p>
-                          <code className="text-sm text-blue-600 break-all">{acc.kaboshi}</code>
-                        </div>
-                      ) : null;
-                    })}
-                  </div>
-                  <div className="bg-gray-50 px-3 py-2 text-xs text-gray-400 border-t">
-                    ✅ 宏参数（click_id、ad_id）将在投放时自动拼接
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-400">请先选择账户，落地页将自动生成</p>
-              )}
             </div>
 
             {/* 品牌形象 & 营销组件 */}
