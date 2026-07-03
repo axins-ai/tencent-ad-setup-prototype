@@ -1428,7 +1428,7 @@ function App() {
           )}
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6" style={{border:'4px solid blue'}}>
+      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
         {/* ===== 1. 基础配置 ===== */}
         <div id="section-basic" className="bg-white rounded-xl shadow-sm border">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
@@ -2359,10 +2359,9 @@ function App() {
               </div>
             </div>
           </div>
-        </div>
 
         {/* ===== 底部：创意配置 ===== */}
-        <div id="section-creative" className="bg-white rounded-xl shadow-sm border overflow-hidden" style={{border:'4px solid red'}}>
+        <div id="section-creative" className="bg-white rounded-xl shadow-sm border overflow-hidden">
           <div className="bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
@@ -2911,6 +2910,8 @@ function App() {
                 </div>
               </div>
             )}
+
+        </div>
 
     </div>
   );

@@ -2061,10 +2061,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-users mr-1"
   }), selectedAccountIds.length, "个账户"))), /*#__PURE__*/React.createElement("div", {
-    className: "max-w-7xl mx-auto px-6 py-6 space-y-6",
-    style: {
-      border: '4px solid blue'
-    }
+    className: "max-w-7xl mx-auto px-6 py-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     id: "section-basic",
     className: "bg-white rounded-xl shadow-sm border"
@@ -3206,12 +3203,9 @@ function App() {
     key: v,
     onClick: () => setUnitName(unitName + '{' + v + '}'),
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-  }, "+", v)))))))), /*#__PURE__*/React.createElement("div", {
+  }, "+", v))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-creative",
-    className: "bg-white rounded-xl shadow-sm border overflow-hidden",
-    style: {
-      border: '4px solid red'
-    }
+    className: "bg-white rounded-xl shadow-sm border overflow-hidden"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h2", {
@@ -3852,7 +3846,7 @@ function App() {
   }, "取消"), /*#__PURE__*/React.createElement("button", {
     onClick: doSaveAsTgtPkg,
     className: "btn-primary text-sm"
-  }, "保存")))));
+  }, "保存"))))));
 }
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(/*#__PURE__*/React.createElement(App, null));
