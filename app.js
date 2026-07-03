@@ -3205,7 +3205,10 @@ function App() {
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
   }, "+", v)))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-creative",
-    className: "bg-white rounded-xl shadow-sm border overflow-hidden"
+    className: "bg-white rounded-xl shadow-sm border overflow-hidden",
+    style: {
+      border: '4px solid red'
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h2", {
