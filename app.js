@@ -2286,7 +2286,10 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "far fa-clock mr-1"
   }), "配置定向、出价、投放设置"))), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 space-y-6"
+    className: "p-6 space-y-6",
+    style: {
+      padding: '24px'
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {

@@ -1615,7 +1615,7 @@ function App() {
               <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
             </h2>
           </div>
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-6" style={{padding:'24px'}}>
             {/* 营销目的 & 推广产品 & 产品 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
