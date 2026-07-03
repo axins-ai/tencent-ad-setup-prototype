@@ -2534,7 +2534,7 @@ function App() {
         className: "fas fa-times text-xs"
       }))) : null;
     }))));
-  }))), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-semibold text-gray-900 mb-3"
@@ -3206,7 +3206,7 @@ function App() {
     key: v,
     onClick: () => setUnitName(unitName + '{' + v + '}'),
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-  }, "+", v))))))), /*#__PURE__*/React.createElement("div", {
+  }, "+", v)))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-creative",
     className: "bg-white rounded-xl shadow-sm border"
   }, /*#__PURE__*/React.createElement("div", {

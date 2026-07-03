@@ -1812,7 +1812,6 @@ function App() {
                   })}
                 </div>
               )}
-            </div>
 
             {/* 定向配置 */}
             <div className="border-t pt-4">
@@ -2359,6 +2358,7 @@ function App() {
               </div>
             </div>
           </div>
+        </div>
 
         {/* ===== 底部：创意配置 ===== */}
         <div id="section-creative" className="bg-white rounded-xl shadow-sm border">
