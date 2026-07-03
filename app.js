@@ -2061,7 +2061,10 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-users mr-1"
   }), selectedAccountIds.length, "个账户"))), /*#__PURE__*/React.createElement("div", {
-    className: "max-w-7xl mx-auto px-6 py-6 space-y-6"
+    className: "max-w-7xl mx-auto px-6 py-6 space-y-6",
+    style: {
+      border: '4px solid blue'
+    }
   }, /*#__PURE__*/React.createElement("div", {
     id: "section-basic",
     className: "bg-white rounded-xl shadow-sm border"

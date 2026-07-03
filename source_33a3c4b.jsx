@@ -1428,7 +1428,7 @@ function App() {
           )}
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6" style={{border:'4px solid blue'}}>
         {/* ===== 1. 基础配置 ===== */}
         <div id="section-basic" className="bg-white rounded-xl shadow-sm border">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
