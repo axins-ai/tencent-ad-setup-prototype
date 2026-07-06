@@ -2530,61 +2530,34 @@ function App() {
               )}
             </div>
 
-            {/* 创意组合预览 */}
-            {selectedMaterials.length > 0 && selectedCopies.length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-sm font-bold text-blue-900 mb-2">创意组合预览</h4>
-                <p className="text-sm text-blue-700">
-                  固定分配：每创意 {composeRule.materials}素材 + {composeRule.copies}文案，
-                  预计可生成 <span className="font-bold">{(() => {
-                    const materialCount = selectedMaterials.length;
-                    const copyCount = selectedCopies.length;
-                    const m = composeRule.materials || 1;
-                    const c = composeRule.copies || 1;
-                    const maxByMaterials = Math.floor(materialCount / m);
-                    const maxByCopies = Math.floor(copyCount / c);
-                    const perUnit = Math.min(maxByMaterials, maxByCopies);
-                    const total = composeStrategy === 'copy' ? perUnit * selectedAccountIds.length : perUnit;
-                    return total;
-                  })()}</span> 个创意/单元
-                  {composeStrategy === 'copy' && selectedAccountIds.length > 0 && (
-                    <span className="text-xs text-gray-500">（每单元{(() => {
-                      const m = composeRule.materials || 1;
-                      const c = composeRule.copies || 1;
-                      const perUnit = Math.min(Math.floor(selectedMaterials.length / m), Math.floor(selectedCopies.length / c));
-                      return perUnit;
-                    })()}个×{selectedAccountIds.length}个账户）</span>
-                  )}
-                </p>
-              </div>
-            )}
-
             {/* 创意素材分配 */}
             <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材分配</h4>
-              <div className="flex items-center gap-6 mb-4">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600 whitespace-nowrap">单创意素材</label>
-                  <input type="number" min="1" max="10" value={composeRule.materials} onChange={e => setComposeRule({...composeRule, materials: Math.max(1, parseInt(e.target.value)||1)})} className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600 whitespace-nowrap">单创意文案</label>
-                  <input type="number" min="1" max="10" value={composeRule.copies} onChange={e => setComposeRule({...composeRule, copies: Math.max(1, parseInt(e.target.value)||1)})} className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-              </div>
-
-              {/* 创意分配策略 */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2"><i className="fas fa-copy mr-2 text-blue-500"></i>创意分配策略</label>
+              <h4 className="text-sm font-bold text-gray-900 mb-4"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材分配</h4>
+              <div className="space-y-4">
                 <div className="flex items-center gap-6">
-                  <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="compose_strategy" value="copy" checked={composeStrategy === 'copy'} onChange={() => setComposeStrategy('copy')} className="mr-2" />
-                    <span className="text-sm">复制分配（所有账户用相同素材）</span>
-                  </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="compose_strategy" value="average" checked={composeStrategy === 'average'} onChange={() => setComposeStrategy('average')} className="mr-2" />
-                    <span className="text-sm">平均分配</span>
-                  </label>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-600 whitespace-nowrap">单创意素材</label>
+                    <input type="number" min="1" max="10" value={composeRule.materials} onChange={e => setComposeRule({...composeRule, materials: Math.max(1, parseInt(e.target.value)||1)})} className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-600 whitespace-nowrap">单创意文案</label>
+                    <input type="number" min="1" max="10" value={composeRule.copies} onChange={e => setComposeRule({...composeRule, copies: Math.max(1, parseInt(e.target.value)||1)})} className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                </div>
+
+                {/* 创意分配策略 */}
+                <div className="border-t pt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-copy mr-2 text-blue-500"></i>创意分配策略</label>
+                  <div className="flex items-center gap-6">
+                    <label className="flex items-center cursor-pointer">
+                      <input type="radio" name="compose_strategy" value="copy" checked={composeStrategy === 'copy'} onChange={() => setComposeStrategy('copy')} className="mr-2" />
+                      <span className="text-sm">复制分配（所有账户用相同素材）</span>
+                    </label>
+                    <label className="flex items-center cursor-pointer">
+                      <input type="radio" name="compose_strategy" value="average" checked={composeStrategy === 'average'} onChange={() => setComposeStrategy('average')} className="mr-2" />
+                      <span className="text-sm">平均分配</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 

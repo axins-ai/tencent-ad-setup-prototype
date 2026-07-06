@@ -3392,39 +3392,16 @@ function App() {
     className: "text-red-500 hover:text-red-700 ml-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-times"
-  }))))))), selectedMaterials.length > 0 && selectedCopies.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-50 border border-blue-200 rounded-lg p-4"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "text-sm font-bold text-blue-900 mb-2"
-  }, "创意组合预览"), /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-blue-700"
-  }, "固定分配：每创意 ", composeRule.materials, "素材 + ", composeRule.copies, "文案， 预计可生成 ", /*#__PURE__*/React.createElement("span", {
-    className: "font-bold"
-  }, (() => {
-    const materialCount = selectedMaterials.length;
-    const copyCount = selectedCopies.length;
-    const m = composeRule.materials || 1;
-    const c = composeRule.copies || 1;
-    const maxByMaterials = Math.floor(materialCount / m);
-    const maxByCopies = Math.floor(copyCount / c);
-    const perUnit = Math.min(maxByMaterials, maxByCopies);
-    const total = composeStrategy === 'copy' ? perUnit * selectedAccountIds.length : perUnit;
-    return total;
-  })()), " 个创意/单元", composeStrategy === 'copy' && selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-gray-500"
-  }, "（每单元", (() => {
-    const m = composeRule.materials || 1;
-    const c = composeRule.copies || 1;
-    const perUnit = Math.min(Math.floor(selectedMaterials.length / m), Math.floor(selectedCopies.length / c));
-    return perUnit;
-  })(), "个×", selectedAccountIds.length, "个账户）"))), /*#__PURE__*/React.createElement("div", {
+  }))))))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h4", {
-    className: "text-sm font-bold text-gray-900 mb-3"
+    className: "text-sm font-bold text-gray-900 mb-4"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-layer-group mr-2 text-blue-500"
   }), "创意素材分配"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-6 mb-4"
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("label", {
@@ -3454,9 +3431,9 @@ function App() {
     }),
     className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   }))), /*#__PURE__*/React.createElement("div", {
-    className: "mb-4"
+    className: "border-t pt-3"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
+    className: "block text-sm font-medium text-gray-700 mb-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-copy mr-2 text-blue-500"
   }), "创意分配策略"), /*#__PURE__*/React.createElement("div", {
@@ -3483,7 +3460,7 @@ function App() {
     className: "mr-2"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "平均分配")))), /*#__PURE__*/React.createElement("div", {
+  }, "平均分配"))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-blue-50 border border-blue-200 rounded-lg p-3"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-1"
