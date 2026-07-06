@@ -140,6 +140,12 @@ const MOCK = {
     { id: 'c_007', content: '5G极速，畅快体验', ctr: 3.2 },
     { id: 'c_008', content: '家庭共享，多人更划算', ctr: 2.9 }
   ],
+  // 文案包
+  copyPackages: [
+    { id: 'cpkg_001', name: '新客引流包', copies: ['c_002', 'c_003', 'c_007'] },
+    { id: 'cpkg_002', name: '优惠促活包', copies: ['c_001', 'c_004', 'c_006'] },
+    { id: 'cpkg_003', name: '品牌形象包', copies: ['c_005', 'c_008'] }
+  ],
   videoSceneOptions: [
     { id: 'vs_001', label: '视频号原生广告-主入口', tip: '朋友圈上方视频号信息流中的广告位' },
     { id: 'vs_002', label: '视频号原生广告-订阅号入口', tip: '订阅号消息中的视频号内容广告位' },
@@ -609,18 +615,21 @@ function MaterialModal({ show, onClose, onConfirm, selectedMaterials, accountId 
   );
 }
 
-// 文案库弹窗（支持批量选择 + 添加文案，无CTR）
+// 文案库弹窗（以文案包为单位选择，支持新增文案包）
 function CopyModal({ show, onClose, onConfirm, selectedCopies }) {
   const [localSelected, setLocalSelected] = useState(selectedCopies.map(c => c.id));
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newCopyContent, setNewCopyContent] = useState('');
   const [copies, setCopies] = useState(MOCK.copyLibrary);
+  const [packages, setPackages] = useState(MOCK.copyPackages);
+  const [expandedPkg, setExpandedPkg] = useState(null); // 当前展开的文案包id
+  const [showNewPkg, setShowNewPkg] = useState(false);
+  const [newPkgName, setNewPkgName] = useState('');
+  const [newPkgCopies, setNewPkgCopies] = useState(['', '', '']); // 最多3条
 
   useEffect(() => {
     if (show) {
       setLocalSelected(selectedCopies.map(c => c.id));
-      setShowAddForm(false);
-      setNewCopyContent('');
+      setExpandedPkg(null);
+      setShowNewPkg(false);
     }
   }, [show, selectedCopies]);
 
@@ -632,30 +641,40 @@ function CopyModal({ show, onClose, onConfirm, selectedCopies }) {
     }
   };
 
-  const handleAddCopy = () => {
-    if (!newCopyContent.trim()) return;
-    const newCopy = {
-      id: `c_${Date.now()}`,
-      content: newCopyContent.trim(),
-      ctr: 0
-    };
-    setCopies([newCopy, ...copies]);
-    setLocalSelected([...localSelected, newCopy.id]);
-    setNewCopyContent('');
-    setShowAddForm(false);
+  const togglePackage = (pkgId) => {
+    const pkg = packages.find(p => p.id === pkgId);
+    if (!pkg) return;
+    const pkgCopyIds = pkg.copies;
+    const allSelected = pkgCopyIds.every(id => localSelected.includes(id));
+    if (allSelected) {
+      setLocalSelected(localSelected.filter(s => !pkgCopyIds.includes(s)));
+    } else {
+      const newSelected = [...new Set([...localSelected, ...pkgCopyIds])];
+      setLocalSelected(newSelected);
+    }
   };
 
-  const handleBatchInput = () => {
-    const input = prompt('请输入文案内容，每行一条：');
-    if (!input) return;
-    const lines = input.split('\n').map(s => s.trim()).filter(Boolean);
-    const newCopies = lines.map((content, i) => ({
-      id: `c_batch_${Date.now()}_${i}`,
-      content,
+  const handleAddPackage = () => {
+    if (!newPkgName.trim()) { alert('请输入文案包名称'); return; }
+    const validCopies = newPkgCopies.filter(c => c.trim());
+    if (validCopies.length === 0) { alert('请至少输入一条文案'); return; }
+    const newCopyIds = validCopies.map((_, i) => `c_${Date.now()}_${i}`);
+    const newCopies = validCopies.map((content, i) => ({
+      id: newCopyIds[i],
+      content: content.trim(),
       ctr: 0
     }));
-    setCopies([...newCopies, ...copies]);
-    setLocalSelected([...localSelected, ...newCopies.map(c => c.id)]);
+    const newPkg = {
+      id: `cpkg_${Date.now()}`,
+      name: newPkgName.trim(),
+      copies: newCopyIds
+    };
+    setCopies([...copies, ...newCopies]);
+    setPackages([...packages, newPkg]);
+    setLocalSelected([...localSelected, ...newCopyIds]);
+    setNewPkgName('');
+    setNewPkgCopies(['', '', '']);
+    setShowNewPkg(false);
   };
 
   const handleConfirm = () => {
@@ -666,52 +685,105 @@ function CopyModal({ show, onClose, onConfirm, selectedCopies }) {
 
   if (!show) return null;
 
+  const getPackageCopyCount = (pkg) => pkg.copies.filter(id => copies.find(c => c.id === id)).length;
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content w-full max-w-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-bold">选择广告文案（已选 {localSelected.length} 条，支持多选）</h3>
+          <h3 className="text-lg font-bold">选择广告文案（已选 {localSelected.length} 条，以文案包为单位）</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
         </div>
         <div className="px-4 py-2 border-b bg-gray-50 flex gap-3">
-          <button onClick={() => setShowAddForm(!showAddForm)} className="btn-secondary text-sm">
-            <i className="fas fa-plus mr-1"></i>{showAddForm ? '收起' : '添加文案'}
-          </button>
-          <button onClick={handleBatchInput} className="btn-secondary text-sm">
-            <i className="fas fa-list mr-1"></i>批量添加
+          <button onClick={() => setShowNewPkg(!showNewPkg)} className="btn-secondary text-sm">
+            <i className="fas fa-plus mr-1"></i>{showNewPkg ? '收起' : '新增文案包'}
           </button>
         </div>
-        {showAddForm && (
-          <div className="px-4 py-3 border-b bg-blue-50">
-            <div className="flex gap-2 items-end">
-              <div className="flex-1">
-                <label className="block text-xs text-gray-600 mb-1">文案内容</label>
+        {showNewPkg && (
+          <div className="px-4 py-3 border-b bg-blue-50 animate-fadeIn">
+            <div className="flex items-center gap-3 mb-3">
+              <label className="text-sm text-gray-700 font-medium">文案包名称：</label>
+              <input
+                type="text"
+                value={newPkgName}
+                onChange={e => setNewPkgName(e.target.value)}
+                placeholder="输入文案包名称"
+                className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <p className="text-xs text-gray-500 mb-2">输入文案内容（最多3条，至少1条）：</p>
+            {newPkgCopies.map((v, i) => (
+              <div key={i} className="flex items-center gap-2 mb-2">
+                <span className="text-xs text-gray-500 w-12">{i+1}.</span>
                 <input
                   type="text"
-                  value={newCopyContent}
-                  onChange={e => setNewCopyContent(e.target.value)}
-                  placeholder="输入文案内容"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  value={v}
+                  onChange={e => {
+                    const newArr = [...newPkgCopies];
+                    newArr[i] = e.target.value;
+                    setNewPkgCopies(newArr);
+                  }}
+                  placeholder={`文案${i+1}`}
+                  className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <button onClick={handleAddCopy} className="btn-primary text-sm">添加</button>
+            ))}
+            <div className="flex justify-end gap-2 mt-2">
+              <button onClick={() => setShowNewPkg(false)} className="btn-secondary text-sm">取消</button>
+              <button onClick={handleAddPackage} className="btn-primary text-sm">创建文案包</button>
             </div>
           </div>
         )}
         <div className="overflow-y-auto flex-1 p-4" style={{maxHeight: '55vh'}}>
-          <div className="space-y-2">
-            {[...copies].map(copy => {
-              const isSelected = localSelected.includes(copy.id);
+          <div className="space-y-3">
+            {packages.map(pkg => {
+              const pkgCopyIds = pkg.copies;
+              const allSelected = pkgCopyIds.every(id => localSelected.includes(id));
+              const someSelected = pkgCopyIds.some(id => localSelected.includes(id));
+              const isExpanded = expandedPkg === pkg.id;
               return (
-                <div
-                  key={copy.id}
-                  onClick={() => toggleSelect(copy.id)}
-                  className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-900">{copy.content}</span>
+                <div key={pkg.id} className="border border-gray-200 rounded-xl overflow-hidden">
+                  <div
+                    onClick={() => setExpandedPkg(isExpanded ? null : pkg.id)}
+                    className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors ${allSelected ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'}`}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0" onClick={e => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={() => togglePackage(pkg.id)}
+                        className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-gray-900">{pkg.name}</span>
+                        <span className="text-xs text-gray-500 ml-2">（{getPackageCopyCount(pkg)}条文案）</span>
+                      </div>
+                      {someSelected && !allSelected && (
+                        <span className="text-xs text-orange-500">部分已选</span>
+                      )}
+                    </div>
+                    <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-gray-400 text-sm ml-2`}></i>
                   </div>
-                  {isSelected && <div className="text-right mt-1"><i className="fas fa-check-circle text-blue-500"></i></div>}
+                  {isExpanded && (
+                    <div className="border-t border-gray-100 divide-y divide-gray-100">
+                      {pkg.copies.map(copyId => {
+                        const copy = copies.find(c => c.id === copyId);
+                        if (!copy) return null;
+                        const isSelected = localSelected.includes(copy.id);
+                        return (
+                          <div
+                            key={copy.id}
+                            onClick={() => toggleSelect(copy.id)}
+                            className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                          >
+                            <input type="checkbox" checked={isSelected} onChange={() => {}} className="w-3.5 h-3.5 text-blue-600 rounded flex-shrink-0" />
+                            <span className="text-sm text-gray-900">{copy.content}</span>
+                            {isSelected && <i className="fas fa-check-circle text-blue-500 ml-auto"></i>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -888,13 +960,15 @@ function TimeGrid({ value, onChange }) {
                       borderRight: isNoonBoundary ? '2px solid #e5e7eb' : (isHourBoundary ? '1px solid #e5e7eb' : '1px solid #f0f0f0'),
                       padding: 0,
                       userSelect: 'none',
-                      width: '2.0833%'
+                      width: '2.0833%',
+                      verticalAlign: 'middle',
+                      lineHeight: 0
                     }}
                   >
                     <div style={{
                       width: '100%',
-                      height: '26px',
-                      margin: '1px 0',
+                      height: '24px',
+                      margin: 0,
                       borderRadius: '2px',
                       backgroundColor: isSelected ? '#3b82f6' : '#f9fafb'
                     }}
@@ -1268,7 +1342,18 @@ function App() {
       creativesPerUnit = Math.min(maxByMaterials, maxByCopies);
       if (creativesPerUnit < 0) creativesPerUnit = 0;
     }
-    const totalCreatives = totalUnits * creativesPerUnit;
+    // 复制分配：每个账户独立使用全部素材，总创意数 = 每单元创意数 × 单元数
+    // 平均分配：素材在账户间平均分配，总创意数 = 每单元创意数 × 定向包数
+    const totalForUnits = creativesPerUnit * unitsPerAccount;
+    const totalForTps = creativesPerUnit * tpCount;
+    let totalCreatives = 0;
+    if (composeStrategy === 'copy') {
+      // 复制分配：每个账户独立使用所有素材
+      totalCreatives = totalForUnits;
+    } else {
+      // 平均分配：素材在所有单元间共享
+      totalCreatives = totalForTps;
+    }
 
     return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, creativesPerUnit, totalCreatives };
   };
@@ -2458,8 +2543,18 @@ function App() {
                     const c = composeRule.copies || 1;
                     const maxByMaterials = Math.floor(materialCount / m);
                     const maxByCopies = Math.floor(copyCount / c);
-                    return Math.min(maxByMaterials, maxByCopies);
+                    const perUnit = Math.min(maxByMaterials, maxByCopies);
+                    const total = composeStrategy === 'copy' ? perUnit * selectedAccountIds.length : perUnit;
+                    return total;
                   })()}</span> 个创意/单元
+                  {composeStrategy === 'copy' && selectedAccountIds.length > 0 && (
+                    <span className="text-xs text-gray-500">（每单元{(() => {
+                      const m = composeRule.materials || 1;
+                      const c = composeRule.copies || 1;
+                      const perUnit = Math.min(Math.floor(selectedMaterials.length / m), Math.floor(selectedCopies.length / c));
+                      return perUnit;
+                    })()}个×{selectedAccountIds.length}个账户）</span>
+                  )}
                 </p>
               </div>
             )}
@@ -2469,18 +2564,18 @@ function App() {
               <h4 className="text-sm font-bold text-gray-900 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材分配</h4>
               <div className="flex items-center gap-6 mb-4">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600 whitespace-nowrap">素材数量</label>
+                  <label className="text-sm text-gray-600 whitespace-nowrap">单创意素材</label>
                   <input type="number" min="1" max="10" value={composeRule.materials} onChange={e => setComposeRule({...composeRule, materials: Math.max(1, parseInt(e.target.value)||1)})} className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600 whitespace-nowrap">文案数量</label>
+                  <label className="text-sm text-gray-600 whitespace-nowrap">单创意文案</label>
                   <input type="number" min="1" max="10" value={composeRule.copies} onChange={e => setComposeRule({...composeRule, copies: Math.max(1, parseInt(e.target.value)||1)})} className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
 
               {/* 创意分配策略 */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2"><i className="fas fa-copy mr-2 text-blue-500"></i>创意分配策略</label>
                 <div className="flex items-center gap-6">
                   <label className="flex items-center cursor-pointer">
                     <input type="radio" name="compose_strategy" value="copy" checked={composeStrategy === 'copy'} onChange={() => setComposeStrategy('copy')} className="mr-2" />
@@ -2507,8 +2602,15 @@ function App() {
                     const maxByCopies = Math.floor(copyCount / c);
                     maxCreatives = Math.min(maxByMaterials, maxByCopies);
                   }
+                  // 复制分配：×账户数；平均分配：不乘
+                  const finalCreatives = composeStrategy === 'copy' ? maxCreatives * selectedAccountIds.length : maxCreatives;
                   return (
-                    <p className="text-lg font-bold text-blue-600">{isNaN(maxCreatives) ? 0 : maxCreatives} 个创意</p>
+                    <p className="text-lg font-bold text-blue-600">
+                      {isNaN(finalCreatives) ? 0 : finalCreatives} 个创意
+                      <span className="text-xs font-normal text-gray-500 ml-2">
+                        {composeStrategy === 'copy' ? `(每账户${maxCreatives}个×${selectedAccountIds.length}个账户)` : `(平均分配)`}
+                      </span>
+                    </p>
                   );
                 })()}
                 <p className="text-xs text-gray-400 mt-1">
