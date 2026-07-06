@@ -765,20 +765,13 @@ function CopyModal({ show, onClose, onConfirm, selectedCopies }) {
                     <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-gray-400 text-sm ml-2`}></i>
                   </div>
                   {isExpanded && (
-                    <div className="border-t border-gray-100 divide-y divide-gray-100">
+                    <div className="border-t border-gray-100 divide-y divide-gray-100 bg-gray-50">
                       {pkg.copies.map(copyId => {
                         const copy = copies.find(c => c.id === copyId);
                         if (!copy) return null;
-                        const isSelected = localSelected.includes(copy.id);
                         return (
-                          <div
-                            key={copy.id}
-                            onClick={() => toggleSelect(copy.id)}
-                            className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                          >
-                            <input type="checkbox" checked={isSelected} onChange={() => {}} className="w-3.5 h-3.5 text-blue-600 rounded flex-shrink-0" />
-                            <span className="text-sm text-gray-900">{copy.content}</span>
-                            {isSelected && <i className="fas fa-check-circle text-blue-500 ml-auto"></i>}
+                          <div key={copy.id} className="flex items-center gap-3 px-4 py-2.5">
+                            <span className="text-sm text-gray-600 pl-1">• {copy.content}</span>
                           </div>
                         );
                       })}
@@ -918,7 +911,7 @@ function TimeGrid({ value, onChange }) {
 
   return (
     <div style={{border:'1px solid #e5e7eb', borderRadius:'8px', overflowX:'auto'}}>
-      <table cellSpacing={0} cellPadding={0} style={{width:'900px', borderCollapse:'collapse', fontSize:'13px', tableLayout:'fixed', minWidth:'900px'}}>
+      <table cellSpacing={0} cellPadding={0} style={{width:'100%', borderCollapse:'collapse', fontSize:'13px', tableLayout:'fixed', minWidth:'900px'}}>
         <thead>
           <tr style={{background:'#fafafa'}}>
             <th rowSpan={2} style={{width:'60px', borderRight:'1px solid #e5e7eb', borderBottom:'1px solid #e5e7eb', padding:'8px 4px', textAlign:'center', fontSize:'12px', color:'#666', fontWeight:400}}>星期\时间</th>
@@ -1339,7 +1332,7 @@ function App() {
       const c = composeRule.copies || 1;
       const maxByMaterials = m > 0 ? Math.floor(materialCount / m) : Infinity;
       const maxByCopies = c > 0 ? Math.floor(copyCount / c) : Infinity;
-      creativesPerUnit = Math.min(maxByMaterials, maxByCopies);
+      creativesPerUnit = maxByMaterials * maxByCopies;
       if (creativesPerUnit < 0) creativesPerUnit = 0;
     }
     // 复制分配：每个账户独立使用全部素材，总创意数 = 每单元创意数 × 单元数
@@ -2573,7 +2566,7 @@ function App() {
                   if (m > 0 && c > 0) {
                     const maxByMaterials = Math.floor(materialCount / m);
                     const maxByCopies = Math.floor(copyCount / c);
-                    maxCreatives = Math.min(maxByMaterials, maxByCopies);
+                    maxCreatives = maxByMaterials * maxByCopies;
                   }
                   // 复制分配：×账户数；平均分配：不乘
                   const finalCreatives = composeStrategy === 'copy' ? maxCreatives * selectedAccountIds.length : maxCreatives;

@@ -1214,25 +1214,16 @@ function CopyModal({
     }, "部分已选")), /*#__PURE__*/React.createElement("i", {
       className: `fas fa-chevron-${isExpanded ? 'up' : 'down'} text-gray-400 text-sm ml-2`
     })), isExpanded && /*#__PURE__*/React.createElement("div", {
-      className: "border-t border-gray-100 divide-y divide-gray-100"
+      className: "border-t border-gray-100 divide-y divide-gray-100 bg-gray-50"
     }, pkg.copies.map(copyId => {
       const copy = copies.find(c => c.id === copyId);
       if (!copy) return null;
-      const isSelected = localSelected.includes(copy.id);
       return /*#__PURE__*/React.createElement("div", {
         key: copy.id,
-        onClick: () => toggleSelect(copy.id),
-        className: `flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`
-      }, /*#__PURE__*/React.createElement("input", {
-        type: "checkbox",
-        checked: isSelected,
-        onChange: () => {},
-        className: "w-3.5 h-3.5 text-blue-600 rounded flex-shrink-0"
-      }), /*#__PURE__*/React.createElement("span", {
-        className: "text-sm text-gray-900"
-      }, copy.content), isSelected && /*#__PURE__*/React.createElement("i", {
-        className: "fas fa-check-circle text-blue-500 ml-auto"
-      }));
+        className: "flex items-center gap-3 px-4 py-2.5"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "text-sm text-gray-600 pl-1"
+      }, "• ", copy.content));
     })));
   }))), /*#__PURE__*/React.createElement("div", {
     className: "p-4 border-t flex justify-between items-center"
@@ -1381,7 +1372,7 @@ function TimeGrid({
     cellSpacing: 0,
     cellPadding: 0,
     style: {
-      width: '900px',
+      width: '100%',
       borderCollapse: 'collapse',
       fontSize: '13px',
       tableLayout: 'fixed',
@@ -1911,7 +1902,7 @@ function App() {
       const c = composeRule.copies || 1;
       const maxByMaterials = m > 0 ? Math.floor(materialCount / m) : Infinity;
       const maxByCopies = c > 0 ? Math.floor(copyCount / c) : Infinity;
-      creativesPerUnit = Math.min(maxByMaterials, maxByCopies);
+      creativesPerUnit = maxByMaterials * maxByCopies;
       if (creativesPerUnit < 0) creativesPerUnit = 0;
     }
     // 复制分配：每个账户独立使用全部素材，总创意数 = 每单元创意数 × 单元数
@@ -3473,7 +3464,7 @@ function App() {
     if (m > 0 && c > 0) {
       const maxByMaterials = Math.floor(materialCount / m);
       const maxByCopies = Math.floor(copyCount / c);
-      maxCreatives = Math.min(maxByMaterials, maxByCopies);
+      maxCreatives = maxByMaterials * maxByCopies;
     }
     // 复制分配：×账户数；平均分配：不乘
     const finalCreatives = composeStrategy === 'copy' ? maxCreatives * selectedAccountIds.length : maxCreatives;
