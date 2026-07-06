@@ -734,13 +734,10 @@ function MaterialModal({
   accountId
 }) {
   const [activeTab, setActiveTab] = useState('video'); // 'video' | 'image'
-  const [sortField, setSortField] = useState('spend'); // 'spend' | 'ctr' | 'cvr'
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [timeRange, setTimeRange] = useState('7day'); // 'yesterday' | '7day'
+  const [uploadTimeSort, setUploadTimeSort] = useState('desc'); // 'asc' | 'desc'
   const [page, setPage] = useState(1);
-  const [batchInputText, setBatchInputText] = useState('');
-  const [showBatchModal, setShowBatchModal] = useState(false);
   const [localSelected, setLocalSelected] = useState(selectedMaterials.map(m => m.id));
+  const [selectCount, setSelectCount] = useState(10);
   const perPage = 50;
   useEffect(() => {
     if (show) {
@@ -750,11 +747,12 @@ function MaterialModal({
   }, [show, selectedMaterials]);
   const allMaterials = activeTab === 'video' ? MOCK.videoMaterials : MOCK.imageMaterials;
 
-  // 排序
+  // 按上传时间排序
   const sorted = [...allMaterials].sort((a, b) => {
-    const field = sortField;
-    const multiplier = sortOrder === 'desc' ? -1 : 1;
-    return (a[field] - b[field]) * multiplier;
+    // 模拟按时间排序：使用索引作为时间参考
+    const idxA = parseInt(a.id.replace(/^\D+/g, ''));
+    const idxB = parseInt(b.id.replace(/^\D+/g, ''));
+    return uploadTimeSort === 'desc' ? idxB - idxA : idxA - idxB;
   });
   const totalPages = Math.ceil(sorted.length / perPage);
   const paged = sorted.slice((page - 1) * perPage, page * perPage);
@@ -762,43 +760,29 @@ function MaterialModal({
     if (localSelected.includes(id)) {
       setLocalSelected(localSelected.filter(s => s !== id));
     } else {
-      if (localSelected.length >= 100) {
-        alert('最多选择100个素材');
+      if (localSelected.length >= 500) {
+        alert('最多选择500个素材');
         return;
       }
       setLocalSelected([...localSelected, id]);
     }
   };
-  const handleBatchInput = () => {
-    const ids = batchInputText.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
-    let added = 0;
-    ids.forEach(token => {
-      const found = allMaterials.find(m => m.id === token || m.name === token);
-      if (found && !localSelected.includes(found.id)) {
-        if (localSelected.length + added >= 100) return;
-        localSelected.push(found.id);
-        added++;
-      }
-    });
-    setLocalSelected([...localSelected]);
-    setBatchInputText('');
-    alert(`已批量添加 ${added} 个素材`);
+  const handleSelectCurrentPage = () => {
+    const currentPageIds = paged.map(m => m.id);
+    const newSelected = [...new Set([...localSelected, ...currentPageIds])];
+    if (newSelected.length > 500) {
+      alert('最多选择500个素材');
+      return;
+    }
+    setLocalSelected(newSelected);
   };
-  const handleBatchModalInput = () => {
-    const ids = batchInputText.split(/[\n,，\s]+/).map(s => s.trim()).filter(Boolean);
-    let added = 0;
-    ids.forEach(token => {
-      const found = allMaterials.find(m => m.id === token || m.name === token);
-      if (found && !localSelected.includes(found.id)) {
-        if (localSelected.length + added >= 100) return;
-        localSelected.push(found.id);
-        added++;
-      }
-    });
-    setLocalSelected([...localSelected]);
-    setBatchInputText('');
-    setShowBatchModal(false);
-    alert(`已批量添加 ${added} 个素材`);
+  const handleSelectCount = () => {
+    const count = Math.min(selectCount, 500);
+    const unselected = sorted.filter(m => !localSelected.includes(m.id));
+    const toAdd = unselected.slice(0, count).map(m => m.id);
+    const newSelected = [...new Set([...localSelected, ...toAdd])];
+    if (newSelected.length > 500) return;
+    setLocalSelected(newSelected);
   };
   const handleConfirm = () => {
     const all = [...MOCK.videoMaterials, ...MOCK.imageMaterials];
@@ -817,7 +801,7 @@ function MaterialModal({
     className: "flex items-center justify-between p-4 border-b"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-lg font-bold"
-  }, "选择素材（已选 ", localSelected.length, "/100）"), /*#__PURE__*/React.createElement("button", {
+  }, "选择素材（已选 ", localSelected.length, "/500）"), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     className: "text-gray-400 hover:text-gray-600"
   }, /*#__PURE__*/React.createElement("i", {
@@ -842,84 +826,47 @@ function MaterialModal({
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "排序："), /*#__PURE__*/React.createElement("select", {
-    value: sortField,
-    onChange: e => setSortField(e.target.value),
-    className: "px-2 py-1 border border-gray-300 rounded text-sm"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "spend"
-  }, "消耗"), /*#__PURE__*/React.createElement("option", {
-    value: "ctr"
-  }, "CTR"), /*#__PURE__*/React.createElement("option", {
-    value: "cvr"
-  }, "CVR")), /*#__PURE__*/React.createElement("select", {
-    value: sortOrder,
-    onChange: e => setSortOrder(e.target.value),
+  }, "上传时间："), /*#__PURE__*/React.createElement("select", {
+    value: uploadTimeSort,
+    onChange: e => {
+      setUploadTimeSort(e.target.value);
+      setPage(1);
+    },
     className: "px-2 py-1 border border-gray-300 rounded text-sm"
   }, /*#__PURE__*/React.createElement("option", {
     value: "desc"
-  }, "从高到低"), /*#__PURE__*/React.createElement("option", {
+  }, "最新优先"), /*#__PURE__*/React.createElement("option", {
     value: "asc"
-  }, "从低到高"))), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
+  }, "最早优先"))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 ml-auto"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: handleSelectCurrentPage,
+    className: "btn-secondary text-sm bg-green-50 text-green-700 border-green-300 hover:bg-green-100"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-check-square mr-1"
+  }), "选择当前页面"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-1"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "时间维度："), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "timeRange",
-    value: "yesterday",
-    checked: timeRange === 'yesterday',
-    onChange: e => setTimeRange(e.target.value),
-    className: "mr-1"
+  }, "选"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "1",
+    max: "500",
+    value: selectCount,
+    onChange: e => setSelectCount(Math.min(500, Math.max(1, parseInt(e.target.value) || 1))),
+    className: "w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center"
   }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "昨日")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "timeRange",
-    value: "7day",
-    checked: timeRange === '7day',
-    onChange: e => setTimeRange(e.target.value),
-    className: "mr-1"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "近七日"))), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 ml-auto"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: batchInputText,
-    onChange: e => setBatchInputText(e.target.value),
-    placeholder: "批量输入素材ID或名称",
-    className: "px-2 py-1 border border-gray-300 rounded text-sm w-48"
-  }), /*#__PURE__*/React.createElement("button", {
-    onClick: handleBatchInput,
-    className: "btn-secondary text-sm"
-  }, "批量添加"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowBatchModal(true),
-    className: "btn-secondary text-sm bg-blue-50 text-blue-600 border-blue-300"
+    className: "text-sm text-gray-600"
+  }, "个"), /*#__PURE__*/React.createElement("button", {
+    onClick: handleSelectCount,
+    className: "btn-secondary text-sm bg-blue-50 text-blue-600 border-blue-300 hover:bg-blue-100"
   }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-list mr-1"
-  }), "批量选择"))), /*#__PURE__*/React.createElement("div", {
+    className: "fas fa-plus mr-1"
+  }), "批量选择")))), /*#__PURE__*/React.createElement("div", {
     className: "px-4 py-2 border-b flex items-center justify-between text-sm text-gray-600"
   }, /*#__PURE__*/React.createElement("span", null, "第 ", page, " / ", totalPages, " 页，共 ", sorted.length, " 个", activeTab === 'video' ? '视频' : '图片', "素材"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      const currentPageIds = paged.map(m => m.id);
-      const newSelected = [...new Set([...localSelected, ...currentPageIds])];
-      if (newSelected.length > 100) {
-        alert('最多选择100个素材');
-        return;
-      }
-      setLocalSelected(newSelected);
-    },
-    className: "btn-secondary text-sm bg-green-50 text-green-700 border-green-300 hover:bg-green-100"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-check-square mr-1"
-  }), "全选本页"), /*#__PURE__*/React.createElement("button", {
     disabled: page <= 1,
     onClick: () => setPage(page - 1),
     className: "btn-secondary text-sm",
@@ -983,7 +930,7 @@ function MaterialModal({
     className: "p-4 border-t flex justify-between items-center"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "已选择 ", localSelected.length, " 个素材（可多次选择，累计最多100个）"), /*#__PURE__*/React.createElement("div", {
+  }, "已选择 ", localSelected.length, " 个素材（可多次选择，累计最多500个）"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-3"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
@@ -994,41 +941,7 @@ function MaterialModal({
   }, "清空重选"), /*#__PURE__*/React.createElement("button", {
     onClick: handleConfirm,
     className: "btn-primary"
-  }, "确认选择")))), showBatchModal && /*#__PURE__*/React.createElement("div", {
-    className: "modal-overlay",
-    style: {
-      zIndex: 60
-    },
-    onClick: () => setShowBatchModal(false)
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-white rounded-xl p-6 w-full max-w-lg",
-    onClick: e => e.stopPropagation()
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between mb-4"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "text-lg font-bold"
-  }, "批量选择素材"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowBatchModal(false),
-    className: "text-gray-400 hover:text-gray-600"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-times"
-  }))), /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-gray-600 mb-3"
-  }, "请输入素材ID或名称，每行一个或用逗号/空格分隔"), /*#__PURE__*/React.createElement("textarea", {
-    value: batchInputText,
-    onChange: e => setBatchInputText(e.target.value),
-    placeholder: "例如：\nvm_001\nvm_002\n素材A",
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-4",
-    rows: "6"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-end gap-3"
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowBatchModal(false),
-    className: "btn-secondary"
-  }, "取消"), /*#__PURE__*/React.createElement("button", {
-    onClick: handleBatchModalInput,
-    className: "btn-primary"
-  }, "确认添加")))));
+  }, "确认选择")))));
 }
 
 // 文案库弹窗（支持批量选择 + 添加文案，无CTR）
@@ -3400,18 +3313,24 @@ function App() {
   }, "规则：每创意 ", composeRule.materials, "素材 + ", composeRule.copies, "文案"))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "品牌形象"), /*#__PURE__*/React.createElement("select", {
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-36 flex-shrink-0"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700"
+  }, "品牌形象")), /*#__PURE__*/React.createElement("select", {
     value: brandImageType,
     onChange: e => setBrandImageType(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none mb-2"
+    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: "custom"
   }, "自定义"), /*#__PURE__*/React.createElement("option", {
     value: "video_account"
-  }, "视频号")), brandImageType === 'custom' && /*#__PURE__*/React.createElement("select", {
+  }, "视频号")), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, brandImageType === 'custom' ? /*#__PURE__*/React.createElement("select", {
     value: selectedBrandImage ? selectedBrandImage.id : '',
     onChange: e => {
       const bi = MOCK.brandImages.find(x => x.id === e.target.value);
@@ -3423,7 +3342,7 @@ function App() {
   }, "选择品牌形象图片"), MOCK.brandImages.map(bi => /*#__PURE__*/React.createElement("option", {
     key: bi.id,
     value: bi.id
-  }, bi.name))), brandImageType === 'video_account' && /*#__PURE__*/React.createElement("select", {
+  }, bi.name))) : /*#__PURE__*/React.createElement("select", {
     value: selectedVideoAccount ? selectedVideoAccount.id : '',
     onChange: e => {
       const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
@@ -3435,21 +3354,23 @@ function App() {
   }, "选择视频号"), MOCK.videoAccounts.map(va => /*#__PURE__*/React.createElement("option", {
     key: va.id,
     value: va.id
-  }, va.name)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "营销组件"), /*#__PURE__*/React.createElement("select", {
+  }, va.name))))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-36 flex-shrink-0"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700"
+  }, "营销组件")), /*#__PURE__*/React.createElement("select", {
     value: marketingComponentType,
     onChange: e => setMarketingComponentType(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: "action_button"
   }, "行动按钮"), /*#__PURE__*/React.createElement("option", {
     value: "floating_card"
-  }, "浮层卡片")), marketingComponentType === 'action_button' && /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 animate-fadeIn"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm text-gray-600 mb-1"
-  }, "行动按钮类型"), /*#__PURE__*/React.createElement("select", {
+  }, "浮层卡片")), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, marketingComponentType === 'action_button' ? /*#__PURE__*/React.createElement("select", {
     value: actionButtonType,
     onChange: e => setActionButtonType(e.target.value),
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
@@ -3457,15 +3378,21 @@ function App() {
     value: "claim"
   }, "立即领取"), /*#__PURE__*/React.createElement("option", {
     value: "details"
-  }, "查看详情"))), marketingComponentType === 'floating_card' && /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 animate-fadeIn"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm text-gray-600 mb-1"
-  }, "浮层卡片内容"), /*#__PURE__*/React.createElement("p", {
+  }, "查看详情")) : /*#__PURE__*/React.createElement("select", {
+    value: actionButtonType,
+    onChange: e => setActionButtonType(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "default"
+  }, "默认浮层卡片"), /*#__PURE__*/React.createElement("option", {
+    value: "coupon"
+  }, "优惠券浮层"), /*#__PURE__*/React.createElement("option", {
+    value: "subscribe"
+  }, "订阅浮层"), /*#__PURE__*/React.createElement("option", {
+    value: "promo"
+  }, "促销浮层")))), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400"
-  }, "浮层卡片将在页面底部展示营销信息")), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400 mt-3"
-  }, "所有创意共用同一个品牌形象和营销组件")))))), /*#__PURE__*/React.createElement("div", {
+  }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
     id: "section-run",
     className: "bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 mb-6"
   }, /*#__PURE__*/React.createElement("h3", {

@@ -387,13 +387,10 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
 // 素材库弹窗（视频+图片，带排序和日期维度）
 function MaterialModal({ show, onClose, onConfirm, selectedMaterials, accountId }) {
   const [activeTab, setActiveTab] = useState('video'); // 'video' | 'image'
-  const [sortField, setSortField] = useState('spend'); // 'spend' | 'ctr' | 'cvr'
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [timeRange, setTimeRange] = useState('7day'); // 'yesterday' | '7day'
+  const [uploadTimeSort, setUploadTimeSort] = useState('desc'); // 'asc' | 'desc'
   const [page, setPage] = useState(1);
-  const [batchInputText, setBatchInputText] = useState('');
-  const [showBatchModal, setShowBatchModal] = useState(false);
   const [localSelected, setLocalSelected] = useState(selectedMaterials.map(m => m.id));
+  const [selectCount, setSelectCount] = useState(10);
   const perPage = 50;
 
   useEffect(() => {
@@ -405,11 +402,12 @@ function MaterialModal({ show, onClose, onConfirm, selectedMaterials, accountId 
 
   const allMaterials = activeTab === 'video' ? MOCK.videoMaterials : MOCK.imageMaterials;
   
-  // 排序
+  // 按上传时间排序
   const sorted = [...allMaterials].sort((a, b) => {
-    const field = sortField;
-    const multiplier = sortOrder === 'desc' ? -1 : 1;
-    return (a[field] - b[field]) * multiplier;
+    // 模拟按时间排序：使用索引作为时间参考
+    const idxA = parseInt(a.id.replace(/^\D+/g, ''));
+    const idxB = parseInt(b.id.replace(/^\D+/g, ''));
+    return uploadTimeSort === 'desc' ? idxB - idxA : idxA - idxB;
   });
   
   const totalPages = Math.ceil(sorted.length / perPage);
@@ -419,45 +417,31 @@ function MaterialModal({ show, onClose, onConfirm, selectedMaterials, accountId 
     if (localSelected.includes(id)) {
       setLocalSelected(localSelected.filter(s => s !== id));
     } else {
-      if (localSelected.length >= 100) {
-        alert('最多选择100个素材');
+      if (localSelected.length >= 500) {
+        alert('最多选择500个素材');
         return;
       }
       setLocalSelected([...localSelected, id]);
     }
   };
 
-  const handleBatchInput = () => {
-    const ids = batchInputText.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
-    let added = 0;
-    ids.forEach(token => {
-      const found = allMaterials.find(m => m.id === token || m.name === token);
-      if (found && !localSelected.includes(found.id)) {
-        if (localSelected.length + added >= 100) return;
-        localSelected.push(found.id);
-        added++;
-      }
-    });
-    setLocalSelected([...localSelected]);
-    setBatchInputText('');
-    alert(`已批量添加 ${added} 个素材`);
+  const handleSelectCurrentPage = () => {
+    const currentPageIds = paged.map(m => m.id);
+    const newSelected = [...new Set([...localSelected, ...currentPageIds])];
+    if (newSelected.length > 500) {
+      alert('最多选择500个素材');
+      return;
+    }
+    setLocalSelected(newSelected);
   };
 
-  const handleBatchModalInput = () => {
-    const ids = batchInputText.split(/[\n,，\s]+/).map(s => s.trim()).filter(Boolean);
-    let added = 0;
-    ids.forEach(token => {
-      const found = allMaterials.find(m => m.id === token || m.name === token);
-      if (found && !localSelected.includes(found.id)) {
-        if (localSelected.length + added >= 100) return;
-        localSelected.push(found.id);
-        added++;
-      }
-    });
-    setLocalSelected([...localSelected]);
-    setBatchInputText('');
-    setShowBatchModal(false);
-    alert(`已批量添加 ${added} 个素材`);
+  const handleSelectCount = () => {
+    const count = Math.min(selectCount, 500);
+    const unselected = sorted.filter(m => !localSelected.includes(m.id));
+    const toAdd = unselected.slice(0, count).map(m => m.id);
+    const newSelected = [...new Set([...localSelected, ...toAdd])];
+    if (newSelected.length > 500) return;
+    setLocalSelected(newSelected);
   };
 
   const handleConfirm = () => {
@@ -473,67 +457,40 @@ function MaterialModal({ show, onClose, onConfirm, selectedMaterials, accountId 
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content w-full max-w-6xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-bold">选择素材（已选 {localSelected.length}/100）</h3>
+          <h3 className="text-lg font-bold">选择素材（已选 {localSelected.length}/500）</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
         </div>
-        {/* 标签页 + 排序 + 时间维度 */}
+        {/* 标签页 + 批量选择 */}
         <div className="p-4 border-b bg-gray-50 flex flex-wrap items-center gap-4">
           <div className="flex rounded-lg overflow-hidden border border-gray-300">
             <button onClick={() => { setActiveTab('video'); setPage(1); }} className={`px-4 py-2 text-sm ${activeTab === 'video' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}>🎬 视频素材</button>
             <button onClick={() => { setActiveTab('image'); setPage(1); }} className={`px-4 py-2 text-sm ${activeTab === 'image' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}>🖼️ 图片素材</button>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">排序：</span>
-            <select value={sortField} onChange={e => setSortField(e.target.value)} className="px-2 py-1 border border-gray-300 rounded text-sm">
-              <option value="spend">消耗</option>
-              <option value="ctr">CTR</option>
-              <option value="cvr">CVR</option>
+            <span className="text-sm text-gray-600">上传时间：</span>
+            <select value={uploadTimeSort} onChange={e => { setUploadTimeSort(e.target.value); setPage(1); }} className="px-2 py-1 border border-gray-300 rounded text-sm">
+              <option value="desc">最新优先</option>
+              <option value="asc">最早优先</option>
             </select>
-            <select value={sortOrder} onChange={e => setSortOrder(e.target.value)} className="px-2 py-1 border border-gray-300 rounded text-sm">
-              <option value="desc">从高到低</option>
-              <option value="asc">从低到高</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">时间维度：</span>
-            <label className="flex items-center cursor-pointer">
-              <input type="radio" name="timeRange" value="yesterday" checked={timeRange === 'yesterday'} onChange={e => setTimeRange(e.target.value)} className="mr-1" />
-              <span className="text-sm">昨日</span>
-            </label>
-            <label className="flex items-center cursor-pointer">
-              <input type="radio" name="timeRange" value="7day" checked={timeRange === '7day'} onChange={e => setTimeRange(e.target.value)} className="mr-1" />
-              <span className="text-sm">近七日</span>
-            </label>
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <input
-              type="text"
-              value={batchInputText}
-              onChange={e => setBatchInputText(e.target.value)}
-              placeholder="批量输入素材ID或名称"
-              className="px-2 py-1 border border-gray-300 rounded text-sm w-48"
-            />
-            <button onClick={handleBatchInput} className="btn-secondary text-sm">批量添加</button>
-            <button onClick={() => setShowBatchModal(true)} className="btn-secondary text-sm bg-blue-50 text-blue-600 border-blue-300">
-              <i className="fas fa-list mr-1"></i>批量选择
+            <button onClick={handleSelectCurrentPage} className="btn-secondary text-sm bg-green-50 text-green-700 border-green-300 hover:bg-green-100">
+              <i className="fas fa-check-square mr-1"></i>选择当前页面
             </button>
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-gray-600">选</span>
+              <input type="number" min="1" max="500" value={selectCount} onChange={e => setSelectCount(Math.min(500, Math.max(1, parseInt(e.target.value)||1)))} className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center" />
+              <span className="text-sm text-gray-600">个</span>
+              <button onClick={handleSelectCount} className="btn-secondary text-sm bg-blue-50 text-blue-600 border-blue-300 hover:bg-blue-100">
+                <i className="fas fa-plus mr-1"></i>批量选择
+              </button>
+            </div>
           </div>
         </div>
         {/* 分页信息 */}
         <div className="px-4 py-2 border-b flex items-center justify-between text-sm text-gray-600">
           <span>第 {page} / {totalPages} 页，共 {sorted.length} 个{activeTab === 'video' ? '视频' : '图片'}素材</span>
           <div className="flex gap-2">
-            <button onClick={() => {
-              const currentPageIds = paged.map(m => m.id);
-              const newSelected = [...new Set([...localSelected, ...currentPageIds])];
-              if (newSelected.length > 100) {
-                alert('最多选择100个素材');
-                return;
-              }
-              setLocalSelected(newSelected);
-            }} className="btn-secondary text-sm bg-green-50 text-green-700 border-green-300 hover:bg-green-100">
-              <i className="fas fa-check-square mr-1"></i>全选本页
-            </button>
             <button disabled={page <= 1} onClick={() => setPage(page-1)} className="btn-secondary text-sm" style={page <= 1 ? {opacity: 0.5, cursor: 'not-allowed'} : {}}>上一页</button>
             <button disabled={page >= totalPages} onClick={() => setPage(page+1)} className="btn-secondary text-sm" style={page >= totalPages ? {opacity: 0.5, cursor: 'not-allowed'} : {}}>下一页</button>
           </div>
@@ -576,36 +533,13 @@ function MaterialModal({ show, onClose, onConfirm, selectedMaterials, accountId 
           </div>
         </div>
         <div className="p-4 border-t flex justify-between items-center">
-          <span className="text-sm text-gray-600">已选择 {localSelected.length} 个素材（可多次选择，累计最多100个）</span>
+          <span className="text-sm text-gray-600">已选择 {localSelected.length} 个素材（可多次选择，累计最多500个）</span>
           <div className="flex gap-3">
             <button onClick={() => { onConfirm(localSelected.map(id => [...MOCK.videoMaterials, ...MOCK.imageMaterials].find(m => m.id === id)).filter(Boolean)); setLocalSelected([]); }} className="btn-secondary text-sm">清空重选</button>
             <button onClick={handleConfirm} className="btn-primary">确认选择</button>
           </div>
         </div>
       </div>
-      {/* 批量选择弹窗 */}
-      {showBatchModal && (
-        <div className="modal-overlay" style={{zIndex: 60}} onClick={() => setShowBatchModal(false)}>
-          <div className="bg-white rounded-xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-lg font-bold">批量选择素材</h4>
-              <button onClick={() => setShowBatchModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
-            </div>
-            <p className="text-sm text-gray-600 mb-3">请输入素材ID或名称，每行一个或用逗号/空格分隔</p>
-            <textarea
-              value={batchInputText}
-              onChange={e => setBatchInputText(e.target.value)}
-              placeholder="例如：&#10;vm_001&#10;vm_002&#10;素材A"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-              rows="6"
-            />
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setShowBatchModal(false)} className="btn-secondary">取消</button>
-              <button onClick={handleBatchModalInput} className="btn-primary">确认添加</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -2520,67 +2454,74 @@ function App() {
 
             {/* 品牌形象 */}
             <div className="border-t pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">品牌形象</label>
-                  <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none mb-2">
+              <div className="space-y-4">
+                {/* 品牌形象 行 */}
+                <div className="flex items-center gap-4">
+                  <div className="w-36 flex-shrink-0">
+                    <label className="block text-sm font-medium text-gray-700">品牌形象</label>
+                  </div>
+                  <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     <option value="custom">自定义</option>
                     <option value="video_account">视频号</option>
                   </select>
-                  {brandImageType === 'custom' && (
-                    <select
-                      value={selectedBrandImage ? selectedBrandImage.id : ''}
-                      onChange={e => {
-                        const bi = MOCK.brandImages.find(x => x.id === e.target.value);
-                        setSelectedBrandImage(bi || null);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    >
-                      <option value="">选择品牌形象图片</option>
-                      {MOCK.brandImages.map(bi => (
-                        <option key={bi.id} value={bi.id}>{bi.name}</option>
-                      ))}
-                    </select>
-                  )}
-                  {brandImageType === 'video_account' && (
-                    <select
-                      value={selectedVideoAccount ? selectedVideoAccount.id : ''}
-                      onChange={e => {
-                        const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
-                        setSelectedVideoAccount(va || null);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    >
-                      <option value="">选择视频号</option>
-                      {MOCK.videoAccounts.map(va => (
-                        <option key={va.id} value={va.id}>{va.name}</option>
-                      ))}
-                    </select>
-                  )}
+                  <div className="flex-1">
+                    {brandImageType === 'custom' ? (
+                      <select
+                        value={selectedBrandImage ? selectedBrandImage.id : ''}
+                        onChange={e => {
+                          const bi = MOCK.brandImages.find(x => x.id === e.target.value);
+                          setSelectedBrandImage(bi || null);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      >
+                        <option value="">选择品牌形象图片</option>
+                        {MOCK.brandImages.map(bi => (
+                          <option key={bi.id} value={bi.id}>{bi.name}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <select
+                        value={selectedVideoAccount ? selectedVideoAccount.id : ''}
+                        onChange={e => {
+                          const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
+                          setSelectedVideoAccount(va || null);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      >
+                        <option value="">选择视频号</option>
+                        {MOCK.videoAccounts.map(va => (
+                          <option key={va.id} value={va.id}>{va.name}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">营销组件</label>
-                  <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                {/* 营销组件 行 */}
+                <div className="flex items-center gap-4">
+                  <div className="w-36 flex-shrink-0">
+                    <label className="block text-sm font-medium text-gray-700">营销组件</label>
+                  </div>
+                  <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     <option value="action_button">行动按钮</option>
                     <option value="floating_card">浮层卡片</option>
                   </select>
-                  {marketingComponentType === 'action_button' && (
-                    <div className="mt-2 animate-fadeIn">
-                      <label className="block text-sm text-gray-600 mb-1">行动按钮类型</label>
+                  <div className="flex-1">
+                    {marketingComponentType === 'action_button' ? (
                       <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="claim">立即领取</option>
                         <option value="details">查看详情</option>
                       </select>
-                    </div>
-                  )}
-                  {marketingComponentType === 'floating_card' && (
-                    <div className="mt-2 animate-fadeIn">
-                      <label className="block text-sm text-gray-600 mb-1">浮层卡片内容</label>
-                      <p className="text-xs text-gray-400">浮层卡片将在页面底部展示营销信息</p>
-                    </div>
-                  )}
-                  <p className="text-xs text-gray-400 mt-3">所有创意共用同一个品牌形象和营销组件</p>
+                    ) : (
+                      <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="default">默认浮层卡片</option>
+                        <option value="coupon">优惠券浮层</option>
+                        <option value="subscribe">订阅浮层</option>
+                        <option value="promo">促销浮层</option>
+                      </select>
+                    )}
+                  </div>
                 </div>
+                <p className="text-xs text-gray-400">所有创意共用同一个品牌形象和营销组件</p>
               </div>
             </div>
           </div>
