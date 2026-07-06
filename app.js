@@ -734,28 +734,72 @@ function MaterialModal({
   accountId
 }) {
   const [activeTab, setActiveTab] = useState('video'); // 'video' | 'image'
-  const [uploadTimeSort, setUploadTimeSort] = useState('desc'); // 'asc' | 'desc'
+  const [dateStart, setDateStart] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().slice(0, 10);
+  });
+  const [dateEnd, setDateEnd] = useState(() => new Date().toISOString().slice(0, 10));
   const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(50);
   const [localSelected, setLocalSelected] = useState(selectedMaterials.map(m => m.id));
   const [selectCount, setSelectCount] = useState(10);
-  const perPage = 50;
   useEffect(() => {
     if (show) {
       setLocalSelected(selectedMaterials.map(m => m.id));
       setPage(1);
     }
   }, [show, selectedMaterials]);
+
+  // 时间范围限制：最多1个月
+  const handleDateStartChange = val => {
+    const end = new Date(dateEnd);
+    const start = new Date(val);
+    const diffDays = Math.abs((end - start) / (1000 * 60 * 60 * 24));
+    if (diffDays > 31) {
+      alert('时间跨度不能超过1个月');
+      return;
+    }
+    setDateStart(val);
+    setPage(1);
+  };
+  const handleDateEndChange = val => {
+    const end = new Date(val);
+    const start = new Date(dateStart);
+    const diffDays = Math.abs((end - start) / (1000 * 60 * 60 * 24));
+    if (diffDays > 31) {
+      alert('时间跨度不能超过1个月');
+      return;
+    }
+    setDateEnd(val);
+    setPage(1);
+  };
   const allMaterials = activeTab === 'video' ? MOCK.videoMaterials : MOCK.imageMaterials;
 
-  // 按上传时间排序
-  const sorted = [...allMaterials].sort((a, b) => {
-    // 模拟按时间排序：使用索引作为时间参考
+  // 过滤+排序（按上传时间倒序）
+  const filtered = [...allMaterials].sort((a, b) => {
     const idxA = parseInt(a.id.replace(/^\D+/g, ''));
     const idxB = parseInt(b.id.replace(/^\D+/g, ''));
-    return uploadTimeSort === 'desc' ? idxB - idxA : idxA - idxB;
+    return idxB - idxA; // 最新优先
   });
-  const totalPages = Math.ceil(sorted.length / perPage);
-  const paged = sorted.slice((page - 1) * perPage, page * perPage);
+
+  // 按上传时间筛选
+  const dateFiltered = filtered.filter(m => {
+    const idx = parseInt(m.id.replace(/^\D+/g, ''));
+    // 模拟：id索引越大越新，假设每天10个素材
+    const dayFromStart = Math.floor(idx / 10);
+    const startDay = 0; // 第一天
+    const endDay = 50; // 共50天数据
+    const startIdx = Math.max(0, Math.min(50, parseInt(dateStart.slice(-2))));
+    const endIdx = Math.max(0, Math.min(50, parseInt(dateEnd.slice(-2))));
+    // 简化模拟：用素材id的数值范围来模拟时间筛选
+    return true; // 不做实际过滤，仅模拟
+  });
+
+  // 使用过滤后的数据
+  const displayData = dateFiltered;
+  const totalPages = Math.ceil(displayData.length / perPage);
+  const paged = displayData.slice((page - 1) * perPage, page * perPage);
   const toggleSelect = id => {
     if (localSelected.includes(id)) {
       setLocalSelected(localSelected.filter(s => s !== id));
@@ -776,9 +820,9 @@ function MaterialModal({
     }
     setLocalSelected(newSelected);
   };
-  const handleSelectCount = () => {
+  const handleSelectFirstN = () => {
     const count = Math.min(selectCount, 500);
-    const unselected = sorted.filter(m => !localSelected.includes(m.id));
+    const unselected = displayData.filter(m => !localSelected.includes(m.id));
     const toAdd = unselected.slice(0, count).map(m => m.id);
     const newSelected = [...new Set([...localSelected, ...toAdd])];
     if (newSelected.length > 500) return;
@@ -823,21 +867,24 @@ function MaterialModal({
     },
     className: `px-4 py-2 text-sm ${activeTab === 'image' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`
   }, "🖼️ 图片素材")), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
+    className: "flex items-center gap-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "上传时间："), /*#__PURE__*/React.createElement("select", {
-    value: uploadTimeSort,
-    onChange: e => {
-      setUploadTimeSort(e.target.value);
-      setPage(1);
-    },
+  }, "上传时间："), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: dateStart,
+    onChange: e => handleDateStartChange(e.target.value),
     className: "px-2 py-1 border border-gray-300 rounded text-sm"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "desc"
-  }, "最新优先"), /*#__PURE__*/React.createElement("option", {
-    value: "asc"
-  }, "最早优先"))), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-gray-400"
+  }, "至"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: dateEnd,
+    onChange: e => handleDateEndChange(e.target.value),
+    className: "px-2 py-1 border border-gray-300 rounded text-sm"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-2xs text-gray-400"
+  }, "跨度不超过1个月")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 ml-auto"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: handleSelectCurrentPage,
@@ -848,7 +895,7 @@ function MaterialModal({
     className: "flex items-center gap-1"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "选"), /*#__PURE__*/React.createElement("input", {
+  }, "选择前"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
     max: "500",
@@ -858,14 +905,31 @@ function MaterialModal({
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
   }, "个"), /*#__PURE__*/React.createElement("button", {
-    onClick: handleSelectCount,
+    onClick: handleSelectFirstN,
     className: "btn-secondary text-sm bg-blue-50 text-blue-600 border-blue-300 hover:bg-blue-100"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-plus mr-1"
   }), "批量选择")))), /*#__PURE__*/React.createElement("div", {
     className: "px-4 py-2 border-b flex items-center justify-between text-sm text-gray-600"
-  }, /*#__PURE__*/React.createElement("span", null, "第 ", page, " / ", totalPages, " 页，共 ", sorted.length, " 个", activeTab === 'video' ? '视频' : '图片', "素材"), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("span", null, "共 ", displayData.length, " 个", activeTab === 'video' ? '视频' : '图片', "素材"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-1"
+  }, /*#__PURE__*/React.createElement("span", null, "每页"), /*#__PURE__*/React.createElement("select", {
+    value: perPage,
+    onChange: e => {
+      setPerPage(parseInt(e.target.value));
+      setPage(1);
+    },
+    className: "px-2 py-1 border border-gray-300 rounded text-sm"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "30"
+  }, "30"), /*#__PURE__*/React.createElement("option", {
+    value: "50"
+  }, "50"), /*#__PURE__*/React.createElement("option", {
+    value: "100"
+  }, "100")), /*#__PURE__*/React.createElement("span", null, "条"))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("button", {
     disabled: page <= 1,
     onClick: () => setPage(page - 1),
@@ -874,7 +938,19 @@ function MaterialModal({
       opacity: 0.5,
       cursor: 'not-allowed'
     } : {}
-  }, "上一页"), /*#__PURE__*/React.createElement("button", {
+  }, "上一页"), /*#__PURE__*/React.createElement("span", {
+    className: "flex items-center gap-1"
+  }, /*#__PURE__*/React.createElement("span", null, "第"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "1",
+    max: totalPages,
+    value: page,
+    onChange: e => {
+      const v = parseInt(e.target.value);
+      if (v >= 1 && v <= totalPages) setPage(v);
+    },
+    className: "w-14 px-2 py-1 border border-gray-300 rounded text-sm text-center"
+  }), /*#__PURE__*/React.createElement("span", null, "/ ", totalPages, " 页")), /*#__PURE__*/React.createElement("button", {
     disabled: page >= totalPages,
     onClick: () => setPage(page + 1),
     className: "btn-secondary text-sm",
@@ -901,27 +977,7 @@ function MaterialModal({
       className: "text-xs font-medium text-gray-900 text-center truncate"
     }, m.name), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-gray-500 text-center"
-    }, m.type === 'video' ? m.duration + ' | ' : '', m.size), /*#__PURE__*/React.createElement("div", {
-      className: "mt-2 space-y-1 text-xs"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex justify-between"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-gray-500"
-    }, "消耗："), /*#__PURE__*/React.createElement("span", {
-      className: "font-medium text-orange-600"
-    }, "¥", m.spend.toFixed(2))), /*#__PURE__*/React.createElement("div", {
-      className: "flex justify-between"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-gray-500"
-    }, "CTR："), /*#__PURE__*/React.createElement("span", {
-      className: "font-medium text-blue-600"
-    }, m.ctr, "%")), /*#__PURE__*/React.createElement("div", {
-      className: "flex justify-between"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-gray-500"
-    }, "CVR："), /*#__PURE__*/React.createElement("span", {
-      className: "font-medium text-green-600"
-    }, m.cvr, "%"))), isSelected && /*#__PURE__*/React.createElement("div", {
+    }, m.type === 'video' ? m.duration + ' | ' : '', m.size), isSelected && /*#__PURE__*/React.createElement("div", {
       className: "text-center mt-1"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-check-circle text-blue-500"
