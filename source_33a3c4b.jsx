@@ -1515,7 +1515,7 @@ function App() {
             </h2>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">业务单元 <span className="text-red-500">*</span></label>
                 <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
@@ -1572,7 +1572,7 @@ function App() {
                                 <a href={acc.kaboshi} target="_blank" rel="noreferrer"
                                   onClick={e => e.stopPropagation()}
                                   className="text-xs text-green-600 hover:text-green-800 hover:underline flex-shrink-0 truncate"
-                                  style={{ maxWidth: '260px' }}
+                                  style={{ maxWidth: '500px' }}
                                   title={acc.kaboshi}>
                                   {acc.kaboshi}
                                 </a>

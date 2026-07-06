@@ -2159,7 +2159,7 @@ function App() {
   }), "选择业务单元和投放账户"))), /*#__PURE__*/React.createElement("div", {
     className: "p-6"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-6"
+    className: "grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "业务单元 ", /*#__PURE__*/React.createElement("span", {
@@ -2238,7 +2238,7 @@ function App() {
     onClick: e => e.stopPropagation(),
     className: "text-xs text-green-600 hover:text-green-800 hover:underline flex-shrink-0 truncate",
     style: {
-      maxWidth: '260px'
+      maxWidth: '500px'
     },
     title: acc.kaboshi
   }, acc.kaboshi), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
