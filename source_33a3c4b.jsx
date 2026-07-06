@@ -1136,14 +1136,15 @@ function App() {
   const [landingPageMacro, setLandingPageMacro] = useState('');
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
-  // 创意数量分配
-  const [creativeComposeMode, setCreativeComposeMode] = useState('cross_join'); // 'cross_join' | 'fixed'
-  const [composeRule, setComposeRule] = useState({ videos: 1, images: 1, copies: 1 });
+  // 创意素材分配
+  const [composeRule, setComposeRule] = useState({ materials: 1, copies: 1 });
+  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average'
   // 品牌形象 & 营销组件
   const [brandImageType, setBrandImageType] = useState('video_account'); // 'custom' | 'video_account'
   const [selectedBrandImage, setSelectedBrandImage] = useState(null); // {id, name, url}
   const [selectedVideoAccount, setSelectedVideoAccount] = useState(null); // {id, name}
   const [marketingComponentType, setMarketingComponentType] = useState('floating_card'); // 'floating_card' | 'action_button'
+  const [actionButtonType, setActionButtonType] = useState('claim'); // 'claim' | 'details'
 
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
@@ -1247,8 +1248,6 @@ function App() {
     const accountCount = selectedAccountIds.length;
     const materialCount = selectedMaterials.length;
     const copyCount = selectedCopies.length;
-    const videoCount = selectedMaterials.filter(m => m.type === 'video').length;
-    const imageCount = selectedMaterials.filter(m => m.type === 'image').length;
 
     // 单元数 = 账户数 × 定向包数
     let tpCount = 0;
@@ -1260,23 +1259,19 @@ function App() {
     const unitsPerAccount = tpCount;
     const totalUnits = accountCount * unitsPerAccount;
 
-    // 每个单元的创意数（根据创意数量分配规则）
+    // 每个单元的创意数（根据创意素材分配规则）
     let creativesPerUnit = 0;
-    if (creativeComposeMode === 'cross_join') {
-      creativesPerUnit = materialCount * copyCount;
-    } else if (creativeComposeMode === 'fixed') {
-      const v = composeRule.videos || 0;
-      const i = composeRule.images || 0;
+    {
+      const m = composeRule.materials || 1;
       const c = composeRule.copies || 1;
-      const maxByVideo = v > 0 ? Math.floor(videoCount / v) : Infinity;
-      const maxByImage = i > 0 ? Math.floor(imageCount / i) : Infinity;
-      const maxByCopy = Math.floor(copyCount / c);
-      creativesPerUnit = Math.min(maxByVideo, maxByImage, maxByCopy);
+      const maxByMaterials = m > 0 ? Math.floor(materialCount / m) : Infinity;
+      const maxByCopies = c > 0 ? Math.floor(copyCount / c) : Infinity;
+      creativesPerUnit = Math.min(maxByMaterials, maxByCopies);
       if (creativesPerUnit < 0) creativesPerUnit = 0;
     }
     const totalCreatives = totalUnits * creativesPerUnit;
 
-    return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, videoCount, imageCount, creativesPerUnit, totalCreatives };
+    return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, creativesPerUnit, totalCreatives };
   };
 
   // ===== 持久化：从 URL 读取 taskId，localStorage 恢复/保存数据 =====
@@ -1305,10 +1300,13 @@ function App() {
         if (data.投放日期类型) set投放日期类型(data.投放日期类型);
         if (data.投放时段模式) set投放时段模式(data.投放时段模式);
         if (data.timeGridSlots) setTimeGridSlots(data.timeGridSlots);
-        if (data.selectedMaterials) setSelectedMaterials(data.selectedMaterials);
-        if (data.selectedCopies) setSelectedCopies(data.selectedCopies);
-        if (data.creativeComposeMode) setCreativeComposeMode(data.creativeComposeMode);
+        if (data.materials) setSelectedMaterials(data.materials);
+        if (data.copies) setSelectedCopies(data.copies);
         if (data.composeRule) setComposeRule(data.composeRule);
+        if (data.composeStrategy) setComposeStrategy(data.composeStrategy);
+        if (data.marketingComponentType) setMarketingComponentType(data.marketingComponentType);
+        if (data.actionButtonType) setActionButtonType(data.actionButtonType);
+        if (data.landingPageMacro !== undefined) setLandingPageMacro(data.landingPageMacro);
         notify('已恢复上次保存的草稿', 'success');
       }
     } catch(e) { console.error('恢复草稿失败', e); }
@@ -1330,8 +1328,9 @@ function App() {
         投放时段模式, timeRangeStart, timeRangeEnd, timeGridSlots,
         首日开始, 首日开始时间值,
         creativeEnhanceMax, selectedMaterials, selectedCopies,
-        videoStrategy, copyStrategy, landingPageMacro,
-        creativeComposeMode, composeRule,
+        landingPageMacro,
+        composeRule, composeStrategy,
+        marketingComponentType, actionButtonType,
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
     } catch(e) { console.error('保存草稿失败', e); }
@@ -2451,159 +2450,137 @@ function App() {
             {selectedMaterials.length > 0 && selectedCopies.length > 0 && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h4 className="text-sm font-bold text-blue-900 mb-2">创意组合预览</h4>
-                {creativeComposeMode === 'cross_join' ? (
-                  <p className="text-sm text-blue-700">
-                    交叉组合：<span className="font-bold">{selectedMaterials.length}素材 × {selectedCopies.length}文案 = {selectedMaterials.length * selectedCopies.length}</span> 个创意/单元
-                  </p>
-                ) : (
-                  <p className="text-sm text-blue-700">
-                    固定分配：每创意 {composeRule.videos}视频 + {composeRule.images}图片 + {composeRule.copies}文案，
-                    预计可生成 <span className="font-bold">{(() => {
-                      const videoCount = selectedMaterials.filter(m => m.type === 'video').length;
-                      const imageCount = selectedMaterials.filter(m => m.type === 'image').length;
-                      const copyCount = selectedCopies.length;
-                      const maxByVideo = composeRule.videos > 0 ? Math.floor(videoCount / composeRule.videos) : Infinity;
-                      const maxByImage = composeRule.images > 0 ? Math.floor(imageCount / composeRule.images) : Infinity;
-                      const maxByCopy = Math.floor(copyCount / composeRule.copies);
-                      return Math.min(maxByVideo, maxByImage, maxByCopy);
-                    })()}</span> 个创意/单元
-                  </p>
-                )}
+                <p className="text-sm text-blue-700">
+                  固定分配：每创意 {composeRule.materials}素材 + {composeRule.copies}文案，
+                  预计可生成 <span className="font-bold">{(() => {
+                    const materialCount = selectedMaterials.length;
+                    const copyCount = selectedCopies.length;
+                    const m = composeRule.materials || 1;
+                    const c = composeRule.copies || 1;
+                    const maxByMaterials = Math.floor(materialCount / m);
+                    const maxByCopies = Math.floor(copyCount / c);
+                    return Math.min(maxByMaterials, maxByCopies);
+                  })()}</span> 个创意/单元
+                </p>
               </div>
             )}
 
-            {/* 创意数量分配 */}
+            {/* 创意素材分配 */}
             <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意数量分配</h4>
-              <p className="text-xs text-gray-500 mb-3">定义每个创意由多少个素材和文案组成</p>
-              <div className="space-y-3">
-                <label className="flex items-center cursor-pointer">
-                  <input type="radio" name="compose_mode" value="cross_join" checked={creativeComposeMode === 'cross_join'} onChange={e => setCreativeComposeMode(e.target.value)} className="mr-2" />
-                  <span className="text-sm">交叉组合（当前：{selectedMaterials.length}素材 × {selectedCopies.length}文案 = {selectedMaterials.length * selectedCopies.length}创意）</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input type="radio" name="compose_mode" value="fixed" checked={creativeComposeMode === 'fixed'} onChange={e => setCreativeComposeMode(e.target.value)} className="mr-2" />
-                  <span className="text-sm">固定数量分配</span>
-                </label>
-                {creativeComposeMode === 'fixed' && (
-                  <div className="ml-6 bg-gray-50 border border-gray-200 rounded-xl p-4 animate-fadeIn">
-                    <p className="text-xs text-gray-500 mb-3">设置每个创意包含的素材和文案数量：</p>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">视频数/创意</label>
-                        <input type="number" min="0" max="10" value={composeRule.videos} onChange={e => setComposeRule({...composeRule, videos: Math.max(0, parseInt(e.target.value)||0)})} className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">图片数/创意</label>
-                        <input type="number" min="0" max="10" value={composeRule.images} onChange={e => setComposeRule({...composeRule, images: Math.max(0, parseInt(e.target.value)||0)})} className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">文案数/创意</label>
-                        <input type="number" min="1" max="10" value={composeRule.copies} onChange={e => setComposeRule({...composeRule, copies: Math.max(1, parseInt(e.target.value)||1)})} className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                    </div>
-                    {/* 实时计算 */}
-                    <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                      <p className="text-xs text-gray-500 mb-1">预估可生成创意数：</p>
-                      {(() => {
-                        const videoCount = selectedMaterials.filter(m => m.type === 'video').length;
-                        const imageCount = selectedMaterials.filter(m => m.type === 'image').length;
-                        const copyCount = selectedCopies.length;
-                        const perCreative = (composeRule.videos || 0) + (composeRule.images || 0);
-                        let maxCreatives = 0;
-                        if (perCreative > 0 && composeRule.copies > 0) {
-                          const maxByVideo = composeRule.videos > 0 ? Math.floor(videoCount / composeRule.videos) : Infinity;
-                          const maxByImage = composeRule.images > 0 ? Math.floor(imageCount / composeRule.images) : Infinity;
-                          const maxByCopy = Math.floor(copyCount / composeRule.copies);
-                          maxCreatives = Math.min(maxByVideo, maxByImage, maxByCopy);
-                        }
-                        return (
-                          <p className="text-lg font-bold text-blue-600">{maxCreatives} 个创意</p>
-                        );
-                      })()}
-                      <p className="text-xs text-gray-400 mt-1">
-                        规则：每创意 {composeRule.videos}视频 + {composeRule.images}图片 + {composeRule.copies}文案
-                      </p>
-                    </div>
-                  </div>
-                )}
+              <h4 className="text-sm font-bold text-gray-900 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材分配</h4>
+              <div className="flex items-center gap-6 mb-4">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600 whitespace-nowrap">素材数量</label>
+                  <input type="number" min="1" max="10" value={composeRule.materials} onChange={e => setComposeRule({...composeRule, materials: Math.max(1, parseInt(e.target.value)||1)})} className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600 whitespace-nowrap">文案数量</label>
+                  <input type="number" min="1" max="10" value={composeRule.copies} onChange={e => setComposeRule({...composeRule, copies: Math.max(1, parseInt(e.target.value)||1)})} className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+
+              {/* 创意分配策略 */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</label>
+                <div className="flex items-center gap-6">
+                  <label className="flex items-center cursor-pointer">
+                    <input type="radio" name="compose_strategy" value="copy" checked={composeStrategy === 'copy'} onChange={() => setComposeStrategy('copy')} className="mr-2" />
+                    <span className="text-sm">复制分配（所有账户用相同素材）</span>
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input type="radio" name="compose_strategy" value="average" checked={composeStrategy === 'average'} onChange={() => setComposeStrategy('average')} className="mr-2" />
+                    <span className="text-sm">平均分配</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* 预估可生成创意数 */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-1">预估可生成创意数：</p>
+                {(() => {
+                  const materialCount = selectedMaterials.length;
+                  const copyCount = selectedCopies.length;
+                  const m = composeRule.materials || 1;
+                  const c = composeRule.copies || 1;
+                  let maxCreatives = 0;
+                  if (m > 0 && c > 0) {
+                    const maxByMaterials = Math.floor(materialCount / m);
+                    const maxByCopies = Math.floor(copyCount / c);
+                    maxCreatives = Math.min(maxByMaterials, maxByCopies);
+                  }
+                  return (
+                    <p className="text-lg font-bold text-blue-600">{isNaN(maxCreatives) ? 0 : maxCreatives} 个创意</p>
+                  );
+                })()}
+                <p className="text-xs text-gray-400 mt-1">
+                  规则：每创意 {composeRule.materials}素材 + {composeRule.copies}文案
+                </p>
               </div>
             </div>
 
-            {/* 分配策略 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">素材分配策略</label>
-                <select
-                  value={videoStrategy}
-                  onChange={e => setVideoStrategy(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="average">平均分配</option>
-                  <option value="copy">复制分配（所有账户用相同素材）</option>
-                  <option value="random">随机分配</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">广告文案分配策略</label>
-                <select
-                  value={copyStrategy}
-                  onChange={e => setCopyStrategy(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="average">平均分配</option>
-                  <option value="copy">复制分配（所有账户用相同文案）</option>
-                  <option value="random">随机分配</option>
-                </select>
-              </div>
-            </div>
-
-            {/* 品牌形象 & 营销组件 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">品牌形象</label>
-                <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none mb-2">
-                  <option value="custom">自定义</option>
-                  <option value="video_account">视频号</option>
-                </select>
-                {brandImageType === 'custom' && (
-                  <select
-                    value={selectedBrandImage ? selectedBrandImage.id : ''}
-                    onChange={e => {
-                      const bi = MOCK.brandImages.find(x => x.id === e.target.value);
-                      setSelectedBrandImage(bi || null);
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  >
-                    <option value="">选择品牌形象图片</option>
-                    {MOCK.brandImages.map(bi => (
-                      <option key={bi.id} value={bi.id}>{bi.name}</option>
-                    ))}
+            {/* 品牌形象 */}
+            <div className="border-t pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">品牌形象</label>
+                  <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none mb-2">
+                    <option value="custom">自定义</option>
+                    <option value="video_account">视频号</option>
                   </select>
-                )}
-                {brandImageType === 'video_account' && (
-                  <select
-                    value={selectedVideoAccount ? selectedVideoAccount.id : ''}
-                    onChange={e => {
-                      const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
-                      setSelectedVideoAccount(va || null);
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  >
-                    <option value="">选择视频号</option>
-                    {MOCK.videoAccounts.map(va => (
-                      <option key={va.id} value={va.id}>{va.name}</option>
-                    ))}
+                  {brandImageType === 'custom' && (
+                    <select
+                      value={selectedBrandImage ? selectedBrandImage.id : ''}
+                      onChange={e => {
+                        const bi = MOCK.brandImages.find(x => x.id === e.target.value);
+                        setSelectedBrandImage(bi || null);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    >
+                      <option value="">选择品牌形象图片</option>
+                      {MOCK.brandImages.map(bi => (
+                        <option key={bi.id} value={bi.id}>{bi.name}</option>
+                      ))}
+                    </select>
+                  )}
+                  {brandImageType === 'video_account' && (
+                    <select
+                      value={selectedVideoAccount ? selectedVideoAccount.id : ''}
+                      onChange={e => {
+                        const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
+                        setSelectedVideoAccount(va || null);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    >
+                      <option value="">选择视频号</option>
+                      {MOCK.videoAccounts.map(va => (
+                        <option key={va.id} value={va.id}>{va.name}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">营销组件</label>
+                  <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    <option value="action_button">行动按钮</option>
+                    <option value="floating_card">浮层卡片</option>
                   </select>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">营销组件</label>
-                <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                  <option value="floating_card">浮层卡片</option>
-                  <option value="action_button">行动按钮</option>
-                </select>
-                <p className="text-xs text-gray-400 mt-1">所有创意共用同一个品牌形象和营销组件</p>
+                  {marketingComponentType === 'action_button' && (
+                    <div className="mt-2 animate-fadeIn">
+                      <label className="block text-sm text-gray-600 mb-1">行动按钮类型</label>
+                      <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="claim">立即领取</option>
+                        <option value="details">查看详情</option>
+                      </select>
+                    </div>
+                  )}
+                  {marketingComponentType === 'floating_card' && (
+                    <div className="mt-2 animate-fadeIn">
+                      <label className="block text-sm text-gray-600 mb-1">浮层卡片内容</label>
+                      <p className="text-xs text-gray-400">浮层卡片将在页面底部展示营销信息</p>
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-400 mt-3">所有创意共用同一个品牌形象和营销组件</p>
+                </div>
               </div>
             </div>
           </div>

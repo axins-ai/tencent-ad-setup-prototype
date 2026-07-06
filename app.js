@@ -1700,18 +1700,18 @@ function App() {
   const [landingPageMacro, setLandingPageMacro] = useState('');
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
-  // 创意数量分配
-  const [creativeComposeMode, setCreativeComposeMode] = useState('cross_join'); // 'cross_join' | 'fixed'
+  // 创意素材分配
   const [composeRule, setComposeRule] = useState({
-    videos: 1,
-    images: 1,
+    materials: 1,
     copies: 1
   });
+  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average'
   // 品牌形象 & 营销组件
   const [brandImageType, setBrandImageType] = useState('video_account'); // 'custom' | 'video_account'
   const [selectedBrandImage, setSelectedBrandImage] = useState(null); // {id, name, url}
   const [selectedVideoAccount, setSelectedVideoAccount] = useState(null); // {id, name}
   const [marketingComponentType, setMarketingComponentType] = useState('floating_card'); // 'floating_card' | 'action_button'
+  const [actionButtonType, setActionButtonType] = useState('claim'); // 'claim' | 'details'
 
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
@@ -1809,8 +1809,6 @@ function App() {
     const accountCount = selectedAccountIds.length;
     const materialCount = selectedMaterials.length;
     const copyCount = selectedCopies.length;
-    const videoCount = selectedMaterials.filter(m => m.type === 'video').length;
-    const imageCount = selectedMaterials.filter(m => m.type === 'image').length;
 
     // 单元数 = 账户数 × 定向包数
     let tpCount = 0;
@@ -1822,18 +1820,14 @@ function App() {
     const unitsPerAccount = tpCount;
     const totalUnits = accountCount * unitsPerAccount;
 
-    // 每个单元的创意数（根据创意数量分配规则）
+    // 每个单元的创意数（根据创意素材分配规则）
     let creativesPerUnit = 0;
-    if (creativeComposeMode === 'cross_join') {
-      creativesPerUnit = materialCount * copyCount;
-    } else if (creativeComposeMode === 'fixed') {
-      const v = composeRule.videos || 0;
-      const i = composeRule.images || 0;
+    {
+      const m = composeRule.materials || 1;
       const c = composeRule.copies || 1;
-      const maxByVideo = v > 0 ? Math.floor(videoCount / v) : Infinity;
-      const maxByImage = i > 0 ? Math.floor(imageCount / i) : Infinity;
-      const maxByCopy = Math.floor(copyCount / c);
-      creativesPerUnit = Math.min(maxByVideo, maxByImage, maxByCopy);
+      const maxByMaterials = m > 0 ? Math.floor(materialCount / m) : Infinity;
+      const maxByCopies = c > 0 ? Math.floor(copyCount / c) : Infinity;
+      creativesPerUnit = Math.min(maxByMaterials, maxByCopies);
       if (creativesPerUnit < 0) creativesPerUnit = 0;
     }
     const totalCreatives = totalUnits * creativesPerUnit;
@@ -1844,8 +1838,6 @@ function App() {
       totalUnits,
       materialCount,
       copyCount,
-      videoCount,
-      imageCount,
       creativesPerUnit,
       totalCreatives
     };
@@ -1877,10 +1869,13 @@ function App() {
         if (data.投放日期类型) set投放日期类型(data.投放日期类型);
         if (data.投放时段模式) set投放时段模式(data.投放时段模式);
         if (data.timeGridSlots) setTimeGridSlots(data.timeGridSlots);
-        if (data.selectedMaterials) setSelectedMaterials(data.selectedMaterials);
-        if (data.selectedCopies) setSelectedCopies(data.selectedCopies);
-        if (data.creativeComposeMode) setCreativeComposeMode(data.creativeComposeMode);
+        if (data.materials) setSelectedMaterials(data.materials);
+        if (data.copies) setSelectedCopies(data.copies);
         if (data.composeRule) setComposeRule(data.composeRule);
+        if (data.composeStrategy) setComposeStrategy(data.composeStrategy);
+        if (data.marketingComponentType) setMarketingComponentType(data.marketingComponentType);
+        if (data.actionButtonType) setActionButtonType(data.actionButtonType);
+        if (data.landingPageMacro !== undefined) setLandingPageMacro(data.landingPageMacro);
         notify('已恢复上次保存的草稿', 'success');
       }
     } catch (e) {
@@ -1929,11 +1924,11 @@ function App() {
         creativeEnhanceMax,
         selectedMaterials,
         selectedCopies,
-        videoStrategy,
-        copyStrategy,
         landingPageMacro,
-        creativeComposeMode,
-        composeRule
+        composeRule,
+        composeStrategy,
+        marketingComponentType,
+        actionButtonType
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
     } catch (e) {
@@ -3306,87 +3301,45 @@ function App() {
     className: "bg-blue-50 border border-blue-200 rounded-lg p-4"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-blue-900 mb-2"
-  }, "创意组合预览"), creativeComposeMode === 'cross_join' ? /*#__PURE__*/React.createElement("p", {
+  }, "创意组合预览"), /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-blue-700"
-  }, "交叉组合：", /*#__PURE__*/React.createElement("span", {
-    className: "font-bold"
-  }, selectedMaterials.length, "素材 × ", selectedCopies.length, "文案 = ", selectedMaterials.length * selectedCopies.length), " 个创意/单元") : /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-blue-700"
-  }, "固定分配：每创意 ", composeRule.videos, "视频 + ", composeRule.images, "图片 + ", composeRule.copies, "文案， 预计可生成 ", /*#__PURE__*/React.createElement("span", {
+  }, "固定分配：每创意 ", composeRule.materials, "素材 + ", composeRule.copies, "文案， 预计可生成 ", /*#__PURE__*/React.createElement("span", {
     className: "font-bold"
   }, (() => {
-    const videoCount = selectedMaterials.filter(m => m.type === 'video').length;
-    const imageCount = selectedMaterials.filter(m => m.type === 'image').length;
+    const materialCount = selectedMaterials.length;
     const copyCount = selectedCopies.length;
-    const maxByVideo = composeRule.videos > 0 ? Math.floor(videoCount / composeRule.videos) : Infinity;
-    const maxByImage = composeRule.images > 0 ? Math.floor(imageCount / composeRule.images) : Infinity;
-    const maxByCopy = Math.floor(copyCount / composeRule.copies);
-    return Math.min(maxByVideo, maxByImage, maxByCopy);
+    const m = composeRule.materials || 1;
+    const c = composeRule.copies || 1;
+    const maxByMaterials = Math.floor(materialCount / m);
+    const maxByCopies = Math.floor(copyCount / c);
+    return Math.min(maxByMaterials, maxByCopies);
   })()), " 个创意/单元")), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-gray-900 mb-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-layer-group mr-2 text-blue-500"
-  }), "创意数量分配"), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-500 mb-3"
-  }, "定义每个创意由多少个素材和文案组成"), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-3"
+  }), "创意素材分配"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-6 mb-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "compose_mode",
-    value: "cross_join",
-    checked: creativeComposeMode === 'cross_join',
-    onChange: e => setCreativeComposeMode(e.target.value),
-    className: "mr-2"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "交叉组合（当前：", selectedMaterials.length, "素材 × ", selectedCopies.length, "文案 = ", selectedMaterials.length * selectedCopies.length, "创意）")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "compose_mode",
-    value: "fixed",
-    checked: creativeComposeMode === 'fixed',
-    onChange: e => setCreativeComposeMode(e.target.value),
-    className: "mr-2"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "固定数量分配")), creativeComposeMode === 'fixed' && /*#__PURE__*/React.createElement("div", {
-    className: "ml-6 bg-gray-50 border border-gray-200 rounded-xl p-4 animate-fadeIn"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-500 mb-3"
-  }, "设置每个创意包含的素材和文案数量："), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs text-gray-600 mb-1"
-  }, "视频数/创意"), /*#__PURE__*/React.createElement("input", {
+    className: "text-sm text-gray-600 whitespace-nowrap"
+  }, "素材数量"), /*#__PURE__*/React.createElement("input", {
     type: "number",
-    min: "0",
+    min: "1",
     max: "10",
-    value: composeRule.videos,
+    value: composeRule.materials,
     onChange: e => setComposeRule({
       ...composeRule,
-      videos: Math.max(0, parseInt(e.target.value) || 0)
+      materials: Math.max(1, parseInt(e.target.value) || 1)
     }),
-    className: "w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs text-gray-600 mb-1"
-  }, "图片数/创意"), /*#__PURE__*/React.createElement("input", {
-    type: "number",
-    min: "0",
-    max: "10",
-    value: composeRule.images,
-    onChange: e => setComposeRule({
-      ...composeRule,
-      images: Math.max(0, parseInt(e.target.value) || 0)
-    }),
-    className: "w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs text-gray-600 mb-1"
-  }, "文案数/创意"), /*#__PURE__*/React.createElement("input", {
+    className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "text-sm text-gray-600 whitespace-nowrap"
+  }, "文案数量"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
     max: "10",
@@ -3395,55 +3348,58 @@ function App() {
       ...composeRule,
       copies: Math.max(1, parseInt(e.target.value) || 1)
     }),
-    className: "w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+    className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   }))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 p-3 bg-white rounded-lg border border-gray-200"
+    className: "mb-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "创意分配策略"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-6"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "compose_strategy",
+    value: "copy",
+    checked: composeStrategy === 'copy',
+    onChange: () => setComposeStrategy('copy'),
+    className: "mr-2"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "复制分配（所有账户用相同素材）")), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "compose_strategy",
+    value: "average",
+    checked: composeStrategy === 'average',
+    onChange: () => setComposeStrategy('average'),
+    className: "mr-2"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "平均分配")))), /*#__PURE__*/React.createElement("div", {
+    className: "bg-blue-50 border border-blue-200 rounded-lg p-3"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-1"
   }, "预估可生成创意数："), (() => {
-    const videoCount = selectedMaterials.filter(m => m.type === 'video').length;
-    const imageCount = selectedMaterials.filter(m => m.type === 'image').length;
+    const materialCount = selectedMaterials.length;
     const copyCount = selectedCopies.length;
-    const perCreative = (composeRule.videos || 0) + (composeRule.images || 0);
+    const m = composeRule.materials || 1;
+    const c = composeRule.copies || 1;
     let maxCreatives = 0;
-    if (perCreative > 0 && composeRule.copies > 0) {
-      const maxByVideo = composeRule.videos > 0 ? Math.floor(videoCount / composeRule.videos) : Infinity;
-      const maxByImage = composeRule.images > 0 ? Math.floor(imageCount / composeRule.images) : Infinity;
-      const maxByCopy = Math.floor(copyCount / composeRule.copies);
-      maxCreatives = Math.min(maxByVideo, maxByImage, maxByCopy);
+    if (m > 0 && c > 0) {
+      const maxByMaterials = Math.floor(materialCount / m);
+      const maxByCopies = Math.floor(copyCount / c);
+      maxCreatives = Math.min(maxByMaterials, maxByCopies);
     }
     return /*#__PURE__*/React.createElement("p", {
       className: "text-lg font-bold text-blue-600"
-    }, maxCreatives, " 个创意");
+    }, isNaN(maxCreatives) ? 0 : maxCreatives, " 个创意");
   })(), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
-  }, "规则：每创意 ", composeRule.videos, "视频 + ", composeRule.images, "图片 + ", composeRule.copies, "文案"))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "素材分配策略"), /*#__PURE__*/React.createElement("select", {
-    value: videoStrategy,
-    onChange: e => setVideoStrategy(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "average"
-  }, "平均分配"), /*#__PURE__*/React.createElement("option", {
-    value: "copy"
-  }, "复制分配（所有账户用相同素材）"), /*#__PURE__*/React.createElement("option", {
-    value: "random"
-  }, "随机分配"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "广告文案分配策略"), /*#__PURE__*/React.createElement("select", {
-    value: copyStrategy,
-    onChange: e => setCopyStrategy(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "average"
-  }, "平均分配"), /*#__PURE__*/React.createElement("option", {
-    value: "copy"
-  }, "复制分配（所有账户用相同文案）"), /*#__PURE__*/React.createElement("option", {
-    value: "random"
-  }, "随机分配")))), /*#__PURE__*/React.createElement("div", {
+  }, "规则：每创意 ", composeRule.materials, "素材 + ", composeRule.copies, "文案"))), /*#__PURE__*/React.createElement("div", {
+    className: "border-t pt-4"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
@@ -3486,12 +3442,30 @@ function App() {
     onChange: e => setMarketingComponentType(e.target.value),
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
-    value: "floating_card"
-  }, "浮层卡片"), /*#__PURE__*/React.createElement("option", {
     value: "action_button"
-  }, "行动按钮")), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400 mt-1"
-  }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
+  }, "行动按钮"), /*#__PURE__*/React.createElement("option", {
+    value: "floating_card"
+  }, "浮层卡片")), marketingComponentType === 'action_button' && /*#__PURE__*/React.createElement("div", {
+    className: "mt-2 animate-fadeIn"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm text-gray-600 mb-1"
+  }, "行动按钮类型"), /*#__PURE__*/React.createElement("select", {
+    value: actionButtonType,
+    onChange: e => setActionButtonType(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "claim"
+  }, "立即领取"), /*#__PURE__*/React.createElement("option", {
+    value: "details"
+  }, "查看详情"))), marketingComponentType === 'floating_card' && /*#__PURE__*/React.createElement("div", {
+    className: "mt-2 animate-fadeIn"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm text-gray-600 mb-1"
+  }, "浮层卡片内容"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400"
+  }, "浮层卡片将在页面底部展示营销信息")), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400 mt-3"
+  }, "所有创意共用同一个品牌形象和营销组件")))))), /*#__PURE__*/React.createElement("div", {
     id: "section-run",
     className: "bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 mb-6"
   }, /*#__PURE__*/React.createElement("h3", {
