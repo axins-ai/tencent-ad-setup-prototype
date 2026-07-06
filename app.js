@@ -263,7 +263,7 @@ const MOCK = {
   }],
   // 素材库（视频+图片），带消耗/CTR/CVR数据
   videoMaterials: Array.from({
-    length: 50
+    length: 500
   }, (_, i) => ({
     id: `v_${String(i + 1).padStart(3, '0')}`,
     name: `视频素材${i + 1}`,
@@ -276,7 +276,7 @@ const MOCK = {
     cvr: Math.round((Math.random() * 10 + 0.5) * 100) / 100
   })),
   imageMaterials: Array.from({
-    length: 50
+    length: 500
   }, (_, i) => ({
     id: `i_${String(i + 1).padStart(3, '0')}`,
     name: `图片素材${i + 1}`,
@@ -743,7 +743,8 @@ function MaterialModal({
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(50);
   const [localSelected, setLocalSelected] = useState(selectedMaterials.map(m => m.id));
-  const [selectCount, setSelectCount] = useState(10);
+  const [selectMode, setSelectMode] = useState('none'); // 'none' | 'current_page' | 'custom'
+  const [customSelectCount, setCustomSelectCount] = useState(10);
   useEffect(() => {
     if (show) {
       setLocalSelected(selectedMaterials.map(m => m.id));
@@ -800,6 +801,40 @@ function MaterialModal({
   const displayData = dateFiltered;
   const totalPages = Math.ceil(displayData.length / perPage);
   const paged = displayData.slice((page - 1) * perPage, page * perPage);
+
+  // 选择模式变更时执行选择
+
+  const handleModeChange = mode => {
+    if (selectMode === mode) {
+      setSelectMode('none');
+      return;
+    }
+    setSelectMode(mode);
+    if (mode === 'current_page') {
+      const currentPageIds = paged.map(m => m.id);
+      const newSelected = [...new Set([...localSelected, ...currentPageIds])];
+      if (newSelected.length <= 500) {
+        setLocalSelected(newSelected);
+      }
+    } else if (mode === 'custom') {
+      doCustomSelect(customSelectCount);
+    }
+  };
+  const doCustomSelect = count => {
+    const n = Math.min(count, 500);
+    const allFiltered = displayData;
+    const newSelected = [...new Set(allFiltered.slice(0, n).map(m => m.id))];
+    if (newSelected.length <= 500) {
+      setLocalSelected(newSelected);
+    }
+  };
+
+  // 自定义选择数量变化时自动重选
+  useEffect(() => {
+    if (selectMode === 'custom') {
+      doCustomSelect(customSelectCount);
+    }
+  }, [customSelectCount]);
   const toggleSelect = id => {
     if (localSelected.includes(id)) {
       setLocalSelected(localSelected.filter(s => s !== id));
@@ -810,23 +845,6 @@ function MaterialModal({
       }
       setLocalSelected([...localSelected, id]);
     }
-  };
-  const handleSelectCurrentPage = () => {
-    const currentPageIds = paged.map(m => m.id);
-    const newSelected = [...new Set([...localSelected, ...currentPageIds])];
-    if (newSelected.length > 500) {
-      alert('最多选择500个素材');
-      return;
-    }
-    setLocalSelected(newSelected);
-  };
-  const handleSelectFirstN = () => {
-    const count = Math.min(selectCount, 500);
-    const unselected = displayData.filter(m => !localSelected.includes(m.id));
-    const toAdd = unselected.slice(0, count).map(m => m.id);
-    const newSelected = [...new Set([...localSelected, ...toAdd])];
-    if (newSelected.length > 500) return;
-    setLocalSelected(newSelected);
   };
   const handleConfirm = () => {
     const all = [...MOCK.videoMaterials, ...MOCK.imageMaterials];
@@ -885,31 +903,41 @@ function MaterialModal({
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-2xs text-gray-400"
   }, "跨度不超过1个月")), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 ml-auto"
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: handleSelectCurrentPage,
-    className: "btn-secondary text-sm bg-green-50 text-green-700 border-green-300 hover:bg-green-100"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-check-square mr-1"
-  }), "选择当前页面"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-1"
+    className: "flex items-center gap-4 ml-auto"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer gap-1.5"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "select_mode",
+    checked: selectMode === 'current_page',
+    onChange: () => handleModeChange('current_page'),
+    className: "w-3.5 h-3.5 text-blue-600"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-700"
+  }, "选择当前页面")), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer gap-1.5"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "select_mode",
+    checked: selectMode === 'custom',
+    onChange: () => handleModeChange('custom'),
+    className: "w-3.5 h-3.5 text-blue-600"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-700"
+  }, "自定义选择")), selectMode === 'custom' && /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-1 ml-1 animate-fadeIn"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
   }, "选择前"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
     max: "500",
-    value: selectCount,
-    onChange: e => setSelectCount(Math.min(500, Math.max(1, parseInt(e.target.value) || 1))),
+    value: customSelectCount,
+    onChange: e => setCustomSelectCount(Math.min(500, Math.max(1, parseInt(e.target.value) || 1))),
     className: "w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm text-gray-600"
-  }, "个"), /*#__PURE__*/React.createElement("button", {
-    onClick: handleSelectFirstN,
-    className: "btn-secondary text-sm bg-blue-50 text-blue-600 border-blue-300 hover:bg-blue-100"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-plus mr-1"
-  }), "批量选择")))), /*#__PURE__*/React.createElement("div", {
+  }, "个")))), /*#__PURE__*/React.createElement("div", {
     className: "px-4 py-2 border-b flex items-center justify-between text-sm text-gray-600"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4"
