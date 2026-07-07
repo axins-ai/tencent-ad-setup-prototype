@@ -105,53 +105,53 @@ const MOCK = {
     }]
   },
   accounts: [{
-    id: 'acc_001',
-    name: 'acc_001-北京移动',
+    id: '001',
+    name: '001-北京移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG001',
     businessUnit: 'baiju'
   }, {
-    id: 'acc_002',
-    name: 'acc_002-上海移动',
+    id: '002',
+    name: '002-上海移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG002',
     businessUnit: 'baiju'
   }, {
-    id: 'acc_003',
-    name: 'acc_003-广州移动',
+    id: '003',
+    name: '003-广州移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG003',
     businessUnit: 'baiju'
   }, {
-    id: 'acc_004',
-    name: 'acc_004-深圳移动',
+    id: '004',
+    name: '004-深圳移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG004',
     businessUnit: 'fenghua'
   }, {
-    id: 'acc_005',
-    name: 'acc_005-杭州移动',
+    id: '005',
+    name: '005-杭州移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG005',
     businessUnit: 'fenghua'
   }, {
-    id: 'acc_006',
-    name: 'acc_006-成都移动',
+    id: '006',
+    name: '006-成都移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG006',
     businessUnit: 'fenghua'
   }, {
-    id: 'acc_007',
-    name: 'acc_007-武汉移动',
+    id: '007',
+    name: '007-武汉移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG007',
     businessUnit: 'fuwei'
   }, {
-    id: 'acc_008',
-    name: 'acc_008-南京移动',
+    id: '008',
+    name: '008-南京移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG008',
     businessUnit: 'fuwei'
   }, {
-    id: 'acc_009',
-    name: 'acc_009-西安移动',
+    id: '009',
+    name: '009-西安移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG009',
     businessUnit: 'fuwei'
   }, {
-    id: 'acc_010',
-    name: 'acc_010-重庆移动',
+    id: '010',
+    name: '010-重庆移动',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG010',
     businessUnit: 'baiju'
   }],
@@ -1591,8 +1591,6 @@ function App() {
   const [businessType, setBusinessType] = useState('benefit_A');
   const [channel, setChannel] = useState('gdt');
   const [selectedAccountIds, setSelectedAccountIds] = useState([]);
-  const [batchInputText, setBatchInputText] = useState('');
-  const [showBatchInput, setShowBatchInput] = useState(false);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
 
   // ===== 营销单元配置 =====
@@ -1802,6 +1800,16 @@ function App() {
 
   // ===== 计算属性 =====
   const filteredAccounts = MOCK.accounts.filter(acc => acc.businessUnit === businessUnit && (!accountSearchText || acc.name.includes(accountSearchText) || acc.id.includes(accountSearchText)));
+  // 搜索命中自动勾选（输入纯数字时尝试精确匹配账户ID）
+  useEffect(() => {
+    if (accountSearchText && /^\d+$/.test(accountSearchText)) {
+      const matched = MOCK.accounts.find(acc => acc.id === accountSearchText);
+      if (matched && !selectedAccountIds.includes(matched.id)) {
+        setSelectedAccountIds([...selectedAccountIds, matched.id]);
+        setAccountSearchText('');
+      }
+    }
+  }, [accountSearchText]);
   const overallProgress = (() => {
     const checks = [selectedAccountIds.length > 0, specificProduct !== '', conversionGoal !== '', placement !== '', targetingSource === 'package' ? selectedTargetingPackages.length > 0 : geoSelectedProvinces.length > 0 || geoMode === 'unlimited', bidAmount !== '', selectedMaterials.length > 0, selectedCopies.length > 0, unitName !== ''];
     const done = checks.filter(Boolean).length;
@@ -1829,27 +1837,6 @@ function App() {
     } else {
       setSelectedAccountIds([...selectedAccountIds, id]);
     }
-  };
-  const handleBatchInput = () => {
-    const tokens = batchInputText.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
-    const matched = [];
-    tokens.forEach(t => {
-      const byId = MOCK.accounts.find(a => a.id === t);
-      if (byId) {
-        matched.push(byId.id);
-        return;
-      }
-      const byName = MOCK.accounts.find(a => a.name.includes(t));
-      if (byName) {
-        matched.push(byName.id);
-        return;
-      }
-    });
-    const newIds = [...new Set([...selectedAccountIds, ...matched])];
-    setSelectedAccountIds(newIds);
-    setBatchInputText('');
-    setShowBatchInput(false);
-    notify(`已添加 ${matched.length} 个账户，共选择 ${newIds.length} 个`);
   };
 
   // 获取当前账户落地页（纯URL，宏参数投放时自动拼接）
@@ -2181,11 +2168,14 @@ function App() {
     className: "border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center text-sm",
     onClick: () => {
       setShowAccountDropdown(!showAccountDropdown);
-      setAccountSearchText('');
     }
   }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("span", {
-    className: "text-gray-400"
-  }, "点击选择账户（支持多选）") : selectedAccountIds.slice(0, 3).map(id => {
+    className: "text-gray-400",
+    onClick: e => {
+      e.stopPropagation();
+      setShowAccountDropdown(true);
+    }
+  }, "点击或输入账户ID搜索...") : selectedAccountIds.slice(0, 5).map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
     return /*#__PURE__*/React.createElement("span", {
       key: id,
@@ -2198,9 +2188,9 @@ function App() {
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-times"
     })));
-  }), selectedAccountIds.length > 3 && /*#__PURE__*/React.createElement("span", {
+  }), selectedAccountIds.length > 5 && /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-blue-600 font-medium ml-1"
-  }, "+", selectedAccountIds.length - 3), /*#__PURE__*/React.createElement("span", {
+  }, "+", selectedAccountIds.length - 5), /*#__PURE__*/React.createElement("span", {
     className: "ml-auto text-gray-400 text-xs"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-chevron-down"
@@ -2212,7 +2202,7 @@ function App() {
     type: "text",
     value: accountSearchText,
     onChange: e => setAccountSearchText(e.target.value),
-    placeholder: "搜索账户名称或ID...",
+    placeholder: "输入账户ID搜索，回车自动勾选...",
     className: "w-full px-3 py-1.5 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400",
     onClick: e => e.stopPropagation(),
     autoFocus: true
@@ -2231,129 +2221,18 @@ function App() {
     className: "w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0"
   }), /*#__PURE__*/React.createElement("span", {
     className: "flex-1 truncate min-w-0"
-  }, acc.name), acc.kaboshi && /*#__PURE__*/React.createElement("a", {
-    href: acc.kaboshi,
-    target: "_blank",
-    rel: "noreferrer",
-    onClick: e => e.stopPropagation(),
-    className: "text-xs text-green-600 hover:text-green-800 hover:underline flex-shrink-0 truncate",
-    style: {
-      maxWidth: '500px'
-    },
-    title: acc.kaboshi
-  }, acc.kaboshi), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
+  }, acc.id, " - ", acc.name), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
     className: "fas fa-check text-blue-500 flex-shrink-0"
   })))))), /*#__PURE__*/React.createElement("div", {
     className: "mt-2 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
-      setShowBatchInput(true);
-      setBatchInputText('');
+      notify('账户列表已刷新', 'success');
     },
     className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
   }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-file-import mr-1"
-  }), "批量输入账户ID"), /*#__PURE__*/React.createElement("span", {
-    className: "text-2xs text-gray-400"
-  }, "支持几百个账户，每行一个或用逗号/空格分隔")), showBatchInput && /*#__PURE__*/React.createElement("div", {
-    className: "fixed inset-0 z-50 flex items-center justify-center",
-    style: {
-      background: 'rgba(0,0,0,0.45)'
-    },
-    onClick: () => setShowBatchInput(false)
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col",
-    onClick: e => e.stopPropagation()
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between px-6 py-4 border-b"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-md font-bold text-gray-900"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-file-import mr-2 text-blue-500"
-  }), "批量输入账户"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowBatchInput(false),
-    className: "text-gray-400 hover:text-gray-600 text-lg"
-  }, "×")), /*#__PURE__*/React.createElement("div", {
-    className: "px-6 py-4 flex-1 overflow-y-auto space-y-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-gray-500"
-  }, "输入账户ID或账户名称，每行一个，或用逗号、空格、制表符分隔。支持模糊匹配账户名称。"), /*#__PURE__*/React.createElement("textarea", {
-    value: batchInputText,
-    onChange: e => setBatchInputText(e.target.value),
-    placeholder: "例如：\nacc_001\n账户002\acc_003, acc_004\n账户005",
-    className: "w-full h-48 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 font-mono resize-none"
-  }), batchInputText.trim() && (() => {
-    const tokens = batchInputText.split(/[\\n,\\s,\\t]+/).map(s => s.trim()).filter(Boolean);
-    const matched = [];
-    const unmatched = [];
-    tokens.forEach(t => {
-      const byId = MOCK.accounts.find(a => a.id === t);
-      if (byId) {
-        matched.push(byId);
-        return;
-      }
-      const byName = MOCK.accounts.find(a => a.name.includes(t));
-      if (byName) {
-        matched.push(byName);
-        return;
-      }
-      unmatched.push(t);
-    });
-    const uniqueMatched = [...new Set(matched.map(a => a.id))].map(id => matched.find(a => a.id === id));
-    return /*#__PURE__*/React.createElement("div", {
-      className: "text-sm space-y-2"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-4"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-green-600 font-medium"
-    }, "✓ 匹配到 ", uniqueMatched.length, " 个账户"), unmatched.length > 0 && /*#__PURE__*/React.createElement("span", {
-      className: "text-red-500"
-    }, "✗ 未匹配 ", unmatched.length, " 个")), uniqueMatched.length > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "bg-green-50 border border-green-200 rounded-lg p-3 max-h-32 overflow-y-auto"
-    }, uniqueMatched.map(acc => /*#__PURE__*/React.createElement("div", {
-      key: acc.id,
-      className: "text-xs text-green-800 py-0.5"
-    }, acc.name, "（", acc.id, "）"))), unmatched.length > 0 && /*#__PURE__*/React.createElement("div", {
-      className: "bg-red-50 border border-red-200 rounded-lg p-3 max-h-20 overflow-y-auto"
-    }, unmatched.map((t, i) => /*#__PURE__*/React.createElement("div", {
-      key: i,
-      className: "text-xs text-red-700 py-0.5"
-    }, t, "（未匹配）"))));
-  })()), /*#__PURE__*/React.createElement("div", {
-    className: "px-6 py-4 border-t flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-2xs text-gray-400"
-  }, "提示：粘贴Excel列时保留换行即可自动识别"), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-2"
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setBatchInputText('');
-    },
-    className: "btn-secondary text-sm"
-  }, "清空"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      const tokens = batchInputText.split(/[\\n,\\s,\\t]+/).map(s => s.trim()).filter(Boolean);
-      const matched = [];
-      tokens.forEach(t => {
-        const byId = MOCK.accounts.find(a => a.id === t);
-        if (byId) {
-          matched.push(byId.id);
-          return;
-        }
-        const byName = MOCK.accounts.find(a => a.name.includes(t));
-        if (byName) {
-          matched.push(byName.id);
-          return;
-        }
-      });
-      const newIds = [...new Set([...selectedAccountIds, ...matched])];
-      setSelectedAccountIds(newIds);
-      setShowBatchInput(false);
-      setBatchInputText('');
-      notify(`已添加 ${matched.length} 个账户`, 'success');
-    },
-    className: "btn-primary text-sm"
-  }, "确认导入"))))))))), /*#__PURE__*/React.createElement("div", {
+    className: "fas fa-sync-alt mr-1"
+  }), "刷新账户列表")))))), /*#__PURE__*/React.createElement("div", {
     id: "section-unit",
     className: "bg-white rounded-xl shadow-sm border"
   }, /*#__PURE__*/React.createElement("div", {
