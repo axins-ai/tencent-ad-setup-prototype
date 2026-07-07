@@ -105,53 +105,53 @@ const MOCK = {
     }]
   },
   accounts: [{
-    id: '001',
-    name: '001-北京移动',
+    id: '38572691',
+    name: '38572691',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG001',
     businessUnit: 'baiju'
   }, {
-    id: '002',
-    name: '002-上海移动',
+    id: '92743108',
+    name: '92743108',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG002',
     businessUnit: 'baiju'
   }, {
-    id: '003',
-    name: '003-广州移动',
+    id: '61480293',
+    name: '61480293',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG003',
     businessUnit: 'baiju'
   }, {
-    id: '004',
-    name: '004-深圳移动',
+    id: '50371846',
+    name: '50371846',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG004',
     businessUnit: 'fenghua'
   }, {
-    id: '005',
-    name: '005-杭州移动',
+    id: '18264903',
+    name: '18264903',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG005',
     businessUnit: 'fenghua'
   }, {
-    id: '006',
-    name: '006-成都移动',
+    id: '74058261',
+    name: '74058261',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG006',
     businessUnit: 'fenghua'
   }, {
-    id: '007',
-    name: '007-武汉移动',
+    id: '36901784',
+    name: '36901784',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG007',
     businessUnit: 'fuwei'
   }, {
-    id: '008',
-    name: '008-南京移动',
+    id: '21835097',
+    name: '21835097',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG008',
     businessUnit: 'fuwei'
   }, {
-    id: '009',
-    name: '009-西安移动',
+    id: '95620143',
+    name: '95620143',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG009',
     businessUnit: 'fuwei'
   }, {
-    id: '010',
-    name: '010-重庆移动',
+    id: '84761502',
+    name: '84761502',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG010',
     businessUnit: 'baiju'
   }],
@@ -2221,7 +2221,17 @@ function App() {
     className: "w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0"
   }), /*#__PURE__*/React.createElement("span", {
     className: "flex-1 truncate min-w-0"
-  }, acc.id, " - ", acc.name), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
+  }, acc.id), acc.kaboshi && /*#__PURE__*/React.createElement("a", {
+    href: acc.kaboshi,
+    target: "_blank",
+    rel: "noreferrer",
+    onClick: e => e.stopPropagation(),
+    className: "text-xs text-green-600 hover:text-green-800 hover:underline flex-shrink-0 truncate",
+    style: {
+      maxWidth: '320px'
+    },
+    title: acc.kaboshi
+  }, acc.kaboshi), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
     className: "fas fa-check text-blue-500 flex-shrink-0"
   })))))), /*#__PURE__*/React.createElement("div", {
     className: "mt-2 flex items-center gap-2"
