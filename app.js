@@ -347,160 +347,98 @@ const MOCK = {
     label: '视频号评论区广告',
     tip: '视频号内容评论区中的广告位'
   }],
-  mpAdPlacementOptions: [{
-    id: 'mp_ad_bottom',
-    label: '公众号文章底部'
-  }, {
-    id: 'mp_ad_middle',
-    label: '公众号文章中部'
-  }, {
-    id: 'mp_ad_video',
-    label: '公众号文章视频贴片',
-    tip: '公众号文章视频贴片'
-  }, {
-    id: 'mp_ad_submsg',
-    label: '订阅号消息列表',
-    tip: '订阅号消息列表'
-  }, {
-    id: 'mp_ad_paydetail',
-    label: '微信支付订单详情页',
-    tip: '微信支付订单详情页'
-  }, {
-    id: 'mp_ad_banner',
-    label: '小程序banner广告',
-    disabled: true
-  }, {
-    id: 'mp_ad_reward',
-    label: '小程序激励式广告',
-    tip: '小程序激励式广告'
-  }, {
-    id: 'mp_ad_interstitial',
-    label: '小程序插屏广告'
-  }, {
-    id: 'mp_ad_cover',
-    label: '小程序封面广告',
-    tip: '小程序封面广告'
-  }, {
-    id: 'mp_ad_discover',
-    label: '发现小程序'
-  }, {
-    id: 'mp_ad_native',
-    label: '小程序原生广告'
-  }, {
-    id: 'mp_ad_comment',
-    label: '公众号留言区'
-  }],
   mpSceneGroups: [{
     groupName: '公众号媒体类型',
-    tip: '公众号媒体类型',
     multi: true,
-    boxed: true,
     options: [{
-      id: 'mp_media_1',
-      label: '曲艺'
+      id: 'mp_001',
+      label: '不限'
     }, {
-      id: 'mp_media_2',
-      label: '军事'
+      id: 'mp_002',
+      label: '社会'
     }, {
-      id: 'mp_media_3',
-      label: '广告创意'
+      id: 'mp_003',
+      label: '生活'
     }, {
-      id: 'mp_media_4',
-      label: '网红达人'
+      id: 'mp_004',
+      label: '文化'
     }, {
-      id: 'mp_media_5',
-      label: '纪录片'
+      id: 'mp_005',
+      label: '教育'
     }, {
-      id: 'mp_media_6',
-      label: '美女'
+      id: 'mp_006',
+      label: '职场'
     }, {
-      id: 'mp_media_7',
-      label: '其它'
+      id: 'mp_007',
+      label: '健康'
     }]
   }, {
     groupName: '小程序小游戏流量类型',
-    tip: '小程序小游戏流量类型',
     multi: true,
     options: [{
-      id: 'mg_unlimited',
-      label: '小游戏-不限'
+      id: 'mg_001',
+      label: '小游戏：不限'
     }, {
-      id: 'mg_action',
-      label: '小游戏-动作游戏'
+      id: 'mg_002',
+      label: '小游戏：动作'
     }, {
-      id: 'mg_role',
-      label: '小游戏-角色游戏'
+      id: 'mg_003',
+      label: '小游戏：角色'
     }, {
-      id: 'mg_competition',
-      label: '小游戏-竞技游戏'
+      id: 'mg_004',
+      label: '小游戏：竞技'
     }, {
-      id: 'mg_other',
-      label: '小游戏-其他游戏'
+      id: 'mg_005',
+      label: '小游戏：其他'
     }, {
-      id: 'mg_chess',
-      label: '小游戏-棋牌游戏'
+      id: 'mg_009',
+      label: '小程序：不限'
     }, {
-      id: 'mg_culture',
-      label: '小游戏-文化互动'
+      id: 'mg_010',
+      label: '小程序：共享充电'
     }, {
-      id: 'mg_casual',
-      label: '小游戏-休闲游戏'
+      id: 'mg_011',
+      label: '小程序：点餐外卖'
     }, {
-      id: 'mp_mini_unlimited',
-      label: '小程序-不限'
+      id: 'mg_012',
+      label: '小程序：快递生活'
     }, {
-      id: 'mp_charging',
-      label: '小程序-共享充电'
+      id: 'mg_013',
+      label: '小程序：公共出行'
     }, {
-      id: 'mp_food',
-      label: '小程序-点餐及外卖服务'
+      id: 'mg_014',
+      label: '小程序：车主服务'
     }, {
-      id: 'mp_express',
-      label: '小程序-快递及生活服务'
+      id: 'mg_015',
+      label: '小程序：效率工具'
     }, {
-      id: 'mp_transport',
-      label: '小程序-公共交通与共享出行'
+      id: 'mg_017',
+      label: '小程序：电商'
     }, {
-      id: 'mp_car',
-      label: '小程序-车主服务'
+      id: 'mg_018',
+      label: '小程序：教育工具'
     }, {
-      id: 'mp_efficiency',
-      label: '小程序-效率工具'
-    }, {
-      id: 'mp_entertainment',
-      label: '小程序-休闲娱乐'
-    }, {
-      id: 'mp_ecommerce',
-      label: '小程序-电商'
-    }, {
-      id: 'mp_education',
-      label: '小程序-教育工具'
-    }, {
-      id: 'mp_drama',
-      label: '小程序-微短剧'
-    }, {
-      id: 'mp_other',
-      label: '小程序-其他'
+      id: 'mg_019',
+      label: '小程序：微短剧'
     }]
   }, {
     groupName: '订单详情页消费场景',
-    tip: '订单详情页消费场景',
     multi: true,
     options: [{
-      id: 'os_unlimited',
+      id: 'os_001',
       label: '不限'
     }, {
-      id: 'os_food',
-      label: '订单详情页-餐饮美食'
+      id: 'os_002',
+      label: '餐饮美食'
     }, {
-      id: 'os_life',
-      label: '订单详情页-生活服务'
+      id: 'os_003',
+      label: '生活服务'
     }, {
-      id: 'os_shopping',
-      label: '订单详情页-购物体验'
+      id: 'os_004',
+      label: '购物体验'
     }, {
-      id: 'os_travel',
-      label: '订单详情页-出行服务'
+      id: 'os_005',
+      label: '出行服务'
     }]
   }],
   // 级联地区数据（用于自定义定向）
@@ -663,33 +601,6 @@ const MOCK = {
   }
 };
 
-// 版位定投场景显示文本
-function getPlacementSceneDisplay(placement, placementScene) {
-  if (!placementScene) return '点击选择版位定投场景';
-  if (placement === 'wechat_video') {
-    if (placementScene === 'unlimited') return '不限';
-    const selected = placementScene.split(',').filter(Boolean);
-    if (!selected.length) return '点击选择版位定投场景';
-    return MOCK.videoSceneOptions.filter(o => selected.includes(o.id)).map(o => o.label).join('、');
-  }
-  try {
-    const parsed = JSON.parse(placementScene);
-    if (parsed.ad === 'unlimited' && parsed.scene === 'unlimited') return '不限';
-    const parts = [];
-    if (parsed.ad === 'custom' && parsed.adSelected && parsed.adSelected.length) {
-      parts.push(`定投 ${parsed.adSelected.length} 个`);
-    }
-    if (parsed.scene === 'custom' && parsed.sceneSelected && parsed.sceneSelected.length) {
-      parts.push(`场景 ${parsed.sceneSelected.length} 个`);
-    }
-    return parts.length ? parts.join('，') : '点击选择版位定投场景';
-  } catch (e) {
-    if (placementScene === 'unlimited') return '不限';
-    const ids = placementScene.split(',').filter(Boolean);
-    return ids.length ? `已选择 ${ids.length} 个场景` : '点击选择版位定投场景';
-  }
-}
-
 // 通知组件
 function Notification({
   msg,
@@ -718,100 +629,33 @@ function PlacementSceneModal({
   value,
   onChange
 }) {
-  const isVideo = placement === 'wechat_video';
-
-  // 视频号：保持原有简单格式（'unlimited' 或逗号分隔 ID）
   const [mode, setMode] = useState('unlimited');
   const [selected, setSelected] = useState([]);
-
-  // 微信公众号与小程序：JSON 对象 { ad, adSelected, scene, sceneSelected }
-  const [adMode, setAdMode] = useState('unlimited');
-  const [sceneMode, setSceneMode] = useState('unlimited');
-  const [sceneSelected, setSceneSelected] = useState([]);
   useEffect(() => {
-    if (!show) return;
-    if (isVideo) {
+    if (show) {
       if (value && value !== 'unlimited') {
         setMode('custom');
-        setSelected(value.split(',').filter(Boolean));
+        setSelected(value.split(','));
       } else {
         setMode('unlimited');
         setSelected([]);
       }
-      return;
     }
-    try {
-      const parsed = value ? JSON.parse(value) : {};
-      setAdMode(parsed.ad || 'unlimited');
-      setSceneMode(parsed.scene || 'unlimited');
-      setSceneSelected(parsed.sceneSelected || []);
-    } catch (e) {
-      setAdMode('unlimited');
-      setSceneMode('unlimited');
-      setSceneSelected([]);
-    }
-  }, [show, value, isVideo]);
+  }, [show, value]);
   if (!show) return null;
-  const handleVideoToggle = id => {
+  const handleToggle = id => {
     setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   };
-
-  // 场景互斥逻辑：同一子组内"不限"与明细选项互斥
-  const handleSceneToggle = id => {
-    setSceneSelected(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(s => s !== id);
-      }
-      // 新增选中时处理互斥
-      const newSelected = [...prev, id];
-
-      // 小游戏-不限（mg_unlimited）与所有其他 mg_* 互斥
-      if (id === 'mg_unlimited') {
-        return newSelected.filter(s => !s.startsWith('mg_') || s === 'mg_unlimited');
-      }
-      if (id.startsWith('mg_') && id !== 'mg_unlimited') {
-        return newSelected.filter(s => s !== 'mg_unlimited');
-      }
-
-      // 小程序-不限（mp_mini_unlimited）与所有其他 mp_* 互斥
-      if (id === 'mp_mini_unlimited') {
-        return newSelected.filter(s => !s.startsWith('mp_') || s === 'mp_mini_unlimited');
-      }
-      if (id.startsWith('mp_') && id !== 'mp_mini_unlimited') {
-        return newSelected.filter(s => s !== 'mp_mini_unlimited');
-      }
-
-      // 订单详情-不限（os_unlimited）与所有其他 os_* 互斥
-      if (id === 'os_unlimited') {
-        return newSelected.filter(s => !s.startsWith('os_') || s === 'os_unlimited');
-      }
-      if (id.startsWith('os_') && id !== 'os_unlimited') {
-        return newSelected.filter(s => s !== 'os_unlimited');
-      }
-      return newSelected;
-    });
-  };
   const handleConfirm = () => {
-    if (isVideo) {
-      onChange(mode === 'unlimited' ? 'unlimited' : selected.join(','));
-    } else {
-      onChange(JSON.stringify({
-        ad: adMode,
-        adSelected: [],
-        scene: sceneMode,
-        sceneSelected: sceneMode === 'custom' ? sceneSelected : []
-      }));
-    }
+    onChange(mode === 'unlimited' ? 'unlimited' : selected.join(','));
     onClose();
   };
-
-  // 场景分组（公众号媒体类型只显示"不限"）
-  const sceneGroups = MOCK.mpSceneGroups;
+  const isVideo = placement === 'wechat_video';
   return /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
-    className: `modal-content w-full ${isVideo ? 'max-w-2xl' : 'max-w-3xl'}`,
+    className: "modal-content w-full max-w-2xl",
     onClick: e => e.stopPropagation()
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between p-4 border-b"
@@ -823,14 +667,7 @@ function PlacementSceneModal({
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-times"
   }))), /*#__PURE__*/React.createElement("div", {
-    className: "overflow-y-auto p-4",
-    style: {
-      maxHeight: isVideo ? '50vh' : '50vh'
-    }
-  }, isVideo ? /*#__PURE__*/React.createElement("div", {
-    className: "space-y-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-gray-50 p-4 rounded-lg"
+    className: "p-4 border-b bg-gray-50"
   }, /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
@@ -838,7 +675,7 @@ function PlacementSceneModal({
     name: "scene_mode",
     checked: mode === 'unlimited',
     onChange: () => setMode('unlimited'),
-    className: "mr-2 accent-blue-600"
+    className: "mr-2"
   }), /*#__PURE__*/React.createElement("span", null, "不限")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer mt-2"
   }, /*#__PURE__*/React.createElement("input", {
@@ -846,8 +683,13 @@ function PlacementSceneModal({
     name: "scene_mode",
     checked: mode === 'custom',
     onChange: () => setMode('custom'),
-    className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "自定义"))), mode === 'custom' && /*#__PURE__*/React.createElement("div", {
+    className: "mr-2"
+  }), /*#__PURE__*/React.createElement("span", null, "自定义"))), /*#__PURE__*/React.createElement("div", {
+    className: "overflow-y-auto flex-1 p-4",
+    style: {
+      maxHeight: '50vh'
+    }
+  }, mode === 'custom' && /*#__PURE__*/React.createElement(React.Fragment, null, isVideo && /*#__PURE__*/React.createElement("div", {
     className: "space-y-3"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-2"
@@ -859,96 +701,34 @@ function PlacementSceneModal({
   }, /*#__PURE__*/React.createElement("input", {
     type: "checkbox",
     checked: selected.includes(opt.id),
-    onChange: () => handleVideoToggle(opt.id),
+    onChange: () => handleToggle(opt.id),
     className: "mr-3"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, opt.label))))), mode === 'unlimited' && /*#__PURE__*/React.createElement("div", {
-    className: "text-center text-gray-400 py-8"
-  }, "已选择\"不限\"，将投放到所有可用场景")) : /*#__PURE__*/React.createElement("div", {
+  }, opt.label), opt.tip && /*#__PURE__*/React.createElement("span", {
+    className: "ml-2 text-gray-400 cursor-help",
+    title: opt.tip
+  }, "❓"))))), !isVideo && /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "pb-5 border-b border-gray-100"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-6"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-sm font-medium text-gray-700"
-  }, "微信公众号与小程序定投"), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "mp_ad_mode",
-    checked: adMode === 'unlimited',
-    onChange: () => setAdMode('unlimited'),
-    className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "不限")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-not-allowed opacity-50"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "mp_ad_mode",
-    disabled: true,
-    className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-gray-400"
-  }, "自定义")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-6"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-sm font-medium text-gray-700"
-  }, "微信公众号与小程序场景"), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "mp_scene_mode",
-    checked: sceneMode === 'unlimited',
-    onChange: () => setSceneMode('unlimited'),
-    className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "不限")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "mp_scene_mode",
-    checked: sceneMode === 'custom',
-    onChange: () => setSceneMode('custom'),
-    className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "自定义"))), sceneMode === 'custom' && /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 space-y-6"
-  }, sceneGroups.map((group, gi) => /*#__PURE__*/React.createElement("div", {
+  }, MOCK.mpSceneGroups.map((group, gi) => /*#__PURE__*/React.createElement("div", {
     key: gi
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-2"
-  }, group.groupName), group.boxed ? /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-6 mt-2"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: `scene_group_${gi}`,
-    defaultChecked: true,
-    className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "不限")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-not-allowed opacity-50"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: `scene_group_${gi}`,
-    disabled: true,
-    className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm text-gray-400"
-  }, "自定义"))) : /*#__PURE__*/React.createElement("div", {
+  }, group.groupName), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-2"
   }, group.options.map(opt => /*#__PURE__*/React.createElement("label", {
     key: opt.id,
     className: "flex items-center px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "checkbox",
-    checked: sceneSelected.includes(opt.id),
-    onChange: () => handleSceneToggle(opt.id),
+    checked: selected.includes(opt.id),
+    onChange: () => handleToggle(opt.id),
     className: "mr-2"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, opt.label)))))))))), /*#__PURE__*/React.createElement("div", {
+  }, opt.label)))))))), mode === 'unlimited' && /*#__PURE__*/React.createElement("div", {
+    className: "text-center text-gray-400 py-8"
+  }, "已选择\"不限\"，将投放到所有可用场景")), /*#__PURE__*/React.createElement("div", {
     className: "p-4 border-t flex justify-end gap-3"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
@@ -2000,16 +1780,11 @@ function App() {
   });
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average'
   // 品牌形象 & 营销组件
+  const [brandImageType, setBrandImageType] = useState('video_account'); // 'custom' | 'video_account'
   const [selectedBrandImage, setSelectedBrandImage] = useState(null); // {id, name, url}
   const [selectedVideoAccount, setSelectedVideoAccount] = useState(null); // {id, name}
   const [marketingComponentType, setMarketingComponentType] = useState('floating_card'); // 'floating_card' | 'action_button'
   const [actionButtonType, setActionButtonType] = useState('claim'); // 'claim' | 'details'
-  // 创意资产类型
-  const [creativeAssetType, setCreativeAssetType] = useState('brand'); // 'brand' | 'component'
-  // 营销组件文案
-  const [marketingTitle, setMarketingTitle] = useState('');
-  const [marketingDesc, setMarketingDesc] = useState('');
-  const [marketingBtnText, setMarketingBtnText] = useState('');
 
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
@@ -2025,26 +1800,12 @@ function App() {
 
   // ===== 计算属性 =====
   const filteredAccounts = MOCK.accounts.filter(acc => acc.businessUnit === businessUnit && (!accountSearchText || acc.name.includes(accountSearchText) || acc.id.includes(accountSearchText)));
-  // 搜索命中自动勾选（支持英文逗号分隔批量搜索）
+  // 搜索命中自动勾选（输入纯数字时尝试精确匹配账户ID）
   useEffect(() => {
-    if (!accountSearchText) return;
-
-    // 批量模式：英文逗号分隔搜索
-    if (accountSearchText.includes(',')) {
-      const parts = accountSearchText.split(',').map(s => s.trim()).filter(Boolean);
-      const matchedIds = parts.map(part => MOCK.accounts.find(acc => acc.id === part)).filter(Boolean).map(acc => acc.id).filter(id => !selectedAccountIds.includes(id));
-      if (matchedIds.length > 0) {
-        setSelectedAccountIds(prev => [...prev, ...matchedIds]);
-        setAccountSearchText('');
-      }
-      return;
-    }
-
-    // 单账户自动勾选（输入纯数字时尝试精确匹配账户ID）
-    if (/^\d+$/.test(accountSearchText)) {
+    if (accountSearchText && /^\d+$/.test(accountSearchText)) {
       const matched = MOCK.accounts.find(acc => acc.id === accountSearchText);
       if (matched && !selectedAccountIds.includes(matched.id)) {
-        setSelectedAccountIds(prev => [...prev, matched.id]);
+        setSelectedAccountIds([...selectedAccountIds, matched.id]);
         setAccountSearchText('');
       }
     }
@@ -2441,7 +2202,7 @@ function App() {
     type: "text",
     value: accountSearchText,
     onChange: e => setAccountSearchText(e.target.value),
-    placeholder: "输入账户ID搜索，支持英文逗号批量搜索...",
+    placeholder: "输入账户ID搜索，回车自动勾选...",
     className: "w-full px-3 py-1.5 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400",
     onClick: e => e.stopPropagation(),
     autoFocus: true
@@ -2587,7 +2348,7 @@ function App() {
     className: "px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[300px]"
   }, /*#__PURE__*/React.createElement("span", {
     className: placementScene ? 'text-gray-900' : 'text-gray-400'
-  }, getPlacementSceneDisplay(placement, placementScene)), /*#__PURE__*/React.createElement("i", {
+  }, placementScene === 'unlimited' ? '不限' : placementScene ? placement === 'wechat_video' ? MOCK.videoSceneOptions.filter(o => placementScene.split(',').includes(o.id)).map(o => o.label).join('、') : `已选择 ${placementScene.split(',').length} 个场景` : '点击选择版位定投场景'), /*#__PURE__*/React.createElement("i", {
     className: "fas fa-chevron-down ml-2 text-gray-400 text-sm"
   })), /*#__PURE__*/React.createElement(PlacementSceneModal, {
     placement: placement,
@@ -2780,25 +2541,27 @@ function App() {
       className: "fas fa-times"
     }))) : null;
   })), /*#__PURE__*/React.createElement("select", {
-    multiple: true,
-    size: 7,
-    onChange: e => {
-      const selected = Array.from(e.target.options).filter(opt => opt.selected && opt.value).map(opt => opt.value);
-      setSelectedTargetingPackages(selected);
-    },
-    className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
-  }, /*#__PURE__*/React.createElement("option", {
     value: "",
-    disabled: true
-  }, "-- 请选择定向包（按住 Ctrl/Cmd 多选）--"), MOCK.targetingPackages.map(tp => /*#__PURE__*/React.createElement("option", {
+    onChange: e => {
+      const val = e.target.value;
+      if (val && !selectedTargetingPackages.includes(val)) {
+        setSelectedTargetingPackages([...selectedTargetingPackages, val]);
+      }
+    },
+    className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "++ 添加定向包 ++"), MOCK.targetingPackages.map(tp => /*#__PURE__*/React.createElement("option", {
     key: tp.id,
-    value: tp.id
-  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）")), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement("option", {
+    value: tp.id,
+    disabled: selectedTargetingPackages.includes(tp.id)
+  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）", selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : '')), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement("option", {
     disabled: true
   }, "── 自建定向包 ──"), userTgtPkgs.map(tp => /*#__PURE__*/React.createElement("option", {
     key: tp.id,
-    value: tp.id
-  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）[自建]"))), selectedTargetingPackages.length === 0 && /*#__PURE__*/React.createElement("p", {
+    value: tp.id,
+    disabled: selectedTargetingPackages.includes(tp.id)
+  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）[自建]", selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : ''))), selectedTargetingPackages.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-orange-500 mt-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle mr-1"
@@ -3445,7 +3208,7 @@ function App() {
     className: "text-xs text-gray-400 ml-2"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-lock mr-1"
-  }), "已锁定为关闭"))), creativeAssetType === 'brand' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }), "已锁定为关闭"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "创意名称"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
@@ -3606,126 +3369,84 @@ function App() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-6"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "text-sm font-medium text-gray-700"
-  }, "资产类型"), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "creative_asset",
-    checked: creativeAssetType === 'brand',
-    onChange: () => setCreativeAssetType('brand'),
-    className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "品牌形象")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "creative_asset",
-    checked: creativeAssetType === 'component',
-    onChange: () => setCreativeAssetType('component'),
-    className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "营销组件"))), creativeAssetType === 'brand' ?
-  /*#__PURE__*/
-  /* 品牌形象 - 简化版（去掉视频号选择） */
-  React.createElement("div", {
     className: "flex items-center gap-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-36 flex-shrink-0"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700"
-  }, "品牌形象")), /*#__PURE__*/React.createElement("div", {
+  }, "品牌形象")), /*#__PURE__*/React.createElement("select", {
+    value: brandImageType,
+    onChange: e => setBrandImageType(e.target.value),
+    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "custom"
+  }, "自定义"), /*#__PURE__*/React.createElement("option", {
+    value: "video_account"
+  }, "视频号")), /*#__PURE__*/React.createElement("div", {
     className: "flex-1"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, brandImageType === 'custom' ? /*#__PURE__*/React.createElement("select", {
     value: selectedBrandImage ? selectedBrandImage.id : '',
     onChange: e => {
       const bi = MOCK.brandImages.find(x => x.id === e.target.value);
       setSelectedBrandImage(bi || null);
     },
-    className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
   }, "选择品牌形象图片"), MOCK.brandImages.map(bi => /*#__PURE__*/React.createElement("option", {
     key: bi.id,
     value: bi.id
-  }, bi.name))))) :
-  /*#__PURE__*/
-  /* 营销组件 */
-  React.createElement("div", {
-    className: "space-y-4"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, bi.name))) : /*#__PURE__*/React.createElement("select", {
+    value: selectedVideoAccount ? selectedVideoAccount.id : '',
+    onChange: e => {
+      const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
+      setSelectedVideoAccount(va || null);
+    },
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "选择视频号"), MOCK.videoAccounts.map(va => /*#__PURE__*/React.createElement("option", {
+    key: va.id,
+    value: va.id
+  }, va.name))))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-36 flex-shrink-0"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700"
-  }, "组件图片")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 cursor-pointer"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"
-  }), /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-gray-500"
-  }, "点击上传图片"), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400 mt-1"
-  }, "尺寸 800×800px，大小 400KB 以内")))), /*#__PURE__*/React.createElement("div", {
-    className: "border-t pt-3"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-sm font-medium text-gray-700 mb-3"
-  }, "文案配置"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs text-gray-500 mb-1"
-  }, "标题 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, "*")), /*#__PURE__*/React.createElement("div", {
-    className: "relative"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: marketingTitle,
-    onChange: e => e.target.value.length <= 10 && setMarketingTitle(e.target.value),
-    placeholder: "请输入标题",
-    maxLength: 10,
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400"
-  }, marketingTitle.length, "/10"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs text-gray-500 mb-1"
-  }, "描述 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, "*")), /*#__PURE__*/React.createElement("div", {
-    className: "relative"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: marketingDesc,
-    onChange: e => e.target.value.length <= 14 && setMarketingDesc(e.target.value),
-    placeholder: "请输入描述",
-    maxLength: 14,
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400"
-  }, marketingDesc.length, "/14"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs text-gray-500 mb-1"
-  }, "按钮文案 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, "*")), /*#__PURE__*/React.createElement("select", {
-    value: marketingBtnText,
-    onChange: e => setMarketingBtnText(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+  }, "营销组件")), /*#__PURE__*/React.createElement("select", {
+    value: marketingComponentType,
+    onChange: e => setMarketingComponentType(e.target.value),
+    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "请选择"), /*#__PURE__*/React.createElement("option", {
-    value: "查看详情"
-  }, "查看详情"), /*#__PURE__*/React.createElement("option", {
-    value: "立即领取"
-  }, "立即领取")))))), /*#__PURE__*/React.createElement("p", {
+    value: "action_button"
+  }, "行动按钮"), /*#__PURE__*/React.createElement("option", {
+    value: "floating_card"
+  }, "浮层卡片")), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, marketingComponentType === 'action_button' ? /*#__PURE__*/React.createElement("select", {
+    value: actionButtonType,
+    onChange: e => setActionButtonType(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "claim"
+  }, "立即领取"), /*#__PURE__*/React.createElement("option", {
+    value: "details"
+  }, "查看详情")) : /*#__PURE__*/React.createElement("select", {
+    value: actionButtonType,
+    onChange: e => setActionButtonType(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "default"
+  }, "默认浮层卡片"), /*#__PURE__*/React.createElement("option", {
+    value: "coupon"
+  }, "优惠券浮层"), /*#__PURE__*/React.createElement("option", {
+    value: "subscribe"
+  }, "订阅浮层"), /*#__PURE__*/React.createElement("option", {
+    value: "promo"
+  }, "促销浮层")))), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400"
-  }, "所有创意共用同一个", creativeAssetType === 'brand' ? '品牌形象' : '营销组件'))))), /*#__PURE__*/React.createElement("div", {
+  }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
     id: "section-run",
     className: "bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 mb-6"
   }, /*#__PURE__*/React.createElement("h3", {
