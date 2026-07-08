@@ -353,8 +353,7 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
   const [selected, setSelected] = useState([]);
 
   // 微信公众号与小程序：JSON 对象 { ad, adSelected, scene, sceneSelected }
-  const [adMode, setAdMode] = useState('unlimited');
-  const [adSelected, setAdSelected] = useState([]);
+  // 定投固定为不限，adMode/adSelected 保留解析兼容
   const [sceneMode, setSceneMode] = useState('unlimited');
   const [sceneSelected, setSceneSelected] = useState([]);
 
@@ -372,13 +371,9 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
     }
     try {
       const parsed = value ? JSON.parse(value) : {};
-      setAdMode(parsed.ad || 'unlimited');
-      setAdSelected(parsed.adSelected || []);
       setSceneMode(parsed.scene || 'unlimited');
       setSceneSelected(parsed.sceneSelected || []);
     } catch (e) {
-      setAdMode('unlimited');
-      setAdSelected([]);
       setSceneMode('unlimited');
       setSceneSelected([]);
     }
@@ -389,11 +384,42 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
   const handleVideoToggle = (id) => {
     setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   };
-  const handleAdToggle = (id) => {
-    setAdSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
-  };
+
+  // 场景互斥逻辑：同一子组内"不限"与明细选项互斥
   const handleSceneToggle = (id) => {
-    setSceneSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+    setSceneSelected(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(s => s !== id);
+      }
+      // 新增选中时处理互斥
+      const newSelected = [...prev, id];
+
+      // 小游戏-不限（mg_unlimited）与所有其他 mg_* 互斥
+      if (id === 'mg_unlimited') {
+        return newSelected.filter(s => !s.startsWith('mg_') || s === 'mg_unlimited');
+      }
+      if (id.startsWith('mg_') && id !== 'mg_unlimited') {
+        return newSelected.filter(s => s !== 'mg_unlimited');
+      }
+
+      // 小程序-不限（mp_mini_unlimited）与所有其他 mp_* 互斥
+      if (id === 'mp_mini_unlimited') {
+        return newSelected.filter(s => !s.startsWith('mp_') || s === 'mp_mini_unlimited');
+      }
+      if (id.startsWith('mp_') && id !== 'mp_mini_unlimited') {
+        return newSelected.filter(s => s !== 'mp_mini_unlimited');
+      }
+
+      // 订单详情-不限（os_unlimited）与所有其他 os_* 互斥
+      if (id === 'os_unlimited') {
+        return newSelected.filter(s => !s.startsWith('os_') || s === 'os_unlimited');
+      }
+      if (id.startsWith('os_') && id !== 'os_unlimited') {
+        return newSelected.filter(s => s !== 'os_unlimited');
+      }
+
+      return newSelected;
+    });
   };
 
   const handleConfirm = () => {
@@ -401,14 +427,17 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
       onChange(mode === 'unlimited' ? 'unlimited' : selected.join(','));
     } else {
       onChange(JSON.stringify({
-        ad: adMode,
-        adSelected: adMode === 'custom' ? adSelected : [],
+        ad: 'unlimited',
+        adSelected: [],
         scene: sceneMode,
         sceneSelected: sceneMode === 'custom' ? sceneSelected : []
       }));
     }
     onClose();
   };
+
+  // 场景分组（去掉公众号媒体类型）
+  const sceneGroups = MOCK.mpSceneGroups.filter(g => !g.boxed);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -418,7 +447,7 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
         </div>
 
-        <div className="overflow-y-auto p-4" style={{maxHeight: isVideo ? '50vh' : '65vh'}}>
+        <div className="overflow-y-auto p-4" style={{maxHeight: isVideo ? '50vh' : '50vh'}}>
           {isVideo ? (
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
@@ -440,7 +469,6 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
                         <input type="checkbox" checked={selected.includes(opt.id)} onChange={() => handleVideoToggle(opt.id)} className="mr-3" />
                         <span className="text-sm">{opt.label}</span>
                       </div>
-                      {opt.tip && <i className="fas fa-question-circle text-gray-400 cursor-help" title={opt.tip}></i>}
                     </label>
                   ))}
                 </div>
@@ -451,48 +479,12 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* 微信公众号与小程序定投 */}
+              {/* 微信公众号与小程序定投 - 固定不限 */}
               <div className="pb-5 border-b border-gray-100">
                 <div className="flex items-center gap-6">
                   <span className="text-sm font-medium text-gray-700">微信公众号与小程序定投</span>
-                  <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="mp_ad_mode" checked={adMode === 'unlimited'} onChange={() => setAdMode('unlimited')} className="mr-2 accent-blue-600" />
-                    <span>不限</span>
-                  </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="mp_ad_mode" checked={adMode === 'custom'} onChange={() => setAdMode('custom')} className="mr-2 accent-blue-600" />
-                    <span>自定义</span>
-                  </label>
+                  <span className="text-gray-400">不限</span>
                 </div>
-                {adMode === 'custom' && (
-                  <div className="mt-3">
-                    {adSelected.length === 0 && (
-                      <div className="bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-sm text-red-600 flex items-center mb-3">
-                        <i className="fas fa-info-circle mr-2"></i>
-                        请选择微信公众号与小程序定投
-                      </div>
-                    )}
-                    <div className="grid grid-cols-3 gap-3">
-                      {MOCK.mpAdPlacementOptions.map(opt => (
-                        <label
-                          key={opt.id}
-                          className={`flex items-center px-3 py-2 border rounded-lg ${opt.disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-gray-100' : 'border-gray-200 hover:bg-gray-50 cursor-pointer'}`}
-                          title={opt.disabled ? '暂不可用' : opt.tip}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={adSelected.includes(opt.id)}
-                            onChange={() => !opt.disabled && handleAdToggle(opt.id)}
-                            disabled={opt.disabled}
-                            className="mr-2"
-                          />
-                          <span className="text-sm">{opt.label}</span>
-                          {opt.tip && !opt.disabled && <i className="fas fa-question-circle text-gray-400 cursor-help ml-1 text-xs" title={opt.tip}></i>}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* 微信公众号与小程序场景 */}
@@ -510,33 +502,17 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
                 </div>
                 {sceneMode === 'custom' && (
                   <div className="mt-3 space-y-6">
-                    {MOCK.mpSceneGroups.map((group, gi) => (
+                    {sceneGroups.map((group, gi) => (
                       <div key={gi}>
-                        <p className="text-sm font-medium text-gray-700 mb-2">
-                          {group.groupName}
-                          {group.tip && <i className="fas fa-question-circle text-gray-400 cursor-help ml-1 text-xs" title={group.tip}></i>}
-                        </p>
-                        {group.boxed ? (
-                          <div className="border border-gray-200 rounded-lg p-3">
-                            <div className="grid grid-cols-1 gap-2">
-                              {group.options.map(opt => (
-                                <label key={opt.id} className="flex items-center px-2 py-1 rounded hover:bg-gray-50 cursor-pointer">
-                                  <input type="checkbox" checked={sceneSelected.includes(opt.id)} onChange={() => handleSceneToggle(opt.id)} className="mr-2" />
-                                  <span className="text-sm">{opt.label}</span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-wrap gap-2">
-                            {group.options.map(opt => (
-                              <label key={opt.id} className="flex items-center px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" checked={sceneSelected.includes(opt.id)} onChange={() => handleSceneToggle(opt.id)} className="mr-2" />
-                                <span className="text-sm">{opt.label}</span>
-                              </label>
-                            ))}
-                          </div>
-                        )}
+                        <p className="text-sm font-medium text-gray-700 mb-2">{group.groupName}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {group.options.map(opt => (
+                            <label key={opt.id} className="flex items-center px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                              <input type="checkbox" checked={sceneSelected.includes(opt.id)} onChange={() => handleSceneToggle(opt.id)} className="mr-2" />
+                              <span className="text-sm">{opt.label}</span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>
