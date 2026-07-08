@@ -2020,12 +2020,26 @@ function App() {
 
   // ===== 计算属性 =====
   const filteredAccounts = MOCK.accounts.filter(acc => acc.businessUnit === businessUnit && (!accountSearchText || acc.name.includes(accountSearchText) || acc.id.includes(accountSearchText)));
-  // 搜索命中自动勾选（输入纯数字时尝试精确匹配账户ID）
+  // 搜索命中自动勾选（支持英文逗号分隔批量搜索）
   useEffect(() => {
-    if (accountSearchText && /^\d+$/.test(accountSearchText)) {
+    if (!accountSearchText) return;
+
+    // 批量模式：英文逗号分隔搜索
+    if (accountSearchText.includes(',')) {
+      const parts = accountSearchText.split(',').map(s => s.trim()).filter(Boolean);
+      const matchedIds = parts.map(part => MOCK.accounts.find(acc => acc.id === part)).filter(Boolean).map(acc => acc.id).filter(id => !selectedAccountIds.includes(id));
+      if (matchedIds.length > 0) {
+        setSelectedAccountIds(prev => [...prev, ...matchedIds]);
+        setAccountSearchText('');
+      }
+      return;
+    }
+
+    // 单账户自动勾选（输入纯数字时尝试精确匹配账户ID）
+    if (/^\d+$/.test(accountSearchText)) {
       const matched = MOCK.accounts.find(acc => acc.id === accountSearchText);
       if (matched && !selectedAccountIds.includes(matched.id)) {
-        setSelectedAccountIds([...selectedAccountIds, matched.id]);
+        setSelectedAccountIds(prev => [...prev, matched.id]);
         setAccountSearchText('');
       }
     }
@@ -2422,7 +2436,7 @@ function App() {
     type: "text",
     value: accountSearchText,
     onChange: e => setAccountSearchText(e.target.value),
-    placeholder: "输入账户ID搜索，回车自动勾选...",
+    placeholder: "输入账户ID搜索，支持英文逗号批量搜索...",
     className: "w-full px-3 py-1.5 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400",
     onClick: e => e.stopPropagation(),
     autoFocus: true
