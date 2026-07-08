@@ -803,8 +803,8 @@ function PlacementSceneModal({
     onClose();
   };
 
-  // 场景分组（去掉公众号媒体类型）
-  const sceneGroups = MOCK.mpSceneGroups.filter(g => !g.boxed);
+  // 场景分组（公众号媒体类型只显示"不限"）
+  const sceneGroups = MOCK.mpSceneGroups;
   return /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     onClick: onClose
@@ -899,7 +899,9 @@ function PlacementSceneModal({
     key: gi
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-2"
-  }, group.groupName), /*#__PURE__*/React.createElement("div", {
+  }, group.groupName), group.boxed ? /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-400"
+  }, "不限") : /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-2"
   }, group.options.map(opt => /*#__PURE__*/React.createElement("label", {
     key: opt.id,

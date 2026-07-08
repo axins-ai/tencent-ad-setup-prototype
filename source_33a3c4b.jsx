@@ -436,8 +436,8 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
     onClose();
   };
 
-  // 场景分组（去掉公众号媒体类型）
-  const sceneGroups = MOCK.mpSceneGroups.filter(g => !g.boxed);
+  // 场景分组（公众号媒体类型只显示"不限"）
+  const sceneGroups = MOCK.mpSceneGroups;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -505,14 +505,18 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
                     {sceneGroups.map((group, gi) => (
                       <div key={gi}>
                         <p className="text-sm font-medium text-gray-700 mb-2">{group.groupName}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {group.options.map(opt => (
-                            <label key={opt.id} className="flex items-center px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                              <input type="checkbox" checked={sceneSelected.includes(opt.id)} onChange={() => handleSceneToggle(opt.id)} className="mr-2" />
-                              <span className="text-sm">{opt.label}</span>
-                            </label>
-                          ))}
-                        </div>
+                        {group.boxed ? (
+                          <span className="text-sm text-gray-400">不限</span>
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {group.options.map(opt => (
+                              <label key={opt.id} className="flex items-center px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" checked={sceneSelected.includes(opt.id)} onChange={() => handleSceneToggle(opt.id)} className="mr-2" />
+                                <span className="text-sm">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
