@@ -1367,11 +1367,16 @@ function App() {
   const [composeRule, setComposeRule] = useState({ materials: 1, copies: 1 });
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average'
   // 品牌形象 & 营销组件
-  const [brandImageType, setBrandImageType] = useState('video_account'); // 'custom' | 'video_account'
   const [selectedBrandImage, setSelectedBrandImage] = useState(null); // {id, name, url}
   const [selectedVideoAccount, setSelectedVideoAccount] = useState(null); // {id, name}
   const [marketingComponentType, setMarketingComponentType] = useState('floating_card'); // 'floating_card' | 'action_button'
   const [actionButtonType, setActionButtonType] = useState('claim'); // 'claim' | 'details'
+  // 创意资产类型
+  const [creativeAssetType, setCreativeAssetType] = useState('brand'); // 'brand' | 'component'
+  // 营销组件文案
+  const [marketingTitle, setMarketingTitle] = useState('');
+  const [marketingDesc, setMarketingDesc] = useState('');
+  const [marketingBtnText, setMarketingBtnText] = useState('');
 
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
@@ -2553,7 +2558,8 @@ function App() {
               </div>
             </div>
 
-            {/* 创意名称 */}
+            {/* 创意名称 - 仅品牌形象时显示 */}
+            {creativeAssetType === 'brand' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">创意名称</label>
               <div className="flex items-center gap-2">
@@ -2571,6 +2577,7 @@ function App() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* 素材选择（视频+图片） */}
             <div>
@@ -2676,76 +2683,113 @@ function App() {
               </div>
             </div>
 
-            {/* 品牌形象 */}
+            {/* 创意资产类型 */}
             <div className="border-t pt-4">
               <div className="space-y-4">
-                {/* 品牌形象 行 */}
-                <div className="flex items-center gap-4">
-                  <div className="w-36 flex-shrink-0">
-                    <label className="block text-sm font-medium text-gray-700">品牌形象</label>
-                  </div>
-                  <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                    <option value="custom">自定义</option>
-                    <option value="video_account">视频号</option>
-                  </select>
-                  <div className="flex-1">
-                    {brandImageType === 'custom' ? (
+                {/* 资产类型选择 */}
+                <div className="flex items-center gap-6">
+                  <label className="text-sm font-medium text-gray-700">资产类型</label>
+                  <label className="flex items-center cursor-pointer">
+                    <input type="radio" name="creative_asset" checked={creativeAssetType === 'brand'} onChange={() => setCreativeAssetType('brand')} className="mr-2 accent-blue-600" />
+                    <span className="text-sm">品牌形象</span>
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input type="radio" name="creative_asset" checked={creativeAssetType === 'component'} onChange={() => setCreativeAssetType('component')} className="mr-2 accent-blue-600" />
+                    <span className="text-sm">营销组件</span>
+                  </label>
+                </div>
+
+                {creativeAssetType === 'brand' ? (
+                  /* 品牌形象 - 简化版（去掉视频号选择） */
+                  <div className="flex items-center gap-4">
+                    <div className="w-36 flex-shrink-0">
+                      <label className="block text-sm font-medium text-gray-700">品牌形象</label>
+                    </div>
+                    <div className="flex-1">
                       <select
                         value={selectedBrandImage ? selectedBrandImage.id : ''}
                         onChange={e => {
                           const bi = MOCK.brandImages.find(x => x.id === e.target.value);
                           setSelectedBrandImage(bi || null);
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       >
                         <option value="">选择品牌形象图片</option>
                         {MOCK.brandImages.map(bi => (
                           <option key={bi.id} value={bi.id}>{bi.name}</option>
                         ))}
                       </select>
-                    ) : (
-                      <select
-                        value={selectedVideoAccount ? selectedVideoAccount.id : ''}
-                        onChange={e => {
-                          const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
-                          setSelectedVideoAccount(va || null);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      >
-                        <option value="">选择视频号</option>
-                        {MOCK.videoAccounts.map(va => (
-                          <option key={va.id} value={va.id}>{va.name}</option>
-                        ))}
-                      </select>
-                    )}
+                    </div>
                   </div>
-                </div>
-                {/* 营销组件 行 */}
-                <div className="flex items-center gap-4">
-                  <div className="w-36 flex-shrink-0">
-                    <label className="block text-sm font-medium text-gray-700">营销组件</label>
+                ) : (
+                  /* 营销组件 */
+                  <div className="space-y-4">
+                    {/* 图片上传（Mock） */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-36 flex-shrink-0">
+                        <label className="block text-sm font-medium text-gray-700">组件图片</label>
+                      </div>
+                      <div className="flex-1">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 cursor-pointer">
+                          <i className="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
+                          <p className="text-sm text-gray-500">点击上传图片</p>
+                          <p className="text-xs text-gray-400 mt-1">尺寸 800×800px，大小 400KB 以内</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 文案配置 */}
+                    <div className="border-t pt-3">
+                      <p className="text-sm font-medium text-gray-700 mb-3">文案配置</p>
+                      <div className="grid grid-cols-3 gap-4">
+                        {/* 标题 */}
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">标题 <span className="text-red-500">*</span></label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={marketingTitle}
+                              onChange={e => e.target.value.length <= 10 && setMarketingTitle(e.target.value)}
+                              placeholder="请输入标题"
+                              maxLength={10}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">{marketingTitle.length}/10</span>
+                          </div>
+                        </div>
+                        {/* 描述 */}
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">描述 <span className="text-red-500">*</span></label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={marketingDesc}
+                              onChange={e => e.target.value.length <= 14 && setMarketingDesc(e.target.value)}
+                              placeholder="请输入描述"
+                              maxLength={14}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">{marketingDesc.length}/14</span>
+                          </div>
+                        </div>
+                        {/* 按钮文案 */}
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">按钮文案 <span className="text-red-500">*</span></label>
+                          <select
+                            value={marketingBtnText}
+                            onChange={e => setMarketingBtnText(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">请选择</option>
+                            <option value="查看详情">查看详情</option>
+                            <option value="立即领取">立即领取</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                    <option value="action_button">行动按钮</option>
-                    <option value="floating_card">浮层卡片</option>
-                  </select>
-                  <div className="flex-1">
-                    {marketingComponentType === 'action_button' ? (
-                      <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="claim">立即领取</option>
-                        <option value="details">查看详情</option>
-                      </select>
-                    ) : (
-                      <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="default">默认浮层卡片</option>
-                        <option value="coupon">优惠券浮层</option>
-                        <option value="subscribe">订阅浮层</option>
-                        <option value="promo">促销浮层</option>
-                      </select>
-                    )}
-                  </div>
-                </div>
-                <p className="text-xs text-gray-400">所有创意共用同一个品牌形象和营销组件</p>
+                )}
+                <p className="text-xs text-gray-400">所有创意共用同一个{creativeAssetType === 'brand' ? '品牌形象' : '营销组件'}</p>
               </div>
             </div>
           </div>
