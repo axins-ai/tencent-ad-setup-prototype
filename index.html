@@ -139,6 +139,17 @@
               </div>
             </div>
 
+            <!-- 渠道 -->
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">渠道 <span style="color:red">*</span></div>
+              <div style="display:flex;gap:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="tgt-pkg-channel" value="gdt" checked style="margin-right:6px;">
+                  <span style="font-size:14px;">广点通</span>
+                </label>
+              </div>
+            </div>
+
             <!-- 地理位置 -->
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
               <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">地理位置</div>
@@ -467,6 +478,16 @@
               <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 包名称</label>
               <input type="text" id="cp-name-input" placeholder="输入文案包名称" maxlength="50"
                 style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
+            </div>
+            <!-- 渠道 -->
+            <div style="margin-bottom:20px;">
+              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;">渠道 <span style="color:red">*</span></label>
+              <div style="display:flex;gap:12px;">
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="cp-channel" value="gdt" checked style="margin-right:6px;">
+                  <span style="font-size:14px;">广点通</span>
+                </label>
+              </div>
             </div>
             <!-- 文案列表 -->
             <div>
@@ -1585,6 +1606,7 @@
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
           '<div style="display:flex;align-items:center;gap:10px;">' +
             '<span style="font-size:15px;font-weight:600;color:#111827;">' + escapeHtml(pkg.name) + '</span>' +
+            '<span style="font-size:11px;color:#fff;background:#52c41a;padding:2px 8px;border-radius:10px;">腾讯广告</span>' +
             '<span style="font-size:12px;color:#fff;background:#1890FF;padding:2px 10px;border-radius:10px;">' + pkg.copies.length + ' 条</span>' +
           '</div>' +
           '<div style="display:flex;gap:8px;">' +
@@ -1627,6 +1649,8 @@
   window.addCopyRow = function(defaultVal) {
     var listEl = document.getElementById('cp-copy-list');
     if (!listEl) return;
+    var existingRows = listEl.querySelectorAll('.cp-row').length;
+    if (existingRows >= 10) { alert('单个文案包最多添加 10 条文案'); return; }
     copyRowCounter++;
     var rid = 'cr_' + copyRowCounter;
     var val = defaultVal || '';
@@ -1654,6 +1678,7 @@
   window.saveCopyPkg = function() {
     var name = document.getElementById('cp-name-input').value.trim();
     if (!name) { alert('请输入包名称'); return; }
+    var channel = document.querySelector('input[name="cp-channel"]:checked').value;
     var rows = document.querySelectorAll('.cp-row .cp-text-input');
     var copies = [];
     rows.forEach(function(r) {
@@ -1664,11 +1689,13 @@
 
     if (editingPkgIdx >= 0) {
       copyPackages[editingPkgIdx].name = name;
+      copyPackages[editingPkgIdx].channel = channel;
       copyPackages[editingPkgIdx].copies = copies;
     } else {
       copyPackages.push({
         id: 'pkg_' + Date.now(),
         name: name,
+        channel: channel,
         copies: copies
       });
     }

@@ -2000,6 +2000,15 @@ function App() {
     copies: 1
   });
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average'
+  // 版位切换时调整素材数量上限
+  useEffect(() => {
+    if (placement === 'wechat_video' && composeRule.materials !== 1) {
+      setComposeRule(prev => ({
+        ...prev,
+        materials: 1
+      }));
+    }
+  }, [placement]);
   // 品牌形象 & 营销组件
   const [brandImageType, setBrandImageType] = useState('video_account'); // 'custom' | 'video_account'
   const [selectedBrandImage, setSelectedBrandImage] = useState(null); // {id, name, url}
@@ -3586,31 +3595,46 @@ function App() {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("label", {
     className: "text-sm text-gray-600 whitespace-nowrap"
-  }, "单创意素材"), /*#__PURE__*/React.createElement("input", {
+  }, "单创意素材"), placement === 'wechat_video' ? /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: 1,
+    disabled: true,
+    className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none bg-gray-100 text-gray-500 cursor-not-allowed"
+  }) : /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
-    max: "10",
+    max: "15",
     value: composeRule.materials,
-    onChange: e => setComposeRule({
-      ...composeRule,
-      materials: Math.max(1, parseInt(e.target.value) || 1)
-    }),
+    onChange: e => {
+      const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+      setComposeRule({
+        ...composeRule,
+        materials: v
+      });
+    },
     className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-  })), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400"
+  }, placement === 'wechat_video' ? '（视频号固定为1）' : '（1~15）')), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("label", {
     className: "text-sm text-gray-600 whitespace-nowrap"
   }, "单创意文案"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
-    max: "10",
+    max: "3",
     value: composeRule.copies,
-    onChange: e => setComposeRule({
-      ...composeRule,
-      copies: Math.max(1, parseInt(e.target.value) || 1)
-    }),
+    onChange: e => {
+      const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
+      setComposeRule({
+        ...composeRule,
+        copies: v
+      });
+    },
     className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-  }))), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400"
+  }, "（1~3）"))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-3"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-3"
