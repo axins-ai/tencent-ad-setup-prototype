@@ -2007,25 +2007,26 @@ function App() {
                     })}
                   </div>
                   <select
-                    value=""
+                    multiple
+                    size={7}
                     onChange={e => {
-                      const val = e.target.value;
-                      if (val && !selectedTargetingPackages.includes(val)) {
-                        setSelectedTargetingPackages([...selectedTargetingPackages, val]);
-                      }
+                      const selected = Array.from(e.target.options)
+                        .filter(opt => opt.selected && opt.value)
+                        .map(opt => opt.value);
+                      setSelectedTargetingPackages(selected);
                     }}
-                    className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
                   >
-                    <option value="">++ 添加定向包 ++</option>
+                    <option value="" disabled>-- 请选择定向包（按住 Ctrl/Cmd 多选）--</option>
                     {MOCK.targetingPackages.map(tp => (
-                      <option key={tp.id} value={tp.id} disabled={selectedTargetingPackages.includes(tp.id)}>
-                        {tp.name}（{tp.region}，{tp.age}岁，{tp.gender}）{selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : ''}
+                      <option key={tp.id} value={tp.id}>
+                        {tp.name}（{tp.region}，{tp.age}岁，{tp.gender}）
                       </option>
                     ))}
                     {userTgtPkgs.length > 0 && <option disabled>── 自建定向包 ──</option>}
                     {userTgtPkgs.map(tp => (
-                      <option key={tp.id} value={tp.id} disabled={selectedTargetingPackages.includes(tp.id)}>
-                        {tp.name}（{tp.region}，{tp.age}岁，{tp.gender}）[自建]{selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : ''}
+                      <option key={tp.id} value={tp.id}>
+                        {tp.name}（{tp.region}，{tp.age}岁，{tp.gender}）[自建]
                       </option>
                     ))}
                   </select>

@@ -2775,27 +2775,25 @@ function App() {
       className: "fas fa-times"
     }))) : null;
   })), /*#__PURE__*/React.createElement("select", {
-    value: "",
+    multiple: true,
+    size: 7,
     onChange: e => {
-      const val = e.target.value;
-      if (val && !selectedTargetingPackages.includes(val)) {
-        setSelectedTargetingPackages([...selectedTargetingPackages, val]);
-      }
+      const selected = Array.from(e.target.options).filter(opt => opt.selected && opt.value).map(opt => opt.value);
+      setSelectedTargetingPackages(selected);
     },
-    className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
   }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "++ 添加定向包 ++"), MOCK.targetingPackages.map(tp => /*#__PURE__*/React.createElement("option", {
+    value: "",
+    disabled: true
+  }, "-- 请选择定向包（按住 Ctrl/Cmd 多选）--"), MOCK.targetingPackages.map(tp => /*#__PURE__*/React.createElement("option", {
     key: tp.id,
-    value: tp.id,
-    disabled: selectedTargetingPackages.includes(tp.id)
-  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）", selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : '')), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement("option", {
+    value: tp.id
+  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）")), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement("option", {
     disabled: true
   }, "── 自建定向包 ──"), userTgtPkgs.map(tp => /*#__PURE__*/React.createElement("option", {
     key: tp.id,
-    value: tp.id,
-    disabled: selectedTargetingPackages.includes(tp.id)
-  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）[自建]", selectedTargetingPackages.includes(tp.id) ? ' ✓ 已选' : ''))), selectedTargetingPackages.length === 0 && /*#__PURE__*/React.createElement("p", {
+    value: tp.id
+  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）[自建]"))), selectedTargetingPackages.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-orange-500 mt-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle mr-1"
