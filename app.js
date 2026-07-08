@@ -1882,6 +1882,7 @@ function App() {
   };
   // 改为多选：支持定向包组合（同账户不同定向包 = 多个单元）
   const [selectedTargetingPackages, setSelectedTargetingPackages] = useState([]);
+  const [showTgtPkgModal, setShowTgtPkgModal] = useState(false);
   // 自定义定向 - 地理位置级联
   const [geoMode, setGeoMode] = useState('region'); // 'unlimited' | 'region'
   const [geoSelectedCountry, setGeoSelectedCountry] = useState('cn');
@@ -2765,7 +2766,7 @@ function App() {
   }, "选择定向包（可多选，不同定向包将创建不同单元）"), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-2 mb-3"
   }, selectedTargetingPackages.map(tpId => {
-    const tp = MOCK.targetingPackages.find(t => t.id === tpId);
+    const tp = MOCK.targetingPackages.find(t => t.id === tpId) || userTgtPkgs.find(t => t.id === tpId);
     return tp ? /*#__PURE__*/React.createElement("span", {
       key: tpId,
       className: "tag bg-blue-100 text-blue-800"
@@ -2774,26 +2775,14 @@ function App() {
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-times"
     }))) : null;
-  })), /*#__PURE__*/React.createElement("select", {
-    multiple: true,
-    size: 7,
-    onChange: e => {
-      const selected = Array.from(e.target.options).filter(opt => opt.selected && opt.value).map(opt => opt.value);
-      setSelectedTargetingPackages(selected);
-    },
-    className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "",
-    disabled: true
-  }, "-- 请选择定向包（按住 Ctrl/Cmd 多选）--"), MOCK.targetingPackages.map(tp => /*#__PURE__*/React.createElement("option", {
-    key: tp.id,
-    value: tp.id
-  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）")), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement("option", {
-    disabled: true
-  }, "── 自建定向包 ──"), userTgtPkgs.map(tp => /*#__PURE__*/React.createElement("option", {
-    key: tp.id,
-    value: tp.id
-  }, tp.name, "（", tp.region, "，", tp.age, "岁，", tp.gender, "）[自建]"))), selectedTargetingPackages.length === 0 && /*#__PURE__*/React.createElement("p", {
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowTgtPkgModal(true),
+    className: "px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[200px]"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: selectedTargetingPackages.length > 0 ? 'text-gray-900' : 'text-gray-400'
+  }, selectedTargetingPackages.length > 0 ? `已选 ${selectedTargetingPackages.length} 个定向包` : '点击选择定向包'), /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-chevron-down ml-2 text-gray-400 text-sm"
+  })), selectedTargetingPackages.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-orange-500 mt-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle mr-1"
@@ -2801,7 +2790,86 @@ function App() {
     className: "text-xs text-blue-500 mt-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle mr-1"
-  }), "广点通渠道：同一定向包内容在同一账户下仅对应一个单元")), targetingSource === 'custom' && /*#__PURE__*/React.createElement("div", {
+  }), "广点通渠道：同一定向包内容在同一账户下仅对应一个单元"), showTgtPkgModal && /*#__PURE__*/React.createElement("div", {
+    className: "modal-overlay",
+    onClick: () => setShowTgtPkgModal(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-content w-full max-w-lg",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between p-4 border-b"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-lg font-bold"
+  }, "选择定向包"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowTgtPkgModal(false),
+    className: "text-gray-400 hover:text-gray-600"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-times"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "overflow-y-auto p-4",
+    style: {
+      maxHeight: '55vh'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "space-y-2"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-sm font-medium text-gray-700 mb-2"
+  }, "系统定向包"), MOCK.targetingPackages.map(tp => /*#__PURE__*/React.createElement("label", {
+    key: tp.id,
+    className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: selectedTargetingPackages.includes(tp.id),
+    onChange: () => {
+      if (selectedTargetingPackages.includes(tp.id)) {
+        setSelectedTargetingPackages(selectedTargetingPackages.filter(id => id !== tp.id));
+      } else {
+        setSelectedTargetingPackages([...selectedTargetingPackages, tp.id]);
+      }
+    },
+    className: "mr-3"
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium"
+  }, tp.name), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-500 mt-0.5"
+  }, tp.region, "，", tp.age, "岁，", tp.gender))), selectedTargetingPackages.includes(tp.id) && /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-check text-blue-500"
+  }))), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+    className: "text-sm font-medium text-gray-700 mb-2 mt-4"
+  }, "自建定向包"), userTgtPkgs.map(tp => /*#__PURE__*/React.createElement("label", {
+    key: tp.id,
+    className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: selectedTargetingPackages.includes(tp.id),
+    onChange: () => {
+      if (selectedTargetingPackages.includes(tp.id)) {
+        setSelectedTargetingPackages(selectedTargetingPackages.filter(id => id !== tp.id));
+      } else {
+        setSelectedTargetingPackages([...selectedTargetingPackages, tp.id]);
+      }
+    },
+    className: "mr-3"
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium"
+  }, tp.name, " ", /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-blue-500 font-normal"
+  }, "[自建]")), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-500 mt-0.5"
+  }, tp.region, "，", tp.age, "岁，", tp.gender))), selectedTargetingPackages.includes(tp.id) && /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-check text-blue-500"
+  })))))), /*#__PURE__*/React.createElement("div", {
+    className: "p-4 border-t flex justify-between items-center"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-500"
+  }, "已选 ", selectedTargetingPackages.length, " 个定向包"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowTgtPkgModal(false),
+    className: "btn-primary"
+  }, "确认"))))), targetingSource === 'custom' && /*#__PURE__*/React.createElement("div", {
     className: "space-y-0"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between pb-4 border-b border-gray-200"

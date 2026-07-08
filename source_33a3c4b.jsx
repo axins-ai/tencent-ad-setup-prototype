@@ -1258,6 +1258,7 @@ function App() {
   };
   // 改为多选：支持定向包组合（同账户不同定向包 = 多个单元）
   const [selectedTargetingPackages, setSelectedTargetingPackages] = useState([]);
+  const [showTgtPkgModal, setShowTgtPkgModal] = useState(false);
   // 自定义定向 - 地理位置级联
   const [geoMode, setGeoMode] = useState('region'); // 'unlimited' | 'region'
   const [geoSelectedCountry, setGeoSelectedCountry] = useState('cn');
@@ -1997,7 +1998,7 @@ function App() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">选择定向包（可多选，不同定向包将创建不同单元）</label>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {selectedTargetingPackages.map(tpId => {
-                      const tp = MOCK.targetingPackages.find(t => t.id === tpId);
+                      const tp = MOCK.targetingPackages.find(t => t.id === tpId) || userTgtPkgs.find(t => t.id === tpId);
                       return tp ? (
                         <span key={tpId} className="tag bg-blue-100 text-blue-800">
                           {tp.name}
@@ -2006,35 +2007,96 @@ function App() {
                       ) : null;
                     })}
                   </div>
-                  <select
-                    multiple
-                    size={7}
-                    onChange={e => {
-                      const selected = Array.from(e.target.options)
-                        .filter(opt => opt.selected && opt.value)
-                        .map(opt => opt.value);
-                      setSelectedTargetingPackages(selected);
-                    }}
-                    className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                  <button
+                    onClick={() => setShowTgtPkgModal(true)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[200px]"
                   >
-                    <option value="" disabled>-- 请选择定向包（按住 Ctrl/Cmd 多选）--</option>
-                    {MOCK.targetingPackages.map(tp => (
-                      <option key={tp.id} value={tp.id}>
-                        {tp.name}（{tp.region}，{tp.age}岁，{tp.gender}）
-                      </option>
-                    ))}
-                    {userTgtPkgs.length > 0 && <option disabled>── 自建定向包 ──</option>}
-                    {userTgtPkgs.map(tp => (
-                      <option key={tp.id} value={tp.id}>
-                        {tp.name}（{tp.region}，{tp.age}岁，{tp.gender}）[自建]
-                      </option>
-                    ))}
-                  </select>
+                    <span className={selectedTargetingPackages.length > 0 ? 'text-gray-900' : 'text-gray-400'}>
+                      {selectedTargetingPackages.length > 0 ? `已选 ${selectedTargetingPackages.length} 个定向包` : '点击选择定向包'}
+                    </span>
+                    <i className="fas fa-chevron-down ml-2 text-gray-400 text-sm"></i>
+                  </button>
                   {selectedTargetingPackages.length === 0 && (
                     <p className="text-xs text-orange-500 mt-1"><i className="fas fa-exclamation-circle mr-1"></i>请至少选择一个定向包</p>
                   )}
                   {channel === 'gdt' && selectedTargetingPackages.length > 0 && (
                     <p className="text-xs text-blue-500 mt-1"><i className="fas fa-info-circle mr-1"></i>广点通渠道：同一定向包内容在同一账户下仅对应一个单元</p>
+                  )}
+
+                  {/* 定向包选择弹窗 */}
+                  {showTgtPkgModal && (
+                    <div className="modal-overlay" onClick={() => setShowTgtPkgModal(false)}>
+                      <div className="modal-content w-full max-w-lg" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-4 border-b">
+                          <h3 className="text-lg font-bold">选择定向包</h3>
+                          <button onClick={() => setShowTgtPkgModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
+                        </div>
+                        <div className="overflow-y-auto p-4" style={{maxHeight: '55vh'}}>
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium text-gray-700 mb-2">系统定向包</p>
+                            {MOCK.targetingPackages.map(tp => (
+                              <label key={tp.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <div className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedTargetingPackages.includes(tp.id)}
+                                    onChange={() => {
+                                      if (selectedTargetingPackages.includes(tp.id)) {
+                                        setSelectedTargetingPackages(selectedTargetingPackages.filter(id => id !== tp.id));
+                                      } else {
+                                        setSelectedTargetingPackages([...selectedTargetingPackages, tp.id]);
+                                      }
+                                    }}
+                                    className="mr-3"
+                                  />
+                                  <div>
+                                    <span className="text-sm font-medium">{tp.name}</span>
+                                    <p className="text-xs text-gray-500 mt-0.5">{tp.region}，{tp.age}岁，{tp.gender}</p>
+                                  </div>
+                                </div>
+                                {selectedTargetingPackages.includes(tp.id) && (
+                                  <i className="fas fa-check text-blue-500"></i>
+                                )}
+                              </label>
+                            ))}
+                            {userTgtPkgs.length > 0 && (
+                              <>
+                                <p className="text-sm font-medium text-gray-700 mb-2 mt-4">自建定向包</p>
+                                {userTgtPkgs.map(tp => (
+                                  <label key={tp.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <div className="flex items-center">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedTargetingPackages.includes(tp.id)}
+                                        onChange={() => {
+                                          if (selectedTargetingPackages.includes(tp.id)) {
+                                            setSelectedTargetingPackages(selectedTargetingPackages.filter(id => id !== tp.id));
+                                          } else {
+                                            setSelectedTargetingPackages([...selectedTargetingPackages, tp.id]);
+                                          }
+                                        }}
+                                        className="mr-3"
+                                      />
+                                      <div>
+                                        <span className="text-sm font-medium">{tp.name} <span className="text-xs text-blue-500 font-normal">[自建]</span></span>
+                                        <p className="text-xs text-gray-500 mt-0.5">{tp.region}，{tp.age}岁，{tp.gender}</p>
+                                      </div>
+                                    </div>
+                                    {selectedTargetingPackages.includes(tp.id) && (
+                                      <i className="fas fa-check text-blue-500"></i>
+                                    )}
+                                  </label>
+                                ))}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="p-4 border-t flex justify-between items-center">
+                          <span className="text-sm text-gray-500">已选 {selectedTargetingPackages.length} 个定向包</span>
+                          <button onClick={() => setShowTgtPkgModal(false)} className="btn-primary">确认</button>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
