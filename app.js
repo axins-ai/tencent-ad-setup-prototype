@@ -882,14 +882,15 @@ function PlacementSceneModal({
     onChange: () => setAdMode('unlimited'),
     className: "mr-2 accent-blue-600"
   }), /*#__PURE__*/React.createElement("span", null, "不限")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
+    className: "flex items-center cursor-not-allowed opacity-50"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "mp_ad_mode",
-    checked: adMode === 'custom',
-    onChange: () => setAdMode('custom'),
+    disabled: true,
     className: "mr-2 accent-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "自定义")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-gray-400"
+  }, "自定义")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-6"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700"
@@ -927,13 +928,14 @@ function PlacementSceneModal({
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
   }, "不限")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
+    className: "flex items-center cursor-not-allowed opacity-50"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: `scene_group_${gi}`,
+    disabled: true,
     className: "mr-2 accent-blue-600"
   }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
+    className: "text-sm text-gray-400"
   }, "自定义"))) : /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-2"
   }, group.options.map(opt => /*#__PURE__*/React.createElement("label", {

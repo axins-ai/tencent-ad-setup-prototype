@@ -489,9 +489,9 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
                     <input type="radio" name="mp_ad_mode" checked={adMode === 'unlimited'} onChange={() => setAdMode('unlimited')} className="mr-2 accent-blue-600" />
                     <span>不限</span>
                   </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="mp_ad_mode" checked={adMode === 'custom'} onChange={() => setAdMode('custom')} className="mr-2 accent-blue-600" />
-                    <span>自定义</span>
+                  <label className="flex items-center cursor-not-allowed opacity-50">
+                    <input type="radio" name="mp_ad_mode" disabled className="mr-2 accent-blue-600" />
+                    <span className="text-gray-400">自定义</span>
                   </label>
                 </div>
               </div>
@@ -520,9 +520,9 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
                               <input type="radio" name={`scene_group_${gi}`} defaultChecked className="mr-2 accent-blue-600" />
                               <span className="text-sm">不限</span>
                             </label>
-                            <label className="flex items-center cursor-pointer">
-                              <input type="radio" name={`scene_group_${gi}`} className="mr-2 accent-blue-600" />
-                              <span className="text-sm">自定义</span>
+                            <label className="flex items-center cursor-not-allowed opacity-50">
+                              <input type="radio" name={`scene_group_${gi}`} disabled className="mr-2 accent-blue-600" />
+                              <span className="text-sm text-gray-400">自定义</span>
                             </label>
                           </div>
                         ) : (
