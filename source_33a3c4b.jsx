@@ -353,7 +353,7 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
   const [selected, setSelected] = useState([]);
 
   // 微信公众号与小程序：JSON 对象 { ad, adSelected, scene, sceneSelected }
-  // 定投固定为不限，adMode/adSelected 保留解析兼容
+  const [adMode, setAdMode] = useState('unlimited');
   const [sceneMode, setSceneMode] = useState('unlimited');
   const [sceneSelected, setSceneSelected] = useState([]);
 
@@ -371,9 +371,11 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
     }
     try {
       const parsed = value ? JSON.parse(value) : {};
+      setAdMode(parsed.ad || 'unlimited');
       setSceneMode(parsed.scene || 'unlimited');
       setSceneSelected(parsed.sceneSelected || []);
     } catch (e) {
+      setAdMode('unlimited');
       setSceneMode('unlimited');
       setSceneSelected([]);
     }
@@ -427,7 +429,7 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
       onChange(mode === 'unlimited' ? 'unlimited' : selected.join(','));
     } else {
       onChange(JSON.stringify({
-        ad: 'unlimited',
+        ad: adMode,
         adSelected: [],
         scene: sceneMode,
         sceneSelected: sceneMode === 'custom' ? sceneSelected : []
@@ -479,11 +481,18 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* 微信公众号与小程序定投 - 固定不限 */}
+              {/* 微信公众号与小程序定投 - 默认不限 */}
               <div className="pb-5 border-b border-gray-100">
                 <div className="flex items-center gap-6">
                   <span className="text-sm font-medium text-gray-700">微信公众号与小程序定投</span>
-                  <span className="text-gray-400">不限</span>
+                  <label className="flex items-center cursor-pointer">
+                    <input type="radio" name="mp_ad_mode" checked={adMode === 'unlimited'} onChange={() => setAdMode('unlimited')} className="mr-2 accent-blue-600" />
+                    <span>不限</span>
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input type="radio" name="mp_ad_mode" checked={adMode === 'custom'} onChange={() => setAdMode('custom')} className="mr-2 accent-blue-600" />
+                    <span>自定义</span>
+                  </label>
                 </div>
               </div>
 
@@ -506,7 +515,16 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
                       <div key={gi}>
                         <p className="text-sm font-medium text-gray-700 mb-2">{group.groupName}</p>
                         {group.boxed ? (
-                          <span className="text-sm text-gray-400">不限</span>
+                          <div className="flex items-center gap-6 mt-2">
+                            <label className="flex items-center cursor-pointer">
+                              <input type="radio" name={`scene_group_${gi}`} defaultChecked className="mr-2 accent-blue-600" />
+                              <span className="text-sm">不限</span>
+                            </label>
+                            <label className="flex items-center cursor-pointer">
+                              <input type="radio" name={`scene_group_${gi}`} className="mr-2 accent-blue-600" />
+                              <span className="text-sm">自定义</span>
+                            </label>
+                          </div>
                         ) : (
                           <div className="flex flex-wrap gap-2">
                             {group.options.map(opt => (

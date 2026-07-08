@@ -725,7 +725,7 @@ function PlacementSceneModal({
   const [selected, setSelected] = useState([]);
 
   // 微信公众号与小程序：JSON 对象 { ad, adSelected, scene, sceneSelected }
-  // 定投固定为不限，adMode/adSelected 保留解析兼容
+  const [adMode, setAdMode] = useState('unlimited');
   const [sceneMode, setSceneMode] = useState('unlimited');
   const [sceneSelected, setSceneSelected] = useState([]);
   useEffect(() => {
@@ -742,9 +742,11 @@ function PlacementSceneModal({
     }
     try {
       const parsed = value ? JSON.parse(value) : {};
+      setAdMode(parsed.ad || 'unlimited');
       setSceneMode(parsed.scene || 'unlimited');
       setSceneSelected(parsed.sceneSelected || []);
     } catch (e) {
+      setAdMode('unlimited');
       setSceneMode('unlimited');
       setSceneSelected([]);
     }
@@ -794,7 +796,7 @@ function PlacementSceneModal({
       onChange(mode === 'unlimited' ? 'unlimited' : selected.join(','));
     } else {
       onChange(JSON.stringify({
-        ad: 'unlimited',
+        ad: adMode,
         adSelected: [],
         scene: sceneMode,
         sceneSelected: sceneMode === 'custom' ? sceneSelected : []
@@ -871,9 +873,23 @@ function PlacementSceneModal({
     className: "flex items-center gap-6"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700"
-  }, "微信公众号与小程序定投"), /*#__PURE__*/React.createElement("span", {
-    className: "text-gray-400"
-  }, "不限"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "微信公众号与小程序定投"), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "mp_ad_mode",
+    checked: adMode === 'unlimited',
+    onChange: () => setAdMode('unlimited'),
+    className: "mr-2 accent-blue-600"
+  }), /*#__PURE__*/React.createElement("span", null, "不限")), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "mp_ad_mode",
+    checked: adMode === 'custom',
+    onChange: () => setAdMode('custom'),
+    className: "mr-2 accent-blue-600"
+  }), /*#__PURE__*/React.createElement("span", null, "自定义")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-6"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700"
@@ -899,9 +915,26 @@ function PlacementSceneModal({
     key: gi
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-2"
-  }, group.groupName), group.boxed ? /*#__PURE__*/React.createElement("span", {
-    className: "text-sm text-gray-400"
-  }, "不限") : /*#__PURE__*/React.createElement("div", {
+  }, group.groupName), group.boxed ? /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-6 mt-2"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: `scene_group_${gi}`,
+    defaultChecked: true,
+    className: "mr-2 accent-blue-600"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "不限")), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: `scene_group_${gi}`,
+    className: "mr-2 accent-blue-600"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "自定义"))) : /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-2"
   }, group.options.map(opt => /*#__PURE__*/React.createElement("label", {
     key: opt.id,
