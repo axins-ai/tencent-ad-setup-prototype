@@ -1323,11 +1323,10 @@
       var geoModeEl = document.querySelector('input[name="tgt-pkg-geo-mode"]:checked');
       var genderEl = document.querySelector('input[name="tgt-pkg-gender"]:checked');
       var excludeEl = document.querySelector('input[name="tgt-pkg-exclude"]:checked');
-      var audModeEl = document.querySelector('input[name="tgt-pkg-audience-mode"]:checked');
       var convBehEl = document.querySelector('input[name="tgt-pkg-conversion-behavior"]:checked');
       var convTimeEl = document.querySelector('input[name="tgt-pkg-conversion-time"]:checked');
 
-      if (!channelEl || !geoModeEl || !genderEl || !excludeEl || !audModeEl || !convBehEl || !convTimeEl) {
+      if (!channelEl || !geoModeEl || !genderEl || !excludeEl || !convBehEl || !convTimeEl) {
         alert('表单数据不完整，请检查所有必填项');
         return;
       }
@@ -1371,8 +1370,8 @@
         age: age,
         gender: gender,
         excludeConverted: excludeConverted,
-        audienceMode: audienceMode,
-        audienceInput: audienceInput,
+        audienceMode: 'unlimited',
+        audienceInput: '',
         conversionBehavior: conversionBehavior,
         conversionInput: conversionInput,
         conversionTimeRange: conversionTimeRange
