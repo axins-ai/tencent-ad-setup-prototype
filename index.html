@@ -331,50 +331,100 @@
         <p style="font-size:16px;color:#666;">暂无创意资产，点击上方按钮批量添加</p>
       </div>
 
-      <!-- 批量添加品牌形象弹窗 -->
+      <!-- 创意资产管理弹窗 -->
       <div id="brand-image-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
         <div style="background:white;border-radius:12px;width:90vw;max-width:580px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:17px;font-weight:600;margin:0;color:#1f2937;">批量添加创意资产</h3>
+            <h3 id="bi-modal-title" style="font-size:17px;font-weight:600;margin:0;color:#1f2937;">批量添加创意资产</h3>
             <button onclick="closeBrandImageModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9ca3af;line-height:1;padding:0 4px;">×</button>
           </div>
           <div style="padding:24px;overflow-y:auto;flex:1;">
-            <!-- 账号信息 -->
+            <!-- 资产类型 -->
             <div style="margin-bottom:20px;">
-              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 账号信息</label>
-              <div style="display:flex;align-items:center;gap:10px;">
-                <select id="bi-account-select" style="flex:1;padding:9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;background:#fff;" onchange="onBiAccountChange()">
-                  <option value="">请选择</option>
-                  <option value="acc_001">账户001-北京移动</option>
-                  <option value="acc_002">账户002-上海移动</option>
-                  <option value="acc_003">账户003-广州移动</option>
-                </select>
-                <button onclick="onBiBatchSelect()" id="bi-batch-btn" style="padding:9px 14px;background:#f3f4f6;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#374151;white-space:nowrap;">批量</button>
+              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;">资产类型</label>
+              <div style="display:flex;gap:20px;">
+                <label style="display:flex;align-items:center;cursor:pointer;gap:6px;">
+                  <input type="radio" name="asset-type" value="brand" checked onchange="onAssetTypeChange()">
+                  <span style="font-size:14px;">品牌形象</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;gap:6px;">
+                  <input type="radio" name="asset-type" value="component" onchange="onAssetTypeChange()">
+                  <span style="font-size:14px;">营销组件</span>
+                </label>
               </div>
             </div>
-            <!-- 头像 -->
-            <div style="margin-bottom:20px;">
-              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 头像</label>
-              <button type="button" onclick="triggerBiFileInput()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:1px dashed #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">
-                <i class="fas fa-plus" style="color:#9ca3af;"></i> 添加头像
-              </button>
-              <input type="file" id="bi-file-input" accept=".jpg,.jpeg,.png" multiple onchange="onBiFilesSelected(event)" style="display:none;">
-              <div style="margin-top:8px;font-size:13px;color:#6b7280;">
-                图片尺寸：512*512 像素
+
+            <!-- 品牌形象区域 -->
+            <div id="bi-brand-section">
+              <!-- 头像 -->
+              <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 头像</label>
+                <button type="button" onclick="triggerBiFileInput()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:1px dashed #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">
+                  <i class="fas fa-plus" style="color:#9ca3af;"></i> 添加头像
+                </button>
+                <input type="file" id="bi-file-input" accept=".jpg,.jpeg,.png" multiple onchange="onBiFilesSelected(event)" style="display:none;">
+                <div style="margin-top:8px;font-size:13px;color:#6b7280;">
+                  图片尺寸：512*512 像素，大小50KB以内，支持jpg/png
+                </div>
+                <!-- 已选图片预览 -->
+                <div id="bi-preview-area" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;"></div>
               </div>
-              <div style="font-size:13px;color:#6b7280;">
-                图片格式：大小需要在50KB以内，仅支持jpg和png格式
+              <!-- 名称 -->
+              <div style="margin-bottom:12px;">
+                <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 名称</label>
+                <div style="position:relative;">
+                  <input type="text" id="bi-name-input" placeholder="请输入名称" maxlength="100" oninput="document.getElementById('bi-name-count').textContent=this.value.length+'/100'"
+                    style="width:100%;padding:9px 100px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
+                  <span id="bi-name-count" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:#9ca3af;">0/100</span>
+                </div>
               </div>
-              <!-- 已选图片预览 -->
-              <div id="bi-preview-area" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;"></div>
             </div>
-            <!-- 名称 -->
-            <div style="margin-bottom:12px;">
-              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 名称</label>
-              <div style="position:relative;">
-                <input type="text" id="bi-name-input" placeholder="请输入名称" maxlength="100" oninput="document.getElementById('bi-name-count').textContent=this.value.length+'/100'"
-                  style="width:100%;padding:9px 100px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
-                <span id="bi-name-count" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:#9ca3af;">0/100</span>
+
+            <!-- 营销组件区域 -->
+            <div id="bi-component-section" style="display:none;">
+              <!-- 组件图片 -->
+              <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 组件图片</label>
+                <button type="button" onclick="triggerBiFileInput()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:1px dashed #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">
+                  <i class="fas fa-plus" style="color:#9ca3af;"></i> 添加图片
+                </button>
+                <div style="margin-top:8px;font-size:13px;color:#6b7280;">
+                  尺寸：800*800 像素，大小400KB以内
+                </div>
+                <div id="bi-preview-area-2" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;"></div>
+              </div>
+              <!-- 文案配置 -->
+              <div style="margin-bottom:12px;">
+                <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:10px;">文案配置</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                  <!-- 标题 -->
+                  <div>
+                    <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">标题 <span style="color:red">*</span></label>
+                    <div style="position:relative;">
+                      <input type="text" id="mc-title" placeholder="请输入标题" maxlength="10" oninput="document.getElementById('mc-title-count').textContent=this.value.length+'/10'"
+                        style="width:100%;padding:9px 40px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
+                      <span id="mc-title-count" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#9ca3af;">0/10</span>
+                    </div>
+                  </div>
+                  <!-- 描述 -->
+                  <div>
+                    <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">描述 <span style="color:red">*</span></label>
+                    <div style="position:relative;">
+                      <input type="text" id="mc-desc" placeholder="请输入描述" maxlength="14" oninput="document.getElementById('mc-desc-count').textContent=this.value.length+'/14'"
+                        style="width:100%;padding:9px 40px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
+                      <span id="mc-desc-count" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#9ca3af;">0/14</span>
+                    </div>
+                  </div>
+                  <!-- 按钮文案 -->
+                  <div>
+                    <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">按钮文案 <span style="color:red">*</span></label>
+                    <select id="mc-btn-text" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;background:#fff;">
+                      <option value="">请选择</option>
+                      <option value="查看详情">查看详情</option>
+                      <option value="立即领取">立即领取</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1275,7 +1325,6 @@
       name: name,
       geoMode: geoMode,
       region: region,
-      locationTypeResident: locationTypeResident,
       age: age,
       gender: gender,
       excludeConverted: excludeConverted,
@@ -1303,11 +1352,20 @@
     renderTgtPkgList();
   };
 
-  // ========== 品牌形象 ==========
+  // ========== 创意资产 ==========
   var brandImages = [];
   try { brandImages = JSON.parse(localStorage.getItem('ad_brand_images') || '[]'); } catch(e) {}
   var biSelectedFiles = [];
   var editingBrandImageId = null;
+
+  // 资产类型切换
+  window.onAssetTypeChange = function() {
+    var isBrand = document.querySelector('input[name="asset-type"]:checked').value === 'brand';
+    document.getElementById('bi-brand-section').style.display = isBrand ? 'block' : 'none';
+    document.getElementById('bi-component-section').style.display = isBrand ? 'none' : 'block';
+    var titleEl = document.getElementById('bi-modal-title');
+    if (titleEl) titleEl.textContent = editingBrandImageId ? '编辑创意资产' : '批量添加创意资产';
+  };
 
   window.renderBrandImageList = function() {
     var listEl = document.getElementById('brand-image-list');
@@ -1327,8 +1385,8 @@
           '<div style="display:none;font-size:32px;color:#d1d5db;">👑</div>' +
         '</div>' +
         '<div style="padding:10px 12px;">' +
-          '<div style="font-size:13px;color:#374151;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(bi.name) + '">' + escapeHtml(bi.name) + '</div>' +
-          '<div style="font-size:11px;color:#9ca3af;">' + (bi.accountName || '-') + '</div>' +
+          '<div style="font-size:13px;color:#374151;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(bi.name || bi.title || '') + '">' + escapeHtml(bi.name || bi.title || '') + '</div>' +
+          '<div style="font-size:11px;color:#9ca3af;">' + (bi.type === 'component' ? '📦 营销组件' : '👑 品牌形象') + '</div>' +
         '</div>' +
         '<div style="display:flex;padding:0 8px 10px;gap:6px;">' +
           '<button onclick="editBrandImage(\'' + bi.id + '\')" style="flex:1;padding:4px 0;background:white;border:1px solid #e5e7eb;border-radius:4px;cursor:pointer;font-size:11px;color:#374151;">编辑</button>' +
@@ -1340,16 +1398,53 @@
 
   window.openBrandImageModal = function(id) {
     editingBrandImageId = id || null;
-    document.getElementById('bi-account-select').value = id ? '' : '';
-    document.getElementById('bi-name-input').value = id ? '' : '';
-    document.getElementById('bi-name-count').textContent = '0/100';
+    biSelectedFiles = [];
+    // 重置品牌形象字段
+    var nameInput = document.getElementById('bi-name-input');
+    if (nameInput) { nameInput.value = ''; }
+    var nameCount = document.getElementById('bi-name-count');
+    if (nameCount) nameCount.textContent = '0/100';
     var previewArea = document.getElementById('bi-preview-area');
     if (previewArea) previewArea.innerHTML = '';
-    biSelectedFiles = [];
+    // 重置营销组件字段
+    var titleInput = document.getElementById('mc-title');
+    if (titleInput) titleInput.value = '';
+    var descInput = document.getElementById('mc-desc');
+    if (descInput) descInput.value = '';
+    var btnSelect = document.getElementById('mc-btn-text');
+    if (btnSelect) btnSelect.value = '';
+    var previewArea2 = document.getElementById('bi-preview-area-2');
+    if (previewArea2) previewArea2.innerHTML = '';
+    if (titleInput) document.getElementById('mc-title-count').textContent = '0/10';
+    if (descInput) document.getElementById('mc-desc-count').textContent = '0/14';
+    // 默认品牌形象
+    var brandRadio = document.querySelector('input[name="asset-type"][value="brand"]');
+    if (brandRadio) brandRadio.checked = true;
+    window.onAssetTypeChange();
     var modal = document.getElementById('brand-image-modal');
     if (modal) modal.style.display = 'flex';
-    if (id) document.getElementById('cp-modal-title').textContent = '编辑创意资产';
-    else document.getElementById('cp-modal-title').textContent = '批量添加创意资产';
+    var titleEl = document.getElementById('bi-modal-title');
+    if (titleEl) titleEl.textContent = id ? '编辑创意资产' : '批量添加创意资产';
+
+    // 编辑回显
+    if (id) {
+      var found = brandImages.find(function(b) { return b.id === id; });
+      if (found) {
+        if (found.type === 'component') {
+          var compRadio = document.querySelector('input[name="asset-type"][value="component"]');
+          if (compRadio) compRadio.checked = true;
+          window.onAssetTypeChange();
+          if (titleInput) titleInput.value = found.title || '';
+          if (descInput) descInput.value = found.desc || '';
+          if (btnSelect) btnSelect.value = found.btnText || '';
+          if (titleInput) document.getElementById('mc-title-count').textContent = (found.title || '').length + '/10';
+          if (descInput) document.getElementById('mc-desc-count').textContent = (found.desc || '').length + '/14';
+        } else {
+          if (nameInput) nameInput.value = found.name || '';
+          if (nameCount) nameCount.textContent = (found.name || '').length + '/100';
+        }
+      }
+    }
   };
   window.closeBrandImageModal = function() {
     var m = document.getElementById('brand-image-modal');
@@ -1360,26 +1455,31 @@
 
   window.triggerBiFileInput = function() { document.getElementById('bi-file-input').click(); };
   window.onBiFilesSelected = function(e) {
+    var isBrand = document.querySelector('input[name="asset-type"]:checked').value === 'brand';
+    var maxSize = isBrand ? 50 * 1024 : 400 * 1024;
+    var sizeLabel = isBrand ? '50KB' : '400KB';
     var files = e.target.files;
     if (!files.length) return;
     for (var i = 0; i < files.length; i++) {
       var f = files[i];
-      // 简单校验
-      if (f.size > 50 * 1024) { alert(f.name + ' 超过50KB限制'); continue; }
+      if (f.size > maxSize) { alert(f.name + ' 超过' + sizeLabel + '限制'); continue; }
       var ext = f.name.split('.').pop().toLowerCase();
       if (!['jpg', 'jpeg', 'png'].includes(ext)) { alert(f.name + ' 格式不支持，仅支持jpg和png'); continue; }
       var reader = new FileReader();
-      reader.onload = function(ev) {
-        biSelectedFiles.push({ name: f.name, dataUrl: ev.target.result });
-        renderBiPreview();
-      };
+      reader.onload = (function(file) {
+        return function(ev) {
+          biSelectedFiles.push({ name: file.name, dataUrl: ev.target.result });
+          renderBiPreview();
+        };
+      })(f);
       reader.readAsDataURL(f);
     }
     e.target.value = '';
   };
 
   function renderBiPreview() {
-    var area = document.getElementById('bi-preview-area');
+    var isBrand = document.querySelector('input[name="asset-type"]:checked').value === 'brand';
+    var area = document.getElementById(isBrand ? 'bi-preview-area' : 'bi-preview-area-2');
     if (!area) return;
     var html = '';
     biSelectedFiles.forEach(function(f, idx) {
@@ -1395,35 +1495,62 @@
   window.onBiBatchSelect = function() { alert('批量选择账号功能（原型）'); };
 
   window.saveBrandImages = function() {
-    var accountId = document.getElementById('bi-account-select').value;
-    var name = document.getElementById('bi-name-input').value.trim();
-    if (!accountId) { alert('请选择账号信息'); return; }
-    if (!name) { alert('请输入名称'); return; }
-    if (biSelectedFiles.length === 0 && !editingBrandImageId) { alert('请添加头像图片'); return; }
+    var isBrand = document.querySelector('input[name="asset-type"]:checked').value === 'brand';
 
-    var accountEl = document.getElementById('bi-account-select');
-    var accText = accountEl.options[accountEl.selectedIndex] ? accountEl.options[accountEl.selectedIndex].text : '';
+    if (isBrand) {
+      // 品牌形象
+      var name = document.getElementById('bi-name-input').value.trim();
+      if (!name) { alert('请输入名称'); return; }
+      if (biSelectedFiles.length === 0 && !editingBrandImageId) { alert('请添加头像图片'); return; }
 
-    if (editingBrandImageId) {
-      // 编辑模式
-      var idx = brandImages.findIndex(function(b) { return b.id === editingBrandImageId; });
-      if (idx >= 0) {
-        if (biSelectedFiles.length > 0) brandImages[idx].thumb = biSelectedFiles[0].dataUrl;
-        brandImages[idx].name = name;
-        brandImages[idx].accountName = accText;
-        brandImages[idx].accountId = accountId;
+      if (editingBrandImageId) {
+        var idx = brandImages.findIndex(function(b) { return b.id === editingBrandImageId; });
+        if (idx >= 0) {
+          if (biSelectedFiles.length > 0) brandImages[idx].thumb = biSelectedFiles[0].dataUrl;
+          brandImages[idx].name = name;
+          brandImages[idx].type = 'brand';
+        }
+      } else {
+        biSelectedFiles.forEach(function(f) {
+          brandImages.push({
+            id: 'bi_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            name: name,
+            thumb: f.dataUrl,
+            type: 'brand'
+          });
+        });
       }
     } else {
-      // 新增模式
-      biSelectedFiles.forEach(function(f) {
-        brandImages.push({
-          id: 'bi_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-          name: name,
-          thumb: f.dataUrl,
-          accountName: accText,
-          accountId: accountId
+      // 营销组件
+      var title = document.getElementById('mc-title').value.trim();
+      var desc = document.getElementById('mc-desc').value.trim();
+      var btnText = document.getElementById('mc-btn-text').value;
+      if (!title) { alert('请输入标题'); return; }
+      if (!desc) { alert('请输入描述'); return; }
+      if (!btnText) { alert('请选择按钮文案'); return; }
+      if (biSelectedFiles.length === 0 && !editingBrandImageId) { alert('请添加组件图片'); return; }
+
+      if (editingBrandImageId) {
+        var idx = brandImages.findIndex(function(b) { return b.id === editingBrandImageId; });
+        if (idx >= 0) {
+          if (biSelectedFiles.length > 0) brandImages[idx].thumb = biSelectedFiles[0].dataUrl;
+          brandImages[idx].title = title;
+          brandImages[idx].desc = desc;
+          brandImages[idx].btnText = btnText;
+          brandImages[idx].type = 'component';
+        }
+      } else {
+        biSelectedFiles.forEach(function(f) {
+          brandImages.push({
+            id: 'bi_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            title: title,
+            desc: desc,
+            btnText: btnText,
+            thumb: f.dataUrl,
+            type: 'component'
+          });
         });
-      });
+      }
     }
     try { localStorage.setItem('ad_brand_images', JSON.stringify(brandImages)); } catch(e) {}
     closeBrandImageModal();
