@@ -1314,11 +1314,32 @@
   };
   window.saveTgtPkg = function() {
     try {
-      var name = document.getElementById('tgt-pkg-name').value.trim();
+      var nameEl = document.getElementById('tgt-pkg-name');
+      if (!nameEl) { alert('表单未正确加载'); return; }
+      var name = nameEl.value.trim();
       if (!name) { alert('请输入定向包名称'); return; }
-      var channel = document.querySelector('input[name="tgt-pkg-channel"]:checked').value;
-      // 获取地理位置
-      var geoMode = document.querySelector('input[name="tgt-pkg-geo-mode"]:checked').value;
+
+      var channelEl = document.querySelector('input[name="tgt-pkg-channel"]:checked');
+      var geoModeEl = document.querySelector('input[name="tgt-pkg-geo-mode"]:checked');
+      var genderEl = document.querySelector('input[name="tgt-pkg-gender"]:checked');
+      var excludeEl = document.querySelector('input[name="tgt-pkg-exclude"]:checked');
+      var audModeEl = document.querySelector('input[name="tgt-pkg-audience-mode"]:checked');
+      var convBehEl = document.querySelector('input[name="tgt-pkg-conversion-behavior"]:checked');
+      var convTimeEl = document.querySelector('input[name="tgt-pkg-conversion-time"]:checked');
+
+      if (!channelEl || !geoModeEl || !genderEl || !excludeEl || !audModeEl || !convBehEl || !convTimeEl) {
+        alert('表单数据不完整，请检查所有必填项');
+        return;
+      }
+
+      var channel = channelEl.value;
+      var geoMode = geoModeEl.value;
+      var gender = genderEl.value;
+      var excludeConverted = excludeEl.value;
+      var audienceMode = audModeEl.value;
+      var conversionBehavior = convBehEl.value;
+      var conversionTimeRange = convTimeEl.value;
+
       var region = '不限';
       if (geoMode === 'region') {
         var allCities = [];
@@ -1327,20 +1348,21 @@
         });
         region = allCities.join(',');
       }
+
       var age = window.getTgtPkgAgeValue();
-      var gender = document.querySelector('input[name="tgt-pkg-gender"]:checked').value;
-      var excludeConverted = document.querySelector('input[name="tgt-pkg-exclude"]:checked').value;
-      var audienceMode = document.querySelector('input[name="tgt-pkg-audience-mode"]:checked').value;
+
       var audienceInput = '';
       if (audienceMode !== 'unlimited') {
-        audienceInput = document.getElementById('tgt-pkg-audience-input').value.trim();
+        var audInputEl = document.getElementById('tgt-pkg-audience-input');
+        if (audInputEl) audienceInput = audInputEl.value.trim();
       }
-      var conversionBehavior = document.querySelector('input[name="tgt-pkg-conversion-behavior"]:checked').value;
+
       var conversionInput = '';
       if (conversionBehavior !== 'optimize') {
-        conversionInput = document.getElementById('tgt-pkg-conversion-input').value.trim();
+        var convInputEl = document.getElementById('tgt-pkg-conversion-input');
+        if (convInputEl) conversionInput = convInputEl.value.trim();
       }
-      var conversionTimeRange = document.querySelector('input[name="tgt-pkg-conversion-time"]:checked').value;
+
       var data = {
         channel: channel,
         name: name,
