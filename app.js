@@ -2622,7 +2622,7 @@ function App() {
         id: 'ec_003',
         name: '已注册用户'
       }]);
-      notify('所有人脸包列表已刷新', 'success');
+      notify('所有人群包列表已刷新', 'success');
     },
     className: "text-xs text-green-600 hover:text-green-800 border border-green-200 rounded px-2 py-1 hover:bg-green-50"
   }, /*#__PURE__*/React.createElement("i", {
