@@ -2500,12 +2500,12 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "far fa-clock mr-1"
   }), "配置定向、出价、投放设置"))), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 space-y-6",
+    className: "p-6 space-y-4",
     style: {
-      padding: '24px'
+      padding: '20px 24px'
     }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
+    className: "grid grid-cols-1 md:grid-cols-3 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "营销目的 ", /*#__PURE__*/React.createElement("span", {
@@ -2517,9 +2517,7 @@ function App() {
   }, MOCK.marketingObjectives.map(mo => /*#__PURE__*/React.createElement("option", {
     key: mo.id,
     value: mo.id
-  }, mo.name))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, mo.name)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "推广产品"), /*#__PURE__*/React.createElement("input", {
     type: "text",
@@ -2538,7 +2536,7 @@ function App() {
     key: sp.id,
     value: sp.id
   }, sp.name))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "营销载体"), /*#__PURE__*/React.createElement("input", {
@@ -2555,7 +2553,9 @@ function App() {
   }, (MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => /*#__PURE__*/React.createElement("option", {
     key: conv.id,
     value: conv.id
-  }, conv.name))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, conv.name))))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
   }, "投放版位 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
@@ -2589,7 +2589,7 @@ function App() {
     className: "block text-sm font-medium text-gray-700 mb-2"
   }, "版位定投场景"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowPlacementModal(true),
-    className: "px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[300px]"
+    className: "px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full min-w-0"
   }, /*#__PURE__*/React.createElement("span", {
     className: placementScene ? 'text-gray-900' : 'text-gray-400'
   }, getPlacementSceneDisplay(placement, placementScene)), /*#__PURE__*/React.createElement("i", {
@@ -2600,7 +2600,7 @@ function App() {
     onClose: () => setShowPlacementModal(false),
     value: placementScene,
     onChange: setPlacementScene
-  })), /*#__PURE__*/React.createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-3"
