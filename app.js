@@ -2627,7 +2627,7 @@ function App() {
     className: "text-xs text-green-600 hover:text-green-800 border border-green-200 rounded px-2 py-1 hover:bg-green-50"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-sync-alt mr-1"
-  }), "刷新人群包"), selectedAccountIds.length > 1 && /*#__PURE__*/React.createElement("button", {
+  }), "刷新人群包"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       // 检查所选账户是否有相同人群包
       const firstAccountId = selectedAccountIds[0];

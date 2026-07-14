@@ -1882,7 +1882,6 @@ function App() {
                   >
                     <i className="fas fa-sync-alt mr-1"></i>刷新人群包
                   </button>
-                  {selectedAccountIds.length > 1 && (
                   <button
                     onClick={() => {
                       // 检查所选账户是否有相同人群包
@@ -1912,7 +1911,6 @@ function App() {
                   >
                     <i className="fas fa-copy mr-1"></i>批量同步
                   </button>
-                )}
                 </div>
               </div>
               </div>
