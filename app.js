@@ -1792,6 +1792,60 @@ function TimeGrid({
     }
   }, "清空"))));
 }
+// 带图片的自定义下拉（原生 select 无法显示图片，用按钮+浮层模拟）
+function ImageSelect({
+  value,
+  options,
+  placeholder,
+  emptyText,
+  onSelect
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find(o => o.value === value);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "relative"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setOpen(o => !o),
+    className: "w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white text-left"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flex items-center gap-2 min-w-0"
+  }, selected ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("img", {
+    src: selected.thumb,
+    alt: "",
+    className: "w-8 h-8 rounded object-cover flex-shrink-0",
+    onError: e => {
+      e.target.style.display = 'none';
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-800 truncate"
+  }, selected.label)) : /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-400"
+  }, placeholder)), /*#__PURE__*/React.createElement("span", {
+    className: "text-gray-400 text-xs ml-2 flex-shrink-0"
+  }, "▾")), open && /*#__PURE__*/React.createElement("div", {
+    className: "absolute z-30 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto"
+  }, options.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "px-3 py-2 text-xs text-gray-400"
+  }, emptyText) : options.map(o => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: o.value,
+    onClick: () => {
+      onSelect(o);
+      setOpen(false);
+    },
+    className: `w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 ${o.value === value ? 'bg-blue-50' : ''}`
+  }, /*#__PURE__*/React.createElement("img", {
+    src: o.thumb,
+    alt: "",
+    className: "w-8 h-8 rounded object-cover flex-shrink-0",
+    onError: e => {
+      e.target.style.display = 'none';
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-800 truncate"
+  }, o.label)))));
+}
 // 主应用
 function App() {
   // ===== 基础配置 =====
@@ -3790,25 +3844,20 @@ function App() {
     className: "flex-1"
   }, brandImageType === 'custom' ? /*#__PURE__*/React.createElement("div", null, creativeAssets.filter(a => a.type === 'brand').length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400"
-  }, "暂无创意资产中的品牌形象，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-4 gap-2"
-  }, creativeAssets.filter(a => a.type === 'brand').map(bi => /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    key: bi.id,
-    onClick: () => setSelectedBrandImage(bi),
-    className: `relative border rounded-lg overflow-hidden text-left ${selectedBrandImage && selectedBrandImage.id === bi.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'}`
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "h-16 bg-gray-50 flex items-center justify-center overflow-hidden"
-  }, /*#__PURE__*/React.createElement("img", {
-    src: bi.thumb || '',
-    alt: bi.name || '',
-    className: "w-full h-full object-cover",
-    onError: e => {
-      e.target.style.display = 'none';
+  }, "暂无创意资产中的品牌形象，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement(ImageSelect, {
+    value: selectedBrandImage ? selectedBrandImage.id : '',
+    placeholder: "选择品牌形象",
+    emptyText: "暂无创意资产中的品牌形象，请先在「创意资产」菜单上传",
+    options: creativeAssets.filter(a => a.type === 'brand').map(bi => ({
+      value: bi.id,
+      label: bi.name,
+      thumb: bi.thumb
+    })),
+    onSelect: o => {
+      const bi = creativeAssets.filter(a => a.type === 'brand').find(x => x.id === o.value);
+      setSelectedBrandImage(bi || null);
     }
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "px-1 py-1 text-[11px] text-gray-700 truncate"
-  }, bi.name))))) : /*#__PURE__*/React.createElement("select", {
+  })) : /*#__PURE__*/React.createElement("select", {
     value: selectedVideoAccount ? selectedVideoAccount.id : '',
     onChange: e => {
       const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
@@ -3846,25 +3895,20 @@ function App() {
     value: "details"
   }, "查看详情")) : /*#__PURE__*/React.createElement("div", null, creativeAssets.filter(a => a.type === 'component').length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400"
-  }, "暂无创意资产中的营销组件，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-4 gap-2"
-  }, creativeAssets.filter(a => a.type === 'component').map(c => /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    key: c.id,
-    onClick: () => setSelectedComponent(c),
-    className: `relative border rounded-lg overflow-hidden text-left ${selectedComponent && selectedComponent.id === c.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'}`
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "h-16 bg-gray-50 flex items-center justify-center overflow-hidden"
-  }, /*#__PURE__*/React.createElement("img", {
-    src: c.thumb || '',
-    alt: c.btnText || '',
-    className: "w-full h-full object-cover",
-    onError: e => {
-      e.target.style.display = 'none';
+  }, "暂无创意资产中的营销组件，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement(ImageSelect, {
+    value: selectedComponent ? selectedComponent.id : '',
+    placeholder: "选择营销组件",
+    emptyText: "暂无创意资产中的营销组件，请先在「创意资产」菜单上传",
+    options: creativeAssets.filter(a => a.type === 'component').map(c => ({
+      value: c.id,
+      label: c.btnText,
+      thumb: c.thumb
+    })),
+    onSelect: o => {
+      const c = creativeAssets.filter(a => a.type === 'component').find(x => x.id === o.value);
+      setSelectedComponent(c || null);
     }
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "px-1 py-1 text-[11px] text-gray-700 truncate"
-  }, c.btnText))))))), /*#__PURE__*/React.createElement("p", {
+  })))), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400"
   }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
     id: "section-run",

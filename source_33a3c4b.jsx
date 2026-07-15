@@ -1163,6 +1163,51 @@ function TimeGrid({ value, onChange }) {
     </div>
   );
 }
+// 带图片的自定义下拉（原生 select 无法显示图片，用按钮+浮层模拟）
+function ImageSelect({ value, options, placeholder, emptyText, onSelect }) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find(o => o.value === value);
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white text-left"
+      >
+        <span className="flex items-center gap-2 min-w-0">
+          {selected ? (
+            <>
+              <img src={selected.thumb} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" onError={e => { e.target.style.display = 'none'; }} />
+              <span className="text-sm text-gray-800 truncate">{selected.label}</span>
+            </>
+          ) : (
+            <span className="text-sm text-gray-400">{placeholder}</span>
+          )}
+        </span>
+        <span className="text-gray-400 text-xs ml-2 flex-shrink-0">▾</span>
+      </button>
+      {open && (
+        <div className="absolute z-30 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+          {options.length === 0 ? (
+            <div className="px-3 py-2 text-xs text-gray-400">{emptyText}</div>
+          ) : (
+            options.map(o => (
+              <button
+                type="button"
+                key={o.value}
+                onClick={() => { onSelect(o); setOpen(false); }}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 ${o.value === value ? 'bg-blue-50' : ''}`}
+              >
+                <img src={o.thumb} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" onError={e => { e.target.style.display = 'none'; }} />
+                <span className="text-sm text-gray-800 truncate">{o.label}</span>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 // 主应用
 function App() {
   // ===== 基础配置 =====
@@ -2858,21 +2903,16 @@ function App() {
                         {creativeAssets.filter(a => a.type === 'brand').length === 0 ? (
                           <p className="text-xs text-gray-400">暂无创意资产中的品牌形象，请先在「创意资产」菜单上传</p>
                         ) : (
-                          <div className="grid grid-cols-4 gap-2">
-                            {creativeAssets.filter(a => a.type === 'brand').map(bi => (
-                              <button
-                                type="button"
-                                key={bi.id}
-                                onClick={() => setSelectedBrandImage(bi)}
-                                className={`relative border rounded-lg overflow-hidden text-left ${selectedBrandImage && selectedBrandImage.id === bi.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'}`}
-                              >
-                                <div className="h-16 bg-gray-50 flex items-center justify-center overflow-hidden">
-                                  <img src={bi.thumb || ''} alt={bi.name || ''} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; }} />
-                                </div>
-                                <div className="px-1 py-1 text-[11px] text-gray-700 truncate">{bi.name}</div>
-                              </button>
-                            ))}
-                          </div>
+                          <ImageSelect
+                            value={selectedBrandImage ? selectedBrandImage.id : ''}
+                            placeholder="选择品牌形象"
+                            emptyText="暂无创意资产中的品牌形象，请先在「创意资产」菜单上传"
+                            options={creativeAssets.filter(a => a.type === 'brand').map(bi => ({ value: bi.id, label: bi.name, thumb: bi.thumb }))}
+                            onSelect={o => {
+                              const bi = creativeAssets.filter(a => a.type === 'brand').find(x => x.id === o.value);
+                              setSelectedBrandImage(bi || null);
+                            }}
+                          />
                         )}
                       </div>
                     ) : (
@@ -2912,21 +2952,16 @@ function App() {
                         {creativeAssets.filter(a => a.type === 'component').length === 0 ? (
                           <p className="text-xs text-gray-400">暂无创意资产中的营销组件，请先在「创意资产」菜单上传</p>
                         ) : (
-                          <div className="grid grid-cols-4 gap-2">
-                            {creativeAssets.filter(a => a.type === 'component').map(c => (
-                              <button
-                                type="button"
-                                key={c.id}
-                                onClick={() => setSelectedComponent(c)}
-                                className={`relative border rounded-lg overflow-hidden text-left ${selectedComponent && selectedComponent.id === c.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'}`}
-                              >
-                                <div className="h-16 bg-gray-50 flex items-center justify-center overflow-hidden">
-                                  <img src={c.thumb || ''} alt={c.btnText || ''} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; }} />
-                                </div>
-                                <div className="px-1 py-1 text-[11px] text-gray-700 truncate">{c.btnText}</div>
-                              </button>
-                            ))}
-                          </div>
+                          <ImageSelect
+                            value={selectedComponent ? selectedComponent.id : ''}
+                            placeholder="选择营销组件"
+                            emptyText="暂无创意资产中的营销组件，请先在「创意资产」菜单上传"
+                            options={creativeAssets.filter(a => a.type === 'component').map(c => ({ value: c.id, label: c.btnText, thumb: c.thumb }))}
+                            onSelect={o => {
+                              const c = creativeAssets.filter(a => a.type === 'component').find(x => x.id === o.value);
+                              setSelectedComponent(c || null);
+                            }}
+                          />
                         )}
                       </div>
                     )}
