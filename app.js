@@ -2045,6 +2045,15 @@ function App() {
   const [selectedVideoAccount, setSelectedVideoAccount] = useState(null); // {id, name}
   const [marketingComponentType, setMarketingComponentType] = useState('floating_card'); // 'floating_card' | 'action_button'
   const [actionButtonType, setActionButtonType] = useState('claim'); // 'claim' | 'details'
+  // 创意资产（与 index.html 共用 ad_brand_images）：品牌形象（type=brand） / 营销组件（type=component）
+  const [creativeAssets, setCreativeAssets] = useState([]);
+  const [selectedComponent, setSelectedComponent] = useState(null); // {id, title, btnText, thumb}
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('ad_brand_images');
+      if (raw) setCreativeAssets(JSON.parse(raw));
+    } catch (e) {}
+  }, []);
 
   // ===== 预览 =====
   const [showPreview, setShowPreview] = useState(false);
@@ -3773,19 +3782,27 @@ function App() {
     value: "video_account"
   }, "视频号")), /*#__PURE__*/React.createElement("div", {
     className: "flex-1"
-  }, brandImageType === 'custom' ? /*#__PURE__*/React.createElement("select", {
-    value: selectedBrandImage ? selectedBrandImage.id : '',
-    onChange: e => {
-      const bi = MOCK.brandImages.find(x => x.id === e.target.value);
-      setSelectedBrandImage(bi || null);
-    },
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "选择品牌形象图片"), MOCK.brandImages.map(bi => /*#__PURE__*/React.createElement("option", {
+  }, brandImageType === 'custom' ? /*#__PURE__*/React.createElement("div", null, creativeAssets.filter(a => a.type === 'brand').length === 0 ? /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400"
+  }, "暂无创意资产中的品牌形象，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-4 gap-2"
+  }, creativeAssets.filter(a => a.type === 'brand').map(bi => /*#__PURE__*/React.createElement("button", {
+    type: "button",
     key: bi.id,
-    value: bi.id
-  }, bi.name))) : /*#__PURE__*/React.createElement("select", {
+    onClick: () => setSelectedBrandImage(bi),
+    className: `relative border rounded-lg overflow-hidden text-left ${selectedBrandImage && selectedBrandImage.id === bi.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'}`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "h-16 bg-gray-50 flex items-center justify-center overflow-hidden"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: bi.thumb || '',
+    alt: bi.name || '',
+    className: "w-full h-full object-cover",
+    onError: e => {
+      e.target.style.display = 'none';
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "px-1 py-1 text-[11px] text-gray-700 truncate"
+  }, bi.name))))) : /*#__PURE__*/React.createElement("select", {
     value: selectedVideoAccount ? selectedVideoAccount.id : '',
     onChange: e => {
       const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
@@ -3821,19 +3838,27 @@ function App() {
     value: "claim"
   }, "立即领取"), /*#__PURE__*/React.createElement("option", {
     value: "details"
-  }, "查看详情")) : /*#__PURE__*/React.createElement("select", {
-    value: actionButtonType,
-    onChange: e => setActionButtonType(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "default"
-  }, "默认浮层卡片"), /*#__PURE__*/React.createElement("option", {
-    value: "coupon"
-  }, "优惠券浮层"), /*#__PURE__*/React.createElement("option", {
-    value: "subscribe"
-  }, "订阅浮层"), /*#__PURE__*/React.createElement("option", {
-    value: "promo"
-  }, "促销浮层")))), /*#__PURE__*/React.createElement("p", {
+  }, "查看详情")) : /*#__PURE__*/React.createElement("div", null, creativeAssets.filter(a => a.type === 'component').length === 0 ? /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400"
+  }, "暂无创意资产中的营销组件，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-4 gap-2"
+  }, creativeAssets.filter(a => a.type === 'component').map(c => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: c.id,
+    onClick: () => setSelectedComponent(c),
+    className: `relative border rounded-lg overflow-hidden text-left ${selectedComponent && selectedComponent.id === c.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'}`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "h-16 bg-gray-50 flex items-center justify-center overflow-hidden"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: c.thumb || '',
+    alt: c.btnText || '',
+    className: "w-full h-full object-cover",
+    onError: e => {
+      e.target.style.display = 'none';
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "px-1 py-1 text-[11px] text-gray-700 truncate"
+  }, c.btnText))))))), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400"
   }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
     id: "section-run",
