@@ -2049,10 +2049,16 @@ function App() {
   const [creativeAssets, setCreativeAssets] = useState([]);
   const [selectedComponent, setSelectedComponent] = useState(null); // {id, title, btnText, thumb}
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('ad_brand_images');
-      if (raw) setCreativeAssets(JSON.parse(raw));
-    } catch (e) {}
+    const loadAssets = () => {
+      try {
+        const raw = localStorage.getItem('ad_brand_images');
+        if (raw) setCreativeAssets(JSON.parse(raw));
+      } catch (e) {}
+    };
+    loadAssets();
+    // 菜单中“加载示例资产”后实时刷新（表单为 iframe，同源 storage 事件触发）
+    window.addEventListener('storage', loadAssets);
+    return () => window.removeEventListener('storage', loadAssets);
   }, []);
 
   // ===== 预览 =====

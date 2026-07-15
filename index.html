@@ -149,12 +149,6 @@
               <label style="display:block;font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">定向包名称 <span style="color:#ff4d4f;">*</span></label>
               <div style="display:flex;align-items:center;gap:8px;">
                 <input id="tgt-pkg-name" type="text" placeholder="输入定向包名称" style="flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
-                <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#9ca3af;">
-                  <span style="cursor:pointer;color:#1890FF;">+日期</span>
-                  <span style="cursor:pointer;color:#1890FF;">+定向包名称</span>
-                  <span style="cursor:pointer;color:#1890FF;">+版位</span>
-                  <span style="cursor:pointer;color:#1890FF;">+创建人</span>
-                </div>
               </div>
             </div>
 
@@ -348,11 +342,16 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
         <div>
           <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">创意资产</h2>
-          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告投放使用的品牌头像</p>
+          <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告投放使用的品牌形象与营销组件</p>
         </div>
-        <button onclick="openBrandImageModal()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
-          <i class="fas fa-plus"></i> 批量添加
-        </button>
+        <div style="display:flex;gap:12px;">
+          <button onclick="loadExampleBrandImages()" style="background:white;color:#1890FF;border:1px solid #1890FF;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <i class="fas fa-magic"></i> 加载示例资产
+          </button>
+          <button onclick="openBrandImageModal()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <i class="fas fa-plus"></i> 批量添加
+          </button>
+        </div>
       </div>
       <!-- 品牌形象列表 -->
       <div id="brand-image-list" style="display:flex;flex-wrap:wrap;gap:16px;"></div>
@@ -1440,6 +1439,32 @@
         '</div></div>';
     });
     listEl.innerHTML = html;
+  };
+
+  // 生成示例缩略图（内联 SVG，免联网）
+  function makeThumb(bg, label) {
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'>" +
+      "<rect width='120' height='120' fill='" + bg + "'/>" +
+      "<text x='50%' y='50%' fill='white' font-size='34' font-family='sans-serif' font-weight='bold' text-anchor='middle' dominant-baseline='central'>" + label + "</text>" +
+      "</svg>";
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  // 加载示例创意资产（品牌形象 + 营销组件）
+  window.loadExampleBrandImages = function() {
+    if (!confirm('加载示例创意资产？将覆盖当前列表（可在菜单中删除）')) return;
+    var examples = [
+      // 品牌形象（type=brand）：名称 + 缩略图
+      { id: 'ex_bi_1', type: 'brand', name: '品牌形象-夏季大促', thumb: makeThumb('#3b82f6', '形象A') },
+      { id: 'ex_bi_2', type: 'brand', name: '品牌形象-会员日', thumb: makeThumb('#10b981', '形象B') },
+      { id: 'ex_bi_3', type: 'brand', name: '品牌形象-新品首发', thumb: makeThumb('#f59e0b', '形象C') },
+      // 营销组件（type=component）：按钮文案 + 缩略图
+      { id: 'ex_mc_1', type: 'component', title: '立即领取-示例', desc: '限时领取福利', btnText: '立即领取', thumb: makeThumb('#ef4444', '领取') },
+      { id: 'ex_mc_2', type: 'component', title: '查看详情-示例', desc: '了解更多产品', btnText: '查看详情', thumb: makeThumb('#8b5cf6', '详情') }
+    ];
+    brandImages = examples;
+    try { localStorage.setItem('ad_brand_images', JSON.stringify(brandImages)); } catch(e) {}
+    renderBrandImageList();
   };
 
   window.openBrandImageModal = function(id) {
