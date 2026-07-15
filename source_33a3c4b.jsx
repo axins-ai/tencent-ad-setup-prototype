@@ -1440,10 +1440,13 @@ function App() {
   // 创意素材分配
   const [composeRule, setComposeRule] = useState({ materials: 1, copies: 1 });
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average'
-  // 版位切换时调整素材数量上限
+  // 版位切换时调整素材数量上限；公众号版位营销组件仅支持行动按钮
   useEffect(() => {
     if (placement === 'wechat_video' && composeRule.materials !== 1) {
       setComposeRule(prev => ({ ...prev, materials: 1 }));
+    }
+    if (placement === 'wechat_mp' && marketingComponentType === 'floating_card') {
+      setMarketingComponentType('action_button');
     }
   }, [placement]);
   // 品牌形象 & 营销组件
@@ -2939,9 +2942,12 @@ function App() {
                   </div>
                   <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     <option value="action_button">行动按钮</option>
-                    <option value="floating_card">浮层卡片</option>
+                    <option value="floating_card" disabled={placement === 'wechat_mp'}>浮层卡片{placement === 'wechat_mp' ? '（公众号不支持）' : ''}</option>
                   </select>
                   <div className="flex-1">
+                    {placement === 'wechat_mp' && (
+                      <p className="text-xs text-gray-400 mb-1">公众号版位仅支持「行动按钮」营销组件</p>
+                    )}
                     {marketingComponentType === 'action_button' ? (
                       <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="claim">立即领取</option>
