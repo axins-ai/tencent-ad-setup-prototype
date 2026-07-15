@@ -345,26 +345,23 @@
           <p style="font-size:14px;color:#6b7280;margin:4px 0 0 0;">管理广告投放使用的品牌形象与营销组件</p>
         </div>
         <div style="display:flex;gap:12px;">
-          <button onclick="loadExampleBrandImages()" style="background:white;color:#1890FF;border:1px solid #1890FF;font-size:14px;padding:10px 20px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;">
-            <i class="fas fa-magic"></i> 加载示例资产
-          </button>
           <button onclick="openBrandImageModal()" style="background:#1890FF;color:white;font-size:14px;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;">
-            <i class="fas fa-plus"></i> 批量添加
+            <i class="fas fa-plus"></i> 添加
           </button>
         </div>
       </div>
       <!-- 品牌形象列表 -->
-      <div id="brand-image-list" style="display:flex;flex-wrap:wrap;gap:16px;"></div>
+      <div id="brand-image-list" style="display:block;"></div>
       <div id="brand-image-empty" style="text-align:center;padding:60px 0;color:#9ca3af;display:block;">
         <div style="font-size:48px;margin-bottom:16px;">👑</div>
-        <p style="font-size:16px;color:#666;">暂无创意资产，点击上方按钮批量添加</p>
+        <p style="font-size:16px;color:#666;">暂无创意资产，点击上方按钮添加</p>
       </div>
 
       <!-- 创意资产管理弹窗 -->
       <div id="brand-image-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
         <div style="background:white;border-radius:12px;width:90vw;max-width:580px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #e5e7eb;">
-            <h3 id="bi-modal-title" style="font-size:17px;font-weight:600;margin:0;color:#1f2937;">批量添加创意资产</h3>
+            <h3 id="bi-modal-title" style="font-size:17px;font-weight:600;margin:0;color:#1f2937;">添加创意资产</h3>
             <button onclick="closeBrandImageModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9ca3af;line-height:1;padding:0 4px;">×</button>
           </div>
           <div style="padding:24px;overflow-y:auto;flex:1;">
@@ -391,7 +388,7 @@
                 <button type="button" onclick="triggerBiFileInput()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:1px dashed #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">
                   <i class="fas fa-plus" style="color:#9ca3af;"></i> 添加头像
                 </button>
-                <input type="file" id="bi-file-input" accept=".jpg,.jpeg,.png" multiple onchange="onBiFilesSelected(event)" style="display:none;">
+                <input type="file" id="bi-file-input" accept=".jpg,.jpeg,.png" onchange="onBiFilesSelected(event)" style="display:none;">
                 <div style="margin-top:8px;font-size:13px;color:#6b7280;">
                   图片尺寸：512*512 像素，大小50KB以内，支持jpg/png
                 </div>
@@ -1400,6 +1397,10 @@
   // ========== 创意资产 ==========
   var brandImages = [];
   try { brandImages = JSON.parse(localStorage.getItem('ad_brand_images') || '[]'); } catch(e) {}
+  if (!brandImages || !brandImages.length) {
+    brandImages = getDefaultBrandImages();
+    try { localStorage.setItem('ad_brand_images', JSON.stringify(brandImages)); } catch(e) {}
+  }
   var biSelectedFiles = [];
   var editingBrandImageId = null;
 
@@ -1409,7 +1410,7 @@
     document.getElementById('bi-brand-section').style.display = isBrand ? 'block' : 'none';
     document.getElementById('bi-component-section').style.display = isBrand ? 'none' : 'block';
     var titleEl = document.getElementById('bi-modal-title');
-    if (titleEl) titleEl.textContent = editingBrandImageId ? '编辑创意资产' : '批量添加创意资产';
+    if (titleEl) titleEl.textContent = editingBrandImageId ? '编辑创意资产' : '添加创意资产';
   };
 
   window.renderBrandImageList = function() {
@@ -1424,19 +1425,18 @@
     if (emptyEl) emptyEl.style.display = 'none';
     var html = '';
     brandImages.forEach(function(bi, idx) {
-      html += '<div style="width:180px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;background:white;">' +
-        '<div style="height:140px;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
-          '<img src="' + (bi.thumb || '') + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" style="max-width:100%;max-height:100%;object-fit:cover;">' +
-          '<div style="display:none;font-size:32px;color:#d1d5db;">👑</div>' +
+      html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;background:white;margin-bottom:10px;">' +
+        '<div style="width:48px;height:48px;flex-shrink:0;border-radius:6px;overflow:hidden;background:#f9fafb;display:flex;align-items:center;justify-content:center;">' +
+          '<img src="' + (bi.thumb || '') + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" style="width:100%;height:100%;object-fit:cover;">' +
+          '<div style="display:none;font-size:20px;color:#d1d5db;">👑</div>' +
         '</div>' +
-        '<div style="padding:10px 12px;">' +
-          '<div style="font-size:13px;color:#374151;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(bi.name || bi.title || '') + '">' + escapeHtml(bi.name || bi.title || '') + '</div>' +
-          '<div style="font-size:11px;color:#9ca3af;">' + (bi.type === 'component' ? '📦 营销组件' : '👑 品牌形象') + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:14px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(bi.name || bi.title || '') + '">' + escapeHtml(bi.name || bi.title || '') + '</div>' +
+          '<div style="font-size:12px;color:#9ca3af;margin-top:2px;">' + (bi.type === 'component' ? '📦 营销组件' : '👑 品牌形象') + '</div>' +
         '</div>' +
-        '<div style="display:flex;padding:0 8px 10px;gap:6px;">' +
-          '<button onclick="editBrandImage(\'' + bi.id + '\')" style="flex:1;padding:4px 0;background:white;border:1px solid #e5e7eb;border-radius:4px;cursor:pointer;font-size:11px;color:#374151;">编辑</button>' +
-          '<button onclick="deleteBrandImage(\'' + bi.id + '\')" style="flex:1;padding:4px 0;background:white;border:1px solid #ffa39e;border-radius:4px;cursor:pointer;font-size:11px;color:#ff4d4f;">删除</button>' +
-        '</div></div>';
+        '<button onclick="editBrandImage(\'' + bi.id + '\')" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#374151;">编辑</button>' +
+        '<button onclick="deleteBrandImage(\'' + bi.id + '\')" style="padding:6px 14px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;">删除</button>' +
+      '</div>';
     });
     listEl.innerHTML = html;
   };
@@ -1450,10 +1450,9 @@
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
   }
 
-  // 加载示例创意资产（品牌形象 + 营销组件）
-  window.loadExampleBrandImages = function() {
-    if (!confirm('加载示例创意资产？将覆盖当前列表（可在菜单中删除）')) return;
-    var examples = [
+  // 默认示例创意资产（首次访问自动写入 localStorage，常驻保留，可在菜单中删除）
+  function getDefaultBrandImages() {
+    return [
       // 品牌形象（type=brand）：名称 + 缩略图
       { id: 'ex_bi_1', type: 'brand', name: '品牌形象-夏季大促', thumb: makeThumb('#3b82f6', '形象A') },
       { id: 'ex_bi_2', type: 'brand', name: '品牌形象-会员日', thumb: makeThumb('#10b981', '形象B') },
@@ -1462,10 +1461,7 @@
       { id: 'ex_mc_1', type: 'component', title: '立即领取-示例', desc: '限时领取福利', btnText: '立即领取', thumb: makeThumb('#ef4444', '领取') },
       { id: 'ex_mc_2', type: 'component', title: '查看详情-示例', desc: '了解更多产品', btnText: '查看详情', thumb: makeThumb('#8b5cf6', '详情') }
     ];
-    brandImages = examples;
-    try { localStorage.setItem('ad_brand_images', JSON.stringify(brandImages)); } catch(e) {}
-    renderBrandImageList();
-  };
+  }
 
   window.openBrandImageModal = function(id) {
     editingBrandImageId = id || null;
@@ -1495,7 +1491,7 @@
     var modal = document.getElementById('brand-image-modal');
     if (modal) modal.style.display = 'flex';
     var titleEl = document.getElementById('bi-modal-title');
-    if (titleEl) titleEl.textContent = id ? '编辑创意资产' : '批量添加创意资产';
+    if (titleEl) titleEl.textContent = id ? '编辑创意资产' : '添加创意资产';
 
     // 编辑回显
     if (id) {

@@ -2070,7 +2070,7 @@ function App() {
   const [creativeMax, setCreativeMax] = useState(false);
   const [creativeEnhanceMax, setCreativeEnhanceMax] = useState(false);
   const [creativeName, setCreativeName] = useState('');
-  const creativeNameVariables = ['日期', '素材名称', '素材类型'];
+  const creativeNameVariables = ['日期', '素材名称'];
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
@@ -3878,20 +3878,19 @@ function App() {
     className: "w-36 flex-shrink-0"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700"
-  }, "营销组件")), /*#__PURE__*/React.createElement("select", {
+  }, "营销组件")), placement === 'wechat_mp' ? /*#__PURE__*/React.createElement("div", {
+    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+  }, "行动按钮") : /*#__PURE__*/React.createElement("select", {
     value: marketingComponentType,
     onChange: e => setMarketingComponentType(e.target.value),
     className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: "action_button"
   }, "行动按钮"), /*#__PURE__*/React.createElement("option", {
-    value: "floating_card",
-    disabled: placement === 'wechat_mp'
-  }, "浮层卡片", placement === 'wechat_mp' ? '（公众号不支持）' : '')), /*#__PURE__*/React.createElement("div", {
+    value: "floating_card"
+  }, "浮层卡片")), /*#__PURE__*/React.createElement("div", {
     className: "flex-1"
-  }, placement === 'wechat_mp' && /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400 mb-1"
-  }, "公众号版位仅支持「行动按钮」营销组件"), marketingComponentType === 'action_button' ? /*#__PURE__*/React.createElement("select", {
+  }, marketingComponentType === 'action_button' ? /*#__PURE__*/React.createElement("select", {
     value: actionButtonType,
     onChange: e => setActionButtonType(e.target.value),
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"

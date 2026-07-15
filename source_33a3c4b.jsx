@@ -1429,7 +1429,7 @@ function App() {
   const [creativeMax, setCreativeMax] = useState(false);
   const [creativeEnhanceMax, setCreativeEnhanceMax] = useState(false);
   const [creativeName, setCreativeName] = useState('');
-  const creativeNameVariables = ['日期', '素材名称', '素材类型'];
+  const creativeNameVariables = ['日期', '素材名称'];
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
@@ -2940,14 +2940,15 @@ function App() {
                   <div className="w-36 flex-shrink-0">
                     <label className="block text-sm font-medium text-gray-700">营销组件</label>
                   </div>
-                  <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                    <option value="action_button">行动按钮</option>
-                    <option value="floating_card" disabled={placement === 'wechat_mp'}>浮层卡片{placement === 'wechat_mp' ? '（公众号不支持）' : ''}</option>
-                  </select>
+                  {placement === 'wechat_mp' ? (
+                    <div className="w-36 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">行动按钮</div>
+                  ) : (
+                    <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                      <option value="action_button">行动按钮</option>
+                      <option value="floating_card">浮层卡片</option>
+                    </select>
+                  )}
                   <div className="flex-1">
-                    {placement === 'wechat_mp' && (
-                      <p className="text-xs text-gray-400 mb-1">公众号版位仅支持「行动按钮」营销组件</p>
-                    )}
                     {marketingComponentType === 'action_button' ? (
                       <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="claim">立即领取</option>
