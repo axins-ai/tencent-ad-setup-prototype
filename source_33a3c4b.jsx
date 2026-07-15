@@ -1788,15 +1788,17 @@ function App() {
               <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
             </h2>
           </div>
-          <div className="p-6 space-y-4" style={{padding:'20px 24px'}}>
+          <div className="p-6 space-y-6" style={{padding:'24px'}}>
             {/* 营销目的 & 推广产品 & 产品 */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销目的 <span className="text-red-500">*</span></label>
                 <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {MOCK.marketingObjectives.map(mo => <option key={mo.id} value={mo.id}>{mo.name}</option>)}
                 </select>
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">推广产品</label>
                 <input type="text" value="运营商产品" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
@@ -1810,7 +1812,7 @@ function App() {
             </div>
 
             {/* 营销载体 & 转化 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销载体</label>
                 <input type="text" value="页面跳转" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
@@ -1823,40 +1825,40 @@ function App() {
               </div>
             </div>
 
-            {/* 投放版位 & 版位定投场景 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">投放版位 <span className="text-red-500">*</span></label>
-                <div className="flex gap-6">
-                  <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="placement" value="wechat_video" checked={placement === 'wechat_video'} onChange={e => { setPlacement(e.target.value); setPlacementScene(''); }} className="w-4 h-4 mr-2 text-blue-600" />
-                    <span>微信视频号</span>
-                  </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="placement" value="wechat_mp" checked={placement === 'wechat_mp'} onChange={e => { setPlacement(e.target.value); setPlacementScene(''); }} className="w-4 h-4 mr-2 text-blue-600" />
-                    <span>微信公众号与小程序</span>
-                  </label>
-                </div>
+            {/* 投放版位 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">投放版位 <span className="text-red-500">*</span></label>
+              <div className="flex gap-6">
+                <label className="flex items-center cursor-pointer">
+                  <input type="radio" name="placement" value="wechat_video" checked={placement === 'wechat_video'} onChange={e => { setPlacement(e.target.value); setPlacementScene(''); }} className="w-4 h-4 mr-2 text-blue-600" />
+                  <span>微信视频号</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input type="radio" name="placement" value="wechat_mp" checked={placement === 'wechat_mp'} onChange={e => { setPlacement(e.target.value); setPlacementScene(''); }} className="w-4 h-4 mr-2 text-blue-600" />
+                  <span>微信公众号与小程序</span>
+                </label>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">版位定投场景</label>
-                <button
-                  onClick={() => setShowPlacementModal(true)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full min-w-0"
-                >
-                  <span className={placementScene ? 'text-gray-900' : 'text-gray-400'}>
-                    {getPlacementSceneDisplay(placement, placementScene)}
-                  </span>
-                  <i className="fas fa-chevron-down ml-2 text-gray-400 text-sm"></i>
-                </button>
-                <PlacementSceneModal
-                  placement={placement}
-                  show={showPlacementModal}
-                  onClose={() => setShowPlacementModal(false)}
-                  value={placementScene}
-                  onChange={setPlacementScene}
-                />
-              </div>
+            </div>
+
+            {/* 版位定投场景 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">版位定投场景</label>
+              <button
+                onClick={() => setShowPlacementModal(true)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[300px]"
+              >
+                <span className={placementScene ? 'text-gray-900' : 'text-gray-400'}>
+                  {getPlacementSceneDisplay(placement, placementScene)}
+                </span>
+                <i className="fas fa-chevron-down ml-2 text-gray-400 text-sm"></i>
+              </button>
+              <PlacementSceneModal
+                placement={placement}
+                show={showPlacementModal}
+                onClose={() => setShowPlacementModal(false)}
+                value={placementScene}
+                onChange={setPlacementScene}
+              />
             </div>
 
             {/* 自定义人群配置（网格布局：一行多个账户） */}
