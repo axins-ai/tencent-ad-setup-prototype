@@ -39,6 +39,12 @@ const MOCK = {
       { id: 'fw_003', name: '服微产品3' }
     ]
   },
+  // 活动类产品（推广产品=活动时展示）
+  activityProducts: [
+    { id: 'act_001', name: '618品牌大促' },
+    { id: 'act_002', name: '双11狂欢活动' },
+    { id: 'act_003', name: '会员日专享活动' }
+  ],
   // 转化目标（按业务单元分类）
   conversionsByBusinessUnit: {
     'baiju': [
@@ -1192,22 +1198,25 @@ function App() {
   // ===== 营销单元配置 =====
   // 业务单元
   const [businessUnit, setBusinessUnit] = useState('baiju');
+  // 推广产品类型：operator=运营商产品, activity=活动
+  const [promotionType, setPromotionType] = useState('operator');
   // 营销目的
   const [marketingObjective, setMarketingObjective] = useState('lead');
-  // 产品（根据业务单元动态变化）
+  // 产品（根据推广产品类型动态变化）
   const getProductsForBusinessUnit = () => {
+    if (promotionType === 'activity') return MOCK.activityProducts || [];
     return MOCK.productsByBusinessUnit[businessUnit] || [];
   };
   const [specificProduct, setSpecificProduct] = useState(() => {
     const products = MOCK.productsByBusinessUnit['baiju'] || [];
     return products.length > 0 ? products[0].id : '';
   });
-  // 当业务单元变化时，重置产品选择 + 清空已选账户
+  // 当业务单元或推广产品类型变化时，重置产品选择 + 清空已选账户
   useEffect(() => {
-    const products = MOCK.productsByBusinessUnit[businessUnit] || [];
+    const products = getProductsForBusinessUnit();
     setSpecificProduct(products.length > 0 ? products[0].id : '');
     setSelectedAccountIds([]);
-  }, [businessUnit]);
+  }, [businessUnit, promotionType]);
   const [placement, setPlacement] = useState('wechat_video');
   const [placementScene, setPlacementScene] = useState('');
   const [showPlacementModal, setShowPlacementModal] = useState(false);
@@ -1217,6 +1226,7 @@ function App() {
   const [userTgtPkgs, setUserTgtPkgs] = useState([]);
   const [showSaveTgtPkgModal, setShowSaveTgtPkgModal] = useState(false);
   const [saveTgtPkgName, setSaveTgtPkgName] = useState('');
+  const [saveTgtPkgError, setSaveTgtPkgError] = useState('');
   // 加载自建定向包
   useEffect(() => {
     try {
@@ -1226,11 +1236,25 @@ function App() {
   }, []);
   // 保存自建定向包
   const doSaveAsTgtPkg = () => {
-    if (!saveTgtPkgName.trim()) return;
+    const name = saveTgtPkgName.trim();
+    if (!name) {
+      setSaveTgtPkgError('请输入定向包名称');
+      return;
+    }
+    // 与现有定向包名称做重复性校验（系统 + 自建）
+    const allPkgNames = [
+      ...MOCK.targetingPackages.map(p => p.name),
+      ...userTgtPkgs.map(p => p.name),
+    ];
+    if (allPkgNames.includes(name)) {
+      setSaveTgtPkgError('该定向包名称已存在，请更换名称');
+      return;
+    }
+    setSaveTgtPkgError('');
     const now = Date.now();
     const pkg = {
       id: 'user_tp_' + now,
-      name: saveTgtPkgName.trim(),
+      name,
       region: geoMode === 'unlimited' ? '不限' : (geoMode === 'region' ? getProvinceNames(geoSelectedProvinces) : '地图选择'),
       age: ageSelections.includes('unlimited') ? '不限' : ageSelections.join(','),
       gender: genderSelection === 'unlimited' ? '不限' : genderSelection,
@@ -1333,6 +1357,10 @@ function App() {
   const [conversionBehavior, setConversionBehavior] = useState('optimize'); // 'optimize' | 'custom'
   // 转化时间区间
   const [conversionTimeRange, setConversionTimeRange] = useState('7day'); // 'today' | '7day' | '1month' | '3month' | '6month'
+  // 自定义人群（修复：原未声明导致弹窗渲染崩溃）
+  const [audienceMode, setAudienceMode] = useState('unlimited'); // 'unlimited' | 'exclude'
+  const [selectedTargetAudiences, setSelectedTargetAudiences] = useState([]);
+  const [selectedExcludeAudiences, setSelectedExcludeAudiences] = useState([]);
   const [bidAmount, setBidAmount] = useState('');
   const [dailyBudget, setDailyBudget] = useState('');
   const [onePartyData, setOnePartyData] = useState(false); // 默认关闭，且锁定
@@ -1445,10 +1473,13 @@ function App() {
     const errors = [];
     if (selectedAccountIds.length === 0) errors.push('请选择账户');
     if (bidAmount === '') errors.push('请设置出价');
+    if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
     if (selectedMaterials.length === 0) errors.push('请选择素材');
     if (selectedCopies.length === 0) errors.push('请选择文案');
     if (unitName === '') errors.push('请输入单元名称');
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
+    if (quickLaunch && quickLaunchBudget === '') errors.push('请填写一键起量预算');
+    if (quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000)) errors.push('一键起量预算需在 200 ~ 10000 元之间');
     return errors;
   })();
 
@@ -1801,7 +1832,10 @@ function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">推广产品</label>
-                <input type="text" value="运营商产品" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
+                <select value={promotionType} onChange={e => setPromotionType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                  <option value="activity">活动</option>
+                  <option value="operator">运营商产品</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">产品 <span className="text-red-500">*</span></label>
@@ -2110,7 +2144,7 @@ function App() {
                   <div className="flex items-center justify-between pb-4 border-b border-gray-200">
                     <span className="text-sm text-gray-500">自定义定向配置</span>
                     <button
-                      onClick={() => { setSaveTgtPkgName(''); setShowSaveTgtPkgModal(true); }}
+                      onClick={() => { setSaveTgtPkgName(''); setSaveTgtPkgError(''); setShowSaveTgtPkgModal(true); }}
                       className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
                     >
                       <i className="fas fa-save mr-1"></i> 保存为定向包
@@ -2397,11 +2431,26 @@ function App() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></label>
                   <input
                     type="number"
+                    min="0.01"
+                    max="300"
+                    step="0.01"
                     value={bidAmount}
                     onChange={e => setBidAmount(e.target.value)}
-                    placeholder="输入出价金额"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={e => {
+                      const v = e.target.value;
+                      if (v === '') return;
+                      let n = parseFloat(v);
+                      if (isNaN(n)) return;
+                      if (n < 0.01) n = 0.01;
+                      if (n > 300) n = 300;
+                      setBidAmount(String(n));
+                    }}
+                    placeholder="0.01 ~ 300"
+                    className={`w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
                   />
+                  {bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && (
+                    <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">日预算（元）</label>
@@ -2446,11 +2495,26 @@ function App() {
                     {quickLaunch && (
                       <input
                         type="number"
+                        min="200"
+                        max="10000"
+                        step="1"
                         value={quickLaunchBudget}
                         onChange={e => setQuickLaunchBudget(e.target.value)}
-                        placeholder="输入一键起量预算（必填）"
-                        className="w-full px-3 py-2 border border-orange-300 rounded-lg outline-none focus:ring-2 focus:ring-orange-500"
+                        onBlur={e => {
+                          const v = e.target.value;
+                          if (v === '') return;
+                          let n = parseFloat(v);
+                          if (isNaN(n)) return;
+                          if (n < 200) n = 200;
+                          if (n > 10000) n = 10000;
+                          setQuickLaunchBudget(String(n));
+                        }}
+                        placeholder="200 ~ 10000（必填）"
+                        className={`w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 ${quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) ? 'border-red-400 focus:ring-red-400' : 'border-orange-300 focus:ring-orange-500'}`}
                       />
+                    )}
+                    {quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) && (
+                      <p className="text-xs text-red-500 mt-1">一键起量预算需在 200 ~ 10000 元之间</p>
                     )}
                   </div>
                 </div>
@@ -3061,10 +3125,13 @@ function App() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">定向包名称 <span className="text-red-500">*</span></label>
                       <input
                         value={saveTgtPkgName}
-                        onChange={e => setSaveTgtPkgName(e.target.value)}
+                        onChange={e => { setSaveTgtPkgName(e.target.value); if (saveTgtPkgError) setSaveTgtPkgError(''); }}
                         placeholder="输入定向包名称"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                        className={`w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 ${saveTgtPkgError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
                       />
+                      {saveTgtPkgError && (
+                        <p className="text-xs text-red-500 mt-1"><i className="fas fa-exclamation-circle mr-1"></i>{saveTgtPkgError}</p>
+                      )}
                     </div>
                     
                     {/* 当前配置摘要 */}
