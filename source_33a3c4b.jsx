@@ -1,4 +1,4 @@
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 
 // ========== Mock 数据 ==========
 const MOCK = {
@@ -1239,6 +1239,19 @@ function App() {
   const [channel, setChannel] = useState('gdt');
   const [selectedAccountIds, setSelectedAccountIds] = useState([]);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const accountDropdownRef = useRef(null);
+
+  // 选择账户下拉：点击空白处收起
+  useEffect(() => {
+    if (!showAccountDropdown) return;
+    function onDocMouseDown(e) {
+      if (accountDropdownRef.current && !accountDropdownRef.current.contains(e.target)) {
+        setShowAccountDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
+  }, [showAccountDropdown]);
   // 投放链匹配结果刷新计数（用于强制重算/重渲染）
   const [matchRefreshKey, setMatchRefreshKey] = useState(0);
 
@@ -1802,7 +1815,7 @@ function App() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">选择账户 <span className="text-red-500">*</span></label>
-                <div className="relative">
+                <div className="relative" ref={accountDropdownRef}>
                   {/* 合并搜索框和已选标签 */}
                   <div
                     className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center text-sm"
@@ -1873,25 +1886,36 @@ function App() {
                     <i className="fas fa-sync-alt mr-1"></i>刷新
                   </button>
                 </div>
-                <div key={matchRefreshKey} className="border border-gray-200 rounded-lg p-3 bg-gray-50 min-h-[120px]">
+                <div key={matchRefreshKey} className="border border-gray-200 rounded-lg overflow-hidden bg-white min-h-[120px]">
                   {selectedAccountIds.length === 0 ? (
-                    <p className="text-sm text-gray-400">请先选择账户</p>
+                    <p className="text-sm text-gray-400 p-3">请先选择账户</p>
                   ) : (
-                    <div className="space-y-2">
-                      {selectedAccountIds.map(id => {
-                        const acc = MOCK.accounts.find(a => a.id === id);
-                        return (
-                          <div key={id} className="text-sm border-b border-gray-100 pb-2 last:border-b-0 last:pb-0">
-                            <div className="font-medium text-gray-800">{id}</div>
-                            <div className="text-xs text-gray-500 mt-0.5 break-all">
-                              落地页：{acc && acc.kaboshi ? (
-                                <a href={acc.kaboshi} target="_blank" rel="noreferrer" className="text-green-600 hover:underline">{acc.kaboshi}</a>
-                              ) : '—'}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 text-gray-600 text-left">
+                          <th className="px-3 py-2 font-medium w-1/3">账户ID</th>
+                          <th className="px-3 py-2 font-medium">投放链接</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedAccountIds.map(id => {
+                          const acc = MOCK.accounts.find(a => a.id === id);
+                          const matched = !!(acc && acc.kaboshi);
+                          return (
+                            <tr key={id} className="border-t border-gray-100">
+                              <td className={`px-3 py-2 align-top ${matched ? 'text-gray-800' : 'text-red-500 font-medium'}`}>{id}</td>
+                              <td className="px-3 py-2 align-top">
+                                {matched ? (
+                                  <a href={acc.kaboshi} target="_blank" rel="noreferrer" className="text-green-600 hover:underline break-all">{acc.kaboshi}</a>
+                                ) : (
+                                  <span className="text-red-500 font-medium">未匹配到投放链接</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   )}
                 </div>
               </div>
