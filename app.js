@@ -166,6 +166,11 @@ const MOCK = {
     name: '84761502',
     kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG010',
     businessUnit: 'baiju'
+  }, {
+    id: '88550021',
+    name: '88550021',
+    kaboshi: null,
+    businessUnit: 'baiju'
   }],
   specificProducts: [{
     id: 'sp_001',
@@ -2599,7 +2604,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-sync-alt mr-1"
   }), "刷新账户列表"))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-6 md:col-span-2"
+    className: "mt-4 md:col-span-2"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-2"
   }, /*#__PURE__*/React.createElement("label", {

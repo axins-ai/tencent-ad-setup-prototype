@@ -74,6 +74,7 @@ const MOCK = {
     { id: '21835097', name: '21835097', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG008', businessUnit: 'fuwei' },
     { id: '95620143', name: '95620143', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG009', businessUnit: 'fuwei' },
     { id: '84761502', name: '84761502', kaboshi: 'https://wp.kaboss.cn/h5-pack-pro/pages/pack/index?tgid=TG010', businessUnit: 'baiju' },
+    { id: '88550021', name: '88550021', kaboshi: null, businessUnit: 'baiju' },
   ],
   specificProducts: [
     { id: 'sp_001', name: '移动大王卡19元档' },
@@ -1876,7 +1877,7 @@ function App() {
                 </div>
               </div>
               {/* 投放链匹配结果：按所选账户ID展示其落地页（整行置于主体选择与选择账户下方） */}
-              <div className="mt-6 md:col-span-2">
+              <div className="mt-4 md:col-span-2">
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-sm font-medium text-gray-700">投放链匹配结果</label>
                   <button
