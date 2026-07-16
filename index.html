@@ -692,6 +692,41 @@
   };
 
   // ========== 渲染任务列表 ==========
+  // 根据任务推导展示用的「状态」与「搭建日志」（原型阶段用确定性 mock，按任务 id 稳定）
+  function getTaskStatusLog(task, taskData) {
+    var id = task.id || '';
+    var seed = 0;
+    for (var i = 0; i < id.length; i++) { seed = (seed * 31 + id.charCodeAt(i)) >>> 0; }
+    var acct = (taskData && taskData.selectedAccountIds && taskData.selectedAccountIds.length)
+      ? taskData.selectedAccountIds.length
+      : (seed % 4 + 1);
+    var statusOptions = ['搭建中', '部分完成', '全部完成', '搭建失败'];
+    var status = statusOptions[seed % 4];
+    var statusStyle = {
+      '搭建中':   'background:#E6F7FF;color:#1890FF;',
+      '部分完成': 'background:#FFF7E6;color:#FA8C16;',
+      '全部完成': 'background:#F6FFED;color:#52C41A;',
+      '搭建失败': 'background:#FFF1F0;color:#FF4D4F;'
+    }[status];
+    if (status === '搭建中') {
+      return { status: status, statusStyle: statusStyle, log: '搭建进行中…' };
+    }
+    var creaTotal = acct * (2 + ((seed >> 3) % 3));
+    var unitSucc = 0, unitFail = 0, creaSucc = 0, creaFail = 0;
+    if (status === '搭建失败') {
+      unitFail = acct; creaFail = creaTotal;
+    } else if (status === '全部完成') {
+      unitSucc = acct; creaSucc = creaTotal;
+    } else {
+      unitFail = (acct > 1) ? (seed % 2 + 1) : 0; if (unitFail > acct) unitFail = acct;
+      unitSucc = acct - unitFail;
+      creaFail = (creaTotal > 1) ? (seed % 2 + 1) : 0; if (creaFail > creaTotal) creaFail = creaTotal;
+      creaSucc = creaTotal - creaFail;
+    }
+    var log = '账户 ' + acct + ' · 单元 成' + unitSucc + '/败' + unitFail + ' · 创意 成' + creaSucc + '/败' + creaFail;
+    return { status: status, statusStyle: statusStyle, log: log };
+  }
+
   function renderTaskList() {
     var container = document.getElementById('task-list-content');
     if (!container) return;
@@ -708,9 +743,11 @@
     var reversed = tasks.slice().reverse();
     var html = '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">';
     html += '<div style="display:flex;align-items:center;padding:16px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">' +
-      '<div style="flex:1.5;">名称</div>' +
-      '<div style="flex:0.8;">渠道</div>' +
-      '<div style="flex:1;">投放版位</div>' +
+      '<div style="flex:1.3;">名称</div>' +
+      '<div style="flex:0.7;">渠道</div>' +
+      '<div style="flex:0.9;">投放版位</div>' +
+      '<div style="flex:0.9;">状态</div>' +
+      '<div style="flex:2;">搭建日志</div>' +
       '<div style="flex:1.2;text-align:right;">操作</div>' +
       '</div>';
     reversed.forEach(function(task) {
@@ -718,10 +755,13 @@
       try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch(e) {}
       var placementVal = taskData && taskData.placement ? taskData.placement : '';
       var placementDisplay = placementVal ? (placementMap[placementVal] || placementVal) : '未选择';
+      var sl = getTaskStatusLog(task, taskData);
       html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;">' +
-        '<div style="flex:1.5;font-weight:500;">' + escapeHtml(task.name) + '<br><span style="font-size:12px;color:#9ca3af;">' + (task.status === 'draft' ? '草稿' : task.status) + ' · ' + formatDate(task.createdAt) + '</span></div>' +
-        '<div style="flex:0.8;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
-        '<div style="flex:1;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
+        '<div style="flex:1.3;font-weight:500;">' + escapeHtml(task.name) + '<br><span style="font-size:12px;color:#9ca3af;">' + formatDate(task.createdAt) + '</span></div>' +
+        '<div style="flex:0.7;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
+        '<div style="flex:0.9;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
+        '<div style="flex:0.9;"><span style="padding:4px 10px;border-radius:999px;font-size:13px;' + sl.statusStyle + '">' + sl.status + '</span></div>' +
+        '<div style="flex:2;color:#6b7280;font-size:13px;line-height:1.4;">' + escapeHtml(sl.log) + '</div>' +
         '<div style="flex:1.2;display:flex;justify-content:flex-end;gap:8px;">' +
           '<button data-task-id="' + task.id + '" data-action="edit" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-edit" style="margin-right:4px;"></i>编辑</button>' +
           '<button data-task-id="' + task.id + '" data-action="copy" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-copy" style="margin-right:4px;"></i>复制</button>' +

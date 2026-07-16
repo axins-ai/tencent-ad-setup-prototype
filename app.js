@@ -2511,9 +2511,9 @@ function App() {
   }), "选择主体和投放账户")), /*#__PURE__*/React.createElement("div", {
     className: "p-6"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "mb-5 max-w-md"
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
+    className: "w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0"
   }, "任务名称 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("input", {
@@ -2522,13 +2522,11 @@ function App() {
     onChange: e => setTaskName(e.target.value),
     placeholder: "请输入任务名称，如：618大促-视频号投放",
     maxLength: 50,
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   })), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap items-start gap-x-10 gap-y-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0"
+    className: "w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0"
   }, "主体选择 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("select", {
@@ -2539,15 +2537,13 @@ function App() {
     key: bu.id,
     value: bu.id
   }, bu.name, "（", bu.id, "）")))), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-start gap-2 flex-1 min-w-[280px]"
+    className: "flex items-center gap-3 mb-5 flex-wrap"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0 pt-2"
+    className: "w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0"
   }, "选择账户 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "relative",
+    className: "relative max-w-sm w-full",
     ref: accountDropdownRef
   }, /*#__PURE__*/React.createElement("div", {
     className: "border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center text-sm",
@@ -2608,16 +2604,14 @@ function App() {
     className: "flex-1 truncate min-w-0"
   }, acc.id), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
     className: "fas fa-check text-blue-500 flex-shrink-0"
-  })))))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("button", {
+  })))))), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       notify('账户列表已刷新', 'success');
     },
-    className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
+    className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50 whitespace-nowrap"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-sync-alt mr-1"
-  }), "刷新账户列表"))))), /*#__PURE__*/React.createElement("div", {
+  }), "刷新账户列表")), /*#__PURE__*/React.createElement("div", {
     className: "mt-6 pt-6 border-t border-gray-100"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-2"
@@ -2678,11 +2672,9 @@ function App() {
   }), "配置定向、出价、投放设置")), /*#__PURE__*/React.createElement("div", {
     className: "p-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap items-start gap-x-10 gap-y-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0"
+    className: "w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0"
   }, "营销目的 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("select", {
@@ -2693,9 +2685,9 @@ function App() {
     key: mo.id,
     value: mo.id
   }, mo.name)))), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0"
+    className: "w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0"
   }, "推广产品"), /*#__PURE__*/React.createElement("select", {
     value: promotionType,
     onChange: e => setPromotionType(e.target.value),
@@ -2705,9 +2697,9 @@ function App() {
   }, "活动"), /*#__PURE__*/React.createElement("option", {
     value: "operator"
   }, "运营商产品"))), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0"
+    className: "w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0"
   }, "产品 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("select", {
@@ -2718,18 +2710,18 @@ function App() {
     key: sp.id,
     value: sp.id
   }, sp.name)))), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0"
+    className: "w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0"
   }, "营销载体"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: "页面跳转",
     disabled: true,
     className: "w-40 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
   })), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0"
+    className: "w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0"
   }, "转化"), /*#__PURE__*/React.createElement("select", {
     value: conversionGoal,
     onChange: e => setConversionGoal(e.target.value),
@@ -2737,7 +2729,7 @@ function App() {
   }, (MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => /*#__PURE__*/React.createElement("option", {
     key: conv.id,
     value: conv.id
-  }, conv.name))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, conv.name)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
   }, "投放版位 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
