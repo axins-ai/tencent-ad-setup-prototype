@@ -1725,11 +1725,11 @@ function App() {
   useEffect(() => { const t = setTimeout(doSaveForm, 500); return () => clearTimeout(t); }, [selectedAccountIds, placement, unitName, selectedMaterials, selectedCopies, selectedTargetingPackages]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {notification && <Notification msg={notification.msg} type={notification.type} onClose={() => setNotification(null)} />}
 
       {/* ===== 顶部：精简信息栏 ===== */}
-      <div className="bg-white border-b shadow-sm sticky top-0 z-40">
+      <div className="bg-gray-50 border-b shadow-sm sticky top-0 z-40">
         <div className="px-6">
           {/* 错误详情条 */}
           {showValidationSummary && validationErrors.length > 0 && (
@@ -1747,7 +1747,7 @@ function App() {
       </div>
 
       {/* ===== 快捷导航 ===== */}
-      <div className="bg-white border-b sticky top-[56px] z-30 shadow-sm">
+      <div className="bg-gray-50 border-b sticky top-[56px] z-30 shadow-sm">
         <div className="px-6 flex items-center gap-1 overflow-x-auto py-1">
           {[
             {id:'section-basic', label:'基础配置', icon:'fa-cog'},
@@ -1788,9 +1788,9 @@ function App() {
           )}
         </div>
       </div>
-      <div className="px-6 py-6 space-y-5">
+      <div className="px-6 py-6 space-y-6">
         {/* ===== 1. 基础配置 ===== */}
-        <div id="section-basic" className="bg-white">
+        <div id="section-basic" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
             <h2 className="text-base font-semibold text-gray-900">基础配置</h2>
@@ -1799,7 +1799,7 @@ function App() {
           <div className="p-6">
             {/* 任务名称：标签在左，输入栏在右 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0">任务名称 <span className="text-red-500">*</span></label>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">任务名称 <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={taskName}
@@ -1811,7 +1811,7 @@ function App() {
             </div>
             {/* 主体选择：一行一项 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0">主体选择 <span className="text-red-500">*</span></label>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">主体选择 <span className="text-red-500">*</span></label>
               <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
                 className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
@@ -1819,7 +1819,7 @@ function App() {
             </div>
             {/* 选择账户：选项框缩短，刷新按钮在选项框右侧 */}
             <div className="flex items-center gap-3 mb-5 flex-wrap">
-              <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0">选择账户 <span className="text-red-500">*</span></label>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">选择账户 <span className="text-red-500">*</span></label>
               <div className="relative max-w-sm w-full" ref={accountDropdownRef}>
                 {/* 合并搜索框和已选标签 */}
                 <div
@@ -1926,7 +1926,7 @@ function App() {
         </div>
 
         {/* ===== 2. 营销单元配置 ===== */}
-        <div id="section-unit" className="bg-gray-50">
+        <div id="section-unit" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
             <h2 className="text-base font-semibold text-gray-900">营销单元配置</h2>
@@ -1935,14 +1935,14 @@ function App() {
           <div className="p-6 space-y-6">
             {/* 营销目的 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0">营销目的 <span className="text-red-500">*</span></label>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销目的 <span className="text-red-500">*</span></label>
               <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 {MOCK.marketingObjectives.map(mo => <option key={mo.id} value={mo.id}>{mo.name}</option>)}
               </select>
             </div>
             {/* 推广产品 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0">推广产品</label>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">推广产品</label>
               <select value={promotionType} onChange={e => setPromotionType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 <option value="activity">活动</option>
                 <option value="operator">运营商产品</option>
@@ -1950,19 +1950,19 @@ function App() {
             </div>
             {/* 产品 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0">产品 <span className="text-red-500">*</span></label>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">产品 <span className="text-red-500">*</span></label>
               <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 {getProductsForBusinessUnit().map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
               </select>
             </div>
             {/* 营销载体 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0">营销载体</label>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销载体</label>
               <input type="text" value="页面跳转" disabled className="w-40 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
             </div>
             {/* 转化 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0">转化</label>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">转化</label>
               <select value={conversionGoal} onChange={e => setConversionGoal(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 {(MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => <option key={conv.id} value={conv.id}>{conv.name}</option>)}
               </select>
@@ -2007,7 +2007,7 @@ function App() {
             {/* 自定义人群配置（网格布局：一行多个账户） */}
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-md font-semibold text-gray-900">自定义人群配置</h3>
+                <h3 className="text-base font-semibold text-gray-900">自定义人群配置</h3>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
@@ -2129,7 +2129,7 @@ function App() {
 
             {/* 定向配置 */}
             <div className="border-t pt-4">
-              <h3 className="text-md font-semibold text-gray-900 mb-3">定向配置</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-3">定向配置</h3>
               <div className="flex gap-4 mb-4">
                 <label className="flex items-center cursor-pointer">
                   <input type="radio" name="targeting" checked={targetingSource === 'package'} onChange={() => setTargetingSource('package')} className="mr-2" />
@@ -2526,7 +2526,7 @@ function App() {
 
             {/* 出价与预算 */}
             <div className="border-t pt-4">
-              <h3 className="text-md font-semibold text-gray-900 mb-3">出价与预算</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-3">出价与预算</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">计费方式</label>
@@ -2632,7 +2632,7 @@ function App() {
 
             {/* 投放设置 */}
             <div className="border-t pt-4">
-              <h3 className="text-md font-semibold text-gray-900 mb-4">投放设置</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-4">投放设置</h3>
               
               {/* 投放日期 */}
               <div className="mb-6">
@@ -2767,7 +2767,7 @@ function App() {
         </div>
 
         {/* ===== 底部：创意配置 ===== */}
-        <div id="section-creative" className="bg-white">
+        <div id="section-creative" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
             <h2 className="text-base font-semibold text-gray-900">创意配置</h2>
@@ -2837,7 +2837,7 @@ function App() {
               <div className="space-y-4">
                 {/* 品牌形象 行 */}
                 <div className="flex items-start gap-3 flex-wrap">
-                  <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0 pt-2">品牌形象</label>
+                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">品牌形象</label>
                   <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     <option value="custom">自定义</option>
                     <option value="video_account">视频号</option>
@@ -2879,7 +2879,7 @@ function App() {
                 </div>
                 {/* 营销组件 行 */}
                 <div className="flex items-start gap-3 flex-wrap">
-                  <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0 pt-2">营销组件</label>
+                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">营销组件</label>
                   {placement === 'wechat_mp' ? (
                     <div className="w-36 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">行动按钮</div>
                   ) : (
@@ -3021,7 +3021,7 @@ function App() {
         </div>
 
         {/* ===== 运行配置 ===== */}
-        <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
+        <div id="section-run" className="px-6 py-4">
           <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <span className="w-7 h-7 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs">4</span>
             运行配置
