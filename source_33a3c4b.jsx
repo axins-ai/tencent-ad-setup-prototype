@@ -1730,7 +1730,7 @@ function App() {
 
       {/* ===== 顶部：精简信息栏 ===== */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-40">
-        <div className="px-6">
+        <div className="max-w-7xl mx-auto px-4">
           {/* 错误详情条 */}
           {showValidationSummary && validationErrors.length > 0 && (
             <div className="border-t bg-red-50 px-4 py-1.5">
@@ -1748,7 +1748,7 @@ function App() {
 
       {/* ===== 快捷导航 ===== */}
       <div className="bg-white border-b sticky top-[56px] z-30 shadow-sm">
-        <div className="px-6 flex items-center gap-1 overflow-x-auto py-1">
+        <div className="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1">
           {[
             {id:'section-basic', label:'基础配置', icon:'fa-cog'},
             {id:'section-unit', label:'营销单元', icon:'fa-bullseye'},
@@ -1788,13 +1788,15 @@ function App() {
           )}
         </div>
       </div>
-      <div className="px-6 py-6 space-y-5">
+      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
         {/* ===== 1. 基础配置 ===== */}
-        <div id="section-basic" className="bg-white">
-          <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
-            <span className="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-            <h2 className="text-base font-semibold text-gray-900">基础配置</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="fas fa-info-circle mr-1"></i>选择主体和投放账户</span>
+        <div id="section-basic" className="bg-white rounded-xl shadow-sm border">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
+              基础配置
+              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="fas fa-info-circle mr-1"></i>选择主体和投放账户</span>
+            </h2>
           </div>
           <div className="p-6">
             {/* 任务名称 */}
@@ -1928,11 +1930,13 @@ function App() {
         </div>
 
         {/* ===== 2. 营销单元配置 ===== */}
-        <div id="section-unit" className="bg-gray-50">
-          <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
-            <span className="w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-            <h2 className="text-base font-semibold text-gray-900">营销单元配置</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
+        <div id="section-unit" className="bg-white rounded-xl shadow-sm border">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
+              营销单元配置
+              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
+            </h2>
           </div>
           <div className="p-6 space-y-6">
             {/* 营销目的 & 推广产品 & 产品 */}
@@ -2773,11 +2777,13 @@ function App() {
         </div>
 
         {/* ===== 底部：创意配置 ===== */}
-        <div id="section-creative" className="bg-white">
-          <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
-            <span className="w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-            <h2 className="text-base font-semibold text-gray-900">创意配置</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、落地页</span>
+        <div id="section-creative" className="bg-white rounded-xl shadow-sm border">
+          <div className="bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
+              创意配置
+              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、落地页</span>
+            </h2>
           </div>
           <div className="p-6 space-y-6">
             {/* 创意增强Max - 已禁用，锁定为关闭 */}
@@ -3031,8 +3037,8 @@ function App() {
         </div>
 
         {/* ===== 运行配置 ===== */}
-        <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
-          <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 mb-6">
+          <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span className="w-7 h-7 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs">4</span>
             运行配置
           </h3>
