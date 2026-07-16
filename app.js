@@ -2614,7 +2614,7 @@ function App() {
   }), "刷新账户列表")), /*#__PURE__*/React.createElement("div", {
     className: "mt-6 pt-6 border-t border-gray-100"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between mb-2"
+    className: "flex items-center gap-2 mb-2"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700"
   }, "投放链匹配结果"), /*#__PURE__*/React.createElement("button", {

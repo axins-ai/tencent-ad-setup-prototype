@@ -1880,7 +1880,7 @@ function App() {
             </div>
             {/* 投放链匹配结果：全宽整行，置于主体选择与选择账户下方 */}
             <div className="mt-6 pt-6 border-t border-gray-100">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 mb-2">
                 <label className="block text-sm font-medium text-gray-700">投放链匹配结果</label>
                 <button
                   onClick={() => { setMatchRefreshKey(k => k + 1); notify('投放链匹配结果已刷新', 'success'); }}
