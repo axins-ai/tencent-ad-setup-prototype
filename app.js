@@ -1,7 +1,8 @@
 const {
   useState,
   useEffect,
-  useRef
+  useRef,
+  useMemo
 } = React;
 
 // ========== Mock 数据 ==========
@@ -2154,7 +2155,7 @@ function App() {
   const [showValidationSummary, setShowValidationSummary] = useState(false);
 
   // ===== 计算属性 =====
-  const filteredAccounts = MOCK.accounts.filter(acc => acc.businessUnit === businessUnit && (!accountSearchText || acc.name.includes(accountSearchText) || acc.id.includes(accountSearchText)));
+  const filteredAccounts = useMemo(() => MOCK.accounts.filter(acc => acc.businessUnit === businessUnit && (!accountSearchText || acc.name.includes(accountSearchText) || acc.id.includes(accountSearchText))), [businessUnit, accountSearchText]);
   // 搜索命中自动勾选（支持英文逗号分隔批量搜索）
   useEffect(() => {
     if (!accountSearchText) return;
@@ -2610,8 +2611,8 @@ function App() {
     className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-sync-alt mr-1"
-  }), "刷新账户列表"))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 md:col-span-2"
+  }), "刷新账户列表")))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-6 pt-6 border-t border-gray-100"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-2"
   }, /*#__PURE__*/React.createElement("label", {
@@ -2655,7 +2656,7 @@ function App() {
     }, acc.kaboshi) : /*#__PURE__*/React.createElement("span", {
       className: "text-red-500 font-medium"
     }, "未匹配到投放链接")));
-  })))))))), /*#__PURE__*/React.createElement("div", {
+  }))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-unit",
     className: "bg-white rounded-xl shadow-sm border"
   }, /*#__PURE__*/React.createElement("div", {

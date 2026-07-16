@@ -1,4 +1,4 @@
-const { useState, useEffect, useRef } = React;
+const { useState, useEffect, useRef, useMemo } = React;
 
 // ========== Mock 数据 ==========
 const MOCK = {
@@ -1502,10 +1502,10 @@ function App() {
   const [showValidationSummary, setShowValidationSummary] = useState(false);
 
   // ===== 计算属性 =====
-  const filteredAccounts = MOCK.accounts.filter(acc => 
-    acc.businessUnit === businessUnit && 
+  const filteredAccounts = useMemo(() => MOCK.accounts.filter(acc =>
+    acc.businessUnit === businessUnit &&
     (!accountSearchText || acc.name.includes(accountSearchText) || acc.id.includes(accountSearchText))
-  );
+  ), [businessUnit, accountSearchText]);
   // 搜索命中自动勾选（支持英文逗号分隔批量搜索）
   useEffect(() => {
     if (!accountSearchText) return;
@@ -1881,49 +1881,49 @@ function App() {
                   </button>
                 </div>
               </div>
-              {/* 投放链匹配结果：按所选账户ID展示其落地页（整行置于主体选择与选择账户下方） */}
-              <div className="mt-4 md:col-span-2">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">投放链匹配结果</label>
-                  <button
-                    onClick={() => { setMatchRefreshKey(k => k + 1); notify('投放链匹配结果已刷新', 'success'); }}
-                    className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
-                  >
-                    <i className="fas fa-sync-alt mr-1"></i>刷新
-                  </button>
-                </div>
-                <div key={matchRefreshKey} className="border border-gray-200 rounded-lg overflow-hidden bg-white min-h-[120px]">
-                  {selectedAccountIds.length === 0 ? (
-                    <p className="text-sm text-gray-400 p-3">请先选择账户</p>
-                  ) : (
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-gray-50 text-gray-600 text-left">
-                          <th className="px-3 py-2 font-medium w-1/3">账户ID</th>
-                          <th className="px-3 py-2 font-medium">投放链接</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selectedAccountIds.map(id => {
-                          const acc = MOCK.accounts.find(a => a.id === id);
-                          const matched = !!(acc && acc.kaboshi);
-                          return (
-                            <tr key={id} className="border-t border-gray-100">
-                              <td className={`px-3 py-2 align-top ${matched ? 'text-gray-800' : 'text-red-500 font-medium'}`}>{id}</td>
-                              <td className="px-3 py-2 align-top">
-                                {matched ? (
-                                  <a href={acc.kaboshi} target="_blank" rel="noreferrer" className="text-green-600 hover:underline break-all">{acc.kaboshi}</a>
-                                ) : (
-                                  <span className="text-red-500 font-medium">未匹配到投放链接</span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
+            </div>
+            {/* 投放链匹配结果：全宽整行，置于主体选择与选择账户下方 */}
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">投放链匹配结果</label>
+                <button
+                  onClick={() => { setMatchRefreshKey(k => k + 1); notify('投放链匹配结果已刷新', 'success'); }}
+                  className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
+                >
+                  <i className="fas fa-sync-alt mr-1"></i>刷新
+                </button>
+              </div>
+              <div key={matchRefreshKey} className="border border-gray-200 rounded-lg overflow-hidden bg-white min-h-[120px]">
+                {selectedAccountIds.length === 0 ? (
+                  <p className="text-sm text-gray-400 p-3">请先选择账户</p>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 text-gray-600 text-left">
+                        <th className="px-3 py-2 font-medium w-1/3">账户ID</th>
+                        <th className="px-3 py-2 font-medium">投放链接</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedAccountIds.map(id => {
+                        const acc = MOCK.accounts.find(a => a.id === id);
+                        const matched = !!(acc && acc.kaboshi);
+                        return (
+                          <tr key={id} className="border-t border-gray-100">
+                            <td className={`px-3 py-2 align-top ${matched ? 'text-gray-800' : 'text-red-500 font-medium'}`}>{id}</td>
+                            <td className="px-3 py-2 align-top">
+                              {matched ? (
+                                <a href={acc.kaboshi} target="_blank" rel="noreferrer" className="text-green-600 hover:underline break-all">{acc.kaboshi}</a>
+                              ) : (
+                                <span className="text-red-500 font-medium">未匹配到投放链接</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </div>
