@@ -3719,22 +3719,6 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-lock mr-1"
   }), "已锁定为关闭"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "创意名称"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: creativeName,
-    onChange: e => setCreativeName(e.target.value),
-    placeholder: "输入创意名称（支持变量）",
-    className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-1 text-sm text-gray-500"
-  }, creativeNameVariables.map(v => /*#__PURE__*/React.createElement("span", {
-    key: v,
-    onClick: () => setCreativeName(creativeName + '{' + v + '}'),
-    className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-  }, "+", v))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
   }, "创意素材 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
@@ -3783,6 +3767,96 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-times"
   }))))))), /*#__PURE__*/React.createElement("div", {
+    className: "border-t pt-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-36 flex-shrink-0"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700"
+  }, "品牌形象")), /*#__PURE__*/React.createElement("select", {
+    value: brandImageType,
+    onChange: e => setBrandImageType(e.target.value),
+    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "custom"
+  }, "自定义"), /*#__PURE__*/React.createElement("option", {
+    value: "video_account"
+  }, "视频号")), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, brandImageType === 'custom' ? /*#__PURE__*/React.createElement("div", null, creativeAssets.filter(a => a.type === 'brand').length === 0 ? /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400"
+  }, "暂无创意资产中的品牌形象，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement(ImageSelect, {
+    value: selectedBrandImage ? selectedBrandImage.id : '',
+    placeholder: "选择品牌形象",
+    emptyText: "暂无创意资产中的品牌形象，请先在「创意资产」菜单上传",
+    options: creativeAssets.filter(a => a.type === 'brand').map(bi => ({
+      value: bi.id,
+      label: bi.name,
+      thumb: bi.thumb
+    })),
+    onSelect: o => {
+      const bi = creativeAssets.filter(a => a.type === 'brand').find(x => x.id === o.value);
+      setSelectedBrandImage(bi || null);
+    }
+  })) : /*#__PURE__*/React.createElement("select", {
+    value: selectedVideoAccount ? selectedVideoAccount.id : '',
+    onChange: e => {
+      const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
+      setSelectedVideoAccount(va || null);
+    },
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "选择视频号"), MOCK.videoAccounts.map(va => /*#__PURE__*/React.createElement("option", {
+    key: va.id,
+    value: va.id
+  }, va.name))))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-36 flex-shrink-0"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700"
+  }, "营销组件")), placement === 'wechat_mp' ? /*#__PURE__*/React.createElement("div", {
+    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+  }, "行动按钮") : /*#__PURE__*/React.createElement("select", {
+    value: marketingComponentType,
+    onChange: e => setMarketingComponentType(e.target.value),
+    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "action_button"
+  }, "行动按钮"), /*#__PURE__*/React.createElement("option", {
+    value: "floating_card"
+  }, "浮层卡片")), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, marketingComponentType === 'action_button' ? /*#__PURE__*/React.createElement("select", {
+    value: actionButtonType,
+    onChange: e => setActionButtonType(e.target.value),
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "claim"
+  }, "立即领取"), /*#__PURE__*/React.createElement("option", {
+    value: "details"
+  }, "查看详情")) : /*#__PURE__*/React.createElement("div", null, creativeAssets.filter(a => a.type === 'component').length === 0 ? /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400"
+  }, "暂无创意资产中的营销组件，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement(ImageSelect, {
+    value: selectedComponent ? selectedComponent.id : '',
+    placeholder: "选择营销组件",
+    emptyText: "暂无创意资产中的营销组件，请先在「创意资产」菜单上传",
+    options: creativeAssets.filter(a => a.type === 'component').map(c => ({
+      value: c.id,
+      label: c.btnText,
+      thumb: c.thumb
+    })),
+    onSelect: o => {
+      const c = creativeAssets.filter(a => a.type === 'component').find(x => x.id === o.value);
+      setSelectedComponent(c || null);
+    }
+  })))), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-400"
+  }, "所有创意共用同一个品牌形象和营销组件"))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-gray-900 mb-4"
@@ -3889,97 +3963,25 @@ function App() {
     }, composeStrategy === 'copy' ? `(每账户${maxCreatives}个×${selectedAccountIds.length}个账户)` : `(平均分配)`));
   })(), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
-  }, "规则：每创意 ", composeRule.materials, "素材 + ", composeRule.copies, "文案"))), /*#__PURE__*/React.createElement("div", {
-    className: "border-t pt-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "space-y-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-36 flex-shrink-0"
+  }, "规则：每创意 ", composeRule.materials, "素材 + ", composeRule.copies, "文案"))))), /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-xl shadow-sm border p-6 mb-6"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700"
-  }, "品牌形象")), /*#__PURE__*/React.createElement("select", {
-    value: brandImageType,
-    onChange: e => setBrandImageType(e.target.value),
-    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "custom"
-  }, "自定义"), /*#__PURE__*/React.createElement("option", {
-    value: "video_account"
-  }, "视频号")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1"
-  }, brandImageType === 'custom' ? /*#__PURE__*/React.createElement("div", null, creativeAssets.filter(a => a.type === 'brand').length === 0 ? /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400"
-  }, "暂无创意资产中的品牌形象，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement(ImageSelect, {
-    value: selectedBrandImage ? selectedBrandImage.id : '',
-    placeholder: "选择品牌形象",
-    emptyText: "暂无创意资产中的品牌形象，请先在「创意资产」菜单上传",
-    options: creativeAssets.filter(a => a.type === 'brand').map(bi => ({
-      value: bi.id,
-      label: bi.name,
-      thumb: bi.thumb
-    })),
-    onSelect: o => {
-      const bi = creativeAssets.filter(a => a.type === 'brand').find(x => x.id === o.value);
-      setSelectedBrandImage(bi || null);
-    }
-  })) : /*#__PURE__*/React.createElement("select", {
-    value: selectedVideoAccount ? selectedVideoAccount.id : '',
-    onChange: e => {
-      const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
-      setSelectedVideoAccount(va || null);
-    },
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "选择视频号"), MOCK.videoAccounts.map(va => /*#__PURE__*/React.createElement("option", {
-    key: va.id,
-    value: va.id
-  }, va.name))))), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-36 flex-shrink-0"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700"
-  }, "营销组件")), placement === 'wechat_mp' ? /*#__PURE__*/React.createElement("div", {
-    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
-  }, "行动按钮") : /*#__PURE__*/React.createElement("select", {
-    value: marketingComponentType,
-    onChange: e => setMarketingComponentType(e.target.value),
-    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "action_button"
-  }, "行动按钮"), /*#__PURE__*/React.createElement("option", {
-    value: "floating_card"
-  }, "浮层卡片")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1"
-  }, marketingComponentType === 'action_button' ? /*#__PURE__*/React.createElement("select", {
-    value: actionButtonType,
-    onChange: e => setActionButtonType(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "claim"
-  }, "立即领取"), /*#__PURE__*/React.createElement("option", {
-    value: "details"
-  }, "查看详情")) : /*#__PURE__*/React.createElement("div", null, creativeAssets.filter(a => a.type === 'component').length === 0 ? /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400"
-  }, "暂无创意资产中的营销组件，请先在「创意资产」菜单上传") : /*#__PURE__*/React.createElement(ImageSelect, {
-    value: selectedComponent ? selectedComponent.id : '',
-    placeholder: "选择营销组件",
-    emptyText: "暂无创意资产中的营销组件，请先在「创意资产」菜单上传",
-    options: creativeAssets.filter(a => a.type === 'component').map(c => ({
-      value: c.id,
-      label: c.btnText,
-      thumb: c.thumb
-    })),
-    onSelect: o => {
-      const c = creativeAssets.filter(a => a.type === 'component').find(x => x.id === o.value);
-      setSelectedComponent(c || null);
-    }
-  })))), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-gray-400"
-  }, "所有创意共用同一个品牌形象和营销组件"))))), /*#__PURE__*/React.createElement("div", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "创意名称"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: creativeName,
+    onChange: e => setCreativeName(e.target.value),
+    placeholder: "输入创意名称（支持变量）",
+    className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-1 text-sm text-gray-500"
+  }, creativeNameVariables.map(v => /*#__PURE__*/React.createElement("span", {
+    key: v,
+    onClick: () => setCreativeName(creativeName + '{' + v + '}'),
+    className: "text-blue-500 hover:text-blue-700 cursor-pointer"
+  }, "+", v))))), /*#__PURE__*/React.createElement("div", {
     id: "section-run",
     className: "bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 mb-6"
   }, /*#__PURE__*/React.createElement("h3", {
