@@ -130,6 +130,7 @@
       <div id="targeting-package-list-content" style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
         <div style="display:flex;align-items:center;padding:14px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">
           <div style="flex:1;">渠道</div>
+          <div style="flex:2;">定向包名称</div>
           <div style="flex:0 0 120px;text-align:right;">操作</div>
         </div>
         <div id="tp-rows"></div>
@@ -1170,6 +1171,7 @@
     targetingPackages.forEach(function(tp, idx) {
       html += '<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;">' +
         '<div style="flex:1;"><span style="padding:3px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">腾讯广告</span></div>' +
+        '<div style="flex:2;padding:0 16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;color:#333;">' + (tp.name || '未命名') + '</div>' +
         '<div style="flex:0 0 120px;display:flex;justify-content:flex-end;gap:6px;">' +
           '<button data-idx="' + idx + '" data-action="edit" style="padding:5px 12px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;">编辑</button>' +
           '<button data-idx="' + idx + '" data-action="delete" style="padding:5px 12px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;">删除</button>' +

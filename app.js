@@ -2494,21 +2494,21 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle mr-1"
   }), validationErrors.length, "项未完成"))), /*#__PURE__*/React.createElement("div", {
-    className: "px-6 py-6 space-y-8"
+    className: "px-6 py-6 space-y-5"
   }, /*#__PURE__*/React.createElement("div", {
     id: "section-basic",
     className: "bg-white"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-lg font-bold text-gray-900 flex items-center gap-2"
+    className: "px-6 py-3.5 flex items-center gap-3 border-b border-gray-200"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm"
-  }, "1"), "基础配置", /*#__PURE__*/React.createElement("span", {
-    className: "ml-auto text-xs text-gray-400 font-normal"
+    className: "w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold"
+  }, "1"), /*#__PURE__*/React.createElement("h2", {
+    className: "text-base font-semibold text-gray-900"
+  }, "基础配置"), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400 ml-auto font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle mr-1"
-  }), "选择主体和投放账户"))), /*#__PURE__*/React.createElement("div", {
+  }), "选择主体和投放账户")), /*#__PURE__*/React.createElement("div", {
     className: "p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mb-5"
@@ -2658,22 +2658,19 @@ function App() {
     }, "未匹配到投放链接")));
   }))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-unit",
-    className: "bg-white"
+    className: "bg-gray-50"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-lg font-bold text-gray-900 flex items-center gap-2"
+    className: "px-6 py-3.5 flex items-center gap-3 border-b border-gray-200"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm"
-  }, "2"), "营销单元配置", /*#__PURE__*/React.createElement("span", {
-    className: "ml-auto text-xs text-gray-400 font-normal"
+    className: "w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold"
+  }, "2"), /*#__PURE__*/React.createElement("h2", {
+    className: "text-base font-semibold text-gray-900"
+  }, "营销单元配置"), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400 ml-auto font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "far fa-clock mr-1"
-  }), "配置定向、出价、投放设置"))), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 space-y-6",
-    style: {
-      padding: '24px'
-    }
+  }), "配置定向、出价、投放设置")), /*#__PURE__*/React.createElement("div", {
+    className: "p-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
@@ -2688,7 +2685,7 @@ function App() {
     key: mo.id,
     value: mo.id
   }, mo.name))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "推广产品"), /*#__PURE__*/React.createElement("select", {
@@ -2711,7 +2708,7 @@ function App() {
     key: sp.id,
     value: sp.id
   }, sp.name))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "营销载体"), /*#__PURE__*/React.createElement("input", {
@@ -3480,7 +3477,7 @@ function App() {
     placeholder: "输入日预算，0=不限",
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
   }, "一方数据跑量加强"), /*#__PURE__*/React.createElement("div", {
@@ -3691,16 +3688,16 @@ function App() {
     id: "section-creative",
     className: "bg-white"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-lg font-bold text-gray-900 flex items-center gap-2"
+    className: "px-6 py-3.5 flex items-center gap-3 border-b border-gray-200"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm"
-  }, "3"), "创意配置", /*#__PURE__*/React.createElement("span", {
-    className: "ml-auto text-xs text-gray-400 font-normal"
+    className: "w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold"
+  }, "3"), /*#__PURE__*/React.createElement("h2", {
+    className: "text-base font-semibold text-gray-900"
+  }, "创意配置"), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400 ml-auto font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "far fa-clock mr-1"
-  }), "配置素材、文案、落地页"))), /*#__PURE__*/React.createElement("div", {
+  }), "配置素材、文案、落地页")), /*#__PURE__*/React.createElement("div", {
     className: "p-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
@@ -3984,7 +3981,7 @@ function App() {
     id: "section-run",
     className: "bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4"
   }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-md font-bold text-gray-900 mb-4 flex items-center gap-2"
+    className: "text-base font-semibold text-gray-900 mb-3 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "w-7 h-7 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs"
   }, "4"), "运行配置"), /*#__PURE__*/React.createElement("div", {

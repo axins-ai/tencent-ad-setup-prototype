@@ -1788,15 +1788,13 @@ function App() {
           )}
         </div>
       </div>
-      <div className="px-6 py-6 space-y-8">
+      <div className="px-6 py-6 space-y-5">
         {/* ===== 1. 基础配置 ===== */}
         <div id="section-basic" className="bg-white">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
-              基础配置
-              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="fas fa-info-circle mr-1"></i>选择主体和投放账户</span>
-            </h2>
+          <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
+            <span className="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+            <h2 className="text-base font-semibold text-gray-900">基础配置</h2>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="fas fa-info-circle mr-1"></i>选择主体和投放账户</span>
           </div>
           <div className="p-6">
             {/* 任务名称 */}
@@ -1930,15 +1928,13 @@ function App() {
         </div>
 
         {/* ===== 2. 营销单元配置 ===== */}
-        <div id="section-unit" className="bg-white">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
-              营销单元配置
-              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
-            </h2>
+        <div id="section-unit" className="bg-gray-50">
+          <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
+            <span className="w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+            <h2 className="text-base font-semibold text-gray-900">营销单元配置</h2>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
           </div>
-          <div className="p-6 space-y-6" style={{padding:'24px'}}>
+          <div className="p-6 space-y-6">
             {/* 营销目的 & 推广产品 & 产品 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -1948,7 +1944,7 @@ function App() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">推广产品</label>
                 <select value={promotionType} onChange={e => setPromotionType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
@@ -1965,7 +1961,7 @@ function App() {
             </div>
 
             {/* 营销载体 & 转化 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销载体</label>
                 <input type="text" value="页面跳转" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
@@ -2583,7 +2579,7 @@ function App() {
                 </div>
               </div>
               {/* 一方数据 & 一键起量 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">一方数据跑量加强</label>
                   <div className="flex items-center gap-4">
@@ -2778,12 +2774,10 @@ function App() {
 
         {/* ===== 底部：创意配置 ===== */}
         <div id="section-creative" className="bg-white">
-          <div className="bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
-              创意配置
-              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、落地页</span>
-            </h2>
+          <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
+            <span className="w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+            <h2 className="text-base font-semibold text-gray-900">创意配置</h2>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、落地页</span>
           </div>
           <div className="p-6 space-y-6">
             {/* 创意增强Max - 已禁用，锁定为关闭 */}
@@ -3038,7 +3032,7 @@ function App() {
 
         {/* ===== 运行配置 ===== */}
         <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
-          <h3 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <span className="w-7 h-7 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs">4</span>
             运行配置
           </h3>
