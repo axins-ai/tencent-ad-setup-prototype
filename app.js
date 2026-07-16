@@ -2418,7 +2418,7 @@ function App() {
   }), /*#__PURE__*/React.createElement("div", {
     className: "bg-white border-b shadow-sm sticky top-0 z-40"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "max-w-7xl mx-auto px-4"
+    className: "px-6"
   }, showValidationSummary && validationErrors.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "border-t bg-red-50 px-4 py-1.5"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2431,7 +2431,7 @@ function App() {
   }, err)))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-white border-b sticky top-[56px] z-30 shadow-sm"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1"
+    className: "px-6 flex items-center gap-1 overflow-x-auto py-1"
   }, [{
     id: 'section-basic',
     label: '基础配置',
@@ -2494,7 +2494,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle mr-1"
   }), validationErrors.length, "项未完成"))), /*#__PURE__*/React.createElement("div", {
-    className: "max-w-7xl mx-auto px-6 py-6 space-y-6"
+    className: "px-6 py-6 grid grid-cols-1 2xl:grid-cols-2 gap-6"
   }, /*#__PURE__*/React.createElement("div", {
     id: "section-basic",
     className: "bg-white rounded-xl shadow-sm border"
@@ -3689,7 +3689,7 @@ function App() {
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
   }, "+", v)))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-creative",
-    className: "bg-white rounded-xl shadow-sm border"
+    className: "bg-white rounded-xl shadow-sm border 2xl:col-span-2"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h2", {
@@ -3982,7 +3982,7 @@ function App() {
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
   }, "+", v))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-run",
-    className: "bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 mb-6"
+    className: "bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 2xl:col-span-2"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-bold text-gray-900 mb-4 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {

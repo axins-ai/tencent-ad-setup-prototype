@@ -1730,7 +1730,7 @@ function App() {
 
       {/* ===== 顶部：精简信息栏 ===== */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="px-6">
           {/* 错误详情条 */}
           {showValidationSummary && validationErrors.length > 0 && (
             <div className="border-t bg-red-50 px-4 py-1.5">
@@ -1748,7 +1748,7 @@ function App() {
 
       {/* ===== 快捷导航 ===== */}
       <div className="bg-white border-b sticky top-[56px] z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1">
+        <div className="px-6 flex items-center gap-1 overflow-x-auto py-1">
           {[
             {id:'section-basic', label:'基础配置', icon:'fa-cog'},
             {id:'section-unit', label:'营销单元', icon:'fa-bullseye'},
@@ -1788,7 +1788,7 @@ function App() {
           )}
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+      <div className="px-6 py-6 grid grid-cols-1 2xl:grid-cols-2 gap-6">
         {/* ===== 1. 基础配置 ===== */}
         <div id="section-basic" className="bg-white rounded-xl shadow-sm border">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
@@ -2777,7 +2777,7 @@ function App() {
         </div>
 
         {/* ===== 底部：创意配置 ===== */}
-        <div id="section-creative" className="bg-white rounded-xl shadow-sm border">
+        <div id="section-creative" className="bg-white rounded-xl shadow-sm border 2xl:col-span-2">
           <div className="bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
@@ -3037,7 +3037,7 @@ function App() {
         </div>
 
         {/* ===== 运行配置 ===== */}
-        <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 mb-6">
+        <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 2xl:col-span-2">
           <h3 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span className="w-7 h-7 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs">4</span>
             运行配置
