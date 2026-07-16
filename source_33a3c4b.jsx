@@ -3015,24 +3015,23 @@ function App() {
               </div>
             </div>
 
-          </div>
-        </div>
-
-        {/* ===== 创意名称（位于创意配置卡片下方） ===== */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">创意名称</label>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={creativeName}
-              onChange={e => setCreativeName(e.target.value)}
-              placeholder="输入创意名称（支持变量）"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="flex items-center gap-1 text-sm text-gray-500">
-              {creativeNameVariables.map(v => (
-                <span key={v} onClick={() => setCreativeName(creativeName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
-              ))}
+            {/* 创意名称（卡片内最后一项） */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">创意名称</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={creativeName}
+                  onChange={e => setCreativeName(e.target.value)}
+                  placeholder="输入创意名称（支持变量）"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  {creativeNameVariables.map(v => (
+                    <span key={v} onClick={() => setCreativeName(creativeName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

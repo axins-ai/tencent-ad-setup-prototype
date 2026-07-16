@@ -3963,9 +3963,7 @@ function App() {
     }, composeStrategy === 'copy' ? `(每账户${maxCreatives}个×${selectedAccountIds.length}个账户)` : `(平均分配)`));
   })(), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
-  }, "规则：每创意 ", composeRule.materials, "素材 + ", composeRule.copies, "文案"))))), /*#__PURE__*/React.createElement("div", {
-    className: "bg-white rounded-xl shadow-sm border p-6 mb-6"
-  }, /*#__PURE__*/React.createElement("label", {
+  }, "规则：每创意 ", composeRule.materials, "素材 + ", composeRule.copies, "文案"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "创意名称"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
@@ -3981,7 +3979,7 @@ function App() {
     key: v,
     onClick: () => setCreativeName(creativeName + '{' + v + '}'),
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-  }, "+", v))))), /*#__PURE__*/React.createElement("div", {
+  }, "+", v))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-run",
     className: "bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 mb-6"
   }, /*#__PURE__*/React.createElement("h3", {
