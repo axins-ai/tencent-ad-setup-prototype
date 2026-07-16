@@ -1730,7 +1730,7 @@ function App() {
 
       {/* ===== 顶部：精简信息栏 ===== */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="px-6">
           {/* 错误详情条 */}
           {showValidationSummary && validationErrors.length > 0 && (
             <div className="border-t bg-red-50 px-4 py-1.5">
@@ -1748,7 +1748,7 @@ function App() {
 
       {/* ===== 快捷导航 ===== */}
       <div className="bg-white border-b sticky top-[56px] z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1">
+        <div className="px-6 flex items-center gap-1 overflow-x-auto py-1">
           {[
             {id:'section-basic', label:'基础配置', icon:'fa-cog'},
             {id:'section-unit', label:'营销单元', icon:'fa-bullseye'},
@@ -1788,19 +1788,17 @@ function App() {
           )}
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+      <div className="px-6 py-6 space-y-5">
         {/* ===== 1. 基础配置 ===== */}
-        <div id="section-basic" className="bg-white rounded-xl shadow-sm border">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
-              基础配置
-              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="fas fa-info-circle mr-1"></i>选择主体和投放账户</span>
-            </h2>
+        <div id="section-basic" className="bg-white">
+          <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
+            <span className="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+            <h2 className="text-base font-semibold text-gray-900">基础配置</h2>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="fas fa-info-circle mr-1"></i>选择主体和投放账户</span>
           </div>
           <div className="p-6">
             {/* 任务名称 */}
-            <div className="mb-5">
+            <div className="mb-5 max-w-md">
               <label className="block text-sm font-medium text-gray-700 mb-1">任务名称 <span className="text-red-500">*</span></label>
               <input
                 type="text"
@@ -1811,74 +1809,76 @@ function App() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">主体选择 <span className="text-red-500">*</span></label>
+            <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
+              <div className="flex items-center gap-2">
+                <label className="w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0">主体选择 <span className="text-red-500">*</span></label>
                 <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
                   className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">选择账户 <span className="text-red-500">*</span></label>
-                <div className="relative" ref={accountDropdownRef}>
-                  {/* 合并搜索框和已选标签 */}
-                  <div
-                    className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center text-sm"
-                    onClick={() => { setShowAccountDropdown(!showAccountDropdown); }}
-                  >
-                    {selectedAccountIds.length === 0 ? (
-                      <span className="text-gray-400" onClick={e => { e.stopPropagation(); setShowAccountDropdown(true); }}>点击或输入账户ID搜索...</span>
-                    ) : (
-                      selectedAccountIds.slice(0, 5).map(id => {
-                        const acc = MOCK.accounts.find(a => a.id === id);
-                        return (
-                          <span key={id} className="tag">
-                            {acc ? acc.name : id}
-                            <button onClick={(e) => { e.stopPropagation(); toggleAccount(id); }}><i className="fas fa-times"></i></button>
-                          </span>
-                        );
-                      })
-                    )}
-                    {selectedAccountIds.length > 5 && (
-                      <span className="text-xs text-blue-600 font-medium ml-1">+{selectedAccountIds.length - 5}</span>
-                    )}
-                    <span className="ml-auto text-gray-400 text-xs"><i className="fas fa-chevron-down"></i></span>
-                  </div>
-                  {showAccountDropdown && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
-                      <div className="p-2 border-b">
-                        <input type="text" value={accountSearchText} onChange={e => setAccountSearchText(e.target.value)}
-                          placeholder="输入账户ID搜索，支持英文逗号批量搜索..."
-                          className="w-full px-3 py-1.5 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400"
-                          onClick={e => e.stopPropagation()} autoFocus
-                        />
-                      </div>
-                      <div className="max-h-48 overflow-y-auto">
-                        {filteredAccounts.length === 0 ? (
-                          <div className="px-3 py-4 text-sm text-gray-400 text-center">无匹配账户</div>
-                        ) : (
-                          filteredAccounts.map(acc => (
-                            <div key={acc.id} onClick={() => toggleAccount(acc.id)}
-                              className="px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-2 text-sm border-b border-gray-100 last:border-b-0"
-                            >
-                              <input type="checkbox" checked={selectedAccountIds.includes(acc.id)} onChange={() => {}}
-                                className="w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0" />
-                              <span className="flex-1 truncate min-w-0">{acc.id}</span>
-                              {selectedAccountIds.includes(acc.id) && (
-                                <i className="fas fa-check text-blue-500 flex-shrink-0"></i>
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
+              <div className="flex items-start gap-2 flex-1 min-w-[280px]">
+                <label className="w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0 pt-2">选择账户 <span className="text-red-500">*</span></label>
+                <div className="flex-1">
+                  <div className="relative" ref={accountDropdownRef}>
+                    {/* 合并搜索框和已选标签 */}
+                    <div
+                      className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center text-sm"
+                      onClick={() => { setShowAccountDropdown(!showAccountDropdown); }}
+                    >
+                      {selectedAccountIds.length === 0 ? (
+                        <span className="text-gray-400" onClick={e => { e.stopPropagation(); setShowAccountDropdown(true); }}>点击或输入账户ID搜索...</span>
+                      ) : (
+                        selectedAccountIds.slice(0, 5).map(id => {
+                          const acc = MOCK.accounts.find(a => a.id === id);
+                          return (
+                            <span key={id} className="tag">
+                              {acc ? acc.name : id}
+                              <button onClick={(e) => { e.stopPropagation(); toggleAccount(id); }}><i className="fas fa-times"></i></button>
+                            </span>
+                          );
+                        })
+                      )}
+                      {selectedAccountIds.length > 5 && (
+                        <span className="text-xs text-blue-600 font-medium ml-1">+{selectedAccountIds.length - 5}</span>
+                      )}
+                      <span className="ml-auto text-gray-400 text-xs"><i className="fas fa-chevron-down"></i></span>
                     </div>
-                  )}
-                </div>
-                <div className="mt-2 flex items-center gap-2">
-                  <button onClick={() => { notify('账户列表已刷新', 'success'); }} className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50">
-                    <i className="fas fa-sync-alt mr-1"></i>刷新账户列表
-                  </button>
+                    {showAccountDropdown && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                        <div className="p-2 border-b">
+                          <input type="text" value={accountSearchText} onChange={e => setAccountSearchText(e.target.value)}
+                            placeholder="输入账户ID搜索，支持英文逗号批量搜索..."
+                            className="w-full px-3 py-1.5 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400"
+                            onClick={e => e.stopPropagation()} autoFocus
+                          />
+                        </div>
+                        <div className="max-h-48 overflow-y-auto">
+                          {filteredAccounts.length === 0 ? (
+                            <div className="px-3 py-4 text-sm text-gray-400 text-center">无匹配账户</div>
+                          ) : (
+                            filteredAccounts.map(acc => (
+                              <div key={acc.id} onClick={() => toggleAccount(acc.id)}
+                                className="px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-2 text-sm border-b border-gray-100 last:border-b-0"
+                              >
+                                <input type="checkbox" checked={selectedAccountIds.includes(acc.id)} onChange={() => {}}
+                                  className="w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0" />
+                                <span className="flex-1 truncate min-w-0">{acc.id}</span>
+                                {selectedAccountIds.includes(acc.id) && (
+                                  <i className="fas fa-check text-blue-500 flex-shrink-0"></i>
+                                )}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <button onClick={() => { notify('账户列表已刷新', 'success'); }} className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50">
+                      <i className="fas fa-sync-alt mr-1"></i>刷新账户列表
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1930,48 +1930,40 @@ function App() {
         </div>
 
         {/* ===== 2. 营销单元配置 ===== */}
-        <div id="section-unit" className="bg-white rounded-xl shadow-sm border">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
-              营销单元配置
-              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
-            </h2>
+        <div id="section-unit" className="bg-gray-50">
+          <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
+            <span className="w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+            <h2 className="text-base font-semibold text-gray-900">营销单元配置</h2>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
           </div>
           <div className="p-6 space-y-6">
-            {/* 营销目的 & 推广产品 & 产品 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">营销目的 <span className="text-red-500">*</span></label>
+            {/* 营销目的 & 推广产品 & 产品 & 营销载体 & 转化 */}
+            <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
+              <div className="flex items-center gap-2">
+                <label className="w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0">营销目的 <span className="text-red-500">*</span></label>
                 <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {MOCK.marketingObjectives.map(mo => <option key={mo.id} value={mo.id}>{mo.name}</option>)}
                 </select>
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">推广产品</label>
+              <div className="flex items-center gap-2">
+                <label className="w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0">推广产品</label>
                 <select value={promotionType} onChange={e => setPromotionType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   <option value="activity">活动</option>
                   <option value="operator">运营商产品</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">产品 <span className="text-red-500">*</span></label>
+              <div className="flex items-center gap-2">
+                <label className="w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0">产品 <span className="text-red-500">*</span></label>
                 <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {getProductsForBusinessUnit().map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
                 </select>
               </div>
-            </div>
-
-            {/* 营销载体 & 转化 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">营销载体</label>
-                <input type="text" value="页面跳转" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
+              <div className="flex items-center gap-2">
+                <label className="w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0">营销载体</label>
+                <input type="text" value="页面跳转" disabled className="w-40 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">转化</label>
+              <div className="flex items-center gap-2">
+                <label className="w-20 text-right text-sm font-medium text-gray-700 flex-shrink-0">转化</label>
                 <select value={conversionGoal} onChange={e => setConversionGoal(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {(MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => <option key={conv.id} value={conv.id}>{conv.name}</option>)}
                 </select>
@@ -2777,13 +2769,11 @@ function App() {
         </div>
 
         {/* ===== 底部：创意配置 ===== */}
-        <div id="section-creative" className="bg-white rounded-xl shadow-sm border">
-          <div className="bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
-              创意配置
-              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、落地页</span>
-            </h2>
+        <div id="section-creative" className="bg-white">
+          <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
+            <span className="w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+            <h2 className="text-base font-semibold text-gray-900">创意配置</h2>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、落地页</span>
           </div>
           <div className="p-6 space-y-6">
             {/* 创意增强Max - 已禁用，锁定为关闭 */}
@@ -2848,15 +2838,13 @@ function App() {
             <div className="border-t pt-4">
               <div className="space-y-4">
                 {/* 品牌形象 行 */}
-                <div className="flex items-center gap-4">
-                  <div className="w-36 flex-shrink-0">
-                    <label className="block text-sm font-medium text-gray-700">品牌形象</label>
-                  </div>
+                <div className="flex items-start gap-3 flex-wrap">
+                  <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0 pt-2">品牌形象</label>
                   <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     <option value="custom">自定义</option>
                     <option value="video_account">视频号</option>
                   </select>
-                  <div className="flex-1">
+                  <div className="max-w-md flex-1 min-w-[240px]">
                     {brandImageType === 'custom' ? (
                       <div>
                         {creativeAssets.filter(a => a.type === 'brand').length === 0 ? (
@@ -2892,10 +2880,8 @@ function App() {
                   </div>
                 </div>
                 {/* 营销组件 行 */}
-                <div className="flex items-center gap-4">
-                  <div className="w-36 flex-shrink-0">
-                    <label className="block text-sm font-medium text-gray-700">营销组件</label>
-                  </div>
+                <div className="flex items-start gap-3 flex-wrap">
+                  <label className="w-24 text-right text-sm font-medium text-gray-700 flex-shrink-0 pt-2">营销组件</label>
                   {placement === 'wechat_mp' ? (
                     <div className="w-36 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">行动按钮</div>
                   ) : (
@@ -2904,7 +2890,7 @@ function App() {
                       <option value="floating_card">浮层卡片</option>
                     </select>
                   )}
-                  <div className="flex-1">
+                  <div className="max-w-md flex-1 min-w-[240px]">
                     {marketingComponentType === 'action_button' ? (
                       <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="claim">立即领取</option>
@@ -3037,8 +3023,8 @@ function App() {
         </div>
 
         {/* ===== 运行配置 ===== */}
-        <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 mb-6">
-          <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
+          <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <span className="w-7 h-7 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs">4</span>
             运行配置
           </h3>
