@@ -2532,11 +2532,11 @@ function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">计费方式</label>
-                  <input type="text" value="oCPM" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                  <input type="text" value="oCPM" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">出价场景</label>
-                  <input type="text" value="常规投放" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                  <input type="text" value="常规投放" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
                 </div>
               </div>
 
@@ -2578,8 +2578,8 @@ function App() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">一键起量</label>
-                  <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm font-medium text-gray-700">一键起量</span>
                     <div className="flex items-center gap-4">
                       <span className={`text-sm font-medium ${!quickLaunch ? 'text-gray-400' : 'text-green-600'}`}>关闭</span>
                       <button
@@ -2589,51 +2589,44 @@ function App() {
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${quickLaunch ? 'translate-x-6' : 'translate-x-1'}`} />
                       </button>
                       <span className={`text-sm font-medium ${quickLaunch ? 'text-green-600' : 'text-gray-400'}`}>开启</span>
+                      {quickLaunch && (
+                        <input
+                          type="number"
+                          min="200"
+                          max="10000"
+                          step="1"
+                          value={quickLaunchBudget}
+                          onChange={e => setQuickLaunchBudget(e.target.value)}
+                          onBlur={e => {
+                            const v = e.target.value;
+                            if (v === '') return;
+                            let n = parseFloat(v);
+                            if (isNaN(n)) return;
+                            if (n < 200) n = 200;
+                            if (n > 10000) n = 10000;
+                            setQuickLaunchBudget(String(n));
+                          }}
+                          placeholder="200 ~ 10000（必填）"
+                          className={`w-32 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) ? 'border-red-400 focus:ring-red-400' : 'border-orange-300 focus:ring-orange-500'}`}
+                        />
+                      )}
                     </div>
-                    {quickLaunch && (
-                      <input
-                        type="number"
-                        min="200"
-                        max="10000"
-                        step="1"
-                        value={quickLaunchBudget}
-                        onChange={e => setQuickLaunchBudget(e.target.value)}
-                        onBlur={e => {
-                          const v = e.target.value;
-                          if (v === '') return;
-                          let n = parseFloat(v);
-                          if (isNaN(n)) return;
-                          if (n < 200) n = 200;
-                          if (n > 10000) n = 10000;
-                          setQuickLaunchBudget(String(n));
-                        }}
-                        placeholder="200 ~ 10000（必填）"
-                        className={`w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 ${quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) ? 'border-red-400 focus:ring-red-400' : 'border-orange-300 focus:ring-orange-500'}`}
-                      />
-                    )}
-                    {quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) && (
-                      <p className="text-xs text-red-500 mt-1">一键起量预算需在 200 ~ 10000 元之间</p>
-                    )}
                   </div>
+                  {quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) && (
+                    <p className="text-xs text-red-500 mt-1">一键起量预算需在 200 ~ 10000 元之间</p>
+                  )}
                 </div>
               </div>
 
-              {/* 一方数据跑量加强：文字左侧 / 状态右侧 */}
-              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700">一方数据跑量加强</span>
-                  <span className="text-xs text-gray-400"><i className="fas fa-lock mr-1"></i>已锁定为关闭</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium text-green-600">关闭</span>
-                  <button
-                    disabled
-                    className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
-                  >
-                    <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                  </button>
-                  <span className="text-sm font-medium text-gray-400">开启</span>
-                </div>
+              {/* 一方数据跑量加强：文字左侧 / 锁定关闭状态在右（不贴屏幕边） */}
+              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-700">一方数据跑量加强</span>
+                <button
+                  disabled
+                  className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
+                >
+                  <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                </button>
               </div>
             </div>
 
@@ -2754,7 +2747,7 @@ function App() {
               {/* 营销单元名称 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销单元名称 <span className="text-red-500">*</span></label>
-                <div className="flex items-center gap-2 w-full">
+                <div className="flex items-center gap-2 max-w-md">
                   <input
                     type="text"
                     value={unitName}
@@ -2782,19 +2775,14 @@ function App() {
           </div>
           <div className="p-6 space-y-6">
             {/* 创意增强Max - 已禁用，锁定为关闭 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">创意增强Max</label>
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-green-600">关闭</span>
-                <button
-                  disabled
-                  className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
-                >
-                  <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                </button>
-                <span className="text-sm font-medium text-gray-400">开启</span>
-                <span className="text-xs text-gray-400 ml-2"><i className="fas fa-lock mr-1"></i>已锁定为关闭</span>
-              </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700">创意增强Max</span>
+              <button
+                disabled
+                className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
+              >
+                <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+              </button>
             </div>
 
             {/* 素材选择（视频+图片） */}
@@ -3009,7 +2997,7 @@ function App() {
             {/* 创意名称（卡片内最后一项） */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">创意名称</label>
-              <div className="flex items-center gap-2 w-full">
+              <div className="flex items-center gap-2 max-w-md">
                 <input
                   type="text"
                   value={creativeName}
