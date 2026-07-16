@@ -2492,13 +2492,13 @@ function App() {
     className: "ml-auto text-xs text-gray-400 font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle mr-1"
-  }), "选择业务单元和投放账户"))), /*#__PURE__*/React.createElement("div", {
+  }), "选择主体和投放账户"))), /*#__PURE__*/React.createElement("div", {
     className: "p-6"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6"
+    className: "grid grid-cols-1 md:grid-cols-[1fr_2fr_2fr] gap-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "业务单元 ", /*#__PURE__*/React.createElement("span", {
+  }, "主体选择 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("select", {
     value: businessUnit,
@@ -2570,17 +2570,7 @@ function App() {
     className: "w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0"
   }), /*#__PURE__*/React.createElement("span", {
     className: "flex-1 truncate min-w-0"
-  }, acc.id), acc.kaboshi && /*#__PURE__*/React.createElement("a", {
-    href: acc.kaboshi,
-    target: "_blank",
-    rel: "noreferrer",
-    onClick: e => e.stopPropagation(),
-    className: "text-xs text-green-600 hover:text-green-800 hover:underline flex-shrink-0 truncate",
-    style: {
-      maxWidth: '320px'
-    },
-    title: acc.kaboshi
-  }, acc.kaboshi), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
+  }, acc.id), selectedAccountIds.includes(acc.id) && /*#__PURE__*/React.createElement("i", {
     className: "fas fa-check text-blue-500 flex-shrink-0"
   })))))), /*#__PURE__*/React.createElement("div", {
     className: "mt-2 flex items-center gap-2"
@@ -2591,7 +2581,30 @@ function App() {
     className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-sync-alt mr-1"
-  }), "刷新账户列表")))))), /*#__PURE__*/React.createElement("div", {
+  }), "刷新账户列表"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "匹配结果"), /*#__PURE__*/React.createElement("div", {
+    className: "border border-gray-200 rounded-lg p-3 bg-gray-50 min-h-[120px]"
+  }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
+    className: "text-sm text-gray-400"
+  }, "请先选择账户") : /*#__PURE__*/React.createElement("div", {
+    className: "space-y-2"
+  }, selectedAccountIds.map(id => {
+    const acc = MOCK.accounts.find(a => a.id === id);
+    return /*#__PURE__*/React.createElement("div", {
+      key: id,
+      className: "text-sm border-b border-gray-100 pb-2 last:border-b-0 last:pb-0"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "font-medium text-gray-800"
+    }, id), /*#__PURE__*/React.createElement("div", {
+      className: "text-xs text-gray-500 mt-0.5 break-all"
+    }, "落地页：", acc && acc.kaboshi ? /*#__PURE__*/React.createElement("a", {
+      href: acc.kaboshi,
+      target: "_blank",
+      rel: "noreferrer",
+      className: "text-green-600 hover:underline"
+    }, acc.kaboshi) : '—'));
+  }))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-unit",
     className: "bg-white rounded-xl shadow-sm border"
   }, /*#__PURE__*/React.createElement("div", {

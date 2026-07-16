@@ -1786,13 +1786,13 @@ function App() {
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
               基础配置
-              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="fas fa-info-circle mr-1"></i>选择业务单元和投放账户</span>
+              <span className="ml-auto text-xs text-gray-400 font-normal"><i className="fas fa-info-circle mr-1"></i>选择主体和投放账户</span>
             </h2>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_2fr] gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">业务单元 <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">主体选择 <span className="text-red-500">*</span></label>
                 <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
@@ -1844,15 +1844,6 @@ function App() {
                               <input type="checkbox" checked={selectedAccountIds.includes(acc.id)} onChange={() => {}}
                                 className="w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0" />
                               <span className="flex-1 truncate min-w-0">{acc.id}</span>
-                              {acc.kaboshi && (
-                                <a href={acc.kaboshi} target="_blank" rel="noreferrer"
-                                  onClick={e => e.stopPropagation()}
-                                  className="text-xs text-green-600 hover:text-green-800 hover:underline flex-shrink-0 truncate"
-                                  style={{ maxWidth: '320px' }}
-                                  title={acc.kaboshi}>
-                                  {acc.kaboshi}
-                                </a>
-                              )}
                               {selectedAccountIds.includes(acc.id) && (
                                 <i className="fas fa-check text-blue-500 flex-shrink-0"></i>
                               )}
@@ -1867,6 +1858,31 @@ function App() {
                   <button onClick={() => { notify('账户列表已刷新', 'success'); }} className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50">
                     <i className="fas fa-sync-alt mr-1"></i>刷新账户列表
                   </button>
+                </div>
+              </div>
+              {/* 匹配结果：按所选账户ID展示其落地页 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">匹配结果</label>
+                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 min-h-[120px]">
+                  {selectedAccountIds.length === 0 ? (
+                    <p className="text-sm text-gray-400">请先选择账户</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {selectedAccountIds.map(id => {
+                        const acc = MOCK.accounts.find(a => a.id === id);
+                        return (
+                          <div key={id} className="text-sm border-b border-gray-100 pb-2 last:border-b-0 last:pb-0">
+                            <div className="font-medium text-gray-800">{id}</div>
+                            <div className="text-xs text-gray-500 mt-0.5 break-all">
+                              落地页：{acc && acc.kaboshi ? (
+                                <a href={acc.kaboshi} target="_blank" rel="noreferrer" className="text-green-600 hover:underline">{acc.kaboshi}</a>
+                              ) : '—'}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
