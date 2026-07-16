@@ -48,13 +48,18 @@ function TaskListPage(props) {
                 className: 'text-red-400 hover:text-red-600 p-2'
               }, React.createElement('i', { className: 'fas fa-trash' }))
             ),
-            React.createElement('button', {
-              onClick: () => handleRunTask(task),
-              className: 'w-full btn-primary text-sm py-2.5'
-            }, React.createElement('i', { className: 'fas fa-play mr-2' }), '运行任务')
+            React.createElement('div', { className: 'flex gap-2' },
+              React.createElement('button', {
+                onClick: () => { window.location.href = 'form.html'; },
+                className: 'flex-1 border border-gray-300 text-gray-700 text-sm py-2.5 rounded-lg hover:bg-gray-50'
+              }, React.createElement('i', { className: 'fas fa-edit mr-1' }), '编辑'),
+              React.createElement('button', {
+                onClick: () => handleRunTask(task),
+                className: 'flex-1 btn-primary text-sm py-2.5'
+              }, React.createElement('i', { className: 'fas fa-play mr-1' }), '运行任务')
           )
         )
-      )
+      ))
     )
   );
 }
@@ -85,7 +90,7 @@ function ChannelSelectionPage(props) {
     const newTasks = tasks.concat([newTask]);
     setTasks(newTasks);
     try { localStorage.setItem('ad_tasks', JSON.stringify(newTasks)); } catch(e) {}
-    setCurrentView('form');
+    window.location.href = 'form.html';
   }
 
   return (
@@ -120,3 +125,29 @@ function ChannelSelectionPage(props) {
     )
   );
 }
+
+// ========== App 容器（持有状态并切换视图） ==========
+function App() {
+  const [tasks, setTasks] = useState([]);
+  const [currentView, setCurrentView] = useState('task-list');
+  const [selectedChannel, setSelectedChannel] = useState(null);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
+      if (Array.isArray(saved)) setTasks(saved);
+    } catch (e) {}
+  }, []);
+
+  if (currentView === 'channel-select') {
+    return React.createElement(ChannelSelectionPage, {
+      setCurrentView, setSelectedChannel, setTasks, tasks
+    });
+  }
+  return React.createElement(TaskListPage, {
+    tasks, setTasks, setCurrentView, setSelectedChannel
+  });
+}
+
+// ========== 挂载 ==========
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));

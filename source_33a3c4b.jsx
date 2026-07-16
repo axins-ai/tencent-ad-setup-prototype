@@ -1257,6 +1257,8 @@ function App() {
   const [matchRefreshKey, setMatchRefreshKey] = useState(0);
 
   // ===== 营销单元配置 =====
+  // 任务名称
+  const [taskName, setTaskName] = useState('');
   // 业务单元
   const [businessUnit, setBusinessUnit] = useState('baiju');
   // 推广产品类型：operator=运营商产品, activity=活动
@@ -1729,31 +1731,6 @@ function App() {
       {/* ===== 顶部：精简信息栏 ===== */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-4 py-2.5">
-            {/* 标题 */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-base">⚡</span>
-              <span className="text-sm font-bold text-gray-700 whitespace-nowrap">广告搭建</span>
-            </div>
-
-            {/* 进度条 — 仅展示 */}
-            {selectedAccountIds.length > 0 && (
-              <div className="flex-shrink-0 flex items-center gap-1.5 ml-auto">
-                <div className="w-20 bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-500 h-2 rounded-full transition-all" style={{width: `${overallProgress}%`}}></div>
-                </div>
-                <span className="text-xs text-gray-500">{overallProgress}%</span>
-              </div>
-            )}
-
-            {/* 校验提示 */}
-            {validationErrors.length > 0 && (
-              <button onClick={() => setShowValidationSummary(!showValidationSummary)}
-                className="flex-shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1 whitespace-nowrap">
-                <i className="fas fa-exclamation-circle mr-1"></i>{validationErrors.length}项未完成
-              </button>
-            )}
-          </div>
           {/* 错误详情条 */}
           {showValidationSummary && validationErrors.length > 0 && (
             <div className="border-t bg-red-50 px-4 py-1.5">
@@ -1789,9 +1766,25 @@ function App() {
           ))}
           <div className="flex-1"></div>
           {selectedAccountIds.length > 0 && (
-            <span className="text-2xs text-gray-400">
+            <span className="text-2xs text-gray-400 mr-3">
               <i className="fas fa-users mr-1"></i>{selectedAccountIds.length}个账户
             </span>
+          )}
+          {/* 配置进度 — 仅展示 */}
+          {selectedAccountIds.length > 0 && (
+            <div className="flex-shrink-0 flex items-center gap-1.5 mr-3">
+              <div className="w-20 bg-gray-200 rounded-full h-2">
+                <div className="bg-blue-500 h-2 rounded-full transition-all" style={{width: `${overallProgress}%`}}></div>
+              </div>
+              <span className="text-xs text-gray-500">{overallProgress}%</span>
+            </div>
+          )}
+          {/* 未配置警示 */}
+          {validationErrors.length > 0 && (
+            <button onClick={() => setShowValidationSummary(!showValidationSummary)}
+              className="flex-shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1 whitespace-nowrap">
+              <i className="fas fa-exclamation-circle mr-1"></i>{validationErrors.length}项未完成
+            </button>
           )}
         </div>
       </div>
@@ -1806,6 +1799,18 @@ function App() {
             </h2>
           </div>
           <div className="p-6">
+            {/* 任务名称 */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">任务名称 <span className="text-red-500">*</span></label>
+              <input
+                type="text"
+                value={taskName}
+                onChange={e => setTaskName(e.target.value)}
+                placeholder="请输入任务名称，如：618大促-视频号投放"
+                maxLength={50}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">主体选择 <span className="text-red-500">*</span></label>

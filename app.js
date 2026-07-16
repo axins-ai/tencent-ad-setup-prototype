@@ -1900,6 +1900,8 @@ function App() {
   const [matchRefreshKey, setMatchRefreshKey] = useState(0);
 
   // ===== 营销单元配置 =====
+  // 任务名称
+  const [taskName, setTaskName] = useState('');
   // 业务单元
   const [businessUnit, setBusinessUnit] = useState('baiju');
   // 推广产品类型：operator=运营商产品, activity=活动
@@ -2416,31 +2418,7 @@ function App() {
     className: "bg-white border-b shadow-sm sticky top-0 z-40"
   }, /*#__PURE__*/React.createElement("div", {
     className: "max-w-7xl mx-auto px-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-4 py-2.5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 flex-shrink-0"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-base"
-  }, "⚡"), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm font-bold text-gray-700 whitespace-nowrap"
-  }, "广告搭建")), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "flex-shrink-0 flex items-center gap-1.5 ml-auto"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-20 bg-gray-200 rounded-full h-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-500 h-2 rounded-full transition-all",
-    style: {
-      width: `${overallProgress}%`
-    }
-  })), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-gray-500"
-  }, overallProgress, "%")), validationErrors.length > 0 && /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowValidationSummary(!showValidationSummary),
-    className: "flex-shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1 whitespace-nowrap"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-exclamation-circle mr-1"
-  }), validationErrors.length, "项未完成")), showValidationSummary && validationErrors.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, showValidationSummary && validationErrors.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "border-t bg-red-50 px-4 py-1.5"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 text-xs text-red-700 flex-wrap"
@@ -2495,10 +2473,26 @@ function App() {
   }), /*#__PURE__*/React.createElement("span", null, s.label))), /*#__PURE__*/React.createElement("div", {
     className: "flex-1"
   }), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "text-2xs text-gray-400"
+    className: "text-2xs text-gray-400 mr-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-users mr-1"
-  }), selectedAccountIds.length, "个账户"))), /*#__PURE__*/React.createElement("div", {
+  }), selectedAccountIds.length, "个账户"), selectedAccountIds.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "flex-shrink-0 flex items-center gap-1.5 mr-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-20 bg-gray-200 rounded-full h-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bg-blue-500 h-2 rounded-full transition-all",
+    style: {
+      width: `${overallProgress}%`
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-500"
+  }, overallProgress, "%")), validationErrors.length > 0 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowValidationSummary(!showValidationSummary),
+    className: "flex-shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1 whitespace-nowrap"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-exclamation-circle mr-1"
+  }), validationErrors.length, "项未完成"))), /*#__PURE__*/React.createElement("div", {
     className: "max-w-7xl mx-auto px-6 py-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     id: "section-basic",
@@ -2516,6 +2510,19 @@ function App() {
   }), "选择主体和投放账户"))), /*#__PURE__*/React.createElement("div", {
     className: "p-6"
   }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-5"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "任务名称 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*")), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: taskName,
+    onChange: e => setTaskName(e.target.value),
+    placeholder: "请输入任务名称，如：618大促-视频号投放",
+    maxLength: 50,
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  })), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
