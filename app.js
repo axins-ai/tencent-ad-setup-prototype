@@ -3440,16 +3440,16 @@ function App() {
     type: "text",
     value: "oCPM",
     disabled: true,
-    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "出价场景"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: "常规投放",
     disabled: true,
-    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
+    className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
   }))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-3 gap-4"
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "出价（元）", /*#__PURE__*/React.createElement("span", {
@@ -3482,8 +3482,8 @@ function App() {
     onChange: e => setDailyBudget(e.target.value),
     placeholder: "输入日预算，留空=不限",
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between gap-3"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 flex items-center gap-4"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700"
   }, "一键起量"), /*#__PURE__*/React.createElement("div", {
@@ -3516,8 +3516,8 @@ function App() {
     placeholder: "200 ~ 10000（必填）",
     className: `w-32 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) ? 'border-red-400 focus:ring-red-400' : 'border-orange-300 focus:ring-orange-500'}`
   }))), quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) && /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-red-500 mt-1"
-  }, "一键起量预算需在 200 ~ 10000 元之间"))), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs text-red-500 mt-1 ml-[68px]"
+  }, "一键起量预算需在 200 ~ 10000 元之间"), /*#__PURE__*/React.createElement("div", {
     className: "mt-6 pt-4 border-t border-gray-100 flex items-center gap-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700"

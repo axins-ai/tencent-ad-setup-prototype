@@ -2528,20 +2528,20 @@ function App() {
             <div className="border-t pt-4">
               <h3 className="text-base font-semibold text-gray-900 mb-3">出价与预算</h3>
 
-              {/* 计费方式 & 出价场景（固定） */}
+              {/* 计费方式 & 出价场景（固定，与出价/日预算同宽） */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">计费方式</label>
-                  <input type="text" value="oCPM" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                  <input type="text" value="oCPM" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">出价场景</label>
-                  <input type="text" value="常规投放" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                  <input type="text" value="常规投放" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
                 </div>
               </div>
 
-              {/* 出价 / 日预算 / 一键起量 同一行 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* 出价 / 日预算 同一行 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></label>
                   <input
@@ -2577,46 +2577,46 @@ function App() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-medium text-gray-700">一键起量</span>
-                    <div className="flex items-center gap-4">
-                      <span className={`text-sm font-medium ${!quickLaunch ? 'text-gray-400' : 'text-green-600'}`}>关闭</span>
-                      <button
-                        onClick={() => setQuickLaunch(!quickLaunch)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${quickLaunch ? 'bg-blue-500' : 'bg-gray-300'}`}
-                      >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${quickLaunch ? 'translate-x-6' : 'translate-x-1'}`} />
-                      </button>
-                      <span className={`text-sm font-medium ${quickLaunch ? 'text-green-600' : 'text-gray-400'}`}>开启</span>
-                      {quickLaunch && (
-                        <input
-                          type="number"
-                          min="200"
-                          max="10000"
-                          step="1"
-                          value={quickLaunchBudget}
-                          onChange={e => setQuickLaunchBudget(e.target.value)}
-                          onBlur={e => {
-                            const v = e.target.value;
-                            if (v === '') return;
-                            let n = parseFloat(v);
-                            if (isNaN(n)) return;
-                            if (n < 200) n = 200;
-                            if (n > 10000) n = 10000;
-                            setQuickLaunchBudget(String(n));
-                          }}
-                          placeholder="200 ~ 10000（必填）"
-                          className={`w-32 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) ? 'border-red-400 focus:ring-red-400' : 'border-orange-300 focus:ring-orange-500'}`}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  {quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) && (
-                    <p className="text-xs text-red-500 mt-1">一键起量预算需在 200 ~ 10000 元之间</p>
+              </div>
+
+              {/* 一键起量（独立一行：文字 - 按钮 - 起量预算，从左到右） */}
+              <div className="mt-4 flex items-center gap-4">
+                <span className="text-sm font-medium text-gray-700">一键起量</span>
+                <div className="flex items-center gap-4">
+                  <span className={`text-sm font-medium ${!quickLaunch ? 'text-gray-400' : 'text-green-600'}`}>关闭</span>
+                  <button
+                    onClick={() => setQuickLaunch(!quickLaunch)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${quickLaunch ? 'bg-blue-500' : 'bg-gray-300'}`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${quickLaunch ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                  <span className={`text-sm font-medium ${quickLaunch ? 'text-green-600' : 'text-gray-400'}`}>开启</span>
+                  {quickLaunch && (
+                    <input
+                      type="number"
+                      min="200"
+                      max="10000"
+                      step="1"
+                      value={quickLaunchBudget}
+                      onChange={e => setQuickLaunchBudget(e.target.value)}
+                      onBlur={e => {
+                        const v = e.target.value;
+                        if (v === '') return;
+                        let n = parseFloat(v);
+                        if (isNaN(n)) return;
+                        if (n < 200) n = 200;
+                        if (n > 10000) n = 10000;
+                        setQuickLaunchBudget(String(n));
+                      }}
+                      placeholder="200 ~ 10000（必填）"
+                      className={`w-32 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) ? 'border-red-400 focus:ring-red-400' : 'border-orange-300 focus:ring-orange-500'}`}
+                    />
                   )}
                 </div>
               </div>
+              {quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) && (
+                <p className="text-xs text-red-500 mt-1 ml-[68px]">一键起量预算需在 200 ~ 10000 元之间</p>
+              )}
 
               {/* 一方数据跑量加强：文字左侧 / 锁定关闭状态在右（不贴屏幕边） */}
               <div className="mt-6 pt-4 border-t border-gray-100 flex items-center gap-3">
