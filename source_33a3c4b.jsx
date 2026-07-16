@@ -1936,14 +1936,14 @@ function App() {
             {/* 营销目的 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销目的 <span className="text-red-500">*</span></label>
-              <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+              <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 {MOCK.marketingObjectives.map(mo => <option key={mo.id} value={mo.id}>{mo.name}</option>)}
               </select>
             </div>
             {/* 推广产品 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">推广产品</label>
-              <select value={promotionType} onChange={e => setPromotionType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+              <select value={promotionType} onChange={e => setPromotionType(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 <option value="activity">活动</option>
                 <option value="operator">运营商产品</option>
               </select>
@@ -1951,19 +1951,19 @@ function App() {
             {/* 产品 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">产品 <span className="text-red-500">*</span></label>
-              <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+              <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 {getProductsForBusinessUnit().map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
               </select>
             </div>
             {/* 营销载体 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销载体</label>
-              <input type="text" value="页面跳转" disabled className="w-40 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
+              <input type="text" value="页面跳转" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
             </div>
             {/* 转化 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">转化</label>
-              <select value={conversionGoal} onChange={e => setConversionGoal(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+              <select value={conversionGoal} onChange={e => setConversionGoal(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 {(MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => <option key={conv.id} value={conv.id}>{conv.name}</option>)}
               </select>
             </div>
@@ -2527,7 +2527,9 @@ function App() {
             {/* 出价与预算 */}
             <div className="border-t pt-4">
               <h3 className="text-base font-semibold text-gray-900 mb-3">出价与预算</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+              {/* 计费方式 & 出价场景（固定） */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">计费方式</label>
                   <input type="text" value="oCPM" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
@@ -2536,6 +2538,10 @@ function App() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">出价场景</label>
                   <input type="text" value="常规投放" disabled className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
                 </div>
+              </div>
+
+              {/* 出价 / 日预算 / 一键起量 同一行 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></label>
                   <input
@@ -2567,29 +2573,12 @@ function App() {
                     type="number"
                     value={dailyBudget}
                     onChange={e => setDailyBudget(e.target.value)}
-                    placeholder="输入日预算，0=不限"
+                    placeholder="输入日预算，留空=不限"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-              </div>
-              {/* 一方数据 & 一键起量 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">一方数据跑量加强</label>
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium text-green-600">关闭</span>
-                    <button
-                      disabled
-                      className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
-                    >
-                      <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                    </button>
-                    <span className="text-sm font-medium text-gray-400">开启</span>
-                    <span className="text-xs text-gray-400 ml-2"><i className="fas fa-lock mr-1"></i>已锁定为关闭</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">一键起量</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">一键起量</label>
                   <div className="space-y-2">
                     <div className="flex items-center gap-4">
                       <span className={`text-sm font-medium ${!quickLaunch ? 'text-gray-400' : 'text-green-600'}`}>关闭</span>
@@ -2626,6 +2615,24 @@ function App() {
                       <p className="text-xs text-red-500 mt-1">一键起量预算需在 200 ~ 10000 元之间</p>
                     )}
                   </div>
+                </div>
+              </div>
+
+              {/* 一方数据跑量加强：文字左侧 / 状态右侧 */}
+              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">一方数据跑量加强</span>
+                  <span className="text-xs text-gray-400"><i className="fas fa-lock mr-1"></i>已锁定为关闭</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-green-600">关闭</span>
+                  <button
+                    disabled
+                    className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
+                  >
+                    <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                  </button>
+                  <span className="text-sm font-medium text-gray-400">开启</span>
                 </div>
               </div>
             </div>
@@ -2747,7 +2754,7 @@ function App() {
               {/* 营销单元名称 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销单元名称 <span className="text-red-500">*</span></label>
-                <div className="flex items-center gap-2 max-w-md">
+                <div className="flex items-center gap-2 w-full">
                   <input
                     type="text"
                     value={unitName}
@@ -3002,7 +3009,7 @@ function App() {
             {/* 创意名称（卡片内最后一项） */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">创意名称</label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full">
                 <input
                   type="text"
                   value={creativeName}

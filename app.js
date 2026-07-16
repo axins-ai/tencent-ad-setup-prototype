@@ -2680,7 +2680,7 @@ function App() {
   }, "*")), /*#__PURE__*/React.createElement("select", {
     value: marketingObjective,
     onChange: e => setMarketingObjective(e.target.value),
-    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, MOCK.marketingObjectives.map(mo => /*#__PURE__*/React.createElement("option", {
     key: mo.id,
     value: mo.id
@@ -2691,7 +2691,7 @@ function App() {
   }, "推广产品"), /*#__PURE__*/React.createElement("select", {
     value: promotionType,
     onChange: e => setPromotionType(e.target.value),
-    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: "activity"
   }, "活动"), /*#__PURE__*/React.createElement("option", {
@@ -2705,7 +2705,7 @@ function App() {
   }, "*")), /*#__PURE__*/React.createElement("select", {
     value: specificProduct,
     onChange: e => setSpecificProduct(e.target.value),
-    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, getProductsForBusinessUnit().map(sp => /*#__PURE__*/React.createElement("option", {
     key: sp.id,
     value: sp.id
@@ -2717,7 +2717,7 @@ function App() {
     type: "text",
     value: "页面跳转",
     disabled: true,
-    className: "w-40 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
   })), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
@@ -2725,7 +2725,7 @@ function App() {
   }, "转化"), /*#__PURE__*/React.createElement("select", {
     value: conversionGoal,
     onChange: e => setConversionGoal(e.target.value),
-    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, (MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => /*#__PURE__*/React.createElement("option", {
     key: conv.id,
     value: conv.id
@@ -3433,7 +3433,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-base font-semibold text-gray-900 mb-3"
   }, "出价与预算"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "计费方式"), /*#__PURE__*/React.createElement("input", {
@@ -3448,7 +3448,9 @@ function App() {
     value: "常规投放",
     disabled: true,
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-3 gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "出价（元）", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
@@ -3478,29 +3480,10 @@ function App() {
     type: "number",
     value: dailyBudget,
     onChange: e => setDailyBudget(e.target.value),
-    placeholder: "输入日预算，0=不限",
+    placeholder: "输入日预算，留空=不限",
     className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "一方数据跑量加强"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-4"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-sm font-medium text-green-600"
-  }, "关闭"), /*#__PURE__*/React.createElement("button", {
-    disabled: true,
-    className: "relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "inline-block h-4 w-4 transform rounded-full bg-white translate-x-1"
-  })), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm font-medium text-gray-400"
-  }, "开启"), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-gray-400 ml-2"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-lock mr-1"
-  }), "已锁定为关闭"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-1"
   }, "一键起量"), /*#__PURE__*/React.createElement("div", {
     className: "space-y-2"
   }, /*#__PURE__*/React.createElement("div", {
@@ -3534,7 +3517,28 @@ function App() {
     className: `w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 ${quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) ? 'border-red-400 focus:ring-red-400' : 'border-orange-300 focus:ring-orange-500'}`
   }), quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-red-500 mt-1"
-  }, "一键起量预算需在 200 ~ 10000 元之间"))))), /*#__PURE__*/React.createElement("div", {
+  }, "一键起量预算需在 200 ~ 10000 元之间")))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-6 pt-4 border-t border-gray-100 flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-gray-700"
+  }, "一方数据跑量加强"), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-lock mr-1"
+  }), "已锁定为关闭")), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-green-600"
+  }, "关闭"), /*#__PURE__*/React.createElement("button", {
+    disabled: true,
+    className: "relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "inline-block h-4 w-4 transform rounded-full bg-white translate-x-1"
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-gray-400"
+  }, "开启")))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-base font-semibold text-gray-900 mb-4"
@@ -3675,7 +3679,7 @@ function App() {
   }, "营销单元名称 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 max-w-md"
+    className: "flex items-center gap-2 w-full"
   }, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: unitName,
@@ -3964,7 +3968,7 @@ function App() {
   }, "规则：每创意 ", composeRule.materials, "素材 + ", composeRule.copies, "文案"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "创意名称"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
+    className: "flex items-center gap-2 w-full"
   }, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: creativeName,
