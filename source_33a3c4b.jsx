@@ -1788,9 +1788,9 @@ function App() {
           )}
         </div>
       </div>
-      <div className="px-6 py-6 grid grid-cols-1 2xl:grid-cols-2 gap-6">
+      <div className="px-6 py-6 space-y-8">
         {/* ===== 1. 基础配置 ===== */}
-        <div id="section-basic" className="bg-white rounded-xl shadow-sm border">
+        <div id="section-basic" className="bg-white">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
@@ -1930,7 +1930,7 @@ function App() {
         </div>
 
         {/* ===== 2. 营销单元配置 ===== */}
-        <div id="section-unit" className="bg-white rounded-xl shadow-sm border">
+        <div id="section-unit" className="bg-white">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
@@ -2777,7 +2777,7 @@ function App() {
         </div>
 
         {/* ===== 底部：创意配置 ===== */}
-        <div id="section-creative" className="bg-white rounded-xl shadow-sm border 2xl:col-span-2">
+        <div id="section-creative" className="bg-white">
           <div className="bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
@@ -3037,7 +3037,7 @@ function App() {
         </div>
 
         {/* ===== 运行配置 ===== */}
-        <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 2xl:col-span-2">
+        <div id="section-run" className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
           <h3 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span className="w-7 h-7 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs">4</span>
             运行配置

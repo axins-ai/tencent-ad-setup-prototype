@@ -2494,10 +2494,10 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle mr-1"
   }), validationErrors.length, "项未完成"))), /*#__PURE__*/React.createElement("div", {
-    className: "px-6 py-6 grid grid-cols-1 2xl:grid-cols-2 gap-6"
+    className: "px-6 py-6 space-y-8"
   }, /*#__PURE__*/React.createElement("div", {
     id: "section-basic",
-    className: "bg-white rounded-xl shadow-sm border"
+    className: "bg-white"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h2", {
@@ -2658,7 +2658,7 @@ function App() {
     }, "未匹配到投放链接")));
   }))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-unit",
-    className: "bg-white rounded-xl shadow-sm border"
+    className: "bg-white"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h2", {
@@ -3689,7 +3689,7 @@ function App() {
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
   }, "+", v)))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-creative",
-    className: "bg-white rounded-xl shadow-sm border 2xl:col-span-2"
+    className: "bg-white"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b"
   }, /*#__PURE__*/React.createElement("h2", {
@@ -3982,7 +3982,7 @@ function App() {
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
   }, "+", v))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-run",
-    className: "bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border px-6 py-4 2xl:col-span-2"
+    className: "bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-md font-bold text-gray-900 mb-4 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("span", {
