@@ -2532,7 +2532,7 @@ function App() {
   }, "*")), /*#__PURE__*/React.createElement("select", {
     value: businessUnit,
     onChange: e => setBusinessUnit(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, MOCK.businessUnits.map(bu => /*#__PURE__*/React.createElement("option", {
     key: bu.id,
     value: bu.id
@@ -2683,7 +2683,7 @@ function App() {
   }, "*")), /*#__PURE__*/React.createElement("select", {
     value: marketingObjective,
     onChange: e => setMarketingObjective(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, MOCK.marketingObjectives.map(mo => /*#__PURE__*/React.createElement("option", {
     key: mo.id,
     value: mo.id
@@ -2694,7 +2694,7 @@ function App() {
   }, "推广产品"), /*#__PURE__*/React.createElement("select", {
     value: promotionType,
     onChange: e => setPromotionType(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: "activity"
   }, "活动"), /*#__PURE__*/React.createElement("option", {
@@ -2706,7 +2706,7 @@ function App() {
   }, "*")), /*#__PURE__*/React.createElement("select", {
     value: specificProduct,
     onChange: e => setSpecificProduct(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, getProductsForBusinessUnit().map(sp => /*#__PURE__*/React.createElement("option", {
     key: sp.id,
     value: sp.id
@@ -2724,7 +2724,7 @@ function App() {
   }, "转化"), /*#__PURE__*/React.createElement("select", {
     value: conversionGoal,
     onChange: e => setConversionGoal(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, (MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => /*#__PURE__*/React.createElement("option", {
     key: conv.id,
     value: conv.id
@@ -3780,7 +3780,7 @@ function App() {
   }, "品牌形象")), /*#__PURE__*/React.createElement("select", {
     value: brandImageType,
     onChange: e => setBrandImageType(e.target.value),
-    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: "custom"
   }, "自定义"), /*#__PURE__*/React.createElement("option", {
@@ -3825,7 +3825,7 @@ function App() {
   }, "行动按钮") : /*#__PURE__*/React.createElement("select", {
     value: marketingComponentType,
     onChange: e => setMarketingComponentType(e.target.value),
-    className: "w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: "action_button"
   }, "行动按钮"), /*#__PURE__*/React.createElement("option", {
@@ -3835,7 +3835,7 @@ function App() {
   }, marketingComponentType === 'action_button' ? /*#__PURE__*/React.createElement("select", {
     value: actionButtonType,
     onChange: e => setActionButtonType(e.target.value),
-    className: "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }, /*#__PURE__*/React.createElement("option", {
     value: "claim"
   }, "立即领取"), /*#__PURE__*/React.createElement("option", {

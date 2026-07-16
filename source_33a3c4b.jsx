@@ -1815,7 +1815,7 @@ function App() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">主体选择 <span className="text-red-500">*</span></label>
                 <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                  className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
                 </select>
               </div>
@@ -1943,7 +1943,7 @@ function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">营销目的 <span className="text-red-500">*</span></label>
-                <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {MOCK.marketingObjectives.map(mo => <option key={mo.id} value={mo.id}>{mo.name}</option>)}
                 </select>
               </div>
@@ -1951,14 +1951,14 @@ function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">推广产品</label>
-                <select value={promotionType} onChange={e => setPromotionType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                <select value={promotionType} onChange={e => setPromotionType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   <option value="activity">活动</option>
                   <option value="operator">运营商产品</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">产品 <span className="text-red-500">*</span></label>
-                <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {getProductsForBusinessUnit().map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
                 </select>
               </div>
@@ -1972,7 +1972,7 @@ function App() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">转化</label>
-                <select value={conversionGoal} onChange={e => setConversionGoal(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                <select value={conversionGoal} onChange={e => setConversionGoal(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                   {(MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => <option key={conv.id} value={conv.id}>{conv.name}</option>)}
                 </select>
               </div>
@@ -2852,7 +2852,7 @@ function App() {
                   <div className="w-36 flex-shrink-0">
                     <label className="block text-sm font-medium text-gray-700">品牌形象</label>
                   </div>
-                  <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                  <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     <option value="custom">自定义</option>
                     <option value="video_account">视频号</option>
                   </select>
@@ -2899,14 +2899,14 @@ function App() {
                   {placement === 'wechat_mp' ? (
                     <div className="w-36 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">行动按钮</div>
                   ) : (
-                    <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                       <option value="action_button">行动按钮</option>
                       <option value="floating_card">浮层卡片</option>
                     </select>
                   )}
                   <div className="flex-1">
                     {marketingComponentType === 'action_button' ? (
-                      <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                      <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="claim">立即领取</option>
                         <option value="details">查看详情</option>
                       </select>
