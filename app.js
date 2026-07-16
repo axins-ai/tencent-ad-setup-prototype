@@ -1877,6 +1877,8 @@ function App() {
   const [channel, setChannel] = useState('gdt');
   const [selectedAccountIds, setSelectedAccountIds] = useState([]);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  // 投放链匹配结果刷新计数（用于强制重算/重渲染）
+  const [matchRefreshKey, setMatchRefreshKey] = useState(0);
 
   // ===== 营销单元配置 =====
   // 业务单元
@@ -2495,7 +2497,7 @@ function App() {
   }), "选择主体和投放账户"))), /*#__PURE__*/React.createElement("div", {
     className: "p-6"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-[1fr_2fr_2fr] gap-6"
+    className: "grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "主体选择 ", /*#__PURE__*/React.createElement("span", {
@@ -2581,9 +2583,22 @@ function App() {
     className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-sync-alt mr-1"
-  }), "刷新账户列表"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "匹配结果"), /*#__PURE__*/React.createElement("div", {
+  }), "刷新账户列表"))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-6 md:col-span-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-2"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700"
+  }, "投放链匹配结果"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setMatchRefreshKey(k => k + 1);
+      notify('投放链匹配结果已刷新', 'success');
+    },
+    className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-sync-alt mr-1"
+  }), "刷新")), /*#__PURE__*/React.createElement("div", {
+    key: matchRefreshKey,
     className: "border border-gray-200 rounded-lg p-3 bg-gray-50 min-h-[120px]"
   }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"

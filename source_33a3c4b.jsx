@@ -1239,6 +1239,8 @@ function App() {
   const [channel, setChannel] = useState('gdt');
   const [selectedAccountIds, setSelectedAccountIds] = useState([]);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  // 投放链匹配结果刷新计数（用于强制重算/重渲染）
+  const [matchRefreshKey, setMatchRefreshKey] = useState(0);
 
   // ===== 营销单元配置 =====
   // 业务单元
@@ -1790,7 +1792,7 @@ function App() {
             </h2>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_2fr] gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">主体选择 <span className="text-red-500">*</span></label>
                 <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
@@ -1860,10 +1862,18 @@ function App() {
                   </button>
                 </div>
               </div>
-              {/* 匹配结果：按所选账户ID展示其落地页 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">匹配结果</label>
-                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 min-h-[120px]">
+              {/* 投放链匹配结果：按所选账户ID展示其落地页（整行置于主体选择与选择账户下方） */}
+              <div className="mt-6 md:col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">投放链匹配结果</label>
+                  <button
+                    onClick={() => { setMatchRefreshKey(k => k + 1); notify('投放链匹配结果已刷新', 'success'); }}
+                    className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
+                  >
+                    <i className="fas fa-sync-alt mr-1"></i>刷新
+                  </button>
+                </div>
+                <div key={matchRefreshKey} className="border border-gray-200 rounded-lg p-3 bg-gray-50 min-h-[120px]">
                   {selectedAccountIds.length === 0 ? (
                     <p className="text-sm text-gray-400">请先选择账户</p>
                   ) : (
