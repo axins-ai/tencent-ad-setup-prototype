@@ -1318,6 +1318,7 @@
       var excludeEl = document.querySelector('input[name="tgt-pkg-exclude"]:checked');
       var convBehEl = document.querySelector('input[name="tgt-pkg-conversion-behavior"]:checked');
       var convTimeEl = document.querySelector('input[name="tgt-pkg-conversion-time"]:checked');
+      var audModeEl = document.querySelector('input[name="tgt-pkg-audience-mode"]:checked');
 
       if (!channelEl || !geoModeEl || !genderEl || !excludeEl || !convBehEl || !convTimeEl) {
         alert('表单数据不完整，请检查所有必填项');
@@ -1328,7 +1329,7 @@
       var geoMode = geoModeEl.value;
       var gender = genderEl.value;
       var excludeConverted = excludeEl.value;
-      var audienceMode = audModeEl.value;
+      var audienceMode = audModeEl ? audModeEl.value : 'unlimited';
       var conversionBehavior = convBehEl.value;
       var conversionTimeRange = convTimeEl.value;
 
@@ -1363,8 +1364,8 @@
         age: age,
         gender: gender,
         excludeConverted: excludeConverted,
-        audienceMode: 'unlimited',
-        audienceInput: '',
+        audienceMode: audienceMode,
+        audienceInput: audienceInput,
         conversionBehavior: conversionBehavior,
         conversionInput: conversionInput,
         conversionTimeRange: conversionTimeRange
