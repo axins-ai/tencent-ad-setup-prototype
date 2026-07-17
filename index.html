@@ -101,7 +101,18 @@
           <span style="font-size:13px;color:#6b7280;white-space:nowrap;">名称</span>
           <input id="filter-name" type="text" placeholder="搜索任务名称..." style="flex:1;padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;max-width:200px;">
         </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:13px;color:#6b7280;white-space:nowrap;">状态</span>
+          <select id="filter-status" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
+            <option value="">全部</option>
+            <option value="搭建中">搭建中</option>
+            <option value="部分完成">部分完成</option>
+            <option value="全部完成">全部完成</option>
+            <option value="搭建失败">搭建失败</option>
+          </select>
+        </div>
         <button id="filter-reset-btn" style="padding:6px 14px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#6b7280;">重置</button>
+        <span id="current-user-label" style="margin-left:auto;font-size:13px;color:#9ca3af;white-space:nowrap;">当前登录优化师：<b style="color:#333;" id="current-user-name"></b></span>
       </div>
       <div id="task-list-content">
         <div style="text-align:center;padding:80px 0;color:#9ca3af;">
@@ -727,6 +738,16 @@
     return { status: status, statusStyle: statusStyle, log: log };
   }
 
+  // ========== 当前登录优化师（原型 mock）与账户优化师推导 ==========
+  var CURRENT_USER = '张伟'; // 当前登录优化师（原型阶段 mock）
+  var OPTIMIZERS = ['张伟','李娜','王芳','刘洋','陈静','赵磊','孙强','周敏'];
+  function getOptimizerName(accountId) {
+    var h = 0;
+    var s = '' + (accountId || '');
+    for (var i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; }
+    return OPTIMIZERS[h % OPTIMIZERS.length];
+  }
+
   // ========== 任务搭建日志（内联弹窗，按账户分行） ==========
   function computeBuildLog(task, taskData) {
     var id = task.id || '';
@@ -766,7 +787,9 @@
       var reasons = [];
       if (status === '搭建失败') { reasons.push('账户 ' + accId + ' 缺失素材包'); }
       else if (status === '部分完成') { reasons.push('账户 ' + accId + ' 定向包未配置'); }
-      return { accId: accId, unitTotal: unitTotal, unitSucc: unitSucc, unitFail: unitFail, creaTotal: creaTotal, creaSucc: creaSucc, creaFail: creaFail, reasons: reasons };
+      var optimizer = getOptimizerName(accId);
+      var mismatch = (optimizer !== CURRENT_USER);
+      return { accId: accId, optimizer: optimizer, mismatch: mismatch, unitTotal: unitTotal, unitSucc: unitSucc, unitFail: unitFail, creaTotal: creaTotal, creaSucc: creaSucc, creaFail: creaFail, reasons: reasons };
     });
     return { status: status, statusColor: statusColor, start: start, end: end, rows: rows };
   }
@@ -802,16 +825,24 @@
     html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
     html += '<thead><tr style="background:#fafafa;color:#6b7280;text-align:left;">' +
       '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">账户明细</th>' +
+      '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">优化师</th>' +
       '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">单元搭建明细</th>' +
       '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">创意搭建明细</th>' +
       '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">失败原因</th>' +
       '</tr></thead><tbody>';
+    var mismatchCount = 0;
     if (log.rows.length === 0) {
-      html += '<tr><td colspan="4" style="padding:16px 12px;color:#9ca3af;text-align:center;">未读取到账户明细</td></tr>';
+      html += '<tr><td colspan="5" style="padding:16px 12px;color:#9ca3af;text-align:center;">未读取到账户明细</td></tr>';
     } else {
       log.rows.forEach(function(r) {
-        html += '<tr style="border-bottom:1px solid #f0f0f0;">';
-        html += '<td style="padding:10px 12px;vertical-align:top;"><span style="display:inline-block;padding:2px 8px;background:#f0fdf4;color:#16a34a;border-radius:6px;font-size:12px;">' + escapeHtml(r.accId) + '</span></td>';
+        if (r.mismatch) mismatchCount++;
+        var rowBg = r.mismatch ? 'background:#fff1f0;' : '';
+        html += '<tr style="border-bottom:1px solid #f0f0f0;' + rowBg + '">';
+        html += '<td style="padding:10px 12px;vertical-align:top;"><span style="display:inline-block;padding:2px 8px;background:' + (r.mismatch ? '#ffe7e5;color:#cf1322;' : '#f0fdf4;color:#16a34a;') + 'border-radius:6px;font-size:12px;">' + escapeHtml(r.accId) + '</span></td>';
+        html += '<td style="padding:10px 12px;vertical-align:top;">' +
+          '<span style="font-size:13px;color:' + (r.mismatch ? '#cf1322;font-weight:600;' : '#333;') + '">' + escapeHtml(r.optimizer) + '</span>' +
+          (r.mismatch ? '<br><span style="display:inline-block;margin-top:4px;padding:2px 8px;background:#ffccc7;color:#a8071a;border-radius:6px;font-size:12px;">与登录人不一致 · 不能搭建</span>' : '') +
+          '</td>';
         html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">共搭建 <b>' + r.unitTotal + '</b> 个单元，<span style="color:#52c41a;">' + r.unitSucc + ' 个成功</span>、<span style="' + (r.unitFail > 0 ? 'color:#ff4d4f;' : 'color:#9ca3af;') + '">' + r.unitFail + ' 个失败</span></td>';
         html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">共搭建 <b>' + r.creaTotal + '</b> 个创意，<span style="color:#52c41a;">' + r.creaSucc + ' 个成功</span>、<span style="' + (r.creaFail > 0 ? 'color:#ff4d4f;' : 'color:#9ca3af;') + '">' + r.creaFail + ' 个失败</span></td>';
         if (r.reasons.length) {
@@ -823,6 +854,9 @@
       });
     }
     html += '</tbody></table>';
+    if (mismatchCount > 0) {
+      html += '<div style="margin-top:12px;padding:10px 14px;background:#fff1f0;border:1px solid #ffccc7;border-radius:8px;color:#a8071a;font-size:13px;">⚠️ 共 ' + mismatchCount + ' 个账户的优化师与当前登录人（' + escapeHtml(CURRENT_USER) + '）不一致，已标红且「不能搭建」，请核对账户归属。</div>';
+    }
     body.innerHTML = html;
     modal.style.display = 'flex';
   }
@@ -830,6 +864,27 @@
   function closeLogModal() {
     var m = document.getElementById('log-modal');
     if (m) m.style.display = 'none';
+  }
+
+  // ========== 任务列表筛选（渠道 / 版位 / 名称 / 状态） ==========
+  function getFilteredTasks() {
+    var ch = ((document.getElementById('filter-channel') || {}).value || '').trim();
+    var pl = ((document.getElementById('filter-placement') || {}).value || '').trim();
+    var nm = ((document.getElementById('filter-name') || {}).value || '').trim().toLowerCase();
+    var st = ((document.getElementById('filter-status') || {}).value || '').trim();
+    return tasks.filter(function(task) {
+      var taskData = null;
+      try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch (e) {}
+      if (ch && task.channel !== ch) return false;
+      var placementVal = taskData && taskData.placement ? taskData.placement : '';
+      if (pl && placementVal !== pl) return false;
+      if (nm && (task.name || '').toLowerCase().indexOf(nm) < 0) return false;
+      if (st) {
+        var sl = getTaskStatusLog(task, taskData);
+        if (sl.status !== st) return false;
+      }
+      return true;
+    });
   }
 
   function renderTaskList() {
@@ -843,9 +898,17 @@
         '</div>';
       return;
     }
+    var filtered = getFilteredTasks();
+    if (filtered.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:80px 0;color:#9ca3af;">' +
+        '<div style="font-size:48px;margin-bottom:16px;">🔍</div>' +
+        '<p style="font-size:18px;margin:0 0 8px 0;">未找到符合条件的任务</p>' +
+        '<p style="font-size:14px;margin:8px 0 0 0;">请调整上方筛选条件后重试</p>' +
+        '</div>';
+      return;
+    }
     var placementMap = { 'wechat_video':'视频号','wechat_mp':'微信公众号与小程序','wechat_article':'公众号','qq_space':'QQ空间','tencent_video':'腾讯视频','tencent_news':'腾讯新闻','all':'全版位' };
-    var tpNameMap = { 'tp_001':'一线城市青年','tp_002':'全国泛投','tp_003':'二三线城市中年','tp_004':'老年人群','tp_005':'一线城市泛投' };
-    var reversed = tasks.slice().reverse();
+    var reversed = filtered.slice().reverse();
     var html = '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">';
     html += '<div style="display:flex;align-items:center;padding:16px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">' +
       '<div style="flex:1.3;text-align:center;">名称</div>' +
@@ -860,12 +923,12 @@
       var placementVal = taskData && taskData.placement ? taskData.placement : '';
       var placementDisplay = placementVal ? (placementMap[placementVal] || placementVal) : '未选择';
       var sl = getTaskStatusLog(task, taskData);
-      html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;">' +
-        '<div style="flex:1.3;font-weight:500;">' + escapeHtml(task.name) + '<br><span style="font-size:12px;color:#9ca3af;">' + formatDate(task.createdAt) + '</span></div>' +
-        '<div style="flex:0.7;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
+      html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;text-align:center;">' +
+        '<div style="flex:1.3;font-weight:500;display:flex;flex-direction:column;align-items:center;line-height:1.4;">' + escapeHtml(task.name) + '<span style="font-size:12px;color:#9ca3af;font-weight:400;">' + formatDate(task.createdAt) + '</span></div>' +
+        '<div style="flex:0.7;display:flex;justify-content:center;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
         '<div style="flex:0.9;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
-        '<div style="flex:0.9;"><span style="padding:4px 10px;border-radius:999px;font-size:13px;' + sl.statusStyle + '">' + sl.status + '</span></div>' +
-        '<div style="flex:2;display:flex;justify-content:flex-end;gap:8px;">' +
+        '<div style="flex:0.9;display:flex;justify-content:center;"><span data-status="' + sl.status + '" style="padding:4px 10px;border-radius:999px;font-size:13px;' + sl.statusStyle + '">' + sl.status + '</span></div>' +
+        '<div style="flex:2;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">' +
           '<button data-task-id="' + task.id + '" data-action="log" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-file-alt" style="margin-right:4px;"></i>日志</button>' +
           '<button data-task-id="' + task.id + '" data-action="edit" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-edit" style="margin-right:4px;"></i>编辑</button>' +
           '<button data-task-id="' + task.id + '" data-action="copy" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-copy" style="margin-right:4px;"></i>复制</button>' +
@@ -2028,6 +2091,12 @@
     if (typeof window.openTgtPkgForm === 'function') window.openTgtPkgForm();
     else alert('脚本加载中，请稍后再试');
   });
+
+  // 暴露给全局作用域（bindAllEvents 在 IIFE 之外定义，需要访问以下符号）
+  window.openLogModal = openLogModal;
+  window.closeLogModal = closeLogModal;
+  window.renderTaskList = renderTaskList;
+  window.CURRENT_USER = CURRENT_USER;
 })();
 
 
@@ -2119,13 +2188,36 @@
       });
     }
 
-    // -- 搭建日志弹窗：关闭（按钮 + 点击遮罩空白） --
-    var logModalEl = document.getElementById('log-modal');
-    if (logModalEl) {
-      var logCloseBtn = document.getElementById('log-modal-close');
-      if (logCloseBtn) logCloseBtn.addEventListener('click', closeLogModal);
-      logModalEl.addEventListener('click', function(e) { if (e.target === logModalEl) closeLogModal(); });
-    }
+    // -- 任务列表筛选（渠道 / 版位 / 名称 / 状态）--
+    function applyTaskFilters() { renderTaskList(); }
+    var fChannel = document.getElementById('filter-channel');
+    var fPlacement = document.getElementById('filter-placement');
+    var fStatus = document.getElementById('filter-status');
+    var fName = document.getElementById('filter-name');
+    var fReset = document.getElementById('filter-reset-btn');
+    if (fChannel) fChannel.addEventListener('change', applyTaskFilters);
+    if (fPlacement) fPlacement.addEventListener('change', applyTaskFilters);
+    if (fStatus) fStatus.addEventListener('change', applyTaskFilters);
+    if (fName) fName.addEventListener('input', applyTaskFilters);
+    if (fReset) fReset.addEventListener('click', function() {
+      if (fChannel) fChannel.value = '';
+      if (fPlacement) fPlacement.value = '';
+      if (fStatus) fStatus.value = '';
+      if (fName) fName.value = '';
+      renderTaskList();
+    });
+
+    // -- 当前登录优化师标签 --
+    var cuName = document.getElementById('current-user-name');
+    if (cuName) cuName.textContent = CURRENT_USER;
+
+    // -- 搭建日志弹窗：关闭（事件委托到 document，兼容弹窗在脚本之后解析）--
+    document.addEventListener('click', function(e) {
+      if (!e.target) return;
+      if (e.target.id === 'log-modal-close') { closeLogModal(); return; }
+      var lm = document.getElementById('log-modal');
+      if (lm && e.target === lm) closeLogModal();
+    });
 
     // -- 文案包：事件委托 --
     var copyPkgContainer = document.getElementById('copy-pkg-list');
