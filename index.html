@@ -550,9 +550,11 @@
   var currentLogTaskId = null;
   var currentTaskId = null;
   var targetingPackages = [];
-  var copyTexts = [];
-  try {
-    tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
+    var copyTexts = [];
+    try {
+      tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
+      // 首次打开无任务时，种子化实例数据（原型 demo 用，避免列表/日志空白）
+      if (!tasks.length) { seedTasks(); tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]'); }
 
     // 初始化排除已转化显示逻辑
     var excludeRadios = document.querySelectorAll('input[name="tgt-pkg-exclude"]');
@@ -842,6 +844,27 @@
     }
     try { localStorage.setItem(key, JSON.stringify(arr)); } catch (e) {}
     return arr;
+  }
+
+  // 首次打开无任务时，种子化实例任务（确定性 mock，避免列表/日志空白）
+  function seedTasks() {
+    var seedOf = function(id) { var s = 0; for (var i = 0; i < id.length; i++) { s = (s * 31 + id.charCodeAt(i)) >>> 0; } return s; };
+    // 找一个 id 使列表状态=草稿（与 getTaskStatusLog 同算法），保证实例含「草稿」
+    var draftId = null;
+    for (var n = 0; n < 9000; n++) { var d = 't_' + n; if (seedOf(d) % 5 === 4) { draftId = d; break; } }
+    var now = Date.now();
+    var examples = [
+      { id: 'seed_task_a1', name: '双11大促-视频号批量搭建', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 2 * 86400000).toISOString() },
+      { id: 'seed_task_b2', name: '品牌曝光-微信公众号矩阵', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 5 * 86400000).toISOString() },
+      { id: 'seed_task_c3', name: '618返场-朋友圈批量搭建', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 9 * 86400000).toISOString() }
+    ];
+    if (draftId) examples.push({ id: draftId, name: '待完善-新游首发搭建', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 1 * 86400000).toISOString() });
+    try { localStorage.setItem('ad_tasks', JSON.stringify(examples)); } catch (e) {}
+    // 预生成搭建日志，确保「日志」页有实例数据（草稿任务不预生成，点击显示空态更真实）
+    examples.forEach(function(t) {
+      if (t.id === draftId) return;
+      try { seedBuildLogs(t); } catch (e) {}
+    });
   }
 
   function renderLogList(taskId) {
