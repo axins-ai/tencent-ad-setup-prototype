@@ -1628,6 +1628,8 @@ function App() {
       }
     }
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
+    // 创意数量上限 1000：超限直接拦截，阻止立即运行
+    if (getBuildSummary().totalCreatives > 1000) errors.push('创意数量超限（1000个），请减少物料选择');
     if (quickLaunch && quickLaunchBudget === '') errors.push('请填写一键起量预算');
     if (quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000)) errors.push('一键起量预算需在 200 ~ 10000 元之间');
     return errors;
@@ -1672,12 +1674,12 @@ function App() {
   };
 
   // 计算搭建总数（新增：定向包组合 + 创意数量分配）
-  const getBuildSummary = () => {
+  function getBuildSummary() {
     const accountCount = selectedAccountIds.length;
     const materialCount = selectedMaterials.length;
     const copyCount = selectedCopies.length;
 
-    // 单元数 = 账户数 × 定向包数
+    // 单元数：仅搭建创意 = 各账户实际已选单元之和；搭建单元和创意 = 账户数 × 定向包数
     let tpCount = 0;
     if (targetingSource === 'package') {
       tpCount = Math.max(selectedTargetingPackages.length, 1);
@@ -1685,7 +1687,16 @@ function App() {
       tpCount = 1;
     }
     const unitsPerAccount = tpCount;
-    const totalUnits = accountCount * unitsPerAccount;
+
+    let totalUnits = 0;
+    if (buildType === 'creative_only') {
+      totalUnits = selectedAccountIds.reduce(function(sum, id) {
+        const su = selectedUnits[id] || [];
+        return sum + su.length;
+      }, 0);
+    } else {
+      totalUnits = accountCount * tpCount;
+    }
 
     // 每个单元的创意数（根据创意素材分配规则）
     let creativesPerUnit = 0;
@@ -1702,7 +1713,10 @@ function App() {
     const totalForUnits = creativesPerUnit * unitsPerAccount;
     const totalForTps = creativesPerUnit * tpCount;
     let totalCreatives = 0;
-    if (composeStrategy === 'copy') {
+    if (buildType === 'creative_only') {
+      // 仅搭建创意：每个已选单元都生成 creativesPerUnit 个创意
+      totalCreatives = totalUnits * creativesPerUnit;
+    } else if (composeStrategy === 'copy') {
       // 复制分配：每个账户独立使用所有素材
       totalCreatives = totalForUnits;
     } else {
@@ -1710,8 +1724,10 @@ function App() {
       totalCreatives = totalForTps;
     }
 
-    return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, creativesPerUnit, totalCreatives };
-  };
+    const CREATIVE_LIMIT = 1000;
+    const overLimit = totalCreatives > CREATIVE_LIMIT;
+    return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, creativesPerUnit, totalCreatives, CREATIVE_LIMIT, overLimit };
+  }
 
   // ===== 持久化：从 URL 读取 taskId，localStorage 恢复/保存数据 =====
   const urlParams = new URLSearchParams(window.location.search);
@@ -1846,6 +1862,12 @@ function App() {
 
   const handleRun = () => {
     if (selectedAccountIds.length === 0) { notify('请先选择账户', 'error'); return; }
+    // 创意数量超限（1000）：阻止运行并展示报错
+    if (getBuildSummary().totalCreatives > 1000) {
+      setShowValidationSummary(true);
+      notify('创意数量超限（1000个），请减少物料选择', 'error');
+      return;
+    }
     runBgRef.current = false;
     setRunBg(false);
     setRunResult(null);
@@ -2964,7 +2986,7 @@ function App() {
             </div>
           </div>
           ) : (
-            <div className="p-6 space-y-4">
+            <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-sm font-medium text-gray-700">账户单元明细 <span className="text-red-500">*</span></span>
                 <span className="text-xs text-gray-400">每个账户下选择要投放的营销单元（支持多选，每个账户至少选 1 个）</span>
@@ -2972,26 +2994,27 @@ function App() {
               {selectedAccountIds.length === 0 && (
                 <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
               )}
-              <div className="space-y-3">
+              {/* 多账户横向排列：类似自定义人群包配置，多个账户在同一行（自动换行） */}
+              <div className="flex flex-wrap gap-3">
                 {selectedAccountIds.map(accountId => {
                   const acc = MOCK.accounts.find(a => a.id === accountId);
                   const units = getAccountUnits(accountId);
                   const sel = selectedUnits[accountId] || [];
                   return (
-                    <div key={accountId} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
+                    <div key={accountId} className="border border-gray-200 rounded-lg p-3 flex-1 min-w-[240px]">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <i className="fas fa-user-friends text-blue-500"></i>
-                          <span className="text-sm font-semibold text-gray-900">{acc ? acc.name : accountId}</span>
+                          <span className="text-sm font-semibold text-gray-900 truncate max-w-[140px]">{acc ? acc.name : accountId}</span>
                           {sel.length > 0 && <span className="text-xs text-green-600">已选 {sel.length} 个</span>}
                         </div>
-                        {sel.length === 0 && <span className="text-xs text-red-500">请至少选择 1 个单元</span>}
+                        {sel.length === 0 && <span className="text-xs text-red-500 whitespace-nowrap">请至少选 1 个</span>}
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         {units.map(u => {
                           const checked = sel.includes(u.id);
                           return (
-                            <label key={u.id} className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer text-sm ${checked ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'}`}>
+                            <label key={u.id} className={`flex items-center gap-2 px-2 py-1.5 border rounded-lg cursor-pointer text-sm ${checked ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'}`}>
                               <input type="checkbox" checked={checked} onChange={() => toggleUnit(accountId, u.id)} className="w-4 h-4 text-blue-600" />
                               <span className="truncate">{u.name}</span>
                             </label>
@@ -3207,23 +3230,17 @@ function App() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-1">预估可生成创意数：</p>
                 {(() => {
-                  const materialCount = selectedMaterials.length;
-                  const copyCount = selectedCopies.length;
-                  const m = composeRule.materials || 1;
-                  const c = composeRule.copies || 1;
-                  let maxCreatives = 0;
-                  if (m > 0 && c > 0) {
-                    const maxByMaterials = Math.floor(materialCount / m);
-                    const maxByCopies = Math.floor(copyCount / c);
-                    maxCreatives = maxByMaterials * maxByCopies;
-                  }
-                  // 复制分配：×账户数；平均分配：不乘
-                  const finalCreatives = composeStrategy === 'copy' ? maxCreatives * selectedAccountIds.length : maxCreatives;
+                  const s = getBuildSummary();
+                  const total = s.totalCreatives;
+                  const over = s.overLimit;
                   return (
-                    <p className="text-lg font-bold text-blue-600">
-                      {isNaN(finalCreatives) ? 0 : finalCreatives} 个创意
+                    <p className={`text-lg font-bold ${over ? 'text-red-600' : 'text-blue-600'}`}>
+                      {isNaN(total) ? 0 : total} 个创意
+                      {over && <span className="text-xs font-normal text-red-500 ml-2">（已超限，上限 1000 个）</span>}
                       <span className="text-xs font-normal text-gray-500 ml-2">
-                        {composeStrategy === 'copy' ? `(每账户${maxCreatives}个×${selectedAccountIds.length}个账户)` : `(平均分配)`}
+                        {buildType === 'creative_only'
+                          ? `(共 ${s.totalUnits} 个单元 × 每单元 ${s.creativesPerUnit} 个)`
+                          : (composeStrategy === 'copy' ? `(每账户${s.creativesPerUnit}个×${s.accountCount}个账户)` : `(平均分配)`)}
                       </span>
                     </p>
                   );

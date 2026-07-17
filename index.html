@@ -82,7 +82,7 @@
           </div>
         </div>
         <!-- 筛选卡片组 -->
-        <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+        <div id="filter-card" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;margin-bottom:20px;">
           <div>
             <div style="font-size:13px;color:#6b7280;margin-bottom:6px;">渠道</div>
             <select id="filter-channel" style="width:150px;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
@@ -613,6 +613,16 @@
       var el = document.getElementById('view-' + v);
       if (el) el.style.display = 'none';
     });
+    // 任务列表与筛选卡片不属于 view-*，需单独管理显隐，避免查看日志时与列表叠加造成「空白」假象
+    var tlContent = document.getElementById('task-list-content');
+    var filterCard = document.getElementById('filter-card');
+    if (name === 'task-list') {
+      if (tlContent) tlContent.style.display = 'block';
+      if (filterCard) filterCard.style.display = 'flex';
+    } else {
+      if (tlContent) tlContent.style.display = 'none';
+      if (filterCard) filterCard.style.display = 'none';
+    }
     var target = document.getElementById('view-' + name);
     if (target) target.style.display = 'block';
     setActiveMenu('menu-' + name.replace(/-/g, '-'));
@@ -921,6 +931,7 @@
         }
       } catch (e3) {}
     }
+    try {
     var html = '';
     html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">';
     html += '<button id="log-back-btn" style="padding:8px 14px;background:white;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;font-size:14px;color:#333;"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>返回任务列表</button>';
@@ -967,6 +978,10 @@
       });
     }
     container.innerHTML = html;
+    } catch (e) {
+      // 兜底：任何渲染异常都不留空白页，给出明确提示
+      container.innerHTML = '<div style="text-align:center;padding:80px 0;color:#ff4d4f;"><div style="font-size:48px;margin-bottom:16px;">⚠️</div><p style="font-size:18px;margin:0 0 8px 0;">日志加载失败</p><p style="font-size:14px;margin:8px 0 0 0;">请刷新页面后重试</p></div>';
+    }
     var back = document.getElementById('log-back-btn');
     if (back) back.addEventListener('click', function() { showView('task-list'); });
   }
@@ -1030,8 +1045,9 @@
       '<div style="flex:1.2;text-align:center;">名称</div>' +
       '<div style="flex:0.7;text-align:center;">渠道</div>' +
       '<div style="flex:0.9;text-align:center;">投放版位</div>' +
+      '<div style="flex:0.9;text-align:center;">搭建类型</div>' +
       '<div style="flex:0.9;text-align:center;">状态</div>' +
-      '<div style="flex:2;text-align:center;">操作</div>' +
+      '<div style="flex:1.6;text-align:center;">操作</div>' +
       '</div>';
     reversed.forEach(function(task, idx) {
       var taskData = null;
@@ -1041,14 +1057,14 @@
       var sl = getTaskStatusLog(task, taskData);
       var _btVal = task.buildType || (taskData && taskData.buildType) || 'unit_creative';
       var _btText = _btVal === 'creative_only' ? '仅搭建创意' : '搭建单元和创意';
-      var _btTag = '<span style="padding:2px 8px;background:#f6ffed;color:#52c41a;border-radius:999px;font-size:11px;">' + _btText + '</span>';
       html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;text-align:center;">' +
         '<div style="flex:0.5;color:#9ca3af;">' + (idx + 1) + '</div>' +
         '<div style="flex:1.2;font-weight:500;display:flex;flex-direction:column;align-items:center;line-height:1.4;">' + escapeHtml(task.name) + '<span style="font-size:12px;color:#9ca3af;font-weight:400;">' + formatDate(task.createdAt) + '</span></div>' +
-        '<div style="flex:0.7;display:flex;flex-direction:column;align-items:center;gap:4px;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span>' + _btTag + '</div>' +
+        '<div style="flex:0.7;display:flex;flex-direction:column;align-items:center;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
+        '<div style="flex:0.9;display:flex;justify-content:center;"><span style="padding:4px 10px;background:#f6ffed;color:#52c41a;border-radius:999px;font-size:13px;">' + _btText + '</span></div>' +
         '<div style="flex:0.9;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
         '<div style="flex:0.9;display:flex;justify-content:center;"><span data-status="' + sl.status + '" style="padding:4px 10px;border-radius:999px;font-size:13px;' + sl.statusStyle + '">' + sl.status + '</span></div>' +
-        '<div style="flex:2;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">' +
+        '<div style="flex:1.6;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">' +
           '<button data-task-id="' + task.id + '" data-action="log" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-file-alt" style="margin-right:4px;"></i>日志</button>' +
           '<button data-task-id="' + task.id + '" data-action="edit" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-edit" style="margin-right:4px;"></i>编辑</button>' +
           '<button data-task-id="' + task.id + '" data-action="copy" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-copy" style="margin-right:4px;"></i>复制</button>' +
