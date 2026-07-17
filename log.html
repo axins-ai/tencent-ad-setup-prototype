@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搭建日志 - 腾讯广告搭建流程原型</title>
+<link rel="stylesheet" href="tailwind.css">
+<link rel="stylesheet" href="font-awesome.min.css">
+<style>
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f3f4f6; color:#333; }
+  .card { background:white; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+  .btn { padding:6px 14px; border-radius:8px; border:1px solid #e5e7eb; background:white; cursor:pointer; font-size:14px; color:#333; }
+  .btn:hover { background:#f0f0f0; }
+  .btn-primary { background:#1890ff; color:white; border:none; }
+  .btn-primary:hover { background:#40a9ff; }
+  .pill { display:inline-block; padding:4px 12px; border-radius:999px; font-size:13px; }
+  .kv { display:flex; padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:14px; }
+  .kv .k { width:160px; flex-shrink:0; color:#6b7280; }
+  .kv .v { flex:1; color:#333; }
+  .acc-row { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:14px; border-bottom:1px dashed #f0f0f0; }
+  .dot { width:8px; height:8px; border-radius:999px; flex-shrink:0; }
+  .ok { background:#52c41a; }
+  .bad { background:#ff4d4f; }
+  .reason { display:flex; align-items:center; gap:8px; padding:8px 12px; margin-top:6px; background:#fff1f0; color:#ff4d4f; border-radius:8px; font-size:13px; }
+</style>
+</head>
+<body>
+<div style="max-width:880px; margin:0 auto; padding:24px 20px 60px 20px;">
+
+  <!-- 顶部：返回 + 标题 -->
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+    <button class="btn" onclick="goBack()"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>返回任务列表</button>
+    <h1 style="font-size:20px; margin:0; font-weight:600;" id="log-title">搭建日志</h1>
+    <span id="log-status" class="pill" style="margin-left:auto;"></span>
+  </div>
+
+  <div id="log-body"></div>
+
+</div>
+
+<script src="react.production.min.js"></script>
+<script src="react-dom.production.min.js"></script>
+<script>
+  // ========== 工具 ==========
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+  function fmt(d){
+    if(!(d instanceof Date) || isNaN(d.getTime())) return '—';
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+  }
+  function fmtDate(iso){ if(!iso) return '—'; var d=new Date(iso); return fmt(d); }
+
+  // ========== 确定性 mock（与任务列表 getTaskStatusLog 同源逻辑）==========
+  function computeBuildLog(task, taskData){
+    var id = task.id || '';
+    var seed = 0;
+    for(var i=0;i<id.length;i++){ seed = (seed*31 + id.charCodeAt(i)) >>> 0; }
+    var acctIds = (taskData && taskData.selectedAccountIds) ? taskData.selectedAccountIds : [];
+    var acct = acctIds.length ? acctIds.length : (seed % 4 + 1);
+    var statusOptions = ['搭建中','部分完成','全部完成','搭建失败'];
+    var status = statusOptions[seed % 4];
+    var statusColor = {
+      '搭建中':'background:#E6F7FF;color:#1890FF;',
+      '部分完成':'background:#FFF7E6;color:#FA8C16;',
+      '全部完成':'background:#F6FFED;color:#52C41A;',
+      '搭建失败':'background:#FFF1F0;color:#FF4D4F;'
+    }[status];
+
+    // 时间：开始=任务创建时间；结束=开始+ (5~24) 分钟
+    var start = task.createdAt ? new Date(task.createdAt) : new Date();
+    var durationMin = 5 + (seed % 20);
+    var end = new Date(start.getTime() + durationMin*60000);
+
+    // 明细
+    var creaTotal = acct * (2 + ((seed>>3) % 3));
+    var unitSucc=0, unitFail=0, creaSucc=0, creaFail=0;
+    var reasons = [];
+    if(status === '搭建中'){
+      // 进行中：尚无完成
+    } else if(status === '搭建失败'){
+      unitFail = acct; creaFail = creaTotal;
+      for(var a=0;a<acct;a++){
+        var accId = acctIds[a] || ('acc_' + (a+1));
+        reasons.push('账户 ' + accId + ' 缺失素材包');
+      }
+    } else if(status === '全部完成'){
+      unitSucc = acct; creaSucc = creaTotal;
+    } else { // 部分完成
+      unitFail = (acct>1) ? (seed % 2 + 1) : 0; if(unitFail>acct) unitFail=acct;
+      unitSucc = acct - unitFail;
+      creaFail = (creaTotal>1) ? (seed % 2 + 1) : 0; if(creaFail>creaTotal) creaFail=creaTotal;
+      creaSucc = creaTotal - creaFail;
+      // 失败账户给原因
+      for(var b=0;b<unitFail;b++){
+        var fid = acctIds[b] || ('acc_' + (b+1));
+        reasons.push('账户 ' + fid + ' 定向包未配置');
+      }
+    }
+
+    return {
+      status: status, statusColor: statusColor,
+      start: start, end: end,
+      acctIds: acctIds, acct: acct,
+      unitTotal: acct, unitSucc: unitSucc, unitFail: unitFail,
+      creaTotal: creaTotal, creaSucc: creaSucc, creaFail: creaFail,
+      reasons: reasons
+    };
+  }
+
+  // ========== 渲染 ==========
+  function render(){
+    var params = new URLSearchParams(window.location.search);
+    var taskId = params.get('taskId') || '';
+    var tasks = [];
+    try { tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]'); } catch(e){ tasks = []; }
+    var task = null;
+    for(var i=0;i<tasks.length;i++){ if(tasks[i].id === taskId){ task = tasks[i]; break; } }
+
+    var body = document.getElementById('log-body');
+    var titleEl = document.getElementById('log-title');
+    var statusEl = document.getElementById('log-status');
+
+    if(!task){
+      titleEl.textContent = '搭建日志';
+      statusEl.textContent = '';
+      statusEl.style.cssText = '';
+      body.innerHTML = '<div class="card" style="padding:48px;text-align:center;color:#9ca3af;">'
+        + '<div style="font-size:42px;margin-bottom:12px;">🔍</div>'
+        + '<p style="margin:0 0 6px 0;font-size:16px;color:#6b7280;">未找到该任务的日志</p>'
+        + '<p style="margin:0;font-size:13px;">taskId=' + escapeHtml(taskId || '(空)') + '</p></div>';
+      return;
+    }
+
+    var taskData = null;
+    try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch(e){}
+
+    var log = computeBuildLog(task, taskData);
+    titleEl.textContent = '搭建日志 · ' + (task.name || task.id);
+    statusEl.textContent = log.status;
+    statusEl.style.cssText = 'margin-left:auto;' + log.statusColor;
+
+    var html = '';
+    // 概览卡片
+    html += '<div class="card" style="padding:20px;margin-bottom:16px;">';
+    html += '<div class="kv"><div class="k">搭建开始时间</div><div class="v">' + fmt(log.start) + '</div></div>';
+    html += '<div class="kv"><div class="k">搭建结束时间</div><div class="v">' + (log.status==='搭建中' ? '进行中…' : fmt(log.end)) + '</div></div>';
+    html += '</div>';
+
+    // 账户明细
+    html += '<div class="card" style="padding:20px;margin-bottom:16px;">';
+    html += '<h2 style="font-size:15px;margin:0 0 12px 0;font-weight:600;">账户明细</h2>';
+    if(log.acctIds.length){
+      log.acctIds.forEach(function(accId){
+        html += '<div class="acc-row"><span class="dot ok"></span><span>' + escapeHtml(accId) + '</span></div>';
+      });
+    } else {
+      html += '<div style="color:#9ca3af;font-size:13px;padding:6px 0;">共 ' + log.acct + ' 个账户（未读取到账户明细）</div>';
+    }
+    html += '</div>';
+
+    // 单元搭建明细
+    html += '<div class="card" style="padding:20px;margin-bottom:16px;">';
+    html += '<h2 style="font-size:15px;margin:0 0 12px 0;font-weight:600;">单元搭建明细</h2>';
+    html += '<div style="font-size:14px;">共搭建 <b>' + log.unitTotal + '</b> 个单元，'
+      + '<span style="color:#52c41a;">' + log.unitSucc + ' 个成功</span>、'
+      + '<span style="' + (log.unitFail>0?'color:#ff4d4f;':'color:#9ca3af;') + '">' + log.unitFail + ' 个失败</span></div>';
+    html += '</div>';
+
+    // 创意搭建明细
+    html += '<div class="card" style="padding:20px;margin-bottom:16px;">';
+    html += '<h2 style="font-size:15px;margin:0 0 12px 0;font-weight:600;">创意搭建明细</h2>';
+    html += '<div style="font-size:14px;">共搭建 <b>' + log.creaTotal + '</b> 个创意，'
+      + '<span style="color:#52c41a;">' + log.creaSucc + ' 个成功</span>、'
+      + '<span style="' + (log.creaFail>0?'color:#ff4d4f;':'color:#9ca3af;') + '">' + log.creaFail + ' 个失败</span></div>';
+    html += '</div>';
+
+    // 失败原因
+    html += '<div class="card" style="padding:20px;">';
+    html += '<h2 style="font-size:15px;margin:0 0 12px 0;font-weight:600;">失败原因</h2>';
+    if(log.reasons.length){
+      log.reasons.forEach(function(r){
+        html += '<div class="reason"><i class="fas fa-exclamation-circle"></i>' + escapeHtml(r) + '</div>';
+      });
+    } else {
+      html += '<div style="color:#52c41a;font-size:14px;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>无（全部搭建成功）</div>';
+    }
+    html += '</div>';
+
+    body.innerHTML = html;
+  }
+
+  function goBack(){ window.location.href = 'index.html'; }
+  function escapeHtml(s){ s = String(s==null?'':s); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+  render();
+</script>
+</body>
+</html>

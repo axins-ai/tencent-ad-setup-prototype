@@ -747,8 +747,7 @@
       '<div style="flex:0.7;">渠道</div>' +
       '<div style="flex:0.9;">投放版位</div>' +
       '<div style="flex:0.9;">状态</div>' +
-      '<div style="flex:2;">搭建日志</div>' +
-      '<div style="flex:1.2;text-align:right;">操作</div>' +
+      '<div style="flex:2;text-align:right;">操作</div>' +
       '</div>';
     reversed.forEach(function(task) {
       var taskData = null;
@@ -761,8 +760,8 @@
         '<div style="flex:0.7;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
         '<div style="flex:0.9;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
         '<div style="flex:0.9;"><span style="padding:4px 10px;border-radius:999px;font-size:13px;' + sl.statusStyle + '">' + sl.status + '</span></div>' +
-        '<div style="flex:2;color:#6b7280;font-size:13px;line-height:1.4;">' + escapeHtml(sl.log) + '</div>' +
-        '<div style="flex:1.2;display:flex;justify-content:flex-end;gap:8px;">' +
+        '<div style="flex:2;display:flex;justify-content:flex-end;gap:8px;">' +
+          '<button data-task-id="' + task.id + '" data-action="log" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-file-alt" style="margin-right:4px;"></i>日志</button>' +
           '<button data-task-id="' + task.id + '" data-action="edit" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-edit" style="margin-right:4px;"></i>编辑</button>' +
           '<button data-task-id="' + task.id + '" data-action="copy" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-copy" style="margin-right:4px;"></i>复制</button>' +
           '<button data-task-id="' + task.id + '" data-action="delete" style="padding:6px 14px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;"><i class="fas fa-trash" style="margin-right:4px;"></i>删除</button>' +
@@ -2008,6 +2007,7 @@
         if (!btn) return;
         var taskId = btn.getAttribute('data-task-id');
         if (!taskId) return;
+        if (btn.textContent.indexOf('日志') >= 0) window.location.href = 'log.html?taskId=' + encodeURIComponent(taskId);
         if (btn.textContent.indexOf('编辑') >= 0) editTask(taskId);
         if (btn.textContent.indexOf('复制') >= 0) copyTask(taskId);
         if (btn.textContent.indexOf('删除') >= 0) deleteTask(taskId);
