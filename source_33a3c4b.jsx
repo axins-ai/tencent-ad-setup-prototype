@@ -804,7 +804,7 @@ function CopyModal({ show, onClose, onConfirm, selectedCopies }) {
   const [expandedPkg, setExpandedPkg] = useState(null); // 当前展开的文案包id
   const [showNewPkg, setShowNewPkg] = useState(false);
   const [newPkgName, setNewPkgName] = useState('');
-  const [newPkgCopies, setNewPkgCopies] = useState(['', '', '']); // 最多3条
+  const [newPkgCopies, setNewPkgCopies] = useState(['']); // 最多10条，与文案包菜单一致
 
   useEffect(() => {
     if (show) {
@@ -835,6 +835,16 @@ function CopyModal({ show, onClose, onConfirm, selectedCopies }) {
     }
   };
 
+  const handleAddCopyRow = () => {
+    if (newPkgCopies.length >= 10) { alert('单个文案包最多添加 10 条文案'); return; }
+    setNewPkgCopies([...newPkgCopies, '']);
+  };
+
+  const handleRemoveCopyRow = (i) => {
+    if (newPkgCopies.length <= 1) return;
+    setNewPkgCopies(newPkgCopies.filter((_, idx) => idx !== i));
+  };
+
   const handleAddPackage = () => {
     if (!newPkgName.trim()) { alert('请输入文案包名称'); return; }
     const validCopies = newPkgCopies.filter(c => c.trim());
@@ -854,7 +864,7 @@ function CopyModal({ show, onClose, onConfirm, selectedCopies }) {
     setPackages([...packages, newPkg]);
     setLocalSelected([...localSelected, ...newCopyIds]);
     setNewPkgName('');
-    setNewPkgCopies(['', '', '']);
+    setNewPkgCopies(['']);
     setShowNewPkg(false);
   };
 
@@ -892,23 +902,30 @@ function CopyModal({ show, onClose, onConfirm, selectedCopies }) {
                 className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <p className="text-xs text-gray-500 mb-2">输入文案内容（最多3条，至少1条）：</p>
+            <p className="text-xs text-gray-500 mb-2">输入文案内容（最多10条，至少1条，单条不超过30字）：</p>
             {newPkgCopies.map((v, i) => (
               <div key={i} className="flex items-center gap-2 mb-2">
                 <span className="text-xs text-gray-500 w-12">{i+1}.</span>
                 <input
                   type="text"
                   value={v}
+                  maxLength={30}
                   onChange={e => {
                     const newArr = [...newPkgCopies];
                     newArr[i] = e.target.value;
                     setNewPkgCopies(newArr);
                   }}
-                  placeholder={`文案${i+1}`}
+                  placeholder={`文案${i+1}（${v.length}/30）`}
                   className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                {newPkgCopies.length > 1 && (
+                  <button type="button" onClick={() => handleRemoveCopyRow(i)} className="px-2 py-1.5 border border-red-200 rounded text-xs text-red-500 hover:bg-red-50" title="删除这条"><i className="fas fa-times"></i></button>
+                )}
               </div>
             ))}
+            <button type="button" onClick={handleAddCopyRow} className="mt-1 inline-flex items-center gap-1 px-3 py-1.5 border border-dashed border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-gray-50">
+              <i className="fas fa-plus"></i> 添加一条文案
+            </button>
             <div className="flex justify-end gap-2 mt-2">
               <button onClick={() => setShowNewPkg(false)} className="btn-secondary text-sm">取消</button>
               <button onClick={handleAddPackage} className="btn-primary text-sm">创建文案包</button>
