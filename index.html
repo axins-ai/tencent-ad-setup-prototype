@@ -109,11 +109,19 @@
               <option value="草稿">草稿</option>
             </select>
           </div>
-          <div style="flex:1;min-width:180px;">
+          <div>
+            <div style="font-size:13px;color:#6b7280;margin-bottom:6px;">搭建类型</div>
+            <select id="filter-buildtype" style="width:180px;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
+              <option value="">全部</option>
+              <option value="unit_creative">搭建单元和创意</option>
+              <option value="creative_only">仅搭建创意</option>
+            </select>
+          </div>
+          <div style="width:220px;flex:none;">
             <div style="font-size:13px;color:#6b7280;margin-bottom:6px;">名称</div>
             <input id="filter-name" type="text" placeholder="搜索任务名称..." style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;box-sizing:border-box;">
           </div>
-          <button id="filter-reset-btn" style="padding:8px 20px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#6b7280;">重置</button>
+          <button id="filter-reset-btn" style="margin-left:auto;padding:8px 20px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#6b7280;">重置</button>
         </div>
         <!-- 任务列表 -->
         <div id="task-list-content">
@@ -553,8 +561,9 @@
     var copyTexts = [];
     try {
       tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
-      // 首次打开无任务时，种子化实例数据（原型 demo 用，避免列表/日志空白）
-      if (!tasks.length) { seedTasks(); tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]'); }
+      // 总是确保示例任务与搭建日志存在（合并策略，不覆盖用户自建任务）
+      seedTasks();
+      tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
 
     // 初始化排除已转化显示逻辑
     var excludeRadios = document.querySelectorAll('input[name="tgt-pkg-exclude"]');
@@ -647,7 +656,8 @@
       channel: channelId,
       channelName: channelId === 'gdt' ? '广点通' : channelId,
       createdAt: new Date().toISOString(),
-      status: 'draft'
+      status: 'draft',
+      buildType: 'unit_creative'
     };
     tasks.push(newTask);
     try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
@@ -757,10 +767,12 @@
   var CURRENT_USER = '张伟'; // 当前登录优化师（原型阶段 mock）
   var OPTIMIZERS = ['张伟','李娜','王芳','刘洋','陈静','赵磊','孙强','周敏'];
   function getOptimizerName(accountId) {
+    // 兼容加载顺序：OPTIMIZERS 在后期脚本赋值，init 阶段调用时可能尚未定义
+    var OPTS = (typeof OPTIMIZERS !== 'undefined' && OPTIMIZERS && OPTIMIZERS.length) ? OPTIMIZERS : ['张伟','李娜','王芳','刘洋','陈静','赵磊','孙强','周敏'];
     var h = 0;
     var s = '' + (accountId || '');
     for (var i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; }
-    return OPTIMIZERS[h % OPTIMIZERS.length];
+    return OPTS[h % OPTS.length];
   }
 
   // ========== 任务搭建日志（内联弹窗，按账户分行） ==========
@@ -846,7 +858,8 @@
     return arr;
   }
 
-  // 首次打开无任务时，种子化实例任务（确定性 mock，避免列表/日志空白）
+  // 种子化实例任务（确定性 mock，避免列表/日志空白）
+  // 改为「合并」策略：总是确保示例任务存在，且不覆盖用户自建任务
   function seedTasks() {
     var seedOf = function(id) { var s = 0; for (var i = 0; i < id.length; i++) { s = (s * 31 + id.charCodeAt(i)) >>> 0; } return s; };
     // 找一个 id 使列表状态=草稿（与 getTaskStatusLog 同算法），保证实例含「草稿」
@@ -854,16 +867,26 @@
     for (var n = 0; n < 9000; n++) { var d = 't_' + n; if (seedOf(d) % 5 === 4) { draftId = d; break; } }
     var now = Date.now();
     var examples = [
-      { id: 'seed_task_a1', name: '双11大促-视频号批量搭建', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 2 * 86400000).toISOString() },
-      { id: 'seed_task_b2', name: '品牌曝光-微信公众号矩阵', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 5 * 86400000).toISOString() },
-      { id: 'seed_task_c3', name: '618返场-朋友圈批量搭建', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 9 * 86400000).toISOString() }
+      { id: 'seed_task_a1', name: '双11大促-视频号批量搭建', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 2 * 86400000).toISOString(), buildType: 'unit_creative' },
+      { id: 'seed_task_b2', name: '品牌曝光-微信公众号矩阵', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 5 * 86400000).toISOString(), buildType: 'unit_creative' },
+      { id: 'seed_task_c3', name: '618返场-朋友圈批量搭建', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 9 * 86400000).toISOString(), buildType: 'creative_only' }
     ];
-    if (draftId) examples.push({ id: draftId, name: '待完善-新游首发搭建', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 1 * 86400000).toISOString() });
-    try { localStorage.setItem('ad_tasks', JSON.stringify(examples)); } catch (e) {}
-    // 预生成搭建日志，确保「日志」页有实例数据（草稿任务不预生成，点击显示空态更真实）
+    if (draftId) examples.push({ id: draftId, name: '待完善-新游首发搭建', channel: 'gdt', channelName: '广点通', createdAt: new Date(now - 1 * 86400000).toISOString(), status: 'draft', buildType: 'unit_creative' });
+    // 合并：仅补充缺失的示例任务，保留用户自建任务
+    var existing = [];
+    try { existing = JSON.parse(localStorage.getItem('ad_tasks') || '[]'); } catch (e) {}
+    var have = {};
+    existing.forEach(function(t) { have[t.id] = true; });
+    var merged = existing.slice();
+    examples.forEach(function(t) { if (!have[t.id]) merged.push(t); });
+    try { localStorage.setItem('ad_tasks', JSON.stringify(merged)); } catch (e) {}
+    // 为示例（非草稿）任务预生成搭建日志；仅当该任务尚无日志时才生成，避免重复覆盖
     examples.forEach(function(t) {
       if (t.id === draftId) return;
-      try { seedBuildLogs(t); } catch (e) {}
+      var key = 'ad_task_buildlogs_' + t.id;
+      var has = false;
+      try { has = (localStorage.getItem(key) || '').length > 2; } catch (e) {}
+      if (!has) { try { seedBuildLogs(t); } catch (e) {} }
     });
   }
 
@@ -875,8 +898,29 @@
     var task = null;
     for (var i = 0; i < tasks.length; i++) { if (tasks[i].id === taskId) { task = tasks[i]; break; } }
     if (!task) { container.innerHTML = '<div style="color:#9ca3af;padding:40px 0;">未找到该任务</div>'; return; }
-    var logs = getBuildLogs(task.id);
-    if (!logs.length) logs = seedBuildLogs(task);
+    var logs = [];
+    try { logs = getBuildLogs(task.id); } catch (e) {}
+    if (!logs.length) {
+      try { logs = seedBuildLogs(task); } catch (e) {}
+    }
+    if (!logs.length) {
+      // 自愈兜底：真实（非草稿）任务直接生成一条搭建日志，避免日志页空白
+      try {
+        var _td = null;
+        try { _td = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch (e2) {}
+        var _sl = getTaskStatusLog(task, _td);
+        if (_sl.status !== '草稿') {
+          var _one = computeBuildLog(task, _td);
+          logs = [{
+            buildId: 'build_heal_' + task.id,
+            startedAt: _one.start && _one.start.toISOString ? _one.start.toISOString() : ('' + _one.start),
+            finishedAt: _one.end && _one.end.toISOString ? _one.end.toISOString() : ('' + _one.end),
+            status: _one.status,
+            rows: _one.rows
+          }];
+        }
+      } catch (e3) {}
+    }
     var html = '';
     html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">';
     html += '<button id="log-back-btn" style="padding:8px 14px;background:white;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;font-size:14px;color:#333;"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>返回任务列表</button>';
@@ -939,6 +983,7 @@
     var pl = ((document.getElementById('filter-placement') || {}).value || '').trim();
     var nm = ((document.getElementById('filter-name') || {}).value || '').trim().toLowerCase();
     var st = ((document.getElementById('filter-status') || {}).value || '').trim();
+    var bt = ((document.getElementById('filter-buildtype') || {}).value || '').trim();
     return tasks.filter(function(task) {
       var taskData = null;
       try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch (e) {}
@@ -950,6 +995,9 @@
         var sl = getTaskStatusLog(task, taskData);
         if (sl.status !== st) return false;
       }
+      // 搭建类型：任务对象优先，其次取表单数据，缺省按「搭建单元和创意」
+      var taskBt = task.buildType || (taskData && taskData.buildType) || 'unit_creative';
+      if (bt && taskBt !== bt) return false;
       return true;
     });
   }
@@ -991,10 +1039,13 @@
       var placementVal = taskData && taskData.placement ? taskData.placement : '';
       var placementDisplay = placementVal ? (placementMap[placementVal] || placementVal) : '未选择';
       var sl = getTaskStatusLog(task, taskData);
+      var _btVal = task.buildType || (taskData && taskData.buildType) || 'unit_creative';
+      var _btText = _btVal === 'creative_only' ? '仅搭建创意' : '搭建单元和创意';
+      var _btTag = '<span style="padding:2px 8px;background:#f6ffed;color:#52c41a;border-radius:999px;font-size:11px;">' + _btText + '</span>';
       html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;text-align:center;">' +
         '<div style="flex:0.5;color:#9ca3af;">' + (idx + 1) + '</div>' +
         '<div style="flex:1.2;font-weight:500;display:flex;flex-direction:column;align-items:center;line-height:1.4;">' + escapeHtml(task.name) + '<span style="font-size:12px;color:#9ca3af;font-weight:400;">' + formatDate(task.createdAt) + '</span></div>' +
-        '<div style="flex:0.7;display:flex;justify-content:center;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
+        '<div style="flex:0.7;display:flex;flex-direction:column;align-items:center;gap:4px;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span>' + _btTag + '</div>' +
         '<div style="flex:0.9;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
         '<div style="flex:0.9;display:flex;justify-content:center;"><span data-status="' + sl.status + '" style="padding:4px 10px;border-radius:999px;font-size:13px;' + sl.statusStyle + '">' + sl.status + '</span></div>' +
         '<div style="flex:2;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">' +
@@ -2062,6 +2113,18 @@
   // ========== 跨页面通信 ==========
   window.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'TASK_FORM_SAVE') {
+      // 同步表单保存的搭建类型到任务对象，保证列表/筛选一致
+      try {
+        var sid = (event.data.taskId) || currentTaskId;
+        var stask = null;
+        for (var _i = 0; _i < tasks.length; _i++) { if (tasks[_i].id === sid) { stask = tasks[_i]; break; } }
+        if (stask) {
+          var sfd = null;
+          try { sfd = JSON.parse(localStorage.getItem('ad_task_form_' + sid) || 'null'); } catch (e) {}
+          if (sfd && sfd.buildType) stask.buildType = sfd.buildType;
+          localStorage.setItem('ad_tasks', JSON.stringify(tasks));
+        }
+      } catch (e) {}
       renderTaskList();
     } else if (event.data && event.data.type === 'GOTO_TASKS') {
       showView('task-list');
@@ -2266,16 +2329,19 @@
     var fPlacement = document.getElementById('filter-placement');
     var fStatus = document.getElementById('filter-status');
     var fName = document.getElementById('filter-name');
+    var fBuildType = document.getElementById('filter-buildtype');
     var fReset = document.getElementById('filter-reset-btn');
     if (fChannel) fChannel.addEventListener('change', applyTaskFilters);
     if (fPlacement) fPlacement.addEventListener('change', applyTaskFilters);
     if (fStatus) fStatus.addEventListener('change', applyTaskFilters);
     if (fName) fName.addEventListener('input', applyTaskFilters);
+    if (fBuildType) fBuildType.addEventListener('change', applyTaskFilters);
     if (fReset) fReset.addEventListener('click', function() {
       if (fChannel) fChannel.value = '';
       if (fPlacement) fPlacement.value = '';
       if (fStatus) fStatus.value = '';
       if (fName) fName.value = '';
+      if (fBuildType) fBuildType.value = '';
       renderTaskList();
     });
 

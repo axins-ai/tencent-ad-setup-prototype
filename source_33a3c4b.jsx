@@ -1267,6 +1267,7 @@ function App() {
   const [businessType, setBusinessType] = useState('benefit_A');
   const [channel, setChannel] = useState('gdt');
   const [selectedAccountIds, setSelectedAccountIds] = useState([]);
+  const [buildType, setBuildType] = useState('unit_creative'); // 搭建类型：unit_creative=搭建单元和创意, creative_only=仅搭建创意
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const accountDropdownRef = useRef(null);
 
@@ -1287,6 +1288,28 @@ function App() {
   // ===== 营销单元配置 =====
   // 任务名称
   const [taskName, setTaskName] = useState('');
+  // 仅搭建创意：每个账户下已选营销单元（多选）{ [accountId]: string[] }
+  const [selectedUnits, setSelectedUnits] = useState({});
+  // 根据账户 id 确定性生成该账户下的营销单元明细（mock 数据）
+  const getAccountUnits = (accountId) => {
+    let h = 0; const s = '' + (accountId || '');
+    for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; }
+    const n = 3 + (h % 4); // 3~6 个单元
+    const cats = ['品牌', '促销', '新品', '活动', '拉新', '留存'];
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+      const hh = (h + i * 2654435761) >>> 0;
+      arr.push({ id: accountId + '_u' + i, name: cats[hh % cats.length] + '单元_' + String.fromCharCode(65 + (i % 26)) + (i + 1) });
+    }
+    return arr;
+  };
+  const toggleUnit = (accountId, unitId) => {
+    setSelectedUnits(prev => {
+      const cur = prev[accountId] ? [...prev[accountId]] : [];
+      const next = cur.includes(unitId) ? cur.filter(x => x !== unitId) : [...cur, unitId];
+      return { ...prev, [accountId]: next };
+    });
+  };
   // 业务单元
   const [businessUnit, setBusinessUnit] = useState('baiju');
   // 推广产品类型：operator=运营商产品, activity=活动
@@ -1594,6 +1617,16 @@ function App() {
     if (selectedMaterials.length === 0) errors.push('请选择素材');
     if (selectedCopies.length === 0) errors.push('请选择文案');
     if (unitName === '') errors.push('请输入单元名称');
+    if (buildType === 'creative_only') {
+      if (selectedAccountIds.length === 0) {
+        // 已校检账户，这里只需校检每个账户是否选了单元
+      } else {
+        selectedAccountIds.forEach(function(id) {
+          var su = selectedUnits[id];
+          if (!su || su.length === 0) errors.push('账户 ' + (MOCK.accounts.find(function(a){return a.id === id;}) || {name:id}).name + ' 未选择营销单元');
+        });
+      }
+    }
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
     if (quickLaunch && quickLaunchBudget === '') errors.push('请填写一键起量预算');
     if (quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000)) errors.push('一键起量预算需在 200 ~ 10000 元之间');
@@ -1694,6 +1727,8 @@ function App() {
         if (data.selectedAccountIds) setSelectedAccountIds(data.selectedAccountIds);
         if (data.placement) setPlacement(data.placement);
         if (data.unitName) setUnitName(data.unitName);
+        if (data.buildType) setBuildType(data.buildType);
+        if (data.selectedUnits) setSelectedUnits(data.selectedUnits);
         if (data.targetingSource) setTargetingSource(data.targetingSource);
         if (data.selectedTargetingPackages) setSelectedTargetingPackages(data.selectedTargetingPackages);
         if (data.geoMode) setGeoMode(data.geoMode);
@@ -1724,6 +1759,7 @@ function App() {
     try {
       const data = {
         selectedAccountIds, placement, unitName,
+        buildType, selectedUnits,
         targetingSource, selectedTargetingPackages,
         geoMode, geoSelectedCountry, geoSelectedProvinces, geoSelectedCities,
         locationTypeResident, ageSelections, customAgeMin, customAgeMax,
@@ -2009,6 +2045,20 @@ function App() {
                 <i className="fas fa-sync-alt mr-1"></i>刷新账户列表
               </button>
             </div>
+            {/* 搭建类型 */}
+            <div className="flex items-center gap-3 mb-5">
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">搭建类型 <span className="text-red-500">*</span></label>
+              <div className="flex gap-3">
+                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'unit_creative' ? '#1890ff' : '#e5e7eb', background: buildType === 'unit_creative' ? '#eff6ff' : '#fff' }}>
+                  <input type="radio" name="buildType" value="unit_creative" checked={buildType === 'unit_creative'} onChange={() => setBuildType('unit_creative')} className="w-4 h-4 mr-2 text-blue-600" />
+                  <span>搭建单元和创意</span>
+                </label>
+                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'creative_only' ? '#1890ff' : '#e5e7eb', background: buildType === 'creative_only' ? '#eff6ff' : '#fff' }}>
+                  <input type="radio" name="buildType" value="creative_only" checked={buildType === 'creative_only'} onChange={() => setBuildType('creative_only')} className="w-4 h-4 mr-2 text-blue-600" />
+                  <span>仅搭建创意</span>
+                </label>
+              </div>
+            </div>
             {/* 投放链匹配结果：全宽整行，置于主体选择与选择账户下方 */}
             <div className="mt-6 pt-6 border-t border-gray-100">
               <div className="flex items-center gap-2 mb-2">
@@ -2077,10 +2127,11 @@ function App() {
         <div id="section-unit" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-            <h2 className="text-base font-semibold text-gray-900">营销单元配置</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置定向、出价、投放设置</span>
+            <h2 className="text-base font-semibold text-gray-900">{buildType === 'creative_only' ? '账户单元明细' : '营销单元配置'}</h2>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>{buildType === 'creative_only' ? '仅搭建创意：为每个账户选择营销单元' : '配置定向、出价、投放设置'}</span>
           </div>
-          <div className="p-6 space-y-6">
+          {buildType === 'unit_creative' ? (
+            <div className="p-6 space-y-6">
             {/* 营销目的 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销目的 <span className="text-red-500">*</span></label>
@@ -2912,6 +2963,47 @@ function App() {
               </div>
             </div>
           </div>
+          ) : (
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-sm font-medium text-gray-700">账户单元明细 <span className="text-red-500">*</span></span>
+                <span className="text-xs text-gray-400">每个账户下选择要投放的营销单元（支持多选，每个账户至少选 1 个）</span>
+              </div>
+              {selectedAccountIds.length === 0 && (
+                <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
+              )}
+              <div className="space-y-3">
+                {selectedAccountIds.map(accountId => {
+                  const acc = MOCK.accounts.find(a => a.id === accountId);
+                  const units = getAccountUnits(accountId);
+                  const sel = selectedUnits[accountId] || [];
+                  return (
+                    <div key={accountId} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <i className="fas fa-user-friends text-blue-500"></i>
+                          <span className="text-sm font-semibold text-gray-900">{acc ? acc.name : accountId}</span>
+                          {sel.length > 0 && <span className="text-xs text-green-600">已选 {sel.length} 个</span>}
+                        </div>
+                        {sel.length === 0 && <span className="text-xs text-red-500">请至少选择 1 个单元</span>}
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {units.map(u => {
+                          const checked = sel.includes(u.id);
+                          return (
+                            <label key={u.id} className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer text-sm ${checked ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'}`}>
+                              <input type="checkbox" checked={checked} onChange={() => toggleUnit(accountId, u.id)} className="w-4 h-4 text-blue-600" />
+                              <span className="truncate">{u.name}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ===== 底部：创意配置 ===== */}
@@ -3413,7 +3505,7 @@ function App() {
                   <div><span className="text-gray-500">投放版位：</span><span className="font-medium">{placement === 'wechat_video' ? '微信视频号' : '微信公众号与小程序'}</span></div>
                   <div><span className="text-gray-500">出价：</span><span className="font-medium">{bidAmount ? `¥${bidAmount}` : '未设置'}</span></div>
                   <div><span className="text-gray-500">定向方式：</span><span className="font-medium">{targetingSource === 'package' ? '定向包：' + (selectedTargetingPackages.length > 0 ? `${selectedTargetingPackages.length} 个定向包` : '未选择') : '自定义定向'}</span></div>
-                  <div><span className="text-gray-500">营销单元名称：</span><span className="font-medium">{unitName || '未设置'}</span></div>
+                  <div><span className="text-gray-500">营销单元名称：</span><span className="font-medium">{buildType === 'creative_only' ? '仅搭建创意（按账户单元）' : (unitName || '未设置')}</span></div>
                 </div>
               </div>
             </div>
