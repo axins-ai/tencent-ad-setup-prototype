@@ -708,6 +708,14 @@ function getPlacementSceneDisplay(placement, placementScene) {
   }
 }
 
+// 优化师：根据账户ID确定性映射到姓名（原型 mock）
+const OPTIMIZERS = ['张伟', '李娜', '王芳', '刘洋', '陈静', '赵磊', '孙强', '周敏'];
+function getOptimizerName(accountId) {
+  let h = 0;
+  for (let i = 0; i < accountId.length; i++) h = h * 31 + accountId.charCodeAt(i) >>> 0;
+  return OPTIMIZERS[h % OPTIMIZERS.length];
+}
+
 // 通知组件
 function Notification({
   msg,
@@ -2635,8 +2643,10 @@ function App() {
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
     className: "bg-gray-50 text-gray-600 text-left"
   }, /*#__PURE__*/React.createElement("th", {
-    className: "px-3 py-2 font-medium w-1/3"
+    className: "px-3 py-2 font-medium w-1/4"
   }, "账户ID"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium"
+  }, "优化师"), /*#__PURE__*/React.createElement("th", {
     className: "px-3 py-2 font-medium"
   }, "投放链接"))), /*#__PURE__*/React.createElement("tbody", null, selectedAccountIds.map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
@@ -2647,6 +2657,8 @@ function App() {
     }, /*#__PURE__*/React.createElement("td", {
       className: `px-3 py-2 align-top ${matched ? 'text-gray-800' : 'text-red-500 font-medium'}`
     }, id), /*#__PURE__*/React.createElement("td", {
+      className: "px-3 py-2 align-top text-gray-700"
+    }, getOptimizerName(id)), /*#__PURE__*/React.createElement("td", {
       className: "px-3 py-2 align-top"
     }, matched ? /*#__PURE__*/React.createElement("a", {
       href: acc.kaboshi,
@@ -3447,7 +3459,7 @@ function App() {
     type: "text",
     value: "常规投放",
     disabled: true,
-    className: "w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
+    className: "w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-left"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
@@ -3481,7 +3493,7 @@ function App() {
     value: dailyBudget,
     onChange: e => setDailyBudget(e.target.value),
     placeholder: "输入日预算，留空=不限",
-    className: "w-1/2 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+    className: "w-1/2 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "mt-4 flex items-center gap-4"
   }, /*#__PURE__*/React.createElement("span", {
