@@ -3277,7 +3277,6 @@ function App() {
                     <thead>
                       <tr className="bg-gray-50 text-gray-600 text-left">
                         <th className="px-3 py-2 font-medium">账户</th>
-                        <th className="px-3 py-2 font-medium">优化师</th>
                         <th className="px-3 py-2 font-medium">单元</th>
                         <th className="px-3 py-2 font-medium">创意</th>
                       </tr>
@@ -3286,7 +3285,6 @@ function App() {
                       {(runResult.rows || []).map((r, i) => (
                         <tr key={i} className="border-t border-gray-100">
                           <td className="px-3 py-2 align-top text-gray-700">{r.accId}</td>
-                          <td className="px-3 py-2 align-top text-gray-700">{r.optimizer}</td>
                           <td className="px-3 py-2 align-top text-gray-700">{r.unitSucc}成 / {r.unitFail}败</td>
                           <td className="px-3 py-2 align-top text-gray-700">{r.creaSucc}成 / {r.creaFail}败</td>
                         </tr>

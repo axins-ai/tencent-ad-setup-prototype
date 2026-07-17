@@ -4292,8 +4292,6 @@ function App() {
     className: "px-3 py-2 font-medium"
   }, "账户"), /*#__PURE__*/React.createElement("th", {
     className: "px-3 py-2 font-medium"
-  }, "优化师"), /*#__PURE__*/React.createElement("th", {
-    className: "px-3 py-2 font-medium"
   }, "单元"), /*#__PURE__*/React.createElement("th", {
     className: "px-3 py-2 font-medium"
   }, "创意"))), /*#__PURE__*/React.createElement("tbody", null, (runResult.rows || []).map((r, i) => /*#__PURE__*/React.createElement("tr", {
@@ -4302,8 +4300,6 @@ function App() {
   }, /*#__PURE__*/React.createElement("td", {
     className: "px-3 py-2 align-top text-gray-700"
   }, r.accId), /*#__PURE__*/React.createElement("td", {
-    className: "px-3 py-2 align-top text-gray-700"
-  }, r.optimizer), /*#__PURE__*/React.createElement("td", {
     className: "px-3 py-2 align-top text-gray-700"
   }, r.unitSucc, "成 / ", r.unitFail, "败"), /*#__PURE__*/React.createElement("td", {
     className: "px-3 py-2 align-top text-gray-700"

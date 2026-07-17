@@ -61,68 +61,66 @@
 
     <!-- 视图：任务列表 -->
     <div id="view-task-list" style="display:block;padding:0;">
-      <div style="display:flex;min-height:100vh;align-items:stretch;">
-        <!-- 左侧筛选栏 -->
-        <div id="task-filter-sidebar" style="width:240px;min-width:240px;padding:28px 20px;background:white;border-right:1px solid #e5e7eb;">
-          <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:20px;letter-spacing:0.5px;">筛选</div>
-          <div style="margin-bottom:18px;">
-            <div style="font-size:13px;color:#374151;margin-bottom:6px;">渠道</div>
-            <select id="filter-channel" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
+      <!-- 主内容 -->
+      <div style="padding:32px 24px;">
+        <!-- 头部：标题 + 新增 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">批创工具</h2>
+          <div style="position:relative;">
+            <button style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
+              <i class="fas fa-plus"></i>新增批创任务
+              <i class="fas fa-chevron-down" style="font-size:12px;"></i>
+            </button>
+            <div id="channel-dropdown" class="dropdown-container" style="display:none;position:absolute;top:100%;right:0;background:white;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.15);min-width:200px;z-index:200;overflow:hidden;">
+              <div id="channel-gdt" class="dropdown-item" data-channel="gdt" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;color:#111827;"><span style="font-size:18px;">🎯</span><span>广点通</span></div>
+              <div style="padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:14px;color:#c0c0c0;cursor:not-allowed;background:#fafafa;">
+                <span style="font-size:18px;filter:grayscale(1);">📰</span>
+                <span>头条</span>
+                <span style="margin-left:auto;font-size:12px;color:#c0c0c0;">即将支持</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 筛选卡片组 -->
+        <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+          <div>
+            <div style="font-size:13px;color:#6b7280;margin-bottom:6px;">渠道</div>
+            <select id="filter-channel" style="width:150px;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
               <option value="">全部</option>
               <option value="gdt">广点通</option>
             </select>
           </div>
-          <div style="margin-bottom:18px;">
-            <div style="font-size:13px;color:#374151;margin-bottom:6px;">版位</div>
-            <select id="filter-placement" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
+          <div>
+            <div style="font-size:13px;color:#6b7280;margin-bottom:6px;">版位</div>
+            <select id="filter-placement" style="width:170px;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
               <option value="">全部</option>
               <option value="wechat_video">视频号</option>
               <option value="wechat_mp">微信公众号与小程序</option>
             </select>
           </div>
-          <div style="margin-bottom:18px;">
-            <div style="font-size:13px;color:#374151;margin-bottom:6px;">状态</div>
-            <select id="filter-status" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
+          <div>
+            <div style="font-size:13px;color:#6b7280;margin-bottom:6px;">状态</div>
+            <select id="filter-status" style="width:140px;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
               <option value="">全部</option>
               <option value="搭建中">搭建中</option>
               <option value="部分完成">部分完成</option>
               <option value="全部完成">全部完成</option>
               <option value="搭建失败">搭建失败</option>
+              <option value="草稿">草稿</option>
             </select>
           </div>
-          <div style="margin-bottom:18px;">
-            <div style="font-size:13px;color:#374151;margin-bottom:6px;">名称</div>
+          <div style="flex:1;min-width:180px;">
+            <div style="font-size:13px;color:#6b7280;margin-bottom:6px;">名称</div>
             <input id="filter-name" type="text" placeholder="搜索任务名称..." style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;box-sizing:border-box;">
           </div>
-          <button id="filter-reset-btn" style="width:100%;padding:8px 14px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#6b7280;">重置</button>
+          <button id="filter-reset-btn" style="padding:8px 20px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#6b7280;">重置</button>
         </div>
-        <!-- 右侧主内容 -->
-        <div style="flex:1;min-width:0;padding:32px 24px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
-            <div>
-              <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">批创工具</h2>
-            </div>
-            <div style="position:relative;">
-              <button style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
-                <i class="fas fa-plus"></i>新增批创任务
-                <i class="fas fa-chevron-down" style="font-size:12px;"></i>
-              </button>
-              <div id="channel-dropdown" class="dropdown-container" style="display:none;position:absolute;top:100%;right:0;background:white;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.15);min-width:200px;z-index:200;overflow:hidden;">
-                <div id="channel-gdt" class="dropdown-item" data-channel="gdt" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;color:#111827;"><span style="font-size:18px;">🎯</span><span>广点通</span></div>
-                <div style="padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:14px;color:#c0c0c0;cursor:not-allowed;background:#fafafa;">
-                  <span style="font-size:18px;filter:grayscale(1);">📰</span>
-                  <span>头条</span>
-                  <span style="margin-left:auto;font-size:12px;color:#c0c0c0;">即将支持</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="task-list-content">
-            <div style="text-align:center;padding:80px 0;color:#9ca3af;">
-              <div style="font-size:48px;margin-bottom:16px;">📋</div>
-              <p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p>
-              <p style="font-size:14px;margin:8px 0 0 0;">点击「新增批创任务」开始创建批量创意搭建</p>
-            </div>
+        <!-- 任务列表 -->
+        <div id="task-list-content">
+          <div style="text-align:center;padding:80px 0;color:#9ca3af;">
+            <div style="font-size:48px;margin-bottom:16px;">📋</div>
+            <p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p>
+            <p style="font-size:14px;margin:8px 0 0 0;">点击「新增批创任务」开始创建批量创意搭建</p>
           </div>
         </div>
       </div>
@@ -722,16 +720,20 @@
     var acct = (taskData && taskData.selectedAccountIds && taskData.selectedAccountIds.length)
       ? taskData.selectedAccountIds.length
       : (seed % 4 + 1);
-    var statusOptions = ['搭建中', '部分完成', '全部完成', '搭建失败'];
-    var status = statusOptions[seed % 4];
+    var statusOptions = ['搭建中', '部分完成', '全部完成', '搭建失败', '草稿'];
+    var status = statusOptions[seed % 5];
     var statusStyle = {
       '搭建中':   'background:#E6F7FF;color:#1890FF;',
       '部分完成': 'background:#FFF7E6;color:#FA8C16;',
       '全部完成': 'background:#F6FFED;color:#52C41A;',
-      '搭建失败': 'background:#FFF1F0;color:#FF4D4F;'
+      '搭建失败': 'background:#FFF1F0;color:#FF4D4F;',
+      '草稿':     'background:#F5F5F5;color:#8c8c8c;'
     }[status];
     if (status === '搭建中') {
       return { status: status, statusStyle: statusStyle, log: '搭建进行中…' };
+    }
+    if (status === '草稿') {
+      return { status: status, statusStyle: statusStyle, log: '草稿未搭建' };
     }
     var creaTotal = acct * (2 + ((seed >> 3) % 3));
     var unitSucc = 0, unitFail = 0, creaSucc = 0, creaFail = 0;
@@ -811,7 +813,8 @@
       '搭建中':   'background:#E6F7FF;color:#1890FF;',
       '部分完成': 'background:#FFF7E6;color:#FA8C16;',
       '全部完成': 'background:#F6FFED;color:#52C41A;',
-      '搭建失败': 'background:#FFF1F0;color:#FF4D4F;'
+      '搭建失败': 'background:#FFF1F0;color:#FF4D4F;',
+      '草稿':     'background:#F5F5F5;color:#8c8c8c;'
     })[status] || 'background:#f3f4f6;color:#6b7280;';
   }
 
@@ -952,20 +955,22 @@
     var reversed = filtered.slice().reverse();
     var html = '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">';
     html += '<div style="display:flex;align-items:center;padding:16px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">' +
-      '<div style="flex:1.3;text-align:center;">名称</div>' +
+      '<div style="flex:0.5;text-align:center;">序号</div>' +
+      '<div style="flex:1.2;text-align:center;">名称</div>' +
       '<div style="flex:0.7;text-align:center;">渠道</div>' +
       '<div style="flex:0.9;text-align:center;">投放版位</div>' +
       '<div style="flex:0.9;text-align:center;">状态</div>' +
       '<div style="flex:2;text-align:center;">操作</div>' +
       '</div>';
-    reversed.forEach(function(task) {
+    reversed.forEach(function(task, idx) {
       var taskData = null;
       try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch(e) {}
       var placementVal = taskData && taskData.placement ? taskData.placement : '';
       var placementDisplay = placementVal ? (placementMap[placementVal] || placementVal) : '未选择';
       var sl = getTaskStatusLog(task, taskData);
       html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;text-align:center;">' +
-        '<div style="flex:1.3;font-weight:500;display:flex;flex-direction:column;align-items:center;line-height:1.4;">' + escapeHtml(task.name) + '<span style="font-size:12px;color:#9ca3af;font-weight:400;">' + formatDate(task.createdAt) + '</span></div>' +
+        '<div style="flex:0.5;color:#9ca3af;">' + (idx + 1) + '</div>' +
+        '<div style="flex:1.2;font-weight:500;display:flex;flex-direction:column;align-items:center;line-height:1.4;">' + escapeHtml(task.name) + '<span style="font-size:12px;color:#9ca3af;font-weight:400;">' + formatDate(task.createdAt) + '</span></div>' +
         '<div style="flex:0.7;display:flex;justify-content:center;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
         '<div style="flex:0.9;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
         '<div style="flex:0.9;display:flex;justify-content:center;"><span data-status="' + sl.status + '" style="padding:4px 10px;border-radius:999px;font-size:13px;' + sl.statusStyle + '">' + sl.status + '</span></div>' +
@@ -1903,26 +1908,28 @@
       return;
     }
     if (emptyEl) emptyEl.style.display = 'none';
-    var html = '';
+    var chMap = { 'gdt': '广点通' };
+    var html = '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">';
+    html += '<div style="display:flex;align-items:center;padding:13px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">' +
+      '<div style="flex:0.6;text-align:center;">序号</div>' +
+      '<div style="flex:1;text-align:center;">渠道</div>' +
+      '<div style="flex:2.2;text-align:center;">名称</div>' +
+      '<div style="flex:1.4;text-align:center;">操作</div>' +
+      '</div>';
     copyPackages.forEach(function(pkg, idx) {
-      html += '<div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:18px 20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
-          '<div style="display:flex;align-items:center;gap:10px;">' +
-            '<span style="font-size:15px;font-weight:600;color:#111827;">' + escapeHtml(pkg.name) + '</span>' +
-            '<span style="font-size:11px;color:#fff;background:#52c41a;padding:2px 8px;border-radius:10px;">腾讯广告</span>' +
-            '<span style="font-size:12px;color:#fff;background:#1890FF;padding:2px 10px;border-radius:10px;">' + pkg.copies.length + ' 条</span>' +
-          '</div>' +
-          '<div style="display:flex;gap:8px;">' +
-            '<button onclick="editCopyPkg(' + idx + ')" style="padding:5px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#374151;"><i class="fas fa-edit" style="margin-right:4px;"></i>编辑</button>' +
-            '<button onclick="deleteCopyPkg(' + idx + ')" style="padding:5px 14px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;"><i class="fas fa-trash" style="margin-right:4px;"></i>删除</button>' +
-          '</div>' +
+      var chName = chMap[pkg.channel] || '广点通';
+      var cnt = pkg.copies ? pkg.copies.length : 0;
+      html += '<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;">' +
+        '<div style="flex:0.6;text-align:center;color:#9ca3af;">' + (idx + 1) + '</div>' +
+        '<div style="flex:1;display:flex;justify-content:center;"><span style="padding:4px 12px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(chName) + '</span></div>' +
+        '<div style="flex:2.2;font-weight:500;display:flex;align-items:center;gap:8px;"><span>' + escapeHtml(pkg.name) + '</span><span style="font-size:12px;color:#fff;background:#1890FF;padding:2px 9px;border-radius:10px;">' + cnt + ' 条</span></div>' +
+        '<div style="flex:1.4;display:flex;justify-content:center;gap:8px;">' +
+          '<button onclick="editCopyPkg(' + idx + ')" style="padding:5px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#374151;"><i class="fas fa-edit" style="margin-right:4px;"></i>编辑</button>' +
+          '<button onclick="deleteCopyPkg(' + idx + ')" style="padding:5px 14px;background:white;border:1px solid #ffa39e;border-radius:6px;cursor:pointer;font-size:13px;color:#ff4d4f;"><i class="fas fa-trash" style="margin-right:4px;"></i>删除</button>' +
         '</div>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
-      pkg.copies.forEach(function(c, ci) {
-        html += '<span style="display:inline-block;padding:5px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:13px;color:#166534;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(c) + '">' + escapeHtml(c) + '<span style="color:#9ca3af;font-size:11px;margin-left:3px;">(' + c.length + '/30)</span></span>';
-      });
-      html += '</div></div>';
+      '</div>';
     });
+    html += '</div>';
     container.innerHTML = html;
   };
 
