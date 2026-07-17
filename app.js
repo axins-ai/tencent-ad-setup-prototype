@@ -716,6 +716,9 @@ function getOptimizerName(accountId) {
   return OPTIMIZERS[h % OPTIMIZERS.length];
 }
 
+// 当前登录优化师（原型 mock；用于和账户优化师比对，不一致时标红警示）
+const LOGIN_USER = '张伟';
+
 // 通知组件
 function Notification({
   msg,
@@ -2157,6 +2160,14 @@ function App() {
   const [runMode, setRunMode] = useState('immediate'); // 'immediate' | 'scheduled'
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
+  // ===== 立即运行：进度弹窗 =====
+  const [runModal, setRunModal] = useState(false);
+  const [runProgress, setRunProgress] = useState(0);
+  const [runBg, setRunBg] = useState(false);
+  const [runResult, setRunResult] = useState(null); // 搭建完成后展示的日志条目
+  const runTimerRef = useRef(null);
+  const runBgRef = useRef(false);
+  const runStartRef = useRef(Date.now());
   // ===== 账户搜索 =====
   const [accountSearchText, setAccountSearchText] = useState('');
   // ===== 校验提示 =====
@@ -2417,6 +2428,110 @@ function App() {
     const t = setTimeout(doSaveForm, 500);
     return () => clearTimeout(t);
   }, [selectedAccountIds, placement, unitName, selectedMaterials, selectedCopies, selectedTargetingPackages]);
+
+  // ===== 立即运行：进度弹窗 + 后台运行 + 搭建日志 =====
+  const buildEntry = () => {
+    const ids = selectedAccountIds.length ? selectedAccountIds : ['acc_90000001', 'acc_90000002', 'acc_90000003'];
+    const seed = (currentTaskId ? currentTaskId.length : 1) * 31 + ids.length;
+    const statusOptions = ['全部完成', '部分完成', '搭建失败'];
+    const status = statusOptions[seed % 3];
+    const rows = ids.map((accId, idx) => {
+      let h = 0;
+      const s = '' + accId;
+      for (let i = 0; i < s.length; i++) h = h * 31 + s.charCodeAt(i) >>> 0;
+      h = h + seed * 7 + idx * 13 >>> 0;
+      const unitTotal = 1 + h % 3;
+      const creaPer = 2 + (h >> 3) % 3;
+      const creaTotal = unitTotal * creaPer;
+      let unitFail = 0,
+        creaFail = 0;
+      if (status === '搭建失败') {
+        unitFail = unitTotal;
+        creaFail = creaTotal;
+      } else if (status === '部分完成') {
+        unitFail = unitTotal > 1 ? 1 : 0;
+        creaFail = creaTotal > 1 ? creaPer : 0;
+      }
+      const reasons = status === '搭建失败' ? ['账户 ' + accId + ' 缺失素材包'] : status === '部分完成' ? ['账户 ' + accId + ' 定向包未配置'] : [];
+      return {
+        accId,
+        optimizer: getOptimizerName(accId),
+        unitTotal,
+        unitSucc: unitTotal - unitFail,
+        unitFail,
+        creaTotal,
+        creaSucc: creaTotal - creaFail,
+        creaFail,
+        reasons
+      };
+    });
+    return {
+      buildId: 'build_' + Date.now(),
+      startedAt: new Date(runStartRef.current).toISOString(),
+      finishedAt: new Date().toISOString(),
+      status,
+      rows
+    };
+  };
+  const appendBuildLog = entry => {
+    try {
+      const key = 'ad_task_buildlogs_' + (currentTaskId || 'unknown');
+      const arr = JSON.parse(localStorage.getItem(key) || '[]');
+      arr.push(entry);
+      localStorage.setItem(key, JSON.stringify(arr));
+    } catch (e) {}
+  };
+  const handleRun = () => {
+    if (selectedAccountIds.length === 0) {
+      notify('请先选择账户', 'error');
+      return;
+    }
+    runBgRef.current = false;
+    setRunBg(false);
+    setRunResult(null);
+    setRunProgress(0);
+    setRunModal(true);
+    runStartRef.current = Date.now();
+    const timer = setInterval(() => {
+      setRunProgress(p => Math.min(100, p + Math.floor(Math.random() * 7) + 4));
+    }, 180);
+    runTimerRef.current = timer;
+  };
+  const goBackground = () => {
+    runBgRef.current = true;
+    setRunBg(true);
+    setRunModal(false);
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'GOTO_TASKS'
+      }, '*');
+    }
+  };
+  const confirmResult = () => {
+    setRunModal(false);
+    setRunResult(null);
+    setRunProgress(0);
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'GOTO_TASKS'
+      }, '*');
+    }
+  };
+
+  // 进度到达 100%：写入搭建日志（后台运行时静默关闭，前台则展示明细）
+  useEffect(() => {
+    if (runProgress < 100) return;
+    clearInterval(runTimerRef.current);
+    const entry = buildEntry();
+    appendBuildLog(entry);
+    if (runBgRef.current) {
+      setRunModal(false);
+      setRunProgress(0);
+      setRunResult(null);
+    } else {
+      setRunResult(entry);
+    }
+  }, [runProgress]);
   return /*#__PURE__*/React.createElement("div", {
     className: "min-h-screen bg-gray-50"
   }, notification && /*#__PURE__*/React.createElement(Notification, {
@@ -2636,9 +2751,9 @@ function App() {
   }), "刷新")), /*#__PURE__*/React.createElement("div", {
     key: matchRefreshKey,
     className: "border border-gray-200 rounded-lg overflow-hidden bg-white min-h-[120px]"
-  }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-gray-400 p-3"
-  }, "请先选择账户") : /*#__PURE__*/React.createElement("table", {
+  }, selectedAccountIds.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "text-sm text-gray-400 p-3 pb-0"
+  }, "请先选择账户（下方为示例数据）"), /*#__PURE__*/React.createElement("table", {
     className: "w-full text-sm"
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
     className: "bg-gray-50 text-gray-600 text-left"
@@ -2668,7 +2783,31 @@ function App() {
     }, acc.kaboshi) : /*#__PURE__*/React.createElement("span", {
       className: "text-red-500 font-medium"
     }, "未匹配到投放链接")));
-  }))))))), /*#__PURE__*/React.createElement("div", {
+  }), [{
+    id: 'ACC-EX-001',
+    optimizer: '李娜',
+    link: 'https://e.qq.com/demo/li-na'
+  }, {
+    id: 'ACC-EX-002',
+    optimizer: '王芳',
+    link: 'https://e.qq.com/demo/wang-fang'
+  }].map(ex => /*#__PURE__*/React.createElement("tr", {
+    key: ex.id,
+    className: "border-t border-gray-100 bg-red-50"
+  }, /*#__PURE__*/React.createElement("td", {
+    className: "px-3 py-2 align-top text-red-500 font-medium"
+  }, ex.id), /*#__PURE__*/React.createElement("td", {
+    className: "px-3 py-2 align-top text-red-500 font-medium"
+  }, ex.optimizer, /*#__PURE__*/React.createElement("span", {
+    className: "ml-1 inline-block text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded"
+  }, "与登录人不一致")), /*#__PURE__*/React.createElement("td", {
+    className: "px-3 py-2 align-top"
+  }, /*#__PURE__*/React.createElement("a", {
+    href: ex.link,
+    target: "_blank",
+    rel: "noreferrer",
+    className: "text-green-600 hover:underline break-all"
+  }, ex.link)))))))))), /*#__PURE__*/React.createElement("div", {
     id: "section-unit",
     className: ""
   }, /*#__PURE__*/React.createElement("div", {
@@ -4033,11 +4172,15 @@ function App() {
         notify('请先选择账户', 'error');
         return;
       }
-      if (runMode === 'scheduled' && (!scheduledDate || !scheduledTime)) {
-        notify('请设置定时日期和时间', 'error');
+      if (runMode === 'scheduled') {
+        if (!scheduledDate || !scheduledTime) {
+          notify('请设置定时日期和时间', 'error');
+          return;
+        }
+        notify(`任务已提交，将在 ${scheduledDate} ${scheduledTime} 运行`, 'success');
         return;
       }
-      notify(`任务已提交${runMode === 'scheduled' ? `，将在 ${scheduledDate} ${scheduledTime} 运行` : '，将立即运行'}`, 'success');
+      handleRun();
     },
     className: "btn-secondary text-lg px-8 py-3"
   }, /*#__PURE__*/React.createElement("i", {
@@ -4058,7 +4201,93 @@ function App() {
       setShowCopyModal(false);
     },
     selectedCopies: selectedCopies
-  }), showPreview && (() => {
+  }), runModal && /*#__PURE__*/React.createElement("div", {
+    className: "modal-overlay",
+    style: {
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0,0,0,0.5)',
+      zIndex: 10001,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-content",
+    style: {
+      background: '#fff',
+      borderRadius: '14px',
+      width: '460px',
+      maxWidth: '92vw',
+      padding: '24px',
+      boxShadow: '0 20px 60px rgba(0,0,0,0.25)'
+    }
+  }, !runResult ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-lg font-bold text-gray-900 mb-1 flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-cog fa-spin text-blue-500"
+  }), "搭建进行中…"), /*#__PURE__*/React.createElement("p", {
+    className: "text-sm text-gray-500 mb-4"
+  }, "正在为 ", selectedAccountIds.length || 3, " 个账户搭建创意，请稍候"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '10px',
+      background: '#eef2f7',
+      borderRadius: '999px',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '100%',
+      width: runProgress + '%',
+      background: 'linear-gradient(90deg,#1890ff,#52c41a)',
+      transition: 'width .2s'
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "text-right text-xs text-gray-400 mt-2"
+  }, runProgress, "%"), /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-center mt-5"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: goBackground,
+    className: "btn-secondary text-sm px-5 py-2"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-arrow-right mr-2"
+  }), "转到后台运行")), /*#__PURE__*/React.createElement("p", {
+    className: "text-center text-xs text-gray-400 mt-3"
+  }, "点击「转到后台运行」将跳回任务列表，搭建在后台继续")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-lg font-bold text-gray-900 mb-3 flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-check-circle text-green-500"
+  }), "搭建完成"), /*#__PURE__*/React.createElement("div", {
+    className: "border border-gray-200 rounded-lg overflow-hidden mb-4"
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "w-full text-sm"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    className: "bg-gray-50 text-gray-600 text-left"
+  }, /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium"
+  }, "账户"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium"
+  }, "优化师"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium"
+  }, "单元"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium"
+  }, "创意"))), /*#__PURE__*/React.createElement("tbody", null, (runResult.rows || []).map((r, i) => /*#__PURE__*/React.createElement("tr", {
+    key: i,
+    className: "border-t border-gray-100"
+  }, /*#__PURE__*/React.createElement("td", {
+    className: "px-3 py-2 align-top text-gray-700"
+  }, r.accId), /*#__PURE__*/React.createElement("td", {
+    className: "px-3 py-2 align-top text-gray-700"
+  }, r.optimizer), /*#__PURE__*/React.createElement("td", {
+    className: "px-3 py-2 align-top text-gray-700"
+  }, r.unitSucc, "成 / ", r.unitFail, "败"), /*#__PURE__*/React.createElement("td", {
+    className: "px-3 py-2 align-top text-gray-700"
+  }, r.creaSucc, "成 / ", r.creaFail, "败")))))), /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-center"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: confirmResult,
+    className: "btn-primary text-sm px-8 py-2"
+  }, "确定"))))), showPreview && (() => {
     const summary = getBuildSummary();
     const {
       accountCount,

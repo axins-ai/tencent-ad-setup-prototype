@@ -60,66 +60,75 @@
   <div id="main-content" style="margin-left:256px;flex:1;height:100vh;overflow:auto;">
 
     <!-- 视图：任务列表 -->
-    <div id="view-task-list" style="display:block;padding:32px 24px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
-        <div>
-          <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">批创工具</h2>
+    <div id="view-task-list" style="display:block;padding:0;">
+      <div style="display:flex;min-height:100vh;align-items:stretch;">
+        <!-- 左侧筛选栏 -->
+        <div id="task-filter-sidebar" style="width:240px;min-width:240px;padding:28px 20px;background:white;border-right:1px solid #e5e7eb;">
+          <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:20px;letter-spacing:0.5px;">筛选</div>
+          <div style="margin-bottom:18px;">
+            <div style="font-size:13px;color:#374151;margin-bottom:6px;">渠道</div>
+            <select id="filter-channel" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
+              <option value="">全部</option>
+              <option value="gdt">广点通</option>
+            </select>
+          </div>
+          <div style="margin-bottom:18px;">
+            <div style="font-size:13px;color:#374151;margin-bottom:6px;">版位</div>
+            <select id="filter-placement" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
+              <option value="">全部</option>
+              <option value="wechat_video">视频号</option>
+              <option value="wechat_mp">微信公众号与小程序</option>
+            </select>
+          </div>
+          <div style="margin-bottom:18px;">
+            <div style="font-size:13px;color:#374151;margin-bottom:6px;">状态</div>
+            <select id="filter-status" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
+              <option value="">全部</option>
+              <option value="搭建中">搭建中</option>
+              <option value="部分完成">部分完成</option>
+              <option value="全部完成">全部完成</option>
+              <option value="搭建失败">搭建失败</option>
+            </select>
+          </div>
+          <div style="margin-bottom:18px;">
+            <div style="font-size:13px;color:#374151;margin-bottom:6px;">名称</div>
+            <input id="filter-name" type="text" placeholder="搜索任务名称..." style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;box-sizing:border-box;">
+          </div>
+          <button id="filter-reset-btn" style="width:100%;padding:8px 14px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#6b7280;">重置</button>
         </div>
-        <div style="position:relative;">
-          <button style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
-            <i class="fas fa-plus"></i>新增批创任务
-            <i class="fas fa-chevron-down" style="font-size:12px;"></i>
-          </button>
-          <div id="channel-dropdown" class="dropdown-container" style="display:none;position:absolute;top:100%;right:0;background:white;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.15);min-width:200px;z-index:200;overflow:hidden;">
-            <div id="channel-gdt" class="dropdown-item" data-channel="gdt" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;color:#111827;"><span style="font-size:18px;">🎯</span><span>广点通</span></div>
-            <div style="padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:14px;color:#c0c0c0;cursor:not-allowed;background:#fafafa;">
-              <span style="font-size:18px;filter:grayscale(1);">📰</span>
-              <span>头条</span>
-              <span style="margin-left:auto;font-size:12px;color:#c0c0c0;">即将支持</span>
+        <!-- 右侧主内容 -->
+        <div style="flex:1;min-width:0;padding:32px 24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
+            <div>
+              <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">批创工具</h2>
+            </div>
+            <div style="position:relative;">
+              <button style="background:#1890FF;color:white;font-size:16px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-plus"></i>新增批创任务
+                <i class="fas fa-chevron-down" style="font-size:12px;"></i>
+              </button>
+              <div id="channel-dropdown" class="dropdown-container" style="display:none;position:absolute;top:100%;right:0;background:white;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.15);min-width:200px;z-index:200;overflow:hidden;">
+                <div id="channel-gdt" class="dropdown-item" data-channel="gdt" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;color:#111827;"><span style="font-size:18px;">🎯</span><span>广点通</span></div>
+                <div style="padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:14px;color:#c0c0c0;cursor:not-allowed;background:#fafafa;">
+                  <span style="font-size:18px;filter:grayscale(1);">📰</span>
+                  <span>头条</span>
+                  <span style="margin-left:auto;font-size:12px;color:#c0c0c0;">即将支持</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="task-list-content">
+            <div style="text-align:center;padding:80px 0;color:#9ca3af;">
+              <div style="font-size:48px;margin-bottom:16px;">📋</div>
+              <p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p>
+              <p style="font-size:14px;margin:8px 0 0 0;">点击「新增批创任务」开始创建批量创意搭建</p>
             </div>
           </div>
         </div>
       </div>
-      <!-- 筛选卡片 -->
-      <div id="task-filter-bar" style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px 20px;background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-size:13px;color:#6b7280;white-space:nowrap;">渠道</span>
-          <select id="filter-channel" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
-            <option value="">全部</option>
-            <option value="gdt">广点通</option>
-          </select>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-size:13px;color:#6b7280;white-space:nowrap;">版位</span>
-          <select id="filter-placement" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
-            <option value="">全部</option>
-            <option value="wechat_video">视频号</option>
-            <option value="wechat_mp">微信公众号与小程序</option>
-          </select>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;flex:1;">
-          <span style="font-size:13px;color:#6b7280;white-space:nowrap;">名称</span>
-          <input id="filter-name" type="text" placeholder="搜索任务名称..." style="flex:1;padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;max-width:200px;">
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-size:13px;color:#6b7280;white-space:nowrap;">状态</span>
-          <select id="filter-status" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;background:#fff;">
-            <option value="">全部</option>
-            <option value="搭建中">搭建中</option>
-            <option value="部分完成">部分完成</option>
-            <option value="全部完成">全部完成</option>
-            <option value="搭建失败">搭建失败</option>
-          </select>
-        </div>
-        <button id="filter-reset-btn" style="padding:6px 14px;background:white;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;color:#6b7280;">重置</button>
-        <span id="current-user-label" style="margin-left:auto;font-size:13px;color:#9ca3af;white-space:nowrap;">当前登录优化师：<b style="color:#333;" id="current-user-name"></b></span>
-      </div>
-      <div id="task-list-content">
-        <div style="text-align:center;padding:80px 0;color:#9ca3af;">
-          <div style="font-size:48px;margin-bottom:16px;">📋</div>
-          <p style="font-size:18px;margin:0 0 8px 0;">暂无任务</p>
-          <p style="font-size:14px;margin:8px 0 0 0;">点击「新增批创任务」开始创建批量创意搭建</p>
-        </div>
+      <!-- 日志页面（独立视图，点击任务「日志」进入） -->
+      <div id="view-log-list" style="display:none;padding:32px 24px;">
+        <div id="log-list-content"></div>
       </div>
     </div>
 
@@ -540,6 +549,7 @@
 <script>
 (function() {
   var tasks = [];
+  var currentLogTaskId = null;
   var currentTaskId = null;
   var targetingPackages = [];
   var copyTexts = [];
@@ -588,7 +598,7 @@
   };
 
   // ========== 视图切换 ==========
-  var VIEWS = ['task-list', 'form', 'targeting-packages', 'creative-assets', 'copy-library'];
+  var VIEWS = ['task-list', 'form', 'targeting-packages', 'creative-assets', 'copy-library', 'log-list'];
   window.showView = function(name) {
     VIEWS.forEach(function(v) {
       var el = document.getElementById('view-' + v);
@@ -602,6 +612,7 @@
     if (name === 'targeting-packages') renderTgtPkgList();
     if (name === 'creative-assets') renderBrandImageList();
     if (name === 'copy-library') renderCopyPkgList();
+    if (name === 'log-list') renderLogList(currentLogTaskId);
   };
 
   // 显示任务列表（兼容旧调用）
@@ -794,76 +805,106 @@
     return { status: status, statusColor: statusColor, start: start, end: end, rows: rows };
   }
 
-  function openLogModal(taskId) {
+  // ========== 搭建日志：独立页面（每次搭建一条记录，支持多次编辑搭建） ==========
+  function statusColorOf(status) {
+    return ({
+      '搭建中':   'background:#E6F7FF;color:#1890FF;',
+      '部分完成': 'background:#FFF7E6;color:#FA8C16;',
+      '全部完成': 'background:#F6FFED;color:#52C41A;',
+      '搭建失败': 'background:#FFF1F0;color:#FF4D4F;'
+    })[status] || 'background:#f3f4f6;color:#6b7280;';
+  }
+
+  function getBuildLogs(taskId) {
+    try { return JSON.parse(localStorage.getItem('ad_task_buildlogs_' + taskId) || '[]'); }
+    catch (e) { return []; }
+  }
+
+  // 首次打开无日志时，种子化 3 条历史搭建记录（确定性 mock，按 id 稳定）
+  function seedBuildLogs(task) {
+    var key = 'ad_task_buildlogs_' + task.id;
+    var taskData = null;
+    try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch (e) {}
+    var arr = [];
+    for (var n = 0; n < 3; n++) {
+      var fake = { id: task.id + '#seed' + n, createdAt: new Date(Date.now() - (n + 1) * 3 * 86400000).toISOString() };
+      var log = computeBuildLog(fake, taskData);
+      arr.push({
+        buildId: 'build_seed_' + task.id + '_' + n,
+        startedAt: log.start.toISOString ? log.start.toISOString() : ('' + log.start),
+        finishedAt: log.end.toISOString ? log.end.toISOString() : ('' + log.end),
+        status: log.status,
+        rows: log.rows
+      });
+    }
+    try { localStorage.setItem(key, JSON.stringify(arr)); } catch (e) {}
+    return arr;
+  }
+
+  function renderLogList(taskId) {
+    var container = document.getElementById('log-list-content');
+    if (!container) return;
     var tasks = [];
     try { tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]'); } catch (e) {}
     var task = null;
     for (var i = 0; i < tasks.length; i++) { if (tasks[i].id === taskId) { task = tasks[i]; break; } }
-    var modal = document.getElementById('log-modal');
-    var titleEl = document.getElementById('log-modal-title');
-    var statusEl = document.getElementById('log-modal-status');
-    var body = document.getElementById('log-modal-body');
-    if (!modal) return;
-    if (!task) {
-      titleEl.textContent = '搭建日志';
-      statusEl.textContent = ''; statusEl.style.cssText = '';
-      body.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:40px 0;">未找到该任务的日志</div>';
-      modal.style.display = 'flex';
-      return;
-    }
-    var taskData = null;
-    try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch (e) {}
-    var log = computeBuildLog(task, taskData);
-    titleEl.textContent = '搭建日志 · ' + (task.name || task.id);
-    statusEl.textContent = log.status;
-    statusEl.style.cssText = 'margin-left:12px;padding:3px 10px;border-radius:999px;font-size:13px;' + log.statusColor;
+    if (!task) { container.innerHTML = '<div style="color:#9ca3af;padding:40px 0;">未找到该任务</div>'; return; }
+    var logs = getBuildLogs(task.id);
+    if (!logs.length) logs = seedBuildLogs(task);
     var html = '';
-    html += '<div style="display:flex;gap:24px;padding:14px 16px;background:#fafafa;border-radius:8px;margin-bottom:16px;">';
-    html += '<div><div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">搭建开始时间</div><div style="font-size:14px;color:#333;">' + formatDate(log.start) + '</div></div>';
-    html += '<div><div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">搭建结束时间</div><div style="font-size:14px;color:#333;">' + (log.status === '搭建中' ? '进行中…' : formatDate(log.end)) + '</div></div>';
+    html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">';
+    html += '<button id="log-back-btn" style="padding:8px 14px;background:white;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;font-size:14px;color:#333;"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>返回任务列表</button>';
+    html += '<h2 style="font-size:22px;font-weight:bold;color:#111827;margin:0;">搭建日志 · ' + escapeHtml(task.name || task.id) + '</h2>';
     html += '</div>';
-    html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
-    html += '<thead><tr style="background:#fafafa;color:#6b7280;text-align:left;">' +
-      '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">账户明细</th>' +
-      '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">优化师</th>' +
-      '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">单元搭建明细</th>' +
-      '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">创意搭建明细</th>' +
-      '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">失败原因</th>' +
-      '</tr></thead><tbody>';
-    var mismatchCount = 0;
-    if (log.rows.length === 0) {
-      html += '<tr><td colspan="5" style="padding:16px 12px;color:#9ca3af;text-align:center;">未读取到账户明细</td></tr>';
+    if (!logs.length) {
+      html += '<div style="text-align:center;padding:80px 0;color:#9ca3af;"><div style="font-size:48px;margin-bottom:16px;">🧾</div><p style="font-size:18px;margin:0 0 8px 0;">暂无搭建日志</p><p style="font-size:14px;margin:8px 0 0 0;">去表单点击「立即运行」开始搭建</p></div>';
     } else {
-      log.rows.forEach(function(r) {
-        if (r.mismatch) mismatchCount++;
-        var rowBg = r.mismatch ? 'background:#fff1f0;' : '';
-        html += '<tr style="border-bottom:1px solid #f0f0f0;' + rowBg + '">';
-        html += '<td style="padding:10px 12px;vertical-align:top;"><span style="display:inline-block;padding:2px 8px;background:' + (r.mismatch ? '#ffe7e5;color:#cf1322;' : '#f0fdf4;color:#16a34a;') + 'border-radius:6px;font-size:12px;">' + escapeHtml(r.accId) + '</span></td>';
-        html += '<td style="padding:10px 12px;vertical-align:top;">' +
-          '<span style="font-size:13px;color:' + (r.mismatch ? '#cf1322;font-weight:600;' : '#333;') + '">' + escapeHtml(r.optimizer) + '</span>' +
-          (r.mismatch ? '<br><span style="display:inline-block;margin-top:4px;padding:2px 8px;background:#ffccc7;color:#a8071a;border-radius:6px;font-size:12px;">与登录人不一致 · 不能搭建</span>' : '') +
-          '</td>';
-        html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">共搭建 <b>' + r.unitTotal + '</b> 个单元，<span style="color:#52c41a;">' + r.unitSucc + ' 个成功</span>、<span style="' + (r.unitFail > 0 ? 'color:#ff4d4f;' : 'color:#9ca3af;') + '">' + r.unitFail + ' 个失败</span></td>';
-        html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">共搭建 <b>' + r.creaTotal + '</b> 个创意，<span style="color:#52c41a;">' + r.creaSucc + ' 个成功</span>、<span style="' + (r.creaFail > 0 ? 'color:#ff4d4f;' : 'color:#9ca3af;') + '">' + r.creaFail + ' 个失败</span></td>';
-        if (r.reasons.length) {
-          html += '<td style="padding:10px 12px;vertical-align:top;">' + r.reasons.map(function(rr) { return '<span style="display:inline-block;padding:2px 8px;background:#fff1f0;color:#ff4d4f;border-radius:6px;font-size:12px;margin:2px 4px 2px 0;">' + escapeHtml(rr) + '</span>'; }).join('') + '</td>';
-        } else {
-          html += '<td style="padding:10px 12px;vertical-align:top;color:#52c41a;"><i class="fas fa-check-circle" style="margin-right:4px;"></i>无</td>';
-        }
-        html += '</tr>';
+      logs.slice().reverse().forEach(function(entry, idx) {
+        var totU = 0, totUF = 0, totC = 0, totCF = 0;
+        (entry.rows || []).forEach(function(r) { totU += r.unitTotal || 0; totUF += r.unitFail || 0; totC += r.creaTotal || 0; totCF += r.creaFail || 0; });
+        html += '<div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:16px;overflow:hidden;">';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f0f0f0;">';
+        html += '<div><span style="font-size:14px;font-weight:600;color:#111827;">第 ' + (idx + 1) + ' 次搭建</span><span style="margin-left:12px;padding:3px 10px;border-radius:999px;font-size:12px;' + statusColorOf(entry.status) + '">' + escapeHtml(entry.status) + '</span></div>';
+        html += '<div style="font-size:12px;color:#9ca3af;">' + (formatDate(entry.startedAt) || '') + ' → ' + (formatDate(entry.finishedAt) || '') + '</div>';
+        html += '</div>';
+        html += '<div style="display:flex;gap:20px;padding:12px 20px;background:#fafafa;border-bottom:1px solid #f0f0f0;font-size:13px;color:#6b7280;">';
+        html += '<span>账户 ' + (entry.rows ? entry.rows.length : 0) + ' 个</span>';
+        html += '<span>单元 ' + (totU - totUF) + ' 成功 / ' + totUF + ' 失败</span>';
+        html += '<span>创意 ' + (totC - totCF) + ' 成功 / ' + totCF + ' 失败</span>';
+        html += '</div>';
+        html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        html += '<thead><tr style="background:#fff;color:#6b7280;text-align:left;">' +
+          '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">账户</th>' +
+          '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">优化师</th>' +
+          '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">单元</th>' +
+          '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">创意</th>' +
+          '<th style="padding:10px 12px;font-weight:600;border-bottom:1px solid #e5e7eb;">失败原因</th>' +
+          '</tr></thead><tbody>';
+        (entry.rows || []).forEach(function(r) {
+          html += '<tr style="border-bottom:1px solid #f0f0f0;">';
+          html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">' + escapeHtml(r.accId) + '</td>';
+          html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">' + escapeHtml(r.optimizer || '') + '</td>';
+          html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">' + r.unitSucc + ' 成功 / ' + r.unitFail + ' 失败</td>';
+          html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">' + r.creaSucc + ' 成功 / ' + r.creaFail + ' 失败</td>';
+          if (r.reasons && r.reasons.length) {
+            html += '<td style="padding:10px 12px;vertical-align:top;">' + r.reasons.map(function(rr) { return '<span style="display:inline-block;padding:2px 8px;background:#fff1f0;color:#ff4d4f;border-radius:6px;font-size:12px;margin:2px 4px 2px 0;">' + escapeHtml(rr) + '</span>'; }).join('') + '</td>';
+          } else {
+            html += '<td style="padding:10px 12px;vertical-align:top;color:#52c41a;"><i class="fas fa-check-circle" style="margin-right:4px;"></i>无</td>';
+          }
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
       });
     }
-    html += '</tbody></table>';
-    if (mismatchCount > 0) {
-      html += '<div style="margin-top:12px;padding:10px 14px;background:#fff1f0;border:1px solid #ffccc7;border-radius:8px;color:#a8071a;font-size:13px;">⚠️ 共 ' + mismatchCount + ' 个账户的优化师与当前登录人（' + escapeHtml(CURRENT_USER) + '）不一致，已标红且「不能搭建」，请核对账户归属。</div>';
-    }
-    body.innerHTML = html;
-    modal.style.display = 'flex';
+    container.innerHTML = html;
+    var back = document.getElementById('log-back-btn');
+    if (back) back.addEventListener('click', function() { showView('task-list'); });
   }
 
-  function closeLogModal() {
-    var m = document.getElementById('log-modal');
-    if (m) m.style.display = 'none';
+  // 点击任务「日志」→ 跳转到独立日志页面
+  function openLogPage(taskId) {
+    currentLogTaskId = taskId;
+    showView('log-list');
   }
 
   // ========== 任务列表筛选（渠道 / 版位 / 名称 / 状态） ==========
@@ -1992,6 +2033,8 @@
   window.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'TASK_FORM_SAVE') {
       renderTaskList();
+    } else if (event.data && event.data.type === 'GOTO_TASKS') {
+      showView('task-list');
     }
   });
 
@@ -2093,8 +2136,7 @@
   });
 
   // 暴露给全局作用域（bindAllEvents 在 IIFE 之外定义，需要访问以下符号）
-  window.openLogModal = openLogModal;
-  window.closeLogModal = closeLogModal;
+  window.openLogPage = openLogPage;
   window.renderTaskList = renderTaskList;
   window.CURRENT_USER = CURRENT_USER;
 })();
@@ -2181,7 +2223,7 @@
         if (!btn) return;
         var taskId = btn.getAttribute('data-task-id');
         if (!taskId) return;
-        if (btn.textContent.indexOf('日志') >= 0) { openLogModal(taskId); return; }
+        if (btn.textContent.indexOf('日志') >= 0) { openLogPage(taskId); return; }
         if (btn.textContent.indexOf('编辑') >= 0) editTask(taskId);
         if (btn.textContent.indexOf('复制') >= 0) copyTask(taskId);
         if (btn.textContent.indexOf('删除') >= 0) deleteTask(taskId);
@@ -2205,18 +2247,6 @@
       if (fStatus) fStatus.value = '';
       if (fName) fName.value = '';
       renderTaskList();
-    });
-
-    // -- 当前登录优化师标签 --
-    var cuName = document.getElementById('current-user-name');
-    if (cuName) cuName.textContent = CURRENT_USER;
-
-    // -- 搭建日志弹窗：关闭（事件委托到 document，兼容弹窗在脚本之后解析）--
-    document.addEventListener('click', function(e) {
-      if (!e.target) return;
-      if (e.target.id === 'log-modal-close') { closeLogModal(); return; }
-      var lm = document.getElementById('log-modal');
-      if (lm && e.target === lm) closeLogModal();
     });
 
     // -- 文案包：事件委托 --
@@ -2257,18 +2287,6 @@
   }
 
 </script>
-
-<!-- 搭建日志内联弹窗 -->
-<div id="log-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;">
-  <div style="background:white;border-radius:12px;width:760px;max-width:92vw;max-height:86vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
-    <div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-      <h3 id="log-modal-title" style="font-size:16px;font-weight:600;margin:0;color:#1f2937;">搭建日志</h3>
-      <span id="log-modal-status" style="margin-left:12px;padding:3px 10px;border-radius:999px;font-size:13px;"></span>
-      <button id="log-modal-close" style="margin-left:auto;background:none;border:none;font-size:22px;color:#9ca3af;cursor:pointer;line-height:1;">&times;</button>
-    </div>
-    <div id="log-modal-body" style="padding:20px;"></div>
-  </div>
-</div>
 
 </body>
 </html>
