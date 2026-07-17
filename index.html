@@ -417,9 +417,9 @@
               <div style="margin-bottom:12px;">
                 <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 名称</label>
                 <div style="position:relative;">
-                  <input type="text" id="bi-name-input" placeholder="请输入名称" maxlength="100" oninput="document.getElementById('bi-name-count').textContent=this.value.length+'/100'"
-                    style="width:100%;padding:9px 100px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
-                  <span id="bi-name-count" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:#9ca3af;">0/100</span>
+                  <input type="text" id="bi-name-input" placeholder="请输入名称（20字以内）" maxlength="20" oninput="document.getElementById('bi-name-count').textContent=this.value.length+'/20'"
+                    style="width:100%;padding:9px 60px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
+                  <span id="bi-name-count" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:#9ca3af;">0/20</span>
                 </div>
               </div>
             </div>
@@ -1727,7 +1727,7 @@
     var nameInput = document.getElementById('bi-name-input');
     if (nameInput) { nameInput.value = ''; }
     var nameCount = document.getElementById('bi-name-count');
-    if (nameCount) nameCount.textContent = '0/100';
+    if (nameCount) nameCount.textContent = '0/20';
     var previewArea = document.getElementById('bi-preview-area');
     if (previewArea) previewArea.innerHTML = '';
     // 重置营销组件字段
@@ -1765,7 +1765,7 @@
           if (descInput) document.getElementById('mc-desc-count').textContent = (found.desc || '').length + '/14';
         } else {
           if (nameInput) nameInput.value = found.name || '';
-          if (nameCount) nameCount.textContent = (found.name || '').length + '/100';
+          if (nameCount) nameCount.textContent = (found.name || '').length + '/20';
         }
       }
     }
