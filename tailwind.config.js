@@ -1,12 +1,18 @@
 module.exports = {
-  content: [
+  purge: [
     './source_33a3c4b.jsx',
     './app.js',
     './form.html',
     './nav.html',
+    './nav.js',
+    './nav.jsx',
     './form_new.html',
     './targeting-package.html',
     './index_simple.html',
+    './index.html',
+  ],
+  safelist: [
+    'modal-overlay', 'modal-content', 'btn-primary', 'btn-secondary', 'tag', 'animate-fadeIn',
   ],
   theme: {
     extend: {
