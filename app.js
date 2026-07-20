@@ -3949,6 +3949,57 @@ function App() {
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
   }, "平均分配")))), /*#__PURE__*/React.createElement("div", {
+    className: "border-t pt-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-3"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-layer-group mr-2 text-blue-500"
+  }), "创意素材数量"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "text-sm text-gray-600 whitespace-nowrap"
+  }, "单创意素材"), placement === 'wechat_video' ? /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: 1,
+    disabled: true,
+    className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none bg-gray-100 text-gray-500 cursor-not-allowed"
+  }) : /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "1",
+    max: "15",
+    value: composeRule.materials,
+    onChange: e => {
+      const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+      setComposeRule({
+        ...composeRule,
+        materials: v
+      });
+    },
+    className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400"
+  }, placement === 'wechat_video' ? '（视频号固定为1）' : '（1~15）')), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "text-sm text-gray-600 whitespace-nowrap"
+  }, "单创意文案"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "1",
+    max: "3",
+    value: composeRule.copies,
+    onChange: e => {
+      const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
+      setComposeRule({
+        ...composeRule,
+        copies: v
+      });
+    },
+    className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400"
+  }, "（1~3）")))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
@@ -3991,7 +4042,7 @@ function App() {
     }, buildType === 'creative_only' ? `(共 ${s.totalUnits} 个单元 × 每单元 ${s.creativesPerUnit} 个)` : `(文案${copyStrategy === 'copy' ? '复制' : '平均'} · 素材${materialStrategy === 'copy' ? '复制' : '平均'})`));
   })(), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
-  }, "规则：每个创意 = 1 素材 + 1 文案（共 ", s.materialCount, " 素材 × ", s.copyCount, " 文案）"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }, "规则：每个创意 = ", composeRule.materials, " 素材 + ", composeRule.copies, " 文案"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "创意名称"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 max-w-md"

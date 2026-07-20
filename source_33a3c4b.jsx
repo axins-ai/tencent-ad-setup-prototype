@@ -2984,6 +2984,40 @@ function App() {
                   </div>
                 </div>
 
+                {/* 创意素材数量：每个创意捆绑的素材数 / 文案数（保留在「创意素材分配」下） */}
+                <div className="border-t pt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材数量</label>
+                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-600 whitespace-nowrap">单创意素材</label>
+                    {placement === 'wechat_video' ? (
+                      <input type="number" value={1} disabled
+                        className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none bg-gray-100 text-gray-500 cursor-not-allowed" />
+                    ) : (
+                      <input type="number" min="1" max="15" value={composeRule.materials}
+                        onChange={e => {
+                          const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                          setComposeRule({...composeRule, materials: v});
+                        }}
+                        className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                    )}
+                    <span className="text-xs text-gray-400">
+                      {placement === 'wechat_video' ? '（视频号固定为1）' : '（1~15）'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-600 whitespace-nowrap">单创意文案</label>
+                    <input type="number" min="1" max="3" value={composeRule.copies}
+                      onChange={e => {
+                        const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
+                        setComposeRule({...composeRule, copies: v});
+                      }}
+                      className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                    <span className="text-xs text-gray-400">（1~3）</span>
+                  </div>
+                </div>
+              </div>
+
                 {/* 创意素材 / 广告文案 数量配置（移入此处） */}
                 <div className="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -2999,8 +3033,6 @@ function App() {
                     </button>
                   </div>
                 </div>
-
-                {/* 创意素材数量配置已删除：数量由下方「创意素材分配」中的已选素材 / 文案数量决定 */}
               </div>
 
               {/* 预估可生成创意数 */}
@@ -3023,7 +3055,7 @@ function App() {
                   );
                 })()}
                 <p className="text-xs text-gray-400 mt-1">
-                  规则：每个创意 = 1 素材 + 1 文案（共 {s.materialCount} 素材 × {s.copyCount} 文案）
+                  规则：每个创意 = {composeRule.materials} 素材 + {composeRule.copies} 文案
                 </p>
               </div>
             </div>
