@@ -785,7 +785,7 @@ function MaterialModal({ show, onClose, onConfirm, selectedMaterials, accountId 
           </div>
         </div>
         <div className="p-4 border-t flex justify-between items-center">
-          <span className="text-sm text-gray-600">已选择 {localSelected.length} 个素材（可多次选择，累计最多500个）</span>
+          <span className="text-sm text-gray-600">已选择 <span className="text-red-500">{localSelected.length}/500</span> 个素材</span>
           <div className="flex gap-3">
             <button onClick={() => { onConfirm(localSelected.map(id => [...MOCK.videoMaterials, ...MOCK.imageMaterials].find(m => m.id === id)).filter(Boolean)); setLocalSelected([]); }} className="btn-secondary text-sm">清空重选</button>
             <button onClick={handleConfirm} className="btn-primary">确认选择</button>
@@ -1538,13 +1538,13 @@ function App() {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
-  const [copyStrategy, setCopyStrategy] = useState('average');
+  const [copyStrategy, setCopyStrategy] = useState('copy'); // 'copy' | 'average' 文案分配策略
   const [landingPageMacro, setLandingPageMacro] = useState('');
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
   // 创意素材分配
   const [composeRule, setComposeRule] = useState({ materials: 1, copies: 1 });
-  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average'
+  const [materialStrategy, setMaterialStrategy] = useState('copy'); // 'copy' | 'average' 素材分配策略
   // 版位切换时调整素材数量上限；公众号版位营销组件仅支持行动按钮
   useEffect(() => {
     if (placement === 'wechat_video' && composeRule.materials !== 1) {
@@ -1755,7 +1755,7 @@ function App() {
     if (buildType === 'creative_only') {
       // 仅搭建创意：每个已选单元都生成 creativesPerUnit 个创意
       totalCreatives = totalUnits * creativesPerUnit;
-    } else if (composeStrategy === 'copy') {
+    } else if (materialStrategy === 'copy') {
       // 复制分配：每个账户独立使用所有素材
       totalCreatives = selectedAccountIds.reduce((sum, id) => sum + tpFor(id) * creativesPerUnit, 0);
     } else {
@@ -1801,7 +1801,8 @@ function App() {
         if (data.materials) setSelectedMaterials(data.materials);
         if (data.copies) setSelectedCopies(data.copies);
         if (data.composeRule) setComposeRule(data.composeRule);
-        if (data.composeStrategy) setComposeStrategy(data.composeStrategy);
+        if (data.materialStrategy) setMaterialStrategy(data.materialStrategy);
+        if (data.copyStrategy) setCopyStrategy(data.copyStrategy);
         if (data.marketingComponentType) setMarketingComponentType(data.marketingComponentType);
         if (data.actionButtonType) setActionButtonType(data.actionButtonType);
         if (data.landingPageMacro !== undefined) setLandingPageMacro(data.landingPageMacro);
@@ -1828,7 +1829,7 @@ function App() {
         首日开始, 首日开始时间值,
         creativeEnhanceMax, selectedMaterials, selectedCopies,
         landingPageMacro,
-        composeRule, composeStrategy,
+        composeRule, materialStrategy, copyStrategy,
         marketingComponentType, actionButtonType,
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
@@ -2861,21 +2862,7 @@ function App() {
               </button>
             </div>
 
-            {/* 素材选择（视频+图片） */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 {selectedMaterials.length}/500 个，可多次选择）</label>
-              <button onClick={() => { setShowMaterialModal(true); }} className="btn-secondary">
-                <i className="fas fa-photo-video mr-2"></i>选择素材（视频/图片）
-              </button>
-            </div>
-
-            {/* 广告文案 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 {selectedCopies.length}/50 条，支持多选和批量添加）</label>
-              <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
-                <i className="fas fa-font mr-2"></i>选择广告文案
-              </button>
-            </div>
+            {/* 创意素材 / 广告文案 选择已移至下方「创意素材分配」区块 */}
 
             {/* 品牌形象 */}
             <div className="border-t pt-4">
@@ -2967,55 +2954,53 @@ function App() {
             <div className="border-t pt-4">
               <h4 className="text-sm font-bold text-gray-900 mb-4"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材分配</h4>
               <div className="space-y-4">
-                {/* 1) 创意分配策略：先确定分配策略（平均 / 复制） */}
+                {/* 文案分配策略 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-copy mr-2 text-blue-500"></i>创意分配策略（文案 / 素材）</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-font mr-2 text-blue-500"></i>文案分配策略</label>
                   <div className="flex items-center gap-6">
                     <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="compose_strategy" value="copy" checked={composeStrategy === 'copy'} onChange={() => setComposeStrategy('copy')} className="mr-2" />
-                      <span className="text-sm">复制分配（所有账户用相同素材 / 文案）</span>
+                      <input type="radio" name="copy_strategy" value="copy" checked={copyStrategy === 'copy'} onChange={() => setCopyStrategy('copy')} className="mr-2" />
+                      <span className="text-sm">复制分配（所有账户用相同文案）</span>
                     </label>
                     <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="compose_strategy" value="average" checked={composeStrategy === 'average'} onChange={() => setComposeStrategy('average')} className="mr-2" />
+                      <input type="radio" name="copy_strategy" value="average" checked={copyStrategy === 'average'} onChange={() => setCopyStrategy('average')} className="mr-2" />
                       <span className="text-sm">平均分配</span>
                     </label>
                   </div>
                 </div>
 
-                {/* 2) 创意素材数量：再确定素材数量 / 文案数量 */}
-                <div className="border-t pt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材数量</label>
+                {/* 素材分配策略 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-photo-video mr-2 text-blue-500"></i>素材分配策略</label>
                   <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600 whitespace-nowrap">单创意素材</label>
-                    {placement === 'wechat_video' ? (
-                      <input type="number" value={1} disabled
-                        className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none bg-gray-100 text-gray-500 cursor-not-allowed" />
-                    ) : (
-                      <input type="number" min="1" max="15" value={composeRule.materials}
-                        onChange={e => {
-                          const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
-                          setComposeRule({...composeRule, materials: v});
-                        }}
-                        className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                    )}
-                    <span className="text-xs text-gray-400">
-                      {placement === 'wechat_video' ? '（视频号固定为1）' : '（1~15）'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600 whitespace-nowrap">单创意文案</label>
-                    <input type="number" min="1" max="3" value={composeRule.copies}
-                      onChange={e => {
-                        const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
-                        setComposeRule({...composeRule, copies: v});
-                      }}
-                      className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                    <span className="text-xs text-gray-400">（1~3）</span>
+                    <label className="flex items-center cursor-pointer">
+                      <input type="radio" name="material_strategy" value="copy" checked={materialStrategy === 'copy'} onChange={() => setMaterialStrategy('copy')} className="mr-2" />
+                      <span className="text-sm">复制分配（所有账户用相同素材）</span>
+                    </label>
+                    <label className="flex items-center cursor-pointer">
+                      <input type="radio" name="material_strategy" value="average" checked={materialStrategy === 'average'} onChange={() => setMaterialStrategy('average')} className="mr-2" />
+                      <span className="text-sm">平均分配</span>
+                    </label>
                   </div>
                 </div>
 
-              </div>
+                {/* 创意素材 / 广告文案 数量配置（移入此处） */}
+                <div className="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</label>
+                    <button onClick={() => { setShowMaterialModal(true); }} className="btn-secondary">
+                      <i className="fas fa-photo-video mr-2"></i>选择素材（视频/图片）
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</label>
+                    <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
+                      <i className="fas fa-font mr-2"></i>选择广告文案
+                    </button>
+                  </div>
+                </div>
+
+                {/* 创意素材数量配置已删除：数量由下方「创意素材分配」中的已选素材 / 文案数量决定 */}
               </div>
 
               {/* 预估可生成创意数 */}
@@ -3032,13 +3017,13 @@ function App() {
                       <span className="text-xs font-normal text-gray-500 ml-2">
                         {buildType === 'creative_only'
                           ? `(共 ${s.totalUnits} 个单元 × 每单元 ${s.creativesPerUnit} 个)`
-                          : (composeStrategy === 'copy' ? `(每账户${s.creativesPerUnit}个×${s.accountCount}个账户)` : `(平均分配)`)}
+                          : `(文案${copyStrategy === 'copy' ? '复制' : '平均'} · 素材${materialStrategy === 'copy' ? '复制' : '平均'})`}
                       </span>
                     </p>
                   );
                 })()}
                 <p className="text-xs text-gray-400 mt-1">
-                  规则：每创意 {composeRule.materials}素材 + {composeRule.copies}文案
+                  规则：每个创意 = 1 素材 + 1 文案（共 {s.materialCount} 素材 × {s.copyCount} 文案）
                 </p>
               </div>
             </div>
