@@ -10,6 +10,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>AdBatch 原型</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="tailwind-v2.css?v=20260720m">
     <link rel="stylesheet" href="font-awesome.min.css">
     <script src="region-data.js"></script>
@@ -563,7 +564,7 @@
 (function() {
   // 版本自校验：页面版本与 localStorage 不一致时强制刷新一次，绕过 CDN/浏览器对 index.html 的缓存
   (function() {
-    var PAGE_VERSION = '20260720h';
+    var PAGE_VERSION = '20260720i';
     try {
       if (localStorage.getItem('page_version') !== PAGE_VERSION) {
         localStorage.setItem('page_version', PAGE_VERSION);
