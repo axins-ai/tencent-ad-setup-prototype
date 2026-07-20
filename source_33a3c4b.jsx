@@ -2371,7 +2371,7 @@ function App() {
                   {tgtAllocMode === 'per_account' && (
                     <div className="space-y-4">
                       <p className="text-xs text-gray-500">为每个账户独立选择定向包（仅支持从定向包列表中选择）：</p>
-                      {selectedAccountIds.map((id) => {
+                      {(selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map((id) => {
                         const acc = MOCK.accounts.find(a => a.id === id);
                         const sel = perAccountTgtPkgs[id] || [];
                         return (
@@ -2728,33 +2728,28 @@ function App() {
               {selectedAccountIds.length === 0 && (
                 <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
               )}
-              {/* 多账户横向排列：类似自定义人群包配置，一个账户占一列（网格，自动换行） */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {/* 一个账户占用一行，单元以下拉多选形式选择（不再平铺全部单元） */}
+              <div className="space-y-2">
                 {selectedAccountIds.map(accountId => {
                   const acc = MOCK.accounts.find(a => a.id === accountId);
                   const units = getAccountUnits(accountId);
                   const sel = selectedUnits[accountId] || [];
                   return (
-                    <div key={accountId} className="border border-gray-200 rounded-lg p-3 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-user-friends text-blue-500"></i>
-                          <span className="text-sm font-semibold text-gray-900 truncate max-w-[140px]">{acc ? acc.name : accountId}</span>
-                          {sel.length > 0 && <span className="text-xs text-green-600">已选 {sel.length} 个</span>}
-                        </div>
-                        {sel.length === 0 && <span className="text-xs text-red-500 whitespace-nowrap">请至少选 1 个</span>}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {units.map(u => {
-                          const checked = sel.includes(u.id);
-                          return (
-                            <label key={u.id} className={`flex items-center gap-2 px-2 py-1.5 border rounded-lg cursor-pointer text-sm ${checked ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'}`}>
-                              <input type="checkbox" checked={checked} onChange={() => toggleUnit(accountId, u.id)} className="w-4 h-4 text-blue-600" />
-                              <span className="truncate">{u.name}</span>
-                            </label>
-                          );
-                        })}
-                      </div>
+                    <div key={accountId} className="flex items-center gap-3 border border-gray-200 rounded-lg p-2.5">
+                      <span className="text-sm font-medium text-gray-900 w-32 truncate flex-shrink-0" title={acc ? acc.name : accountId}>{acc ? acc.name : accountId}</span>
+                      <select
+                        multiple
+                        value={sel}
+                        onChange={e => {
+                          const vals = Array.from(e.target.selectedOptions).map(o => o.value);
+                          setSelectedUnits(prev => ({ ...prev, [accountId]: vals }));
+                        }}
+                        size={Math.min(units.length, 4)}
+                        className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                      </select>
+                      <span className="text-xs text-green-600 flex-shrink-0 whitespace-nowrap">{sel.length} 个已选</span>
                     </div>
                   );
                 })}

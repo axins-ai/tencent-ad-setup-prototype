@@ -3271,7 +3271,7 @@ function App() {
     className: "space-y-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500"
-  }, "为每个账户独立选择定向包（仅支持从定向包列表中选择）："), selectedAccountIds.map(id => {
+  }, "为每个账户独立选择定向包（仅支持从定向包列表中选择）："), (selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
     const sel = perAccountTgtPkgs[id] || [];
     return /*#__PURE__*/React.createElement("div", {
@@ -3652,42 +3652,35 @@ function App() {
   }, "每个账户下选择要投放的营销单元（支持多选，每个账户至少选 1 个）")), selectedAccountIds.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "text-sm text-gray-400 py-4"
   }, "请先在「基础配置」选择投放账户"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+    className: "space-y-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     const units = getAccountUnits(accountId);
     const sel = selectedUnits[accountId] || [];
     return /*#__PURE__*/React.createElement("div", {
       key: accountId,
-      className: "border border-gray-200 rounded-lg p-3 min-w-0"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between mb-2"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-2"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-user-friends text-blue-500"
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "text-sm font-semibold text-gray-900 truncate max-w-[140px]"
-    }, acc ? acc.name : accountId), sel.length > 0 && /*#__PURE__*/React.createElement("span", {
-      className: "text-xs text-green-600"
-    }, "已选 ", sel.length, " 个")), sel.length === 0 && /*#__PURE__*/React.createElement("span", {
-      className: "text-xs text-red-500 whitespace-nowrap"
-    }, "请至少选 1 个")), /*#__PURE__*/React.createElement("div", {
-      className: "grid grid-cols-2 gap-2"
-    }, units.map(u => {
-      const checked = sel.includes(u.id);
-      return /*#__PURE__*/React.createElement("label", {
-        key: u.id,
-        className: `flex items-center gap-2 px-2 py-1.5 border rounded-lg cursor-pointer text-sm ${checked ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'}`
-      }, /*#__PURE__*/React.createElement("input", {
-        type: "checkbox",
-        checked: checked,
-        onChange: () => toggleUnit(accountId, u.id),
-        className: "w-4 h-4 text-blue-600"
-      }), /*#__PURE__*/React.createElement("span", {
-        className: "truncate"
-      }, u.name));
-    })));
+      className: "flex items-center gap-3 border border-gray-200 rounded-lg p-2.5"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-sm font-medium text-gray-900 w-32 truncate flex-shrink-0",
+      title: acc ? acc.name : accountId
+    }, acc ? acc.name : accountId), /*#__PURE__*/React.createElement("select", {
+      multiple: true,
+      value: sel,
+      onChange: e => {
+        const vals = Array.from(e.target.selectedOptions).map(o => o.value);
+        setSelectedUnits(prev => ({
+          ...prev,
+          [accountId]: vals
+        }));
+      },
+      size: Math.min(units.length, 4),
+      className: "flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500"
+    }, units.map(u => /*#__PURE__*/React.createElement("option", {
+      key: u.id,
+      value: u.id
+    }, u.name))), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-green-600 flex-shrink-0 whitespace-nowrap"
+    }, sel.length, " 个已选"));
   })))), /*#__PURE__*/React.createElement("div", {
     id: "section-creative",
     className: ""
