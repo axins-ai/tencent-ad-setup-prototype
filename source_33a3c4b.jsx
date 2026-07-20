@@ -2531,17 +2531,17 @@ function App() {
                                 ))}
                               </>
                             )}
+                            <div className="pt-3 mt-2">
+                              <div className="flex gap-2">
+                                <button onClick={handleNewTgtPkg} className="px-3 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 text-sm"><i className="fas fa-plus mr-1"></i>新建定向包</button>
+                                <button onClick={handleRefreshTgtPkgs} className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"><i className="fas fa-sync mr-1"></i>刷新</button>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div className="p-4 border-t flex justify-between items-center gap-2 flex-wrap">
-                          <div className="flex gap-2">
-                            <button onClick={handleNewTgtPkg} className="px-3 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 text-sm"><i className="fas fa-plus mr-1"></i>新建定向包</button>
-                            <button onClick={handleRefreshTgtPkgs} className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"><i className="fas fa-sync mr-1"></i>刷新</button>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-500">已选 {modalSelectedIds.length} 个定向包</span>
-                            <button onClick={confirmTgtPkgModal} className="btn-primary">确认</button>
-                          </div>
+                        <div className="p-4 border-t flex justify-end items-center gap-2">
+                          <span className="text-sm text-gray-500">已选 {modalSelectedIds.length} 个定向包</span>
+                          <button onClick={confirmTgtPkgModal} className="btn-primary">确认</button>
                         </div>
                       </div>
                     </div>
@@ -2969,7 +2969,7 @@ function App() {
                 {/* 创意分配策略：两个按钮 + 感叹号角标注释 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3 max-w-md">
                     <button type="button" onClick={() => setComposeStrategy('copy')}
                       className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
                       {composeStrategy === 'copy' && (
