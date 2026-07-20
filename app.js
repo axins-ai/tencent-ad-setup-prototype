@@ -1889,6 +1889,70 @@ function ImageSelect({
     className: "text-sm text-gray-800 truncate"
   }, o.label)))));
 }
+// 通用「点击展开」多选下拉（替代原生 select multiple，保证美观）
+function MultiSelectDropdown({
+  options,
+  selected,
+  onChange,
+  placeholder = '请选择',
+  emptyText = '暂无选项',
+  triggerClass = '',
+  panelMaxHeight = 240,
+  compact = false
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    function onDown(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+  const toggle = val => {
+    const next = selected.includes(val) ? selected.filter(x => x !== val) : [...selected, val];
+    onChange(next);
+  };
+  const summary = selected.length === 0 ? /*#__PURE__*/React.createElement("span", {
+    className: "text-gray-400"
+  }, placeholder) : /*#__PURE__*/React.createElement("span", {
+    className: "text-gray-800"
+  }, `已选 ${selected.length} 个`);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "relative",
+    ref: ref
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setOpen(o => !o),
+    className: `w-full flex items-center justify-between px-2.5 py-1.5 border border-gray-300 rounded-md bg-white text-left hover:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none ${compact ? 'text-xs' : 'text-sm'} ${triggerClass}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "truncate"
+  }, summary), /*#__PURE__*/React.createElement("span", {
+    className: `text-gray-400 ml-1 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`
+  }, "▾")), open && /*#__PURE__*/React.createElement("div", {
+    className: "absolute z-40 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-auto",
+    style: {
+      maxHeight: panelMaxHeight
+    }
+  }, options.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "px-3 py-2 text-xs text-gray-400"
+  }, emptyText) : options.map(o => {
+    const checked = selected.includes(o.value);
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      key: o.value,
+      onClick: () => toggle(o.value),
+      className: `w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 ${compact ? 'text-xs' : 'text-sm'} ${checked ? 'bg-indigo-50' : ''}`
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${checked ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-300 text-transparent'}`
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-check text-[10px]"
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "text-gray-800 truncate"
+    }, o.label));
+  })));
+}
 // 主应用
 function App() {
   // ===== 基础配置 =====
@@ -3286,42 +3350,40 @@ function App() {
   })))), tgtAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
   }, "为每个账户独立选择定向包（仅支持从定向包列表中选择）："), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-3"
+    className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"
   }, (selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
+    if (!acc) return null;
     const sel = perAccountTgtPkgs[id] || [];
     return /*#__PURE__*/React.createElement("div", {
       key: id,
-      className: "border border-gray-200 rounded-lg p-3"
+      className: "border border-gray-200 rounded-lg p-2.5 bg-white hover:shadow-sm transition-shadow"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-between mb-2"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-sm font-medium text-gray-800"
-    }, acc ? acc.name : id), /*#__PURE__*/React.createElement("span", {
-      className: "text-xs text-gray-400"
-    }, sel.length, " 个定向包")), /*#__PURE__*/React.createElement("div", {
-      className: "flex flex-wrap gap-2 mb-2"
-    }, sel.map(tpId => {
-      const tp = MOCK.targetingPackages.find(t => t.id === tpId) || userTgtPkgs.find(t => t.id === tpId);
-      return tp ? /*#__PURE__*/React.createElement("span", {
-        key: tpId,
-        className: "tag bg-blue-100 text-blue-800"
-      }, tp.name, /*#__PURE__*/React.createElement("button", {
-        onClick: () => setPerAccountTgtPkgs(prev => ({
-          ...prev,
-          [id]: (prev[id] || []).filter(x => x !== tpId)
-        }))
-      }, /*#__PURE__*/React.createElement("i", {
-        className: "fas fa-times"
-      }))) : null;
-    })), /*#__PURE__*/React.createElement("button", {
-      onClick: () => openPerAccountTgtModal(id),
-      className: "px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: sel.length > 0 ? 'text-gray-900' : 'text-gray-400'
-    }, sel.length > 0 ? '修改定向包' : '选择定向包'), /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-chevron-down ml-2 text-gray-400 text-sm"
-    })));
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-1.5 min-w-0"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-user-circle text-blue-400 text-xs flex-shrink-0"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs font-semibold text-gray-800 truncate",
+      title: acc.name
+    }, acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name)), sel.length > 0 && /*#__PURE__*/React.createElement("span", {
+      className: "text-xs bg-blue-50 text-blue-600 rounded-full px-2 py-0.5 font-medium flex-shrink-0"
+    }, sel.length)), /*#__PURE__*/React.createElement(MultiSelectDropdown, {
+      options: [...MOCK.targetingPackages, ...userTgtPkgs].map(tp => ({
+        value: tp.id,
+        label: tp.name
+      })),
+      selected: sel,
+      onChange: vals => setPerAccountTgtPkgs(prev => ({
+        ...prev,
+        [id]: vals
+      })),
+      placeholder: "选择定向包",
+      emptyText: "暂无可用的定向包",
+      compact: true,
+      panelMaxHeight: 220
+    }));
   }))), showTgtPkgModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     onClick: () => setShowTgtPkgModal(false)
@@ -3688,22 +3750,21 @@ function App() {
       title: acc.name
     }, acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name)), sel.length > 0 && /*#__PURE__*/React.createElement("span", {
       className: "text-xs bg-indigo-50 text-indigo-600 rounded-full px-2 py-0.5 font-medium flex-shrink-0"
-    }, sel.length)), /*#__PURE__*/React.createElement("select", {
-      multiple: true,
-      value: sel,
-      onChange: e => {
-        const vals = Array.from(e.target.selectedOptions).map(o => o.value);
-        setSelectedUnits(prev => ({
-          ...prev,
-          [accountId]: vals
-        }));
-      },
-      size: Math.min(units.length, 4),
-      className: "w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-300"
-    }, units.map(u => /*#__PURE__*/React.createElement("option", {
-      key: u.id,
-      value: u.id
-    }, u.name))), sel.length === 0 && /*#__PURE__*/React.createElement("p", {
+    }, sel.length)), /*#__PURE__*/React.createElement(MultiSelectDropdown, {
+      options: units.map(u => ({
+        value: u.id,
+        label: u.name
+      })),
+      selected: sel,
+      onChange: vals => setSelectedUnits(prev => ({
+        ...prev,
+        [accountId]: vals
+      })),
+      placeholder: "选择营销单元",
+      emptyText: "该账户暂无可投放单元",
+      compact: true,
+      panelMaxHeight: 200
+    }), sel.length === 0 && /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-orange-400 mt-1"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-exclamation-triangle mr-0.5"
