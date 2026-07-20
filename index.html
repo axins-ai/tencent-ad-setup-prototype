@@ -138,12 +138,20 @@
       <!-- 日志页面（独立视图，点击任务「日志」进入） -->
       <div id="view-log-list" style="display:none;padding:32px 24px;">
         <div id="log-list-content"></div>
+        <div style="text-align:center;margin-top:24px;font-size:11px;color:#c0c0c0;">v20260720b · AdBatch 原型</div>
       </div>
     </div>
 
     <!-- 视图：表单 iframe -->
     <div id="view-form" style="display:none;height:100%;">
-      <iframe id="form-frame" src="form.html" style="width:100%;height:100vh;border:none;"></iframe>
+      <div style="padding:10px 24px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+        <button onclick="window.closeForm()" style="display:flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">
+          <i class="fas fa-arrow-left"></i> 返回任务列表
+        </button>
+        <h2 style="font-size:16px;font-weight:bold;color:#111827;margin:0;">搭建表单</h2>
+        <span style="width:90px;"></span>
+      </div>
+      <iframe id="form-frame" src="form.html" style="width:100%;height:calc(100vh - 48px);border:none;"></iframe>
     </div>
 
     <!-- 视图：定向包列表 -->
