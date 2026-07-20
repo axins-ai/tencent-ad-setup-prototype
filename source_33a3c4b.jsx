@@ -1538,13 +1538,12 @@ function App() {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
-  const [copyStrategy, setCopyStrategy] = useState('copy'); // 'copy' | 'average' 文案分配策略
+  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 创意分配策略
   const [landingPageMacro, setLandingPageMacro] = useState('');
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
   // 创意素材分配
   const [composeRule, setComposeRule] = useState({ materials: 1, copies: 1 });
-  const [materialStrategy, setMaterialStrategy] = useState('copy'); // 'copy' | 'average' 素材分配策略
   // 版位切换时调整素材数量上限；公众号版位营销组件仅支持行动按钮
   useEffect(() => {
     if (placement === 'wechat_video' && composeRule.materials !== 1) {
@@ -1755,7 +1754,7 @@ function App() {
     if (buildType === 'creative_only') {
       // 仅搭建创意：每个已选单元都生成 creativesPerUnit 个创意
       totalCreatives = totalUnits * creativesPerUnit;
-    } else if (materialStrategy === 'copy') {
+    } else if (composeStrategy === 'copy') {
       // 复制分配：每个账户独立使用所有素材
       totalCreatives = selectedAccountIds.reduce((sum, id) => sum + tpFor(id) * creativesPerUnit, 0);
     } else {
@@ -1801,8 +1800,7 @@ function App() {
         if (data.materials) setSelectedMaterials(data.materials);
         if (data.copies) setSelectedCopies(data.copies);
         if (data.composeRule) setComposeRule(data.composeRule);
-        if (data.materialStrategy) setMaterialStrategy(data.materialStrategy);
-        if (data.copyStrategy) setCopyStrategy(data.copyStrategy);
+        if (data.composeStrategy) setComposeStrategy(data.composeStrategy);
         if (data.marketingComponentType) setMarketingComponentType(data.marketingComponentType);
         if (data.actionButtonType) setActionButtonType(data.actionButtonType);
         if (data.landingPageMacro !== undefined) setLandingPageMacro(data.landingPageMacro);
@@ -1829,7 +1827,7 @@ function App() {
         首日开始, 首日开始时间值,
         creativeEnhanceMax, selectedMaterials, selectedCopies,
         landingPageMacro,
-        composeRule, materialStrategy, copyStrategy,
+        composeRule, composeStrategy,
         marketingComponentType, actionButtonType,
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
@@ -2968,32 +2966,17 @@ function App() {
             <div className="border-t pt-4">
               <h4 className="text-sm font-bold text-gray-900 mb-4"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材分配</h4>
               <div className="space-y-4">
-                {/* 文案分配策略 */}
+                {/* 创意分配策略（原结构：单一策略） */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-font mr-2 text-blue-500"></i>文案分配策略</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意分配策略</label>
                   <div className="flex items-center gap-6">
                     <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="copy_strategy" value="copy" checked={copyStrategy === 'copy'} onChange={() => setCopyStrategy('copy')} className="mr-2" />
-                      <span className="text-sm">复制分配（所有账户用相同文案）</span>
+                      <input type="radio" name="compose_strategy" value="copy" checked={composeStrategy === 'copy'} onChange={() => setComposeStrategy('copy')} className="mr-2" />
+                      <span className="text-sm">复制分配（所有账户用相同创意素材与文案）</span>
                     </label>
                     <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="copy_strategy" value="average" checked={copyStrategy === 'average'} onChange={() => setCopyStrategy('average')} className="mr-2" />
-                      <span className="text-sm">平均分配</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* 素材分配策略 */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-photo-video mr-2 text-blue-500"></i>素材分配策略</label>
-                  <div className="flex items-center gap-6">
-                    <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="material_strategy" value="copy" checked={materialStrategy === 'copy'} onChange={() => setMaterialStrategy('copy')} className="mr-2" />
-                      <span className="text-sm">复制分配（所有账户用相同素材）</span>
-                    </label>
-                    <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="material_strategy" value="average" checked={materialStrategy === 'average'} onChange={() => setMaterialStrategy('average')} className="mr-2" />
-                      <span className="text-sm">平均分配</span>
+                      <input type="radio" name="compose_strategy" value="average" checked={composeStrategy === 'average'} onChange={() => setComposeStrategy('average')} className="mr-2" />
+                      <span className="text-sm">平均分配（素材与文案在账户间均分）</span>
                     </label>
                   </div>
                 </div>
@@ -3049,7 +3032,9 @@ function App() {
                       <span className="text-xs font-normal text-gray-500 ml-2">
                         {buildType === 'creative_only'
                           ? `(共 ${s.totalUnits} 个单元 × 每单元 ${s.creativesPerUnit} 个)`
-                          : `(文案${copyStrategy === 'copy' ? '复制' : '平均'} · 素材${materialStrategy === 'copy' ? '复制' : '平均'})`}
+                          : (composeStrategy === 'copy'
+                              ? `(每账户 ${s.creativesPerUnit} 个 × ${s.accountCount} 个账户)`
+                              : `(平均分配 · 共 ${s.totalUnits} 个单元)`)}
                       </span>
                     </p>
                   );

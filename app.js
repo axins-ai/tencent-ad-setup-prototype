@@ -2247,7 +2247,7 @@ function App() {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
-  const [copyStrategy, setCopyStrategy] = useState('copy'); // 'copy' | 'average' 文案分配策略
+  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 创意分配策略
   const [landingPageMacro, setLandingPageMacro] = useState('');
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
@@ -2256,7 +2256,6 @@ function App() {
     materials: 1,
     copies: 1
   });
-  const [materialStrategy, setMaterialStrategy] = useState('copy'); // 'copy' | 'average' 素材分配策略
   // 版位切换时调整素材数量上限；公众号版位营销组件仅支持行动按钮
   useEffect(() => {
     if (placement === 'wechat_video' && composeRule.materials !== 1) {
@@ -2453,7 +2452,7 @@ function App() {
     if (buildType === 'creative_only') {
       // 仅搭建创意：每个已选单元都生成 creativesPerUnit 个创意
       totalCreatives = totalUnits * creativesPerUnit;
-    } else if (materialStrategy === 'copy') {
+    } else if (composeStrategy === 'copy') {
       // 复制分配：每个账户独立使用所有素材
       totalCreatives = selectedAccountIds.reduce((sum, id) => sum + tpFor(id) * creativesPerUnit, 0);
     } else {
@@ -2509,8 +2508,7 @@ function App() {
         if (data.materials) setSelectedMaterials(data.materials);
         if (data.copies) setSelectedCopies(data.copies);
         if (data.composeRule) setComposeRule(data.composeRule);
-        if (data.materialStrategy) setMaterialStrategy(data.materialStrategy);
-        if (data.copyStrategy) setCopyStrategy(data.copyStrategy);
+        if (data.composeStrategy) setComposeStrategy(data.composeStrategy);
         if (data.marketingComponentType) setMarketingComponentType(data.marketingComponentType);
         if (data.actionButtonType) setActionButtonType(data.actionButtonType);
         if (data.landingPageMacro !== undefined) setLandingPageMacro(data.landingPageMacro);
@@ -2568,8 +2566,7 @@ function App() {
         selectedCopies,
         landingPageMacro,
         composeRule,
-        materialStrategy,
-        copyStrategy,
+        composeStrategy,
         marketingComponentType,
         actionButtonType
       };
@@ -3919,60 +3916,32 @@ function App() {
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-3"
   }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-font mr-2 text-blue-500"
-  }), "文案分配策略"), /*#__PURE__*/React.createElement("div", {
+    className: "fas fa-layer-group mr-2 text-blue-500"
+  }), "创意分配策略"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-6"
   }, /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
-    name: "copy_strategy",
+    name: "compose_strategy",
     value: "copy",
-    checked: copyStrategy === 'copy',
-    onChange: () => setCopyStrategy('copy'),
+    checked: composeStrategy === 'copy',
+    onChange: () => setComposeStrategy('copy'),
     className: "mr-2"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "复制分配（所有账户用相同文案）")), /*#__PURE__*/React.createElement("label", {
+  }, "复制分配（所有账户用相同创意素材与文案）")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
-    name: "copy_strategy",
+    name: "compose_strategy",
     value: "average",
-    checked: copyStrategy === 'average',
-    onChange: () => setCopyStrategy('average'),
+    checked: composeStrategy === 'average',
+    onChange: () => setComposeStrategy('average'),
     className: "mr-2"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
-  }, "平均分配")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-3"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-photo-video mr-2 text-blue-500"
-  }), "素材分配策略"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-6"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "material_strategy",
-    value: "copy",
-    checked: materialStrategy === 'copy',
-    onChange: () => setMaterialStrategy('copy'),
-    className: "mr-2"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "复制分配（所有账户用相同素材）")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "material_strategy",
-    value: "average",
-    checked: materialStrategy === 'average',
-    onChange: () => setMaterialStrategy('average'),
-    className: "mr-2"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "平均分配")))), /*#__PURE__*/React.createElement("div", {
+  }, "平均分配（素材与文案在账户间均分）")))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-3"
@@ -4037,7 +4006,7 @@ function App() {
       className: "text-xs font-normal text-red-500 ml-2"
     }, "（已超限，上限 1000 个）"), /*#__PURE__*/React.createElement("span", {
       className: "text-xs font-normal text-gray-500 ml-2"
-    }, buildType === 'creative_only' ? `(共 ${s.totalUnits} 个单元 × 每单元 ${s.creativesPerUnit} 个)` : `(文案${copyStrategy === 'copy' ? '复制' : '平均'} · 素材${materialStrategy === 'copy' ? '复制' : '平均'})`));
+    }, buildType === 'creative_only' ? `(共 ${s.totalUnits} 个单元 × 每单元 ${s.creativesPerUnit} 个)` : composeStrategy === 'copy' ? `(每账户 ${s.creativesPerUnit} 个 × ${s.accountCount} 个账户)` : `(平均分配 · 共 ${s.totalUnits} 个单元)`));
   })(), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-400 mt-1"
   }, "规则：每个创意 = ", composeRule.materials, " 素材 + ", composeRule.copies, " 文案"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
