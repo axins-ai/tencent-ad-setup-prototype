@@ -2124,7 +2124,7 @@ function App() {
             {/* 投放链匹配结果：全宽整行，置于主体选择与选择账户下方 */}
             <div className="mt-6 pt-6 border-t border-gray-100">
               <div className="flex items-center gap-2 mb-2">
-                <label className="block text-sm font-medium text-gray-700">投放链匹配结果</label>
+                <div className="block text-sm font-medium text-gray-700">投放链匹配结果</div>
                 <button
                   onClick={() => { setMatchRefreshKey(k => k + 1); notify('投放链匹配结果已刷新', 'success'); }}
                   className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
@@ -2231,7 +2231,7 @@ function App() {
 
             {/* 投放版位 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">投放版位 <span className="text-red-500">*</span></label>
+              <div className="block text-sm font-medium text-gray-700 mb-2">投放版位 <span className="text-red-500">*</span></div>
               <div className="flex gap-6">
                 <label className="flex items-center cursor-pointer">
                   <input type="radio" name="placement" value="wechat_video" checked={placement === 'wechat_video'} onChange={e => { setPlacement(e.target.value); setPlacementScene(''); }} className="w-4 h-4 mr-2 text-blue-600" />
@@ -2246,7 +2246,7 @@ function App() {
 
             {/* 版位定投场景 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">版位定投场景</label>
+              <div className="block text-sm font-medium text-gray-700 mb-2">版位定投场景</div>
               <button
                 onClick={() => setShowPlacementModal(true)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[300px]"
@@ -2403,7 +2403,7 @@ function App() {
               </div>
               {tgtAllocMode === 'shared' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">选择定向包（可多选，不同定向包将创建不同单元）</label>
+                  <div className="block text-sm font-medium text-gray-700 mb-2">选择定向包（可多选，不同定向包将创建不同单元）</div>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {selectedTargetingPackages.map(tpId => {
                       const tp = MOCK.targetingPackages.find(t => t.id === tpId) || userTgtPkgs.find(t => t.id === tpId);
@@ -2555,11 +2555,11 @@ function App() {
               {/* 计费方式 & 出价场景（固定，与出价/日预算同宽） */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">计费方式</label>
+                  <div className="block text-sm font-medium text-gray-700 mb-1">计费方式</div>
                   <input type="text" value="oCPM" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">出价场景</label>
+                  <div className="block text-sm font-medium text-gray-700 mb-1">出价场景</div>
                   <input type="text" value="常规投放" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-left" />
                 </div>
               </div>
@@ -2567,7 +2567,7 @@ function App() {
               {/* 出价 / 日预算 同一行 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></label>
+                  <div className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></div>
                   <input
                     type="number"
                     min="0.01"
@@ -2592,7 +2592,7 @@ function App() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">日预算（元）</label>
+                  <div className="block text-sm font-medium text-gray-700 mb-1">日预算（元）</div>
                   <input
                     type="number"
                     value={dailyBudget}
@@ -2660,7 +2660,7 @@ function App() {
               
               {/* 投放日期 */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">投放日期</label>
+                <div className="block text-sm font-medium text-gray-700 mb-2">投放日期</div>
                 <div className="flex gap-6 mb-3">
                   <label className="flex items-center cursor-pointer">
                     <input type="radio" name="date_type" checked={投放日期类型 === 'custom'} onChange={() => set投放日期类型('custom')} className="mr-2" />
@@ -2689,7 +2689,7 @@ function App() {
 
               {/* 投放时段 - 周历网格样式 */}
               <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 mb-3">投放时段</label>
+                <div className="block text-sm font-medium text-gray-700 mb-3">投放时段</div>
                 <div className="flex items-center gap-1 mb-4">
                   <span className="text-sm text-gray-600 mr-2">选择时段</span>
                   <label className="flex items-center cursor-pointer mr-5">
@@ -2770,7 +2770,7 @@ function App() {
 
               {/* 营销单元名称 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">营销单元名称 <span className="text-red-500">*</span></label>
+                <div className="block text-sm font-medium text-gray-700 mb-1">营销单元名称 <span className="text-red-500">*</span></div>
                 <div className="flex items-center gap-2 max-w-md">
                   <input
                     type="text"
@@ -2862,7 +2862,7 @@ function App() {
 
             {/* 素材选择（视频+图片） */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</label>
+              <div className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</div>
               <button onClick={() => { setShowMaterialModal(true); }} className="btn-secondary">
                 <i className="fas fa-photo-video mr-2"></i>选择素材（视频/图片）
               </button>
@@ -2870,7 +2870,7 @@ function App() {
 
             {/* 广告文案 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</label>
+              <div className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</div>
               <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
                 <i className="fas fa-font mr-2"></i>选择广告文案
               </button>
@@ -2966,60 +2966,58 @@ function App() {
             <div className="border-t pt-4">
               <h4 className="text-sm font-bold text-gray-900 mb-4">创意素材分配</h4>
               <div className="space-y-4">
-                {/* 创意分配策略：两个按钮 + 感叹号角标注释 */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</label>
-                  <div className="grid grid-cols-2 gap-3 max-w-md">
-                    <button type="button" onClick={() => setComposeStrategy('copy')}
-                      className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                      {composeStrategy === 'copy' && (
-                        <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white"><i className="fas fa-exclamation fa-xs"></i></span>
-                      )}
-                      <div className="text-sm font-medium text-gray-900">复制分配</div>
-                      <div className="mt-1 text-xs text-gray-500 leading-relaxed">所有单元共用创意</div>
-                    </button>
-                    <button type="button" onClick={() => setComposeStrategy('average')}
-                      className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                      {composeStrategy === 'average' && (
-                        <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white"><i className="fas fa-exclamation fa-xs"></i></span>
-                      )}
-                      <div className="text-sm font-medium text-gray-900">平均分配</div>
-                      <div className="mt-1 text-xs text-gray-500 leading-relaxed">根据单元数均分创意数</div>
-                    </button>
-                  </div>
-                </div>
+    {/* 创意素材数量 */}
+    <div>
+      <div className="block text-sm font-medium text-gray-700 mb-2">创意素材数量</div>
+      <div className="grid grid-cols-2 gap-3 max-w-md">
+        <div>
+          <div className="text-xs text-gray-500 mb-1">单创意素材</div>
+          {placement === 'wechat_video' ? (
+            <input type="number" value={1} disabled
+              className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none bg-gray-100 text-gray-500 cursor-not-allowed" />
+          ) : (
+            <input type="number" min="1" max="15" value={composeRule.materials}
+              onChange={e => {
+                const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                setComposeRule({...composeRule, materials: v});
+              }}
+              className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+          )}
+          <div className="text-xs text-gray-400 mt-1">{placement === 'wechat_video' ? '视频号固定为1' : '范围 1~15'}</div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-500 mb-1">单创意文案</div>
+          <input type="number" min="1" max="3" value={composeRule.copies}
+            onChange={e => {
+              const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
+              setComposeRule({...composeRule, copies: v});
+            }}
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+          <div className="text-xs text-gray-400 mt-1">范围 1~3</div>
+        </div>
+      </div>
+    </div>
 
-                {/* 创意素材数量 */}
-                <div className="border-t pt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">创意素材数量</label>
-                  <div className="grid grid-cols-2 gap-3 max-w-md">
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1">单创意素材</div>
-                      {placement === 'wechat_video' ? (
-                        <input type="number" value={1} disabled
-                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none bg-gray-100 text-gray-500 cursor-not-allowed" />
-                      ) : (
-                        <input type="number" min="1" max="15" value={composeRule.materials}
-                          onChange={e => {
-                            const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
-                            setComposeRule({...composeRule, materials: v});
-                          }}
-                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                      )}
-                      <div className="text-xs text-gray-400 mt-1">{placement === 'wechat_video' ? '视频号固定为1' : '范围 1~15'}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1">单创意文案</div>
-                      <input type="number" min="1" max="3" value={composeRule.copies}
-                        onChange={e => {
-                          const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
-                          setComposeRule({...composeRule, copies: v});
-                        }}
-                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                      <div className="text-xs text-gray-400 mt-1">范围 1~3</div>
-                    </div>
-                  </div>
-                </div>
+    {/* 创意分配策略：两个按钮 + 角标带注释 */}
+    <div className="border-t pt-4">
+      <div className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</div>
+      <div className="grid grid-cols-2 gap-3 max-w-md">
+        <button type="button" onClick={() => setComposeStrategy('copy')}
+          className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+          {composeStrategy === 'copy' && (
+            <span className="absolute -top-2 -right-2 flex items-center gap-1 rounded-full bg-blue-500 px-2 py-1 text-white text-xs"><i className="fas fa-exclamation fa-xs"></i> 所有单元共用创意</span>
+          )}
+          <div className="text-sm font-medium text-gray-900">复制分配</div>
+        </button>
+        <button type="button" onClick={() => setComposeStrategy('average')}
+          className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+          {composeStrategy === 'average' && (
+            <span className="absolute -top-2 -right-2 flex items-center gap-1 rounded-full bg-blue-500 px-2 py-1 text-white text-xs"><i className="fas fa-exclamation fa-xs"></i> 根据单元数均分创意数</span>
+          )}
+          <div className="text-sm font-medium text-gray-900">平均分配</div>
+        </button>
+      </div>
+    </div>
 
                 {/* 创意素材 / 广告文案 选择已移回主表单原位置（创意增强Max 与 品牌形象 之间） */}
               </div>
@@ -3053,7 +3051,7 @@ function App() {
 
             {/* 创意名称（卡片内最后一项） */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">创意名称</label>
+              <div className="block text-sm font-medium text-gray-700 mb-1">创意名称</div>
               <div className="flex items-center gap-2 max-w-md">
                 <input
                   type="text"
@@ -3091,11 +3089,11 @@ function App() {
           {runMode === 'scheduled' && (
             <div className="flex items-center gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">定时日期</label>
+                <div className="block text-sm font-medium text-gray-700 mb-1">定时日期</div>
                 <input type="date" value={scheduledDate} onChange={e => setScheduledDate(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">定时时间</label>
+                <div className="block text-sm font-medium text-gray-700 mb-1">定时时间</div>
                 <input type="time" value={scheduledTime} onChange={e => setScheduledTime(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg" />
               </div>
             </div>

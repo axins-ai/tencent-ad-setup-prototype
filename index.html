@@ -179,7 +179,7 @@
           <div style="padding:20px;">
             <!-- 定向包名称 -->
             <div style="margin-bottom:20px;">
-              <label style="display:block;font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">定向包名称 <span style="color:#ff4d4f;">*</span></label>
+              <div style="display:block;font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">定向包名称 <span style="color:#ff4d4f;">*</span></div>
               <div style="display:flex;align-items:center;gap:8px;">
                 <input id="tgt-pkg-name" type="text" placeholder="输入定向包名称" style="flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
               </div>
@@ -399,7 +399,7 @@
           <div style="padding:24px;overflow-y:auto;flex:1;">
             <!-- 资产类型 -->
             <div style="margin-bottom:20px;">
-              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;">资产类型</label>
+              <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;">资产类型</div>
               <div style="display:flex;gap:20px;">
                 <label style="display:flex;align-items:center;cursor:pointer;gap:6px;">
                   <input type="radio" name="asset-type" value="brand" checked onchange="onAssetTypeChange()">
@@ -416,7 +416,7 @@
             <div id="bi-brand-section">
               <!-- 头像 -->
               <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 头像</label>
+                <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 头像</div>
                 <button type="button" onclick="triggerBiFileInput()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:1px dashed #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">
                   <i class="fas fa-plus" style="color:#9ca3af;"></i> 添加头像
                 </button>
@@ -429,7 +429,7 @@
               </div>
               <!-- 名称 -->
               <div style="margin-bottom:12px;">
-                <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 名称</label>
+                <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 名称</div>
                 <div style="position:relative;">
                   <input type="text" id="bi-name-input" placeholder="请输入名称（20字以内）" maxlength="20" oninput="document.getElementById('bi-name-count').textContent=this.value.length+'/20'"
                     style="width:100%;padding:9px 60px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
@@ -442,7 +442,7 @@
             <div id="bi-component-section" style="display:none;">
               <!-- 组件图片 -->
               <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 组件图片</label>
+                <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 组件图片</div>
                 <button type="button" onclick="triggerBiFileInput()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:1px dashed #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">
                   <i class="fas fa-plus" style="color:#9ca3af;"></i> 添加图片
                 </button>
@@ -453,11 +453,11 @@
               </div>
               <!-- 文案配置 -->
               <div style="margin-bottom:12px;">
-                <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:10px;">文案配置</label>
+                <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:10px;">文案配置</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
                   <!-- 标题 -->
                   <div>
-                    <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">标题 <span style="color:red">*</span></label>
+                    <div style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">标题 <span style="color:red">*</span></div>
                     <div style="position:relative;">
                       <input type="text" id="mc-title" placeholder="请输入标题" maxlength="10" oninput="document.getElementById('mc-title-count').textContent=this.value.length+'/10'"
                         style="width:100%;padding:9px 40px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
@@ -466,7 +466,7 @@
                   </div>
                   <!-- 描述 -->
                   <div>
-                    <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">描述 <span style="color:red">*</span></label>
+                    <div style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">描述 <span style="color:red">*</span></div>
                     <div style="position:relative;">
                       <input type="text" id="mc-desc" placeholder="请输入描述" maxlength="14" oninput="document.getElementById('mc-desc-count').textContent=this.value.length+'/14'"
                         style="width:100%;padding:9px 40px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
@@ -475,7 +475,7 @@
                   </div>
                   <!-- 按钮文案 -->
                   <div>
-                    <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">按钮文案 <span style="color:red">*</span></label>
+                    <div style="display:block;font-size:12px;color:#6b7280;margin-bottom:4px;">按钮文案 <span style="color:red">*</span></div>
                     <select id="mc-btn-text" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;background:#fff;">
                       <option value="">请选择</option>
                       <option value="查看详情">查看详情</option>
@@ -521,13 +521,13 @@
           <div style="padding:24px;overflow-y:auto;flex:1;">
             <!-- 包名称 -->
             <div style="margin-bottom:20px;">
-              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 包名称</label>
+              <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 包名称</div>
               <input type="text" id="cp-name-input" placeholder="输入文案包名称" maxlength="50"
                 style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
             </div>
             <!-- 渠道 -->
             <div style="margin-bottom:20px;">
-              <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;">渠道 <span style="color:red">*</span></label>
+              <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;">渠道 <span style="color:red">*</span></div>
               <div style="display:flex;gap:12px;">
                 <label style="display:flex;align-items:center;cursor:pointer;">
                   <input type="radio" name="cp-channel" value="gdt" checked style="margin-right:6px;">
@@ -538,7 +538,7 @@
             <!-- 文案列表 -->
             <div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                <label style="font-size:14px;font-weight:500;color:#374151;"><span style="color:red">*</span> 文案内容</label>
+                <div style="font-size:14px;font-weight:500;color:#374151;"><span style="color:red">*</span> 文案内容</div>
                 <span style="font-size:12px;color:#9ca3af;">单条不超过30字（含标点符号）</span>
               </div>
               <div id="cp-copy-list">
@@ -564,7 +564,7 @@
 (function() {
   // 版本自校验：页面版本与 localStorage 不一致时强制刷新一次，绕过 CDN/浏览器对 index.html 的缓存
   (function() {
-    var PAGE_VERSION = '20260720i';
+    var PAGE_VERSION = '20260720j';
     try {
       if (localStorage.getItem('page_version') !== PAGE_VERSION) {
         localStorage.setItem('page_version', PAGE_VERSION);
