@@ -2964,56 +2964,62 @@ function App() {
 
             {/* 创意素材分配 */}
             <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-4"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材分配</h4>
+              <h4 className="text-sm font-bold text-gray-900 mb-4">创意素材分配</h4>
               <div className="space-y-4">
-                {/* 创意分配策略（原结构：单一策略） */}
+                {/* 创意分配策略：两个按钮 + 感叹号角标注释 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意分配策略</label>
-                  <div className="flex items-center gap-6">
-                    <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="compose_strategy" value="copy" checked={composeStrategy === 'copy'} onChange={() => setComposeStrategy('copy')} className="mr-2" />
-                      <span className="text-sm">复制分配（所有账户用相同创意素材与文案）</span>
-                    </label>
-                    <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="compose_strategy" value="average" checked={composeStrategy === 'average'} onChange={() => setComposeStrategy('average')} className="mr-2" />
-                      <span className="text-sm">平均分配（素材与文案在账户间均分）</span>
-                    </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button type="button" onClick={() => setComposeStrategy('copy')}
+                      className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                      {composeStrategy === 'copy' && (
+                        <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white"><i className="fas fa-exclamation fa-xs"></i></span>
+                      )}
+                      <div className="text-sm font-medium text-gray-900">复制分配</div>
+                      <div className="mt-1 text-xs text-gray-500 leading-relaxed">所有单元共用创意</div>
+                    </button>
+                    <button type="button" onClick={() => setComposeStrategy('average')}
+                      className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                      {composeStrategy === 'average' && (
+                        <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white"><i className="fas fa-exclamation fa-xs"></i></span>
+                      )}
+                      <div className="text-sm font-medium text-gray-900">平均分配</div>
+                      <div className="mt-1 text-xs text-gray-500 leading-relaxed">根据单元数均分创意数</div>
+                    </button>
                   </div>
                 </div>
 
-                {/* 创意素材数量：每个创意捆绑的素材数 / 文案数（保留在「创意素材分配」下） */}
+                {/* 创意素材数量 */}
                 <div className="border-t pt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材数量</label>
-                  <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600 whitespace-nowrap">单创意素材</label>
-                    {placement === 'wechat_video' ? (
-                      <input type="number" value={1} disabled
-                        className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none bg-gray-100 text-gray-500 cursor-not-allowed" />
-                    ) : (
-                      <input type="number" min="1" max="15" value={composeRule.materials}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">创意素材数量</label>
+                  <div className="grid grid-cols-2 gap-3 max-w-md">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">单创意素材</div>
+                      {placement === 'wechat_video' ? (
+                        <input type="number" value={1} disabled
+                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none bg-gray-100 text-gray-500 cursor-not-allowed" />
+                      ) : (
+                        <input type="number" min="1" max="15" value={composeRule.materials}
+                          onChange={e => {
+                            const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                            setComposeRule({...composeRule, materials: v});
+                          }}
+                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                      )}
+                      <div className="text-xs text-gray-400 mt-1">{placement === 'wechat_video' ? '视频号固定为1' : '范围 1~15'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">单创意文案</div>
+                      <input type="number" min="1" max="3" value={composeRule.copies}
                         onChange={e => {
-                          const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
-                          setComposeRule({...composeRule, materials: v});
+                          const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
+                          setComposeRule({...composeRule, copies: v});
                         }}
-                        className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                    )}
-                    <span className="text-xs text-gray-400">
-                      {placement === 'wechat_video' ? '（视频号固定为1）' : '（1~15）'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600 whitespace-nowrap">单创意文案</label>
-                    <input type="number" min="1" max="3" value={composeRule.copies}
-                      onChange={e => {
-                        const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
-                        setComposeRule({...composeRule, copies: v});
-                      }}
-                      className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                    <span className="text-xs text-gray-400">（1~3）</span>
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                      <div className="text-xs text-gray-400 mt-1">范围 1~3</div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
                 {/* 创意素材 / 广告文案 选择已移回主表单原位置（创意增强Max 与 品牌形象 之间） */}
               </div>
@@ -3033,14 +3039,14 @@ function App() {
                         {buildType === 'creative_only'
                           ? `(共 ${s.totalUnits} 个单元 × 每单元 ${s.creativesPerUnit} 个)`
                           : (composeStrategy === 'copy'
-                              ? `(每账户 ${s.creativesPerUnit} 个 × ${s.accountCount} 个账户)`
+                              ? `(每单元 ${s.creativesPerUnit} 个 × ${s.totalUnits} 个单元)`
                               : `(平均分配 · 共 ${s.totalUnits} 个单元)`)}
                       </span>
                     </p>
                   );
                 })()}
                 <p className="text-xs text-gray-400 mt-1">
-                  规则：每个创意 = {composeRule.materials} 素材 + {composeRule.copies} 文案
+                  规则：每个创意 = {composeRule.materials} 素材 + {composeRule.copies} 文案；按单元数计算（一个账户可选多个定向包，产生多个单元）
                 </p>
               </div>
             </div>
