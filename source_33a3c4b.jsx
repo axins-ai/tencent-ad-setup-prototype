@@ -870,7 +870,12 @@ function CopyModal({ show, onClose, onConfirm, selectedCopies }) {
 
   const handleConfirm = () => {
     const result = localSelected.map(id => copies.find(c => c.id === id)).filter(Boolean);
-    onConfirm(result);
+    if (result.length > 50) {
+      alert('最多选择 50 条文案，已为您保留前 50 条');
+      onConfirm(result.slice(0, 50));
+    } else {
+      onConfirm(result);
+    }
     onClose();
   };
 
@@ -2866,7 +2871,7 @@ function App() {
 
             {/* 广告文案 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 {selectedCopies.length} 条，支持多选和批量添加）</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 {selectedCopies.length}/50 条，支持多选和批量添加）</label>
               <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
                 <i className="fas fa-font mr-2"></i>选择广告文案
               </button>

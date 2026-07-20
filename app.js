@@ -1373,7 +1373,12 @@ function CopyModal({
   };
   const handleConfirm = () => {
     const result = localSelected.map(id => copies.find(c => c.id === id)).filter(Boolean);
-    onConfirm(result);
+    if (result.length > 50) {
+      alert('最多选择 50 条文案，已为您保留前 50 条');
+      onConfirm(result.slice(0, 50));
+    } else {
+      onConfirm(result);
+    }
     onClose();
   };
   if (!show) return null;
@@ -3804,7 +3809,7 @@ function App() {
     className: "block text-sm font-medium text-gray-700 mb-2"
   }, "广告文案 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
-  }, "*"), "（已选 ", selectedCopies.length, " 条，支持多选和批量添加）"), /*#__PURE__*/React.createElement("button", {
+  }, "*"), "（已选 ", selectedCopies.length, "/50 条，支持多选和批量添加）"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowCopyModal(true),
     className: "btn-secondary"
   }, /*#__PURE__*/React.createElement("i", {
