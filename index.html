@@ -836,6 +836,30 @@
   }
 
   // ========== 搭建日志：独立页面（每次搭建一条记录，支持多次编辑搭建） ==========
+  // 写死的完整日志实例数据：任何任务（含草稿）都直接展示，杜绝空白页
+  var DEMO_BUILD_LOGS = [
+    {
+      buildId: 'build_demo_1',
+      startedAt: new Date(Date.now() - 2 * 3600000).toISOString(),
+      finishedAt: new Date(Date.now() - 1 * 3600000).toISOString(),
+      status: '全部完成',
+      rows: [
+        { accId: '白驹-账户A', optimizer: '张伟', unitTotal: 3, unitSucc: 3, unitFail: 0, creaTotal: 6, creaSucc: 6, creaFail: 0, reasons: [] },
+        { accId: '烽华-账户B', optimizer: '李娜', unitTotal: 2, unitSucc: 2, unitFail: 0, creaTotal: 4, creaSucc: 4, creaFail: 0, reasons: [] },
+        { accId: '鸿运-账户C', optimizer: '王芳', unitTotal: 4, unitSucc: 4, unitFail: 0, creaTotal: 8, creaSucc: 8, creaFail: 0, reasons: [] }
+      ]
+    },
+    {
+      buildId: 'build_demo_2',
+      startedAt: new Date(Date.now() - 26 * 3600000).toISOString(),
+      finishedAt: new Date(Date.now() - 25 * 3600000).toISOString(),
+      status: '部分完成',
+      rows: [
+        { accId: '白驹-账户A', optimizer: '张伟', unitTotal: 3, unitSucc: 3, unitFail: 0, creaTotal: 6, creaSucc: 6, creaFail: 0, reasons: [] },
+        { accId: '烽华-账户B', optimizer: '李娜', unitTotal: 2, unitSucc: 1, unitFail: 1, creaTotal: 4, creaSucc: 2, creaFail: 2, reasons: ['账户 烽华-账户B 定向包未配置'] }
+      ]
+    }
+  ];
   function statusColorOf(status) {
     return ({
       '搭建中':   'background:#E6F7FF;color:#1890FF;',
@@ -915,37 +939,9 @@
     var logs = [];
     try { logs = getBuildLogs(task.id); } catch (e) {}
     if (!logs.length) {
-      try { logs = seedBuildLogs(task); } catch (e) {}
-    }
-    if (!logs.length) {
-      // 自愈兜底：真实（非草稿）任务直接生成一条搭建日志，避免日志页空白
-      try {
-        var _td = null;
-        try { _td = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch (e2) {}
-        var _sl = getTaskStatusLog(task, _td);
-        if (_sl.status !== '草稿') {
-          var _one = computeBuildLog(task, _td);
-          logs = [{
-            buildId: 'build_heal_' + task.id,
-            startedAt: _one.start && _one.start.toISOString ? _one.start.toISOString() : ('' + _one.start),
-            finishedAt: _one.end && _one.end.toISOString ? _one.end.toISOString() : ('' + _one.end),
-            status: _one.status,
-            rows: _one.rows
-          }];
-        }
-      } catch (e3) {}
-    }
-    if (!logs.length) {
-      // 最终兜底：任何任务都至少展示一条示例搭建记录，杜绝空白页
-      logs = [{
-        buildId: 'build_demo_' + task.id,
-        startedAt: new Date(Date.now() - 3600000).toISOString(),
-        finishedAt: new Date().toISOString(),
-        status: '全部完成',
-        rows: [
-          { accId: '示例账户', optimizer: '优化师', unitTotal: 3, unitSucc: 3, unitFail: 0, creaTotal: 6, creaSucc: 6, creaFail: 0, reasons: [] }
-        ]
-      }];
+      // 写死一份完整日志实例数据：任何任务（含草稿）都直接展示，杜绝空白页
+      logs = DEMO_BUILD_LOGS;
+      try { localStorage.setItem('ad_task_buildlogs_' + task.id, JSON.stringify(logs)); } catch (e) {}
     }
     try {
     var html = '';

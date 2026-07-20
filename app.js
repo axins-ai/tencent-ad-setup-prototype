@@ -1925,7 +1925,7 @@ function MultiSelectDropdown({
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: () => setOpen(o => !o),
-    className: `w-full flex items-center justify-between px-2.5 py-1.5 border border-gray-300 rounded-md bg-white text-left hover:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none ${compact ? 'text-xs' : 'text-sm'} ${triggerClass}`
+    className: `w-full flex items-center justify-between px-2.5 py-1.5 border border-gray-300 rounded-md bg-white text-left hover:border-blue-400 focus:ring-1 focus:ring-blue-500 outline-none ${compact ? 'text-xs' : 'text-sm'} ${triggerClass}`
   }, /*#__PURE__*/React.createElement("span", {
     className: "truncate"
   }, summary), /*#__PURE__*/React.createElement("span", {
@@ -1943,9 +1943,9 @@ function MultiSelectDropdown({
       type: "button",
       key: o.value,
       onClick: () => toggle(o.value),
-      className: `w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 ${compact ? 'text-xs' : 'text-sm'} ${checked ? 'bg-indigo-50' : ''}`
+      className: `w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 ${compact ? 'text-xs' : 'text-sm'} ${checked ? 'bg-blue-50' : ''}`
     }, /*#__PURE__*/React.createElement("span", {
-      className: `w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${checked ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-300 text-transparent'}`
+      className: `w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'}`
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-check text-[10px]"
     })), /*#__PURE__*/React.createElement("span", {
@@ -3350,26 +3350,22 @@ function App() {
   })))), tgtAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
   }, "为每个账户独立选择定向包（仅支持从定向包列表中选择）："), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"
+    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
   }, (selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
     if (!acc) return null;
     const sel = perAccountTgtPkgs[id] || [];
     return /*#__PURE__*/React.createElement("div", {
       key: id,
-      className: "border border-gray-200 rounded-lg p-2.5 bg-white hover:shadow-sm transition-shadow"
+      className: "border border-gray-200 rounded-lg p-2.5 bg-gray-50 hover:bg-gray-100 transition-colors"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between mb-2"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-1.5 min-w-0"
+      className: "flex items-center gap-1.5 mb-2 min-w-0"
     }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-user-circle text-blue-400 text-xs flex-shrink-0"
+      className: "fas fa-user-friends text-blue-500 text-xs flex-shrink-0"
     }), /*#__PURE__*/React.createElement("span", {
-      className: "text-xs font-semibold text-gray-800 truncate",
+      className: "text-xs font-semibold text-gray-900 truncate",
       title: acc.name
-    }, acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name)), sel.length > 0 && /*#__PURE__*/React.createElement("span", {
-      className: "text-xs bg-blue-50 text-blue-600 rounded-full px-2 py-0.5 font-medium flex-shrink-0"
-    }, sel.length)), /*#__PURE__*/React.createElement(MultiSelectDropdown, {
+    }, acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name)), /*#__PURE__*/React.createElement(MultiSelectDropdown, {
       options: [...MOCK.targetingPackages, ...userTgtPkgs].map(tp => ({
         value: tp.id,
         label: tp.name
@@ -3383,7 +3379,17 @@ function App() {
       emptyText: "暂无可用的定向包",
       compact: true,
       panelMaxHeight: 220
-    }));
+    }), sel.length > 0 && /*#__PURE__*/React.createElement("div", {
+      className: "flex flex-wrap gap-0.5 mt-1.5"
+    }, sel.slice(0, 6).map(tpId => {
+      const tp = MOCK.targetingPackages.find(t => t.id === tpId) || userTgtPkgs.find(t => t.id === tpId);
+      return tp ? /*#__PURE__*/React.createElement("span", {
+        key: tpId,
+        className: "tag bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5"
+      }, tp.name.length > 8 ? tp.name.substring(0, 8) + '...' : tp.name) : null;
+    }), sel.length > 6 && /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-400 px-1"
+    }, "+", sel.length - 6)));
   }))), showTgtPkgModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     onClick: () => setShowTgtPkgModal(false)
@@ -3730,7 +3736,7 @@ function App() {
   }, "每个账户下选择要投放的营销单元（支持多选，每个账户至少选 1 个）")), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "text-sm text-gray-400 py-4"
   }, "请先在「基础配置」选择投放账户") : /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5"
+    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     if (!acc) return null;
@@ -3738,19 +3744,15 @@ function App() {
     const sel = selectedUnits[accountId] || [];
     return /*#__PURE__*/React.createElement("div", {
       key: accountId,
-      className: "border border-gray-200 rounded-lg p-2.5 bg-white hover:shadow-sm transition-shadow"
+      className: "border border-gray-200 rounded-lg p-2.5 bg-gray-50 hover:bg-gray-100 transition-colors"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between mb-2"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-1.5 min-w-0"
+      className: "flex items-center gap-1.5 mb-2 min-w-0"
     }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-cubes text-indigo-500 text-xs flex-shrink-0"
+      className: "fas fa-cubes text-blue-500 text-xs flex-shrink-0"
     }), /*#__PURE__*/React.createElement("span", {
-      className: "text-xs font-semibold text-gray-800 truncate",
+      className: "text-xs font-semibold text-gray-900 truncate",
       title: acc.name
-    }, acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name)), sel.length > 0 && /*#__PURE__*/React.createElement("span", {
-      className: "text-xs bg-indigo-50 text-indigo-600 rounded-full px-2 py-0.5 font-medium flex-shrink-0"
-    }, sel.length)), /*#__PURE__*/React.createElement(MultiSelectDropdown, {
+    }, acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name)), /*#__PURE__*/React.createElement(MultiSelectDropdown, {
       options: units.map(u => ({
         value: u.id,
         label: u.name
@@ -3764,8 +3766,16 @@ function App() {
       emptyText: "该账户暂无可投放单元",
       compact: true,
       panelMaxHeight: 200
-    }), sel.length === 0 && /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-orange-400 mt-1"
+    }), sel.length > 0 ? /*#__PURE__*/React.createElement("div", {
+      className: "flex flex-wrap gap-0.5 mt-1.5"
+    }, sel.map(uid => {
+      const u = units.find(x => x.id === uid);
+      return u ? /*#__PURE__*/React.createElement("span", {
+        key: uid,
+        className: "tag bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5"
+      }, u.name.length > 8 ? u.name.substring(0, 8) + '...' : u.name) : null;
+    })) : /*#__PURE__*/React.createElement("p", {
+      className: "text-xs text-orange-400 mt-1.5"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-exclamation-triangle mr-0.5"
     }), "未选择"));
