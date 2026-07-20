@@ -2994,14 +2994,14 @@ function App() {
               {selectedAccountIds.length === 0 && (
                 <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
               )}
-              {/* 多账户横向排列：类似自定义人群包配置，多个账户在同一行（自动换行） */}
-              <div className="flex flex-wrap gap-3">
+              {/* 多账户横向排列：类似自定义人群包配置，一个账户占一列（网格，自动换行） */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {selectedAccountIds.map(accountId => {
                   const acc = MOCK.accounts.find(a => a.id === accountId);
                   const units = getAccountUnits(accountId);
                   const sel = selectedUnits[accountId] || [];
                   return (
-                    <div key={accountId} className="border border-gray-200 rounded-lg p-3 flex-1 min-w-[240px]">
+                    <div key={accountId} className="border border-gray-200 rounded-lg p-3 min-w-0">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <i className="fas fa-user-friends text-blue-500"></i>

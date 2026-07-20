@@ -3976,14 +3976,14 @@ function App() {
   }, "每个账户下选择要投放的营销单元（支持多选，每个账户至少选 1 个）")), selectedAccountIds.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "text-sm text-gray-400 py-4"
   }, "请先在「基础配置」选择投放账户"), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap gap-3"
+    className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     const units = getAccountUnits(accountId);
     const sel = selectedUnits[accountId] || [];
     return /*#__PURE__*/React.createElement("div", {
       key: accountId,
-      className: "border border-gray-200 rounded-lg p-3 flex-1 min-w-[240px]"
+      className: "border border-gray-200 rounded-lg p-3 min-w-0"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-between mb-2"
     }, /*#__PURE__*/React.createElement("div", {

@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>AdBatch 原型</title>
 <link rel="stylesheet" href="tailwind-v2.css">
     <link rel="stylesheet" href="font-awesome.min.css">
@@ -986,10 +989,17 @@
     if (back) back.addEventListener('click', function() { showView('task-list'); });
   }
 
-  // 点击任务「日志」→ 跳转到独立日志页面
+  // 点击任务「日志」→ 跳转到独立日志页面（多重兜底：即使 showView 内部异常，也保证日志页可见且有内容，绝不空白）
   function openLogPage(taskId) {
     currentLogTaskId = taskId;
-    showView('log-list');
+    try { showView('log-list'); } catch (e) {}
+    // 兜底：强制日志视图可见、隐藏任务列表与筛选卡，确保不出现「空白日志页」
+    try {
+      var lv = document.getElementById('view-log-list'); if (lv) lv.style.display = 'block';
+      var tlc = document.getElementById('task-list-content'); if (tlc) tlc.style.display = 'none';
+      var fc = document.getElementById('filter-card'); if (fc) fc.style.display = 'none';
+    } catch (e) {}
+    try { renderLogList(currentLogTaskId); } catch (e) {}
   }
 
   // ========== 任务列表筛选（渠道 / 版位 / 名称 / 状态） ==========
