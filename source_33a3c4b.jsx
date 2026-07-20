@@ -2858,23 +2858,10 @@ function App() {
 
             {/* 素材选择（视频+图片） */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 {selectedMaterials.length}/100 个，可多次选择）</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 {selectedMaterials.length}/500 个，可多次选择）</label>
               <button onClick={() => { setShowMaterialModal(true); }} className="btn-secondary">
                 <i className="fas fa-photo-video mr-2"></i>选择素材（视频/图片）
               </button>
-              {selectedMaterials.length > 0 && (
-                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-900 font-medium mb-2">已选素材：</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedMaterials.map(m => (
-                      <span key={m.id} className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-200 rounded text-xs">
-                        {m.type === 'video' ? '🎬' : '🖼️'} {m.name}
-                        <button onClick={() => setSelectedMaterials(selectedMaterials.filter(sm => sm.id !== m.id))} className="text-red-500 hover:text-red-700 ml-1"><i className="fas fa-times"></i></button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* 广告文案 */}
@@ -2883,19 +2870,6 @@ function App() {
               <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
                 <i className="fas fa-font mr-2"></i>选择广告文案
               </button>
-              {selectedCopies.length > 0 && (
-                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-900 font-medium mb-2">已选文案：</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedCopies.map(c => (
-                      <span key={c.id} className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-green-200 rounded text-xs">
-                        📝 {c.content}
-                        <button onClick={() => setSelectedCopies(selectedCopies.filter(sc => sc.id !== c.id))} className="text-red-500 hover:text-red-700 ml-1"><i className="fas fa-times"></i></button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* 品牌形象 */}

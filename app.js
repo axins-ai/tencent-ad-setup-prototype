@@ -3793,28 +3793,14 @@ function App() {
     className: "block text-sm font-medium text-gray-700 mb-2"
   }, "创意素材 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
-  }, "*"), "（已选 ", selectedMaterials.length, "/100 个，可多次选择）"), /*#__PURE__*/React.createElement("button", {
+  }, "*"), "（已选 ", selectedMaterials.length, "/500 个，可多次选择）"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       setShowMaterialModal(true);
     },
     className: "btn-secondary"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-photo-video mr-2"
-  }), "选择素材（视频/图片）"), selectedMaterials.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-blue-900 font-medium mb-2"
-  }, "已选素材："), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap gap-2"
-  }, selectedMaterials.map(m => /*#__PURE__*/React.createElement("span", {
-    key: m.id,
-    className: "inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-200 rounded text-xs"
-  }, m.type === 'video' ? '🎬' : '🖼️', " ", m.name, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setSelectedMaterials(selectedMaterials.filter(sm => sm.id !== m.id)),
-    className: "text-red-500 hover:text-red-700 ml-1"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-times"
-  }))))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  }), "选择素材（视频/图片）")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-sm font-medium text-gray-700 mb-2"
   }, "广告文案 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
@@ -3823,21 +3809,7 @@ function App() {
     className: "btn-secondary"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-font mr-2"
-  }), "选择广告文案"), selectedCopies.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 p-3 bg-green-50 border border-green-200 rounded-lg"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-green-900 font-medium mb-2"
-  }, "已选文案："), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap gap-2"
-  }, selectedCopies.map(c => /*#__PURE__*/React.createElement("span", {
-    key: c.id,
-    className: "inline-flex items-center gap-1 px-2 py-1 bg-white border border-green-200 rounded text-xs"
-  }, "📝 ", c.content, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setSelectedCopies(selectedCopies.filter(sc => sc.id !== c.id)),
-    className: "text-red-500 hover:text-red-700 ml-1"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-times"
-  }))))))), /*#__PURE__*/React.createElement("div", {
+  }), "选择广告文案")), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"

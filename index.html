@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -138,7 +141,7 @@
       <!-- 日志页面（独立视图，点击任务「日志」进入） -->
       <div id="view-log-list" style="display:none;padding:32px 24px;">
         <div id="log-list-content"></div>
-        <div style="text-align:center;margin-top:24px;font-size:11px;color:#c0c0c0;">v20260720b · AdBatch 原型</div>
+        <div style="text-align:center;margin-top:24px;font-size:11px;color:#c0c0c0;">v20260720g · AdBatch 原型</div>
       </div>
     </div>
 
@@ -558,9 +561,18 @@
 
 <script>
 (function() {
+  // 版本自校验：页面版本与 localStorage 不一致时强制刷新一次，绕过 CDN/浏览器对 index.html 的缓存
+  (function() {
+    var PAGE_VERSION = '20260720g';
+    try {
+      if (localStorage.getItem('page_version') !== PAGE_VERSION) {
+        localStorage.setItem('page_version', PAGE_VERSION);
+        location.reload(true);
+      }
+    } catch (e) {}
+  })();
+
   var tasks = [];
-  var taskListPage = 1;
-  var TASK_PAGE_SIZE = 5;
   var currentLogTaskId = null;
   var currentTaskId = null;
   var targetingPackages = [];
@@ -940,8 +952,12 @@
     if (!task) { container.innerHTML = '<div style="color:#9ca3af;padding:40px 0;">未找到该任务</div>'; return; }
     var logs = [];
     try { logs = getBuildLogs(task.id); } catch (e) {}
-    if (!logs.length) {
-      // 写死一份完整日志实例数据：任何任务（含草稿）都直接展示，杜绝空白页
+    // 存储日志为空、或不含任何有效记录（空 rows）时，一律回退到写死的实例数据，杜绝空白页
+    var hasReal = false;
+    for (var li = 0; li < logs.length; li++) {
+      if (logs[li].rows && logs[li].rows.length > 0) { hasReal = true; break; }
+    }
+    if (!hasReal) {
       logs = DEMO_BUILD_LOGS;
       try { localStorage.setItem('ad_task_buildlogs_' + task.id, JSON.stringify(logs)); } catch (e) {}
     }
@@ -993,8 +1009,17 @@
     }
     container.innerHTML = html;
     } catch (e) {
-      // 兜底：任何渲染异常都不留空白页，给出明确提示
-      container.innerHTML = '<div style="text-align:center;padding:80px 0;color:#ff4d4f;"><div style="font-size:48px;margin-bottom:16px;">⚠️</div><p style="font-size:18px;margin:0 0 8px 0;">日志加载失败</p><p style="font-size:14px;margin:8px 0 0 0;">请刷新页面后重试</p></div>';
+      // 兜底：任何渲染异常都展示写死的实例数据，物理上不可能空白
+      try {
+        var dh = '<div style="padding:10px 0 18px;color:#fa8c16;font-size:13px;">⚠️ 日志渲染异常，已自动展示示例数据</div>';
+        DEMO_BUILD_LOGS.slice().reverse().forEach(function(entry, idx) {
+          var rc = (entry.rows || []).length;
+          dh += '<div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:16px;padding:16px 20px;font-size:14px;color:#333;">第 ' + (idx + 1) + ' 次搭建 · ' + escapeHtml(entry.status || '示例') + ' · ' + rc + ' 个账户</div>';
+        });
+        container.innerHTML = dh;
+      } catch (e2) {
+        container.innerHTML = '<div style="text-align:center;padding:80px 0;color:#ff4d4f;">日志加载失败，请刷新页面后重试</div>';
+      }
     }
     var back = document.getElementById('log-back-btn');
     if (back) back.addEventListener('click', function() { showView('task-list'); });
@@ -1059,11 +1084,7 @@
       return;
     }
     var placementMap = { 'wechat_video':'视频号','wechat_mp':'微信公众号与小程序','wechat_article':'公众号','qq_space':'QQ空间','tencent_video':'腾讯视频','tencent_news':'腾讯新闻','all':'全版位' };
-    // 分页：每页 TASK_PAGE_SIZE 条，避免无限下拉
-    var totalPages = Math.max(1, Math.ceil(filtered.length / TASK_PAGE_SIZE));
-    if (taskListPage > totalPages) taskListPage = totalPages;
-    if (taskListPage < 1) taskListPage = 1;
-    var pageItems = filtered.slice().reverse().slice((taskListPage - 1) * TASK_PAGE_SIZE, taskListPage * TASK_PAGE_SIZE);
+    var pageItems = filtered.slice().reverse();
     var html = '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">';
     html += '<div style="display:flex;align-items:center;padding:16px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">' +
       '<div style="flex:0.5;text-align:center;">序号</div>' +
@@ -1098,17 +1119,6 @@
       '</div>';
     });
     html += '</div>';
-    // 分页控件
-    if (totalPages > 1) {
-      html += '<div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:14px 0;flex-wrap:wrap;">';
-      html += '<button data-page="' + (taskListPage - 1) + '" ' + (taskListPage === 1 ? 'disabled' : '') + ' style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:' + (taskListPage === 1 ? '#f5f5f5' : '#fff') + ';color:' + (taskListPage === 1 ? '#bbb' : '#333') + ';cursor:' + (taskListPage === 1 ? 'not-allowed' : 'pointer') + ';font-size:13px;">上一页</button>';
-      for (var p = 1; p <= totalPages; p++) {
-        html += '<button data-page="' + p + '" style="min-width:34px;padding:6px 8px;border:1px solid ' + (p === taskListPage ? '#1890ff' : '#e5e7eb') + ';border-radius:6px;background:' + (p === taskListPage ? '#1890ff' : '#fff') + ';color:' + (p === taskListPage ? '#fff' : '#333') + ';cursor:pointer;font-size:13px;font-weight:' + (p === taskListPage ? '600' : '400') + ';">' + p + '</button>';
-      }
-      html += '<button data-page="' + (taskListPage + 1) + '" ' + (taskListPage === totalPages ? 'disabled' : '') + ' style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:' + (taskListPage === totalPages ? '#f5f5f5' : '#fff') + ';color:' + (taskListPage === totalPages ? '#bbb' : '#333') + ';cursor:' + (taskListPage === totalPages ? 'not-allowed' : 'pointer') + ';font-size:13px;">下一页</button>';
-      html += '<span style="margin-left:8px;font-size:12px;color:#9ca3af;">共 ' + filtered.length + ' 条 / ' + totalPages + ' 页</span>';
-      html += '</div>';
-    }
     container.innerHTML = html;
   }
 
@@ -2379,13 +2389,6 @@
     var taskContainer = document.getElementById('task-list-content');
     if (taskContainer) {
       taskContainer.addEventListener('click', function(e) {
-        var pgBtn = e.target.closest('button[data-page]');
-        if (pgBtn) {
-          if (pgBtn.hasAttribute('disabled')) return;
-          var p = parseInt(pgBtn.getAttribute('data-page'), 10);
-          if (!isNaN(p)) { taskListPage = p; renderTaskList(); }
-          return;
-        }
         var btn = e.target.closest('button');
         if (!btn) return;
         var taskId = btn.getAttribute('data-task-id');
@@ -2398,7 +2401,7 @@
     }
 
     // -- 任务列表筛选（渠道 / 版位 / 名称 / 状态）--
-    function applyTaskFilters() { taskListPage = 1; renderTaskList(); }
+    function applyTaskFilters() { renderTaskList(); }
     var fChannel = document.getElementById('filter-channel');
     var fPlacement = document.getElementById('filter-placement');
     var fStatus = document.getElementById('filter-status');
