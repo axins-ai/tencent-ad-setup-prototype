@@ -2154,6 +2154,9 @@
       renderTaskList();
     } else if (event.data && event.data.type === 'GOTO_TASKS') {
       showView('task-list');
+    } else if (event.data && event.data.type === 'GOTO_TARGETING_PACKAGES') {
+      // 从搭建表单（iframe）跳转至「定向包」菜单页面
+      showView('targeting-packages');
     }
   });
 
