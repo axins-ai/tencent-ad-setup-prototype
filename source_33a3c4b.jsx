@@ -2862,7 +2862,21 @@ function App() {
               </button>
             </div>
 
-            {/* 创意素材 / 广告文案 选择已移至下方「创意素材分配」区块 */}
+            {/* 素材选择（视频+图片） */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</label>
+              <button onClick={() => { setShowMaterialModal(true); }} className="btn-secondary">
+                <i className="fas fa-photo-video mr-2"></i>选择素材（视频/图片）
+              </button>
+            </div>
+
+            {/* 广告文案 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</label>
+              <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
+                <i className="fas fa-font mr-2"></i>选择广告文案
+              </button>
+            </div>
 
             {/* 品牌形象 */}
             <div className="border-t pt-4">
@@ -3018,21 +3032,7 @@ function App() {
                 </div>
               </div>
 
-                {/* 创意素材 / 广告文案 数量配置（移入此处） */}
-                <div className="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</label>
-                    <button onClick={() => { setShowMaterialModal(true); }} className="btn-secondary">
-                      <i className="fas fa-photo-video mr-2"></i>选择素材（视频/图片）
-                    </button>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</label>
-                    <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
-                      <i className="fas fa-font mr-2"></i>选择广告文案
-                    </button>
-                  </div>
-                </div>
+                {/* 创意素材 / 广告文案 选择已移回主表单原位置（创意增强Max 与 品牌形象 之间） */}
               </div>
 
               {/* 预估可生成创意数 */}

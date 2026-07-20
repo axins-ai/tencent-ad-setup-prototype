@@ -3798,7 +3798,31 @@ function App() {
     className: "relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
   }, /*#__PURE__*/React.createElement("span", {
     className: "inline-block h-4 w-4 transform rounded-full bg-white translate-x-1"
-  }))), /*#__PURE__*/React.createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "创意素材 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*"), "（已选 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, selectedMaterials.length, "/500"), " 个）"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setShowMaterialModal(true);
+    },
+    className: "btn-secondary"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-photo-video mr-2"
+  }), "选择素材（视频/图片）")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "广告文案 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*"), "（已选 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, selectedCopies.length, "/50"), " 条）"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowCopyModal(true),
+    className: "btn-secondary"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-font mr-2"
+  }), "选择广告文案")), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
@@ -3999,33 +4023,7 @@ function App() {
     className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-400"
-  }, "（1~3）")))), /*#__PURE__*/React.createElement("div", {
-    className: "border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "创意素材 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, "*"), "（已选 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, selectedMaterials.length, "/500"), " 个）"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setShowMaterialModal(true);
-    },
-    className: "btn-secondary"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-photo-video mr-2"
-  }), "选择素材（视频/图片）")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "广告文案 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, "*"), "（已选 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, selectedCopies.length, "/50"), " 条）"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowCopyModal(true),
-    className: "btn-secondary"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-font mr-2"
-  }), "选择广告文案")))), /*#__PURE__*/React.createElement("div", {
+  }, "（1~3）"))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-blue-50 border border-blue-200 rounded-lg p-3"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-1"
