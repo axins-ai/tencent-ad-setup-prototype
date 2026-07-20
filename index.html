@@ -564,7 +564,7 @@
 (function() {
   // 版本自校验：页面版本与 localStorage 不一致时强制刷新一次，绕过 CDN/浏览器对 index.html 的缓存
   (function() {
-    var PAGE_VERSION = '20260720j';
+    var PAGE_VERSION = '20260720k';
     try {
       if (localStorage.getItem('page_version') !== PAGE_VERSION) {
         localStorage.setItem('page_version', PAGE_VERSION);
@@ -999,7 +999,9 @@
           html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">' + r.unitSucc + ' 成功 / ' + r.unitFail + ' 失败</td>';
           html += '<td style="padding:10px 12px;vertical-align:top;color:#333;">' + r.creaSucc + ' 成功 / ' + r.creaFail + ' 失败</td>';
           if (r.reasons && r.reasons.length) {
-            html += '<td style="padding:10px 12px;vertical-align:top;">' + r.reasons.map(function(rr) { return '<span style="display:inline-block;padding:2px 8px;background:#fff1f0;color:#ff4d4f;border-radius:6px;font-size:12px;margin:2px 4px 2px 0;">' + escapeHtml(rr) + '</span>'; }).join('') + '</td>';
+            var uniqReasons = [];
+            try { uniqReasons = Array.from(new Set(r.reasons)); } catch (e) { uniqReasons = r.reasons; }
+            html += '<td style="padding:10px 12px;vertical-align:top;">' + uniqReasons.map(function(rr) { return '<span style="display:inline-block;padding:2px 8px;background:#fff1f0;color:#ff4d4f;border-radius:6px;font-size:12px;margin:2px 4px 2px 0;">' + escapeHtml(rr) + '</span>'; }).join('') + '</td>';
           } else {
             html += '<td style="padding:10px 12px;vertical-align:top;color:#52c41a;"><i class="fas fa-check-circle" style="margin-right:4px;"></i>无</td>';
           }

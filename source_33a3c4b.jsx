@@ -1738,28 +1738,27 @@ function App() {
       totalUnits = selectedAccountIds.reduce((sum, id) => sum + tpFor(id), 0);
     }
 
-    // 每个单元的创意数（根据创意素材分配规则）
+    // 根据素材确定创意数：每个创意捆绑「单创意素材数」个素材（文案仅顺序选取，不影响总数）
     let creativesPerUnit = 0;
     {
       const m = composeRule.materials || 1;
-      const c = composeRule.copies || 1;
-      const maxByMaterials = m > 0 ? Math.floor(materialCount / m) : Infinity;
-      const maxByCopies = c > 0 ? Math.floor(copyCount / c) : Infinity;
-      creativesPerUnit = maxByMaterials * maxByCopies;
+      creativesPerUnit = m > 0 ? Math.floor(materialCount / m) : 0;
       if (creativesPerUnit < 0) creativesPerUnit = 0;
     }
-    // 复制分配：每个账户独立使用全部素材
-    // 平均分配：素材在所有单元间共享
+    // 复制分配：每个单元独立使用全部素材 → 单元数 × (素材数 / 单创意素材数)
+    // 平均分配：素材在所有单元间均分 → (素材数 / 单创意素材数) / 单元数
     let totalCreatives = 0;
     if (buildType === 'creative_only') {
-      // 仅搭建创意：每个已选单元都生成 creativesPerUnit 个创意
-      totalCreatives = totalUnits * creativesPerUnit;
+      // 仅搭建创意：平均分配时素材在单元间均分，否则每个单元都用全部素材
+      totalCreatives = composeStrategy === 'average'
+        ? (totalUnits > 0 ? Math.floor(creativesPerUnit / totalUnits) : creativesPerUnit)
+        : totalUnits * creativesPerUnit;
     } else if (composeStrategy === 'copy') {
-      // 复制分配：每个账户独立使用所有素材
-      totalCreatives = selectedAccountIds.reduce((sum, id) => sum + tpFor(id) * creativesPerUnit, 0);
-    } else {
-      // 平均分配：素材在所有单元间共享
+      // 复制分配：每个单元独立使用全部素材
       totalCreatives = totalUnits * creativesPerUnit;
+    } else {
+      // 平均分配：素材在所有单元间均分
+      totalCreatives = totalUnits > 0 ? Math.floor(creativesPerUnit / totalUnits) : creativesPerUnit;
     }
 
     const CREATIVE_LIMIT = 1000;
@@ -3029,22 +3028,21 @@ function App() {
                   const s = getBuildSummary();
                   const total = s.totalCreatives;
                   const over = s.overLimit;
+                  const isAvg = composeStrategy === 'average';
                   return (
                     <p className={`text-lg font-bold ${over ? 'text-red-600' : 'text-blue-600'}`}>
                       {isNaN(total) ? 0 : total} 个创意
                       {over && <span className="text-xs font-normal text-red-500 ml-2">（已超限，上限 1000 个）</span>}
                       <span className="text-xs font-normal text-gray-500 ml-2">
-                        {buildType === 'creative_only'
-                          ? `(共 ${s.totalUnits} 个单元 × 每单元 ${s.creativesPerUnit} 个)`
-                          : (composeStrategy === 'copy'
-                              ? `(每单元 ${s.creativesPerUnit} 个 × ${s.totalUnits} 个单元)`
-                              : `(平均分配 · 共 ${s.totalUnits} 个单元)`)}
+                        {isAvg
+                          ? `素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials} ÷ 单元数 ${s.totalUnits}`
+                          : `单元数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials}`}
                       </span>
                     </p>
                   );
                 })()}
-                <p className="text-xs text-gray-400 mt-1">
-                  规则：每个创意 = {composeRule.materials} 素材 + {composeRule.copies} 文案；按单元数计算（一个账户可选多个定向包，产生多个单元）
+                <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                  规则：复制分配：预估可生成创意数 = 单元数 × 已选素材数 ÷ 单创意素材数；平均分配：预估可生成创意数 = 已选素材数 ÷ 单创意素材数 ÷ 单元数。默认根据素材确定创意数，文案选取方式为顺序选取
                 </p>
               </div>
             </div>
@@ -3186,16 +3184,27 @@ function App() {
                         <th className="px-3 py-2 font-medium">账户</th>
                         <th className="px-3 py-2 font-medium">单元</th>
                         <th className="px-3 py-2 font-medium">创意</th>
+                        <th className="px-3 py-2 font-medium">失败原因</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {(runResult.rows || []).map((r, i) => (
-                        <tr key={i} className="border-t border-gray-100">
-                          <td className="px-3 py-2 align-top text-gray-700">{r.accId}</td>
-                          <td className="px-3 py-2 align-top text-gray-700">{r.unitSucc}成 / {r.unitFail}败</td>
-                          <td className="px-3 py-2 align-top text-gray-700">{r.creaSucc}成 / {r.creaFail}败</td>
-                        </tr>
-                      ))}
+                      {(runResult.rows || []).map((r, i) => {
+                        const reasons = [...new Set(r.reasons || [])];
+                        return (
+                          <tr key={i} className="border-t border-gray-100">
+                            <td className="px-3 py-2 align-top text-gray-700">{r.accId}</td>
+                            <td className="px-3 py-2 align-top text-gray-700">{r.unitSucc}成 / {r.unitFail}败</td>
+                            <td className="px-3 py-2 align-top text-gray-700">{r.creaSucc}成 / {r.creaFail}败</td>
+                            <td className="px-3 py-2 align-top">
+                              {reasons.length
+                                ? reasons.map((rr, ri) => (
+                                    <span key={ri} className="inline-block px-2 py-1 mb-1 mr-1 rounded bg-red-50 text-red-500 text-xs">{rr}</span>
+                                  ))
+                                : <span className="text-green-500 text-xs"><i className="fas fa-check-circle mr-1"></i>无</span>}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
