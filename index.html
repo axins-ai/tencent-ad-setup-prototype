@@ -2270,6 +2270,11 @@
   window.openLogPage = openLogPage;
   window.renderTaskList = renderTaskList;
   window.CURRENT_USER = CURRENT_USER;
+
+  // 关键修复：初始化时显式渲染任务列表（seed 之后）。
+  // 否则页面停留在 #task-list-content 的静态"暂无任务"占位符，
+  // 任务列表为空 → 没有日志按钮 → 表现为"日志为空"。
+  try { renderTaskList(); } catch (e) { console.log('[init] renderTaskList 失败:', e && e.message); }
 })();
 
 
