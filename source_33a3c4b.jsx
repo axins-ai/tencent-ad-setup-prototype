@@ -1539,6 +1539,7 @@ function App() {
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 创意分配策略
+  const [hoverStrategy, setHoverStrategy] = useState(null); // 悬停展示策略注释
   const [landingPageMacro, setLandingPageMacro] = useState('');
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
@@ -1763,7 +1764,14 @@ function App() {
 
     const CREATIVE_LIMIT = 1000;
     const overLimit = totalCreatives > CREATIVE_LIMIT;
-    return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, creativesPerUnit, totalCreatives, CREATIVE_LIMIT, overLimit };
+    // 单个单元最多可分配 100 个创意：
+    // 平均分配模式下 totalCreatives 已是「每单元」创意数；复制分配模式下每单元 = 总创意数 / 单元数
+    const perUnitCreatives = composeStrategy === 'average'
+      ? totalCreatives
+      : (totalUnits > 0 ? Math.floor(totalCreatives / totalUnits) : totalCreatives);
+    const UNIT_LIMIT = 100;
+    const overUnit = perUnitCreatives > UNIT_LIMIT;
+    return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, creativesPerUnit, totalCreatives, perUnitCreatives, UNIT_LIMIT, CREATIVE_LIMIT, overLimit, overUnit };
   }
 
   // ===== 持久化：从 URL 读取 taskId，localStorage 恢复/保存数据 =====
@@ -1901,10 +1909,11 @@ function App() {
 
   const handleRun = () => {
     if (selectedAccountIds.length === 0) { notify('请先选择账户', 'error'); return; }
-    // 创意数量超限（1000）：阻止运行并展示报错
-    if (getBuildSummary().totalCreatives > 1000) {
+    // 创意数量超限：单次任务最多 1000 条、单个单元最多 100 个，任一超限均阻止运行
+    const s = getBuildSummary();
+    if (s.overLimit || s.overUnit) {
       setShowValidationSummary(true);
-      notify('创意数量超限（1000个），请减少物料选择', 'error');
+      notify('创意数量超限（单次任务最多 1000 条、单个单元最多 100 个），请调整物料选择', 'error');
       return;
     }
     runBgRef.current = false;
@@ -2997,23 +3006,29 @@ function App() {
       </div>
     </div>
 
-    {/* 创意分配策略：两个按钮 + 角标带注释 */}
-    <div className="border-t pt-4">
+    {/* 创意分配策略：两个按钮 + 右上角常驻角标，注释光标悬停展示 */}
+    <div className="border-t pt-4 mb-6">
       <div className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</div>
       <div className="grid grid-cols-2 gap-3 max-w-md">
         <button type="button" onClick={() => setComposeStrategy('copy')}
+          onMouseEnter={() => setHoverStrategy('copy')} onMouseLeave={() => setHoverStrategy(null)}
           className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-          {composeStrategy === 'copy' && (
-            <span className="absolute -top-2 -right-2 flex items-center gap-1 rounded-full bg-blue-500 px-2 py-1 text-white text-xs"><i className="fas fa-exclamation fa-xs"></i> 所有单元共用创意</span>
-          )}
+          {/* 右上角常驻角标 */}
+          <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs"><i className="fas fa-info"></i></span>
           <div className="text-sm font-medium text-gray-900">复制分配</div>
+          {hoverStrategy === 'copy' && (
+            <div className="mt-1 text-xs text-gray-400 leading-relaxed">所有单元共用同一批创意</div>
+          )}
         </button>
         <button type="button" onClick={() => setComposeStrategy('average')}
+          onMouseEnter={() => setHoverStrategy('average')} onMouseLeave={() => setHoverStrategy(null)}
           className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-          {composeStrategy === 'average' && (
-            <span className="absolute -top-2 -right-2 flex items-center gap-1 rounded-full bg-blue-500 px-2 py-1 text-white text-xs"><i className="fas fa-exclamation fa-xs"></i> 根据单元数均分创意数</span>
-          )}
+          {/* 右上角常驻角标 */}
+          <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs"><i className="fas fa-info"></i></span>
           <div className="text-sm font-medium text-gray-900">平均分配</div>
+          {hoverStrategy === 'average' && (
+            <div className="mt-1 text-xs text-gray-400 leading-relaxed">根据单元数均分创意数</div>
+          )}
         </button>
       </div>
     </div>
@@ -3027,18 +3042,26 @@ function App() {
                 {(() => {
                   const s = getBuildSummary();
                   const total = s.totalCreatives;
-                  const over = s.overLimit;
+                  const over = s.overLimit || s.overUnit;
                   const isAvg = composeStrategy === 'average';
                   return (
                     <p className={`text-lg font-bold ${over ? 'text-red-600' : 'text-blue-600'}`}>
                       {isNaN(total) ? 0 : total} 个创意
-                      {over && <span className="text-xs font-normal text-red-500 ml-2">（已超限，上限 1000 个）</span>}
+                      {s.overLimit && <span className="text-xs font-normal text-red-500 ml-2">（已超限，单次任务上限 1000 个）</span>}
+                      {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单单元超限，上限 100 个）</span>}
                       <span className="text-xs font-normal text-gray-500 ml-2">
                         {isAvg
                           ? `素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials} ÷ 单元数 ${s.totalUnits}`
                           : `单元数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials}`}
                       </span>
                     </p>
+                  );
+                })()}
+                {(() => {
+                  const s = getBuildSummary();
+                  if (!s.overUnit) return null;
+                  return (
+                    <div className="mt-2 text-xs text-red-500">单个单元创意数 {s.perUnitCreatives} 超出上限 100 个，请调整素材 / 单创意素材数 / 单元数</div>
                   );
                 })()}
                 <p className="text-xs text-gray-400 mt-1 leading-relaxed">
