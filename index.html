@@ -559,6 +559,8 @@
 <script>
 (function() {
   var tasks = [];
+  var taskListPage = 1;
+  var TASK_PAGE_SIZE = 5;
   var currentLogTaskId = null;
   var currentTaskId = null;
   var targetingPackages = [];
@@ -1057,7 +1059,11 @@
       return;
     }
     var placementMap = { 'wechat_video':'视频号','wechat_mp':'微信公众号与小程序','wechat_article':'公众号','qq_space':'QQ空间','tencent_video':'腾讯视频','tencent_news':'腾讯新闻','all':'全版位' };
-    var reversed = filtered.slice().reverse();
+    // 分页：每页 TASK_PAGE_SIZE 条，避免无限下拉
+    var totalPages = Math.max(1, Math.ceil(filtered.length / TASK_PAGE_SIZE));
+    if (taskListPage > totalPages) taskListPage = totalPages;
+    if (taskListPage < 1) taskListPage = 1;
+    var pageItems = filtered.slice().reverse().slice((taskListPage - 1) * TASK_PAGE_SIZE, taskListPage * TASK_PAGE_SIZE);
     var html = '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">';
     html += '<div style="display:flex;align-items:center;padding:16px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">' +
       '<div style="flex:0.5;text-align:center;">序号</div>' +
@@ -1068,7 +1074,7 @@
       '<div style="flex:0.9;text-align:center;">状态</div>' +
       '<div style="flex:1.6;text-align:center;">操作</div>' +
       '</div>';
-    reversed.forEach(function(task, idx) {
+    pageItems.forEach(function(task, idx) {
       var taskData = null;
       try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch(e) {}
       var placementVal = taskData && taskData.placement ? taskData.placement : '';
@@ -1080,8 +1086,8 @@
         '<div style="flex:0.5;color:#9ca3af;">' + (idx + 1) + '</div>' +
         '<div style="flex:1.2;font-weight:500;display:flex;flex-direction:column;align-items:center;line-height:1.4;">' + escapeHtml(task.name) + '<span style="font-size:12px;color:#9ca3af;font-weight:400;">' + formatDate(task.createdAt) + '</span></div>' +
         '<div style="flex:0.7;display:flex;flex-direction:column;align-items:center;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
+        '<div style="flex:0.9;display:flex;justify-content:center;"><span style="padding:4px 10px;background:#f0f5ff;color:#1890ff;border-radius:999px;font-size:13px;">' + escapeHtml(placementDisplay) + '</span></div>' +
         '<div style="flex:0.9;display:flex;justify-content:center;"><span style="padding:4px 10px;background:#f6ffed;color:#52c41a;border-radius:999px;font-size:13px;">' + _btText + '</span></div>' +
-        '<div style="flex:0.9;color:#6b7280;">' + escapeHtml(placementDisplay) + '</div>' +
         '<div style="flex:0.9;display:flex;justify-content:center;"><span data-status="' + sl.status + '" style="padding:4px 10px;border-radius:999px;font-size:13px;' + sl.statusStyle + '">' + sl.status + '</span></div>' +
         '<div style="flex:1.6;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">' +
           '<button data-task-id="' + task.id + '" data-action="log" style="padding:6px 14px;background:white;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;font-size:13px;color:#333;"><i class="fas fa-file-alt" style="margin-right:4px;"></i>日志</button>' +
@@ -1092,6 +1098,17 @@
       '</div>';
     });
     html += '</div>';
+    // 分页控件
+    if (totalPages > 1) {
+      html += '<div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:14px 0;flex-wrap:wrap;">';
+      html += '<button data-page="' + (taskListPage - 1) + '" ' + (taskListPage === 1 ? 'disabled' : '') + ' style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:' + (taskListPage === 1 ? '#f5f5f5' : '#fff') + ';color:' + (taskListPage === 1 ? '#bbb' : '#333') + ';cursor:' + (taskListPage === 1 ? 'not-allowed' : 'pointer') + ';font-size:13px;">上一页</button>';
+      for (var p = 1; p <= totalPages; p++) {
+        html += '<button data-page="' + p + '" style="min-width:34px;padding:6px 8px;border:1px solid ' + (p === taskListPage ? '#1890ff' : '#e5e7eb') + ';border-radius:6px;background:' + (p === taskListPage ? '#1890ff' : '#fff') + ';color:' + (p === taskListPage ? '#fff' : '#333') + ';cursor:pointer;font-size:13px;font-weight:' + (p === taskListPage ? '600' : '400') + ';">' + p + '</button>';
+      }
+      html += '<button data-page="' + (taskListPage + 1) + '" ' + (taskListPage === totalPages ? 'disabled' : '') + ' style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:' + (taskListPage === totalPages ? '#f5f5f5' : '#fff') + ';color:' + (taskListPage === totalPages ? '#bbb' : '#333') + ';cursor:' + (taskListPage === totalPages ? 'not-allowed' : 'pointer') + ';font-size:13px;">下一页</button>';
+      html += '<span style="margin-left:8px;font-size:12px;color:#9ca3af;">共 ' + filtered.length + ' 条 / ' + totalPages + ' 页</span>';
+      html += '</div>';
+    }
     container.innerHTML = html;
   }
 
@@ -2271,10 +2288,17 @@
   window.renderTaskList = renderTaskList;
   window.CURRENT_USER = CURRENT_USER;
 
-  // 关键修复：初始化时显式渲染任务列表（seed 之后）。
-  // 否则页面停留在 #task-list-content 的静态"暂无任务"占位符，
-  // 任务列表为空 → 没有日志按钮 → 表现为"日志为空"。
-  try { renderTaskList(); } catch (e) { console.log('[init] renderTaskList 失败:', e && e.message); }
+  // 首屏渲染任务列表：必须等 DOM 就绪（容器存在）后再渲染，
+  // 否则在脚本解析期过早执行会 early-return 且不重渲染，
+  // 任务列表永久停在静态“暂无任务”占位 → 没有日志按钮 → 表现为“日志永远为空”
+  function initRenderTaskList() {
+    try { renderTaskList(); } catch (e) { console.log('[init] renderTaskList 失败:', e && e.message); }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initRenderTaskList);
+  } else {
+    initRenderTaskList();
+  }
 })();
 
 
@@ -2355,6 +2379,13 @@
     var taskContainer = document.getElementById('task-list-content');
     if (taskContainer) {
       taskContainer.addEventListener('click', function(e) {
+        var pgBtn = e.target.closest('button[data-page]');
+        if (pgBtn) {
+          if (pgBtn.hasAttribute('disabled')) return;
+          var p = parseInt(pgBtn.getAttribute('data-page'), 10);
+          if (!isNaN(p)) { taskListPage = p; renderTaskList(); }
+          return;
+        }
         var btn = e.target.closest('button');
         if (!btn) return;
         var taskId = btn.getAttribute('data-task-id');
@@ -2367,7 +2398,7 @@
     }
 
     // -- 任务列表筛选（渠道 / 版位 / 名称 / 状态）--
-    function applyTaskFilters() { renderTaskList(); }
+    function applyTaskFilters() { taskListPage = 1; renderTaskList(); }
     var fChannel = document.getElementById('filter-channel');
     var fPlacement = document.getElementById('filter-placement');
     var fStatus = document.getElementById('filter-status');

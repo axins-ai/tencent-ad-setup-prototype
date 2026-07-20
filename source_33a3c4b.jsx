@@ -1280,10 +1280,14 @@ function MultiSelectDropdown({ options, selected, onChange, placeholder = '请�
                   onClick={() => toggle(o.value)}
                   className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 ${compact ? 'text-xs' : 'text-sm'} ${checked ? 'bg-blue-50' : ''}`}
                 >
-                  <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'}`}>
-                    <i className="fas fa-check text-[10px]"></i>
-                  </span>
-                  <span className="text-gray-800 truncate">{o.label}</span>
+                  {checked ? (
+                    <span className="w-4 h-4 rounded bg-blue-500 border border-blue-500 flex items-center justify-center flex-shrink-0 text-white">
+                      <i className="fas fa-check text-[10px]"></i>
+                    </span>
+                  ) : (
+                    <span className="w-4 h-4 flex-shrink-0"></span>
+                  )}
+                  <span className={checked ? 'text-blue-700 font-medium truncate' : 'text-gray-800 truncate'}>{o.label}</span>
                 </button>
               );
             })
@@ -2422,25 +2426,6 @@ function App() {
                   {channel === 'gdt' && selectedTargetingPackages.length > 0 && (
                     <p className="text-xs text-blue-500 mt-1"><i className="fas fa-info-circle mr-1"></i>广点通渠道：同一定向包内容在同一账户下仅对应一个单元</p>
                   )}
-
-                  {/* 共用模式 - 账户明细：显示哪些账户将共用此定向配置 */}
-                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-xs text-blue-700 font-medium mb-2">
-                      <i className="fas fa-info-circle mr-1"></i>
-                      此定向配置将应用于以下 {(selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts).length} 个账户
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map(id => {
-                        const acc = MOCK.accounts.find(a => a.id === id);
-                        return acc ? (
-                          <span key={id} className="inline-flex items-center gap-1 text-xs bg-white border border-blue-200 rounded-full px-2.5 py-0.5 text-gray-700">
-                            <i className="fas fa-user-circle text-blue-400 text-xs"></i>
-                            {acc.name.length > 8 ? acc.name.substring(0, 8) + '...' : acc.name}
-                          </span>
-                        ) : null;
-                      })}
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -3003,7 +2988,25 @@ function App() {
             <div className="border-t pt-4">
               <h4 className="text-sm font-bold text-gray-900 mb-4"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材分配</h4>
               <div className="space-y-4">
-                <div className="flex items-center gap-6">
+                {/* 1) 创意分配策略：先确定分配策略（平均 / 复制） */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-copy mr-2 text-blue-500"></i>创意分配策略（文案 / 素材）</label>
+                  <div className="flex items-center gap-6">
+                    <label className="flex items-center cursor-pointer">
+                      <input type="radio" name="compose_strategy" value="copy" checked={composeStrategy === 'copy'} onChange={() => setComposeStrategy('copy')} className="mr-2" />
+                      <span className="text-sm">复制分配（所有账户用相同素材 / 文案）</span>
+                    </label>
+                    <label className="flex items-center cursor-pointer">
+                      <input type="radio" name="compose_strategy" value="average" checked={composeStrategy === 'average'} onChange={() => setComposeStrategy('average')} className="mr-2" />
+                      <span className="text-sm">平均分配</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* 2) 创意素材数量：再确定素材数量 / 文案数量 */}
+                <div className="border-t pt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-layer-group mr-2 text-blue-500"></i>创意素材数量</label>
+                  <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
                     <label className="text-sm text-gray-600 whitespace-nowrap">单创意素材</label>
                     {placement === 'wechat_video' ? (
@@ -3033,20 +3036,7 @@ function App() {
                   </div>
                 </div>
 
-                {/* 创意分配策略 */}
-                <div className="border-t pt-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-3"><i className="fas fa-copy mr-2 text-blue-500"></i>创意分配策略</label>
-                  <div className="flex items-center gap-6">
-                    <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="compose_strategy" value="copy" checked={composeStrategy === 'copy'} onChange={() => setComposeStrategy('copy')} className="mr-2" />
-                      <span className="text-sm">复制分配（所有账户用相同素材）</span>
-                    </label>
-                    <label className="flex items-center cursor-pointer">
-                      <input type="radio" name="compose_strategy" value="average" checked={composeStrategy === 'average'} onChange={() => setComposeStrategy('average')} className="mr-2" />
-                      <span className="text-sm">平均分配</span>
-                    </label>
-                  </div>
-                </div>
+              </div>
               </div>
 
               {/* 预估可生成创意数 */}

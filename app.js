@@ -1944,12 +1944,14 @@ function MultiSelectDropdown({
       key: o.value,
       onClick: () => toggle(o.value),
       className: `w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 ${compact ? 'text-xs' : 'text-sm'} ${checked ? 'bg-blue-50' : ''}`
-    }, /*#__PURE__*/React.createElement("span", {
-      className: `w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'}`
+    }, checked ? /*#__PURE__*/React.createElement("span", {
+      className: "w-4 h-4 rounded bg-blue-500 border border-blue-500 flex items-center justify-center flex-shrink-0 text-white"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-check text-[10px]"
-    })), /*#__PURE__*/React.createElement("span", {
-      className: "text-gray-800 truncate"
+    })) : /*#__PURE__*/React.createElement("span", {
+      className: "w-4 h-4 flex-shrink-0"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: checked ? 'text-blue-700 font-medium truncate' : 'text-gray-800 truncate'
     }, o.label));
   })));
 }
@@ -3331,23 +3333,7 @@ function App() {
     className: "text-xs text-blue-500 mt-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle mr-1"
-  }), "广点通渠道：同一定向包内容在同一账户下仅对应一个单元"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-blue-700 font-medium mb-2"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-info-circle mr-1"
-  }), "此定向配置将应用于以下 ", (selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts).length, " 个账户"), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap gap-1.5"
-  }, (selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map(id => {
-    const acc = MOCK.accounts.find(a => a.id === id);
-    return acc ? /*#__PURE__*/React.createElement("span", {
-      key: id,
-      className: "inline-flex items-center gap-1 text-xs bg-white border border-blue-200 rounded-full px-2.5 py-0.5 text-gray-700"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-user-circle text-blue-400 text-xs"
-    }), acc.name.length > 8 ? acc.name.substring(0, 8) + '...' : acc.name) : null;
-  })))), tgtAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+  }), "广点通渠道：同一定向包内容在同一账户下仅对应一个单元")), tgtAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
   }, "为每个账户独立选择定向包（仅支持从定向包列表中选择）："), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
@@ -3945,7 +3931,41 @@ function App() {
     className: "fas fa-layer-group mr-2 text-blue-500"
   }), "创意素材分配"), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-3"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-copy mr-2 text-blue-500"
+  }), "创意分配策略（文案 / 素材）"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-6"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "compose_strategy",
+    value: "copy",
+    checked: composeStrategy === 'copy',
+    onChange: () => setComposeStrategy('copy'),
+    className: "mr-2"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "复制分配（所有账户用相同素材 / 文案）")), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "compose_strategy",
+    value: "average",
+    checked: composeStrategy === 'average',
+    onChange: () => setComposeStrategy('average'),
+    className: "mr-2"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "平均分配")))), /*#__PURE__*/React.createElement("div", {
+    className: "border-t pt-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-3"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-layer-group mr-2 text-blue-500"
+  }), "创意素材数量"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
@@ -3990,37 +4010,7 @@ function App() {
     className: "w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-400"
-  }, "（1~3）"))), /*#__PURE__*/React.createElement("div", {
-    className: "border-t pt-3"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-sm font-medium text-gray-700 mb-3"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-copy mr-2 text-blue-500"
-  }), "创意分配策略"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-6"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "compose_strategy",
-    value: "copy",
-    checked: composeStrategy === 'copy',
-    onChange: () => setComposeStrategy('copy'),
-    className: "mr-2"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "复制分配（所有账户用相同素材）")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "compose_strategy",
-    value: "average",
-    checked: composeStrategy === 'average',
-    onChange: () => setComposeStrategy('average'),
-    className: "mr-2"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "平均分配"))))), /*#__PURE__*/React.createElement("div", {
+  }, "（1~3）"))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-blue-50 border border-blue-200 rounded-lg p-3"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-1"
