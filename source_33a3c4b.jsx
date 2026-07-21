@@ -3279,57 +3279,6 @@ function App() {
                 </div>
               </div>
 
-              {/* 定向包明细 */}
-              {tgtAllocMode === 'shared' && selectedTargetingPackages.length > 0 && (
-                <div className="border border-blue-200 rounded-xl overflow-hidden mb-6">
-                  <div className="bg-blue-50 px-4 py-3 border-b border-blue-200">
-                    <h4 className="text-sm font-semibold text-blue-900"><i className="fas fa-bullseye mr-2"></i>定向包明细（全账户共用，每包 = 1 单元/账户）</h4>
-                  </div>
-                  <div className="divide-y divide-blue-100">
-                    {selectedTargetingPackages.map((tpId, idx) => {
-                      const tp = MOCK.targetingPackages.find(t => t.id === tpId) || userTgtPkgs.find(t => t.id === tpId);
-                      return tp ? (
-                        <div key={tpId} className="px-4 py-3 flex items-center justify-between hover:bg-blue-50">
-                          <div className="flex items-center gap-3">
-                            <span className="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{tp.name}</p>
-                              <p className="text-xs text-gray-500">{tp.region} | {tp.age}岁 | {tp.gender}</p>
-                            </div>
-                          </div>
-                          <span className="text-xs text-blue-600 font-medium">{accountCount} 账户 × 1 单元</span>
-                        </div>
-                      ) : null;
-                    })}
-                  </div>
-                </div>
-              )}
-              {tgtAllocMode === 'per_account' && (
-                <div className="border border-blue-200 rounded-xl overflow-hidden mb-6">
-                  <div className="bg-blue-50 px-4 py-3 border-b border-blue-200">
-                    <h4 className="text-sm font-semibold text-blue-900"><i className="fas fa-bullseye mr-2"></i>定向包明细（分账户定制）</h4>
-                  </div>
-                  <div className="divide-y divide-blue-100">
-                    {selectedAccountIds.map((id) => {
-                      const acc = MOCK.accounts.find(a => a.id === id);
-                      const sel = perAccountTgtPkgs[id] || [];
-                      if (sel.length === 0) return null;
-                      return (
-                        <div key={id} className="px-4 py-3">
-                          <p className="text-sm font-medium text-gray-900 mb-1">{acc ? acc.name : id}（{sel.length} 个定向包）</p>
-                          <div className="flex flex-wrap gap-2">
-                            {sel.map(tpId => {
-                              const tp = MOCK.targetingPackages.find(t => t.id === tpId) || userTgtPkgs.find(t => t.id === tpId);
-                              return tp ? <span key={tpId} className="tag bg-blue-100 text-blue-800">{tp.name}</span> : null;
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
               {/* 账户明细列表 */}
               <div className="border border-gray-200 rounded-xl overflow-hidden">
                 <div className="bg-gray-50 px-4 py-3 border-b">
