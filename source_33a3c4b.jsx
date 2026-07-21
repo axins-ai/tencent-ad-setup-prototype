@@ -1746,29 +1746,23 @@ function App() {
       creativesPerUnit = m > 0 ? Math.floor(materialCount / m) : 0;
       if (creativesPerUnit < 0) creativesPerUnit = 0;
     }
-    // 复制分配：每个单元独立使用全部素材 → 单元数 × (素材数 / 单创意素材数)
-    // 平均分配：素材在所有单元间均分 → (素材数 / 单创意素材数) / 单元数
+    // 平均分配：素材在单元间均分 → 总创意数 = 每单元创意数 = 已选素材数 ÷ 单创意素材数
+    // 复制分配：每个单元独立使用全部素材 → 单元数 × (素材数 ÷ 单创意素材数)
     let totalCreatives = 0;
-    if (buildType === 'creative_only') {
-      // 仅搭建创意：平均分配时素材在单元间均分，否则每个单元都用全部素材
-      totalCreatives = composeStrategy === 'average'
-        ? (totalUnits > 0 ? Math.floor(creativesPerUnit / totalUnits) : creativesPerUnit)
-        : totalUnits * creativesPerUnit;
-    } else if (composeStrategy === 'copy') {
-      // 复制分配：每个单元独立使用全部素材
-      totalCreatives = totalUnits * creativesPerUnit;
+    if (composeStrategy === 'average') {
+      totalCreatives = creativesPerUnit;
     } else {
-      // 平均分配：素材在所有单元间均分
-      totalCreatives = totalUnits > 0 ? Math.floor(creativesPerUnit / totalUnits) : creativesPerUnit;
+      totalCreatives = totalUnits * creativesPerUnit;
     }
 
     const CREATIVE_LIMIT = 1000;
     const overLimit = totalCreatives > CREATIVE_LIMIT;
     // 单个单元最多可分配 100 个创意：
-    // 平均分配模式下 totalCreatives 已是「每单元」创意数；复制分配模式下每单元 = 总创意数 / 单元数
+    // 复制分配：每单元共用全部素材 = 每单元创意数(creativesPerUnit)
+    // 平均分配：总创意数在单元间均分 → 每单元 = creativesPerUnit ÷ 单元数
     const perUnitCreatives = composeStrategy === 'average'
-      ? totalCreatives
-      : (totalUnits > 0 ? Math.floor(totalCreatives / totalUnits) : totalCreatives);
+      ? (totalUnits > 0 ? Math.floor(creativesPerUnit / totalUnits) : creativesPerUnit)
+      : creativesPerUnit;
     const UNIT_LIMIT = 100;
     const overUnit = perUnitCreatives > UNIT_LIMIT;
     return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, creativesPerUnit, totalCreatives, perUnitCreatives, UNIT_LIMIT, CREATIVE_LIMIT, overLimit, overUnit };
@@ -3006,29 +3000,35 @@ function App() {
       </div>
     </div>
 
-    {/* 创意分配策略：两个按钮 + 右上角常驻角标，注释光标悬停展示 */}
+    {/* 创意分配策略：两个按钮 + 右上角常驻角标，悬停角标旁出现注释 */}
     <div className="border-t pt-4 mb-6">
       <div className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</div>
       <div className="grid grid-cols-2 gap-3 max-w-md">
         <button type="button" onClick={() => setComposeStrategy('copy')}
-          onMouseEnter={() => setHoverStrategy('copy')} onMouseLeave={() => setHoverStrategy(null)}
           className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-          {/* 右上角常驻角标 */}
-          <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs"><i className="fas fa-info"></i></span>
           <div className="text-sm font-medium text-gray-900">复制分配</div>
-          {hoverStrategy === 'copy' && (
-            <div className="mt-1 text-xs text-gray-400 leading-relaxed">所有单元共用同一批创意</div>
-          )}
+          {/* 右上角常驻角标：悬停角标，注释浮现在角标旁 */}
+          <span
+            className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs cursor-pointer"
+            onMouseEnter={() => setHoverStrategy('copy')} onMouseLeave={() => setHoverStrategy(null)}>
+            <i className="fas fa-info"></i>
+            {hoverStrategy === 'copy' && (
+              <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">所有单元共用同一批创意</span>
+            )}
+          </span>
         </button>
         <button type="button" onClick={() => setComposeStrategy('average')}
-          onMouseEnter={() => setHoverStrategy('average')} onMouseLeave={() => setHoverStrategy(null)}
           className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-          {/* 右上角常驻角标 */}
-          <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs"><i className="fas fa-info"></i></span>
           <div className="text-sm font-medium text-gray-900">平均分配</div>
-          {hoverStrategy === 'average' && (
-            <div className="mt-1 text-xs text-gray-400 leading-relaxed">根据单元数均分创意数</div>
-          )}
+          {/* 右上角常驻角标：悬停角标，注释浮现在角标旁 */}
+          <span
+            className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs cursor-pointer"
+            onMouseEnter={() => setHoverStrategy('average')} onMouseLeave={() => setHoverStrategy(null)}>
+            <i className="fas fa-info"></i>
+            {hoverStrategy === 'average' && (
+              <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">根据单元数均分创意数</span>
+            )}
+          </span>
         </button>
       </div>
     </div>
@@ -3037,7 +3037,7 @@ function App() {
               </div>
 
               {/* 预估可生成创意数 */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-6">
                 <p className="text-xs text-gray-500 mb-1">预估可生成创意数：</p>
                 {(() => {
                   const s = getBuildSummary();
@@ -3051,7 +3051,7 @@ function App() {
                       {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单单元超限，上限 100 个）</span>}
                       <span className="text-xs font-normal text-gray-500 ml-2">
                         {isAvg
-                          ? `素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials} ÷ 单元数 ${s.totalUnits}`
+                          ? `素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials}`
                           : `单元数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials}`}
                       </span>
                     </p>
@@ -3064,9 +3064,11 @@ function App() {
                     <div className="mt-2 text-xs text-red-500">单个单元创意数 {s.perUnitCreatives} 超出上限 100 个，请调整素材 / 单创意素材数 / 单元数</div>
                   );
                 })()}
-                <p className="text-xs text-gray-400 mt-1 leading-relaxed">
-                  规则：复制分配：预估可生成创意数 = 单元数 × 已选素材数 ÷ 单创意素材数；平均分配：预估可生成创意数 = 已选素材数 ÷ 单创意素材数 ÷ 单元数。默认根据素材确定创意数，文案选取方式为顺序选取
-                </p>
+                <div className="text-xs text-gray-400 mt-1 leading-relaxed">
+                  <div>规则：默认根据素材确定创意数，文案选取方式为顺序选取</div>
+                  <div>复制分配：预估可生成创意数 = 单元数 × 已选素材数 ÷ 单创意素材数；</div>
+                  <div>平均分配：预估可生成创意数 = 已选素材数 ÷ 单创意素材数</div>
+                </div>
               </div>
             </div>
 
