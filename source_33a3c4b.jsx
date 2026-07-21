@@ -3257,20 +3257,7 @@ function App() {
             </div>
             <div className="overflow-auto flex-1 p-6" style={{maxHeight: '70vh'}}>
               {/* 核心统计卡片 */}
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white mb-6 text-center shadow-xl">
-                <p className="text-sm opacity-80 mb-3">搭建总量预览</p>
-                <div className="flex items-center justify-center gap-3 flex-wrap text-2xl font-bold">
-                  <span className="bg-white/20 px-4 py-2 rounded-xl">{accountCount} 个账户</span>
-                  <span class="text-3xl">×</span>
-                  <span className="bg-white/20 px-4 py-2 rounded-xl">{unitsPerAccount} 个单元/账户</span>
-                  <span class="text-3xl">×</span>
-                  <span className="bg-white/20 px-4 py-2 rounded-xl">{copyCount} 条文案</span>
-                </div>
-                <div className="mt-5 pt-5 border-t border-white/30">
-                  <p className="text-5xl font-extrabold tracking-tight">{totalCreatives.toLocaleString()}</p>
-                  <p className="text-base opacity-80 mt-1">共搭建 {totalCreatives.toLocaleString()} 个创意</p>
-                </div>
-              </div>
+              {/* 搭建总量预览卡片已按需求删除（文案与创意数无关，不再用 账户×单元×文案 估算） */}
 
               {/* 详细拆解 */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -3350,18 +3337,17 @@ function App() {
                 </div>
                 <div className="divide-y divide-gray-100">
                   {selectedAccountIds.map((id, idx) => {
-                    const acc = MOCK.accounts.find(a => a.id === id);
                     return (
                       <div key={id} className="px-4 py-3 flex items-center justify-between hover:bg-gray-50">
                         <div className="flex items-center gap-3">
                           <span className="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{acc ? acc.name : id}</p>
-                            <p className="text-xs text-gray-400">{acc?.kaboshi ? acc.kaboshi.substring(0, 35) + '...' : ''}</p>
+                            <p className="text-sm font-medium text-gray-900">{id}</p>
+                            <p className="text-xs text-gray-400">子账户 ID</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-gray-900">{unitsPerAccount} 单元 × {copyCount} 文案 × {materialCount} 素材 = <span className="text-blue-600">{totalCreatives / accountCount} 创意</span></p>
+                          <p className="text-sm font-bold text-gray-900">{unitsPerAccount} 单元 × {materialCount} 素材 = <span className="text-blue-600">{Math.floor(totalCreatives / accountCount)} 创意</span></p>
                         </div>
                       </div>
                     );
@@ -3369,20 +3355,80 @@ function App() {
                 </div>
               </div>
 
-              {/* 配置摘要 */}
-              <div className="mt-6 bg-gray-50 rounded-xl p-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3"><i className="fas fa-cog mr-2"></i>关键配置摘要</h4>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                  <div><span className="text-gray-500">业务单元：</span><span className="font-medium">{MOCK.businessUnits.find(b => b.id === businessUnit)?.name}</span></div>
-                  <div><span className="text-gray-500">营销目的：</span><span className="font-medium">{MOCK.marketingObjectives.find(m => m.id === marketingObjective)?.name}</span></div>
-                  <div><span className="text-gray-500">产品：</span><span className="font-medium">{getProductsForBusinessUnit().find(sp => sp.id === specificProduct)?.name}</span></div>
-                  <div><span className="text-gray-500">转化：</span><span className="font-medium">{(MOCK.conversionsByBusinessUnit[businessUnit] || []).find(c => c.id === conversionGoal)?.name}</span></div>
-                  <div><span className="text-gray-500">投放版位：</span><span className="font-medium">{placement === 'wechat_video' ? '微信视频号' : '微信公众号与小程序'}</span></div>
-                  <div><span className="text-gray-500">出价：</span><span className="font-medium">{bidAmount ? `¥${bidAmount}` : '未设置'}</span></div>
-                  <div><span className="text-gray-500">定向方式：</span><span className="font-medium">{tgtAllocMode === 'shared' ? '定向包（全账户共用）：' + (selectedTargetingPackages.length > 0 ? `${selectedTargetingPackages.length} 个定向包` : '未选择') : '定向包（分账户定制）：' + Object.values(perAccountTgtPkgs).reduce((s, arr) => s + (arr ? arr.length : 0), 0) + ' 个账户配置'}</span></div>
-                  <div><span className="text-gray-500">营销单元名称：</span><span className="font-medium">{buildType === 'creative_only' ? '仅搭建创意（按账户单元）' : (unitName || '未设置')}</span></div>
-                </div>
-              </div>
+              {/* 配置摘要：列出整个表单所有配置项，未配置的必填项目标红 */}
+              {(() => {
+                const configItems = (() => {
+                  const bu = MOCK.businessUnits.find(b => b.id === businessUnit);
+                  const mo = MOCK.marketingObjectives.find(m => m.id === marketingObjective);
+                  const prod = getProductsForBusinessUnit().find(sp => sp.id === specificProduct);
+                  const conv = (MOCK.conversionsByBusinessUnit[businessUnit] || []).find(c => c.id === conversionGoal);
+                  const placementName = placement === 'wechat_video' ? '微信视频号' : (placement === 'wechat_mp' ? '微信公众号与小程序' : '');
+                  let tgtLabel, tgtDetail, tgtOk;
+                  if (targetingSource === 'package') {
+                    tgtLabel = '定向包';
+                    tgtDetail = selectedTargetingPackages.length > 0 ? (selectedTargetingPackages.length + ' 个定向包') : '未选择';
+                    tgtOk = selectedTargetingPackages.length > 0;
+                  } else {
+                    tgtLabel = '地域定向';
+                    tgtDetail = geoMode === 'unlimited' ? '不限' : (geoSelectedProvinces.length > 0 ? (geoSelectedProvinces.length + ' 个省份') : '未选择');
+                    tgtOk = geoMode === 'unlimited' || geoSelectedProvinces.length > 0;
+                  }
+                  const items = [];
+                  items.push({ label: '选择账户', value: selectedAccountIds.length > 0 ? (selectedAccountIds.length + ' 个') : '未选择', required: true, ok: selectedAccountIds.length > 0 });
+                  items.push({ label: '业务单元', value: bu ? bu.name : '未设置', required: false, ok: !!bu });
+                  items.push({ label: '营销目的', value: mo ? mo.name : '未设置', required: false, ok: !!mo });
+                  items.push({ label: '产品', value: prod ? prod.name : '未设置', required: true, ok: !!prod });
+                  items.push({ label: '转化目标', value: conv ? conv.name : '未设置', required: true, ok: !!conv });
+                  items.push({ label: '投放版位', value: placementName || '未设置', required: true, ok: !!placement });
+                  items.push({ label: '营销单元名称', value: unitName || '未设置', required: true, ok: !!unitName });
+                  items.push({ label: '定向方式', value: tgtLabel + '：' + tgtDetail, required: true, ok: tgtOk });
+                  items.push({ label: '出价', value: bidAmount !== '' ? ('¥' + bidAmount) : '未设置', required: true, ok: bidAmount !== '' });
+                  items.push({ label: '日预算', value: dailyBudget !== '' ? ('¥' + dailyBudget) : '未设置', required: false, ok: dailyBudget !== '' });
+                  items.push({ label: '创意素材数', value: (selectedMaterials.length + ' 个'), required: true, ok: selectedMaterials.length > 0 });
+                  items.push({ label: '广告文案数', value: (selectedCopies.length + ' 条'), required: true, ok: selectedCopies.length > 0 });
+                  items.push({ label: '单创意素材数', value: String(composeRule.materials), required: false, ok: true });
+                  items.push({ label: '单创意文案数', value: String(composeRule.copies), required: false, ok: true });
+                  items.push({ label: '创意分配策略', value: composeStrategy === 'average' ? '平均分配' : '复制分配', required: false, ok: true });
+                  items.push({ label: '品牌形象', value: brandImageType === 'video_account' ? (selectedVideoAccount ? selectedVideoAccount.name : '未选择视频号') : (selectedBrandImage ? selectedBrandImage.name : '未选择'), required: false, ok: brandImageType === 'video_account' ? !!selectedVideoAccount : !!selectedBrandImage });
+                  items.push({ label: '营销组件', value: marketingComponentType === 'action_button' ? ('行动按钮（' + actionButtonType + '）') : (selectedComponent ? selectedComponent.btnText : '未选择'), required: false, ok: marketingComponentType === 'action_button' ? !!actionButtonType : !!selectedComponent });
+                  items.push({ label: '创意名称', value: creativeName || '未设置', required: false, ok: !!creativeName });
+                  items.push({ label: '运行模式', value: runMode === 'scheduled' ? '定时运行' : '立即运行', required: false, ok: true });
+                  if (runMode === 'scheduled') items.push({ label: '定时时间', value: (scheduledDate && scheduledTime) ? (scheduledDate + ' ' + scheduledTime) : '未设置', required: true, ok: !!(scheduledDate && scheduledTime) });
+                  items.push({ label: '投放日期类型', value: 投放日期类型 || '未设置', required: false, ok: !!投放日期类型 });
+                  items.push({ label: '投放时段模式', value: 投放时段模式 || '未设置', required: false, ok: !!投放时段模式 });
+                  items.push({ label: '搭建类型', value: buildType === 'creative_only' ? '仅搭建创意' : '搭建单元+创意', required: false, ok: true });
+                  items.push({ label: '一键起量', value: quickLaunch ? (quickLaunchBudget !== '' ? ('已开启（¥' + quickLaunchBudget + '）') : '已开启（未填预算）') : '未开启', required: false, ok: !quickLaunch || quickLaunchBudget !== '' });
+                  if (quickLaunch) items.push({ label: '起量预算', value: quickLaunchBudget !== '' ? ('¥' + quickLaunchBudget) : '未设置', required: true, ok: quickLaunchBudget !== '' });
+                  items.push({ label: '推官链接', value: getDefaultLandingPage(selectedAccountIds[0] || '') ? '已设置' : '未设置', required: false, ok: true });
+                  return items;
+                })();
+                const missCount = configItems.filter(i => i.required && !i.ok).length;
+                return (
+                  <div className="mt-6 bg-gray-50 rounded-xl p-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                      <i className="fas fa-cog mr-2"></i>关键配置摘要
+                      {missCount > 0
+                        ? <span className="ml-2 text-xs text-red-500 font-normal">（{missCount} 项必填未配置）</span>
+                        : <span className="ml-2 text-xs text-green-600 font-normal">（必填项均已配置）</span>}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                      {configItems.map((it, i) => {
+                        const miss = it.required && !it.ok;
+                        return (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-gray-500 flex-shrink-0">{it.label}：</span>
+                            {miss ? (
+                              <span className="font-medium text-red-500">{it.value}<span className="ml-1 text-xs border border-red-300 rounded px-1">未配置</span></span>
+                            ) : (
+                              <span className="font-medium text-gray-900">{it.value}</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
             <div className="p-5 border-t flex justify-end gap-3">
               <button onClick={() => setShowPreview(false)} className="btn-secondary">关闭</button>
