@@ -3312,16 +3312,8 @@ function App() {
                   const prod = getProductsForBusinessUnit().find(sp => sp.id === specificProduct);
                   const conv = (MOCK.conversionsByBusinessUnit[businessUnit] || []).find(c => c.id === conversionGoal);
                   const placementName = placement === 'wechat_video' ? '微信视频号' : (placement === 'wechat_mp' ? '微信公众号与小程序' : '');
-                  let tgtLabel, tgtDetail, tgtOk;
-                  if (targetingSource === 'package') {
-                    tgtLabel = '定向包';
-                    tgtDetail = selectedTargetingPackages.length > 0 ? (selectedTargetingPackages.length + ' 个定向包') : '未选择';
-                    tgtOk = selectedTargetingPackages.length > 0;
-                  } else {
-                    tgtLabel = '地域定向';
-                    tgtDetail = geoMode === 'unlimited' ? '不限' : (geoSelectedProvinces.length > 0 ? (geoSelectedProvinces.length + ' 个省份') : '未选择');
-                    tgtOk = geoMode === 'unlimited' || geoSelectedProvinces.length > 0;
-                  }
+                  const geoDetail = geoMode === 'unlimited' ? '不限' : (geoSelectedProvinces.length > 0 ? (geoSelectedProvinces.length + ' 个省份') : '未选择');
+                  const geoOk = geoMode === 'unlimited' || geoSelectedProvinces.length > 0;
                   const items = [];
                   items.push({ label: '选择账户', value: selectedAccountIds.length > 0 ? (selectedAccountIds.length + ' 个') : '未选择', required: true, ok: selectedAccountIds.length > 0 });
                   items.push({ label: '业务单元', value: bu ? bu.name : '未设置', required: false, ok: !!bu });
@@ -3330,7 +3322,7 @@ function App() {
                   items.push({ label: '转化目标', value: conv ? conv.name : '未设置', required: true, ok: !!conv });
                   items.push({ label: '投放版位', value: placementName || '未设置', required: true, ok: !!placement });
                   items.push({ label: '营销单元名称', value: unitName || '未设置', required: true, ok: !!unitName });
-                  items.push({ label: '定向方式', value: tgtLabel + '：' + tgtDetail, required: true, ok: tgtOk });
+                  items.push({ label: '地域定向', value: geoDetail, required: false, ok: geoOk });
                   items.push({ label: '出价', value: bidAmount !== '' ? ('¥' + bidAmount) : '未设置', required: true, ok: bidAmount !== '' });
                   items.push({ label: '日预算', value: dailyBudget !== '' ? ('¥' + dailyBudget) : '未设置', required: false, ok: dailyBudget !== '' });
                   items.push({ label: '创意素材数', value: (selectedMaterials.length + ' 个'), required: true, ok: selectedMaterials.length > 0 });
