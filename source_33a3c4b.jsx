@@ -572,7 +572,7 @@ function PlacementSceneModal({ placement, show, onClose, value, onChange }) {
 }
 
 // 素材库弹窗（视频+图片，带排序和日期维度）
-function MaterialModal({ show, onClose, onConfirm, selectedMaterials, accountId }) {
+function MaterialModal({ show, onClose, onConfirm, onClear, selectedMaterials, accountId }) {
   const [activeTab, setActiveTab] = useState('video'); // 'video' | 'image'
   const [dateStart, setDateStart] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0,10);
@@ -787,7 +787,7 @@ function MaterialModal({ show, onClose, onConfirm, selectedMaterials, accountId 
         <div className="p-4 border-t flex justify-between items-center">
           <span className="text-sm text-gray-600">已选择 <span className="text-red-500">{localSelected.length}/500</span> 个素材</span>
           <div className="flex gap-3">
-            <button onClick={() => { onConfirm(localSelected.map(id => [...MOCK.videoMaterials, ...MOCK.imageMaterials].find(m => m.id === id)).filter(Boolean)); setLocalSelected([]); }} className="btn-secondary text-sm">清空重选</button>
+            <button onClick={() => { setLocalSelected([]); onClear && onClear(); }} className="btn-secondary text-sm">清空重选</button>
             <button onClick={handleConfirm} className="btn-primary">确认选择</button>
           </div>
         </div>
@@ -3162,6 +3162,7 @@ function App() {
           setSelectedMaterials(materials);
           setShowMaterialModal(false);
         }}
+        onClear={() => setSelectedMaterials([])}
         selectedMaterials={selectedMaterials}
       />
 
