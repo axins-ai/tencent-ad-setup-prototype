@@ -564,7 +564,7 @@
 (function() {
   // 版本自校验：页面版本与 localStorage 不一致时强制刷新一次，绕过 CDN/浏览器对 index.html 的缓存
   (function() {
-    var PAGE_VERSION = '20260720q';
+    var PAGE_VERSION = '20260720r';
     try {
       if (localStorage.getItem('page_version') !== PAGE_VERSION) {
         localStorage.setItem('page_version', PAGE_VERSION);
@@ -1032,8 +1032,12 @@
   function openLogPage(taskId) {
     currentLogTaskId = taskId;
     try { showView('log-list'); } catch (e) {}
-    // 兜底：强制日志视图可见、隐藏任务列表与筛选卡，确保不出现「空白日志页」
+    // 关键修复：view-log-list 嵌套在 view-task-list 内部（HTML 结构限制），
+    // showView('log-list') 会把外层 view-task-list 设为 display:none，
+    // 子元素即使 display:block 也会被父容器整体隐藏 → 日志页「一片空白」。
+    // 必须强制恢复父容器可见，日志区才能真正显示出来。
     try {
+      var parentV = document.getElementById('view-task-list'); if (parentV) parentV.style.display = 'block';
       var lv = document.getElementById('view-log-list'); if (lv) lv.style.display = 'block';
       var tlc = document.getElementById('task-list-content'); if (tlc) tlc.style.display = 'none';
       var fc = document.getElementById('filter-card'); if (fc) fc.style.display = 'none';
