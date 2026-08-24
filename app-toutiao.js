@@ -2416,7 +2416,7 @@ function App() {
   }))), 投放时段模式 === 'multi_slot' && /*#__PURE__*/React.createElement(TimeGrid, {
     value: timeGridSlots,
     onChange: setTimeGridSlots
-  })))), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
+  })), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
@@ -2434,7 +2434,7 @@ function App() {
     key: v,
     onClick: () => setUnitName(unitName + '{' + v + '}'),
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-  }, "+", v)))), buildType === 'unit_only' && /*#__PURE__*/React.createElement("div", {
+  }, "+", v)))))), buildType === 'unit_only' && /*#__PURE__*/React.createElement("div", {
     className: "p-6 border-t border-gray-200"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-4"
