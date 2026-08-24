@@ -1820,63 +1820,7 @@ function App() {
     className: "text-xs text-gray-400 ml-auto font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "far fa-clock mr-1"
-  }), "配置营销目的、产品、优化目标与投放设置")), buildType === 'unit_only' ? /*#__PURE__*/React.createElement("div", {
-    className: "p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 mb-4"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-sm font-medium text-gray-700"
-  }, "需要搭建单元的项目 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, "*")), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-gray-400"
-  }, "为每个账户选择要搭建单元的营销项目（支持多选，每个账户至少选 1 个）")), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    className: "text-sm text-gray-400 py-4"
-  }, "请先在「基础配置」选择投放账户") : /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-3 gap-2"
-  }, selectedAccountIds.map(accountId => {
-    const acc = MOCK.accounts.find(a => a.id === accountId);
-    if (!acc) return null;
-    const projects = getAccountProjects(accountId);
-    const sel = selectedProjects[accountId] || [];
-    return /*#__PURE__*/React.createElement("div", {
-      key: accountId,
-      className: "border border-gray-200 rounded-lg p-2.5 bg-gray-50 hover:bg-gray-100 transition-colors"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-1.5 mb-2 min-w-0"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-folder-open text-blue-500 text-xs flex-shrink-0"
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "text-xs font-semibold text-gray-900 truncate",
-      title: acc.name
-    }, acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name)), /*#__PURE__*/React.createElement(MultiSelectDropdown, {
-      options: projects.map(p => ({
-        value: p.id,
-        label: p.name
-      })),
-      selected: sel,
-      onChange: vals => setSelectedProjects(prev => ({
-        ...prev,
-        [accountId]: vals
-      })),
-      placeholder: "选择项目",
-      emptyText: "该账户暂无可搭建项目",
-      compact: true,
-      panelMaxHeight: 200
-    }), sel.length > 0 ? /*#__PURE__*/React.createElement("div", {
-      className: "flex flex-wrap gap-0.5 mt-1.5"
-    }, sel.map(pid => {
-      const p = projects.find(x => x.id === pid);
-      return p ? /*#__PURE__*/React.createElement("span", {
-        key: pid,
-        className: "tag bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5"
-      }, p.name.length > 8 ? p.name.substring(0, 8) + '...' : p.name) : null;
-    })) : /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-orange-400 mt-1.5"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-exclamation-triangle mr-0.5"
-    }), "未选择"));
-  }))) : /*#__PURE__*/React.createElement("div", {
+  }), "配置营销目的、产品、优化目标与投放设置")), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
     className: "p-6 space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
@@ -1948,7 +1892,7 @@ function App() {
   }, "分账户定制：在下方按账户分别选择商品")), productAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", {
     className: "mb-5 pl-28"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-3 gap-2"
+    className: "grid grid-cols-3 gap-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     const pid = perAccountProduct[accountId] || '';
@@ -2074,7 +2018,7 @@ function App() {
   }, "每个账户需单独配置，支持批量同步"), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
   }, "请先选择账户") : /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-3 gap-2"
+    className: "grid grid-cols-3 gap-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     if (!acc) return null;
@@ -2211,7 +2155,7 @@ function App() {
   }), "巨量引擎渠道：同一定向包内容在同一账户下仅对应一个单元")), tgtAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
   }, "为每个账户独立选择定向包（仅支持从定向包列表中选择）："), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-3 gap-2"
+    className: "grid grid-cols-3 gap-2"
   }, (selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
     if (!acc) return null;
@@ -2438,16 +2382,6 @@ function App() {
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
   }, "全天")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer mr-5"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "time_mode",
-    checked: 投放时段模式 === 'time_range',
-    onChange: () => set投放时段模式('time_range'),
-    className: "mr-1.5"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm"
-  }, "指定开始时间和结束时间")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
@@ -2515,7 +2449,7 @@ function App() {
   }, "每个账户下选择要投放的营销单元（支持多选，每个账户至少选 1 个）")), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "text-sm text-gray-400 py-4"
   }, "请先在「基础配置」选择投放账户") : /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-3 gap-2"
+    className: "grid grid-cols-3 gap-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     if (!acc) return null;

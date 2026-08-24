@@ -1294,57 +1294,7 @@ function App() {
             <h2 className="text-base font-semibold text-gray-900">项目配置</h2>
             <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置营销目的、产品、优化目标与投放设置</span>
           </div>
-          {buildType === 'unit_only' ? (
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-sm font-medium text-gray-700">需要搭建单元的项目 <span className="text-red-500">*</span></span>
-                <span className="text-xs text-gray-400">为每个账户选择要搭建单元的营销项目（支持多选，每个账户至少选 1 个）</span>
-              </div>
-              {selectedAccountIds.length === 0 ? (
-                <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  {selectedAccountIds.map(accountId => {
-                    const acc = MOCK.accounts.find(a => a.id === accountId);
-                    if (!acc) return null;
-                    const projects = getAccountProjects(accountId);
-                    const sel = selectedProjects[accountId] || [];
-                    return (
-                      <div key={accountId} className="border border-gray-200 rounded-lg p-2.5 bg-gray-50 hover:bg-gray-100 transition-colors">
-                        <div className="flex items-center gap-1.5 mb-2 min-w-0">
-                          <i className="fas fa-folder-open text-blue-500 text-xs flex-shrink-0"></i>
-                          <span className="text-xs font-semibold text-gray-900 truncate" title={acc.name}>
-                            {acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name}
-                          </span>
-                        </div>
-                        <MultiSelectDropdown
-                          options={projects.map(p => ({ value: p.id, label: p.name }))}
-                          selected={sel}
-                          onChange={vals => setSelectedProjects(prev => ({ ...prev, [accountId]: vals }))}
-                          placeholder="选择项目"
-                          emptyText="该账户暂无可搭建项目"
-                          compact
-                          panelMaxHeight={200}
-                        />
-                        {sel.length > 0 ? (
-                          <div className="flex flex-wrap gap-0.5 mt-1.5">
-                            {sel.map(pid => {
-                              const p = projects.find(x => x.id === pid);
-                              return p ? (
-                                <span key={pid} className="tag bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5">{p.name.length > 8 ? p.name.substring(0, 8) + '...' : p.name}</span>
-                              ) : null;
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-orange-400 mt-1.5"><i className="fas fa-exclamation-triangle mr-0.5"></i>未选择</p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ) : (
+          {buildType === 'project_unit' && (
             <div className="p-6 space-y-6">
             {/* 营销目的 */}
             <div className="flex items-center gap-3 mb-5">
@@ -1387,7 +1337,7 @@ function App() {
             {/* 分账户定制商品（网格） */}
             {productAllocMode === 'per_account' && (
               <div className="mb-5 pl-28">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     const pid = perAccountProduct[accountId] || '';
@@ -1490,7 +1440,7 @@ function App() {
               {selectedAccountIds.length === 0 ? (
                 <p className="text-sm text-gray-400">请先选择账户</p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     if (!acc) return null;
@@ -1606,7 +1556,7 @@ function App() {
               {tgtAllocMode === 'per_account' && (
                 <div>
                   <p className="text-xs text-gray-500 mb-3">为每个账户独立选择定向包（仅支持从定向包列表中选择）：</p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {(selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map((id) => {
                       const acc = MOCK.accounts.find(a => a.id === id);
                       if (!acc) return null;
@@ -1807,10 +1757,6 @@ function App() {
                     <input type="radio" name="time_mode" checked={投放时段模式 === 'all_day'} onChange={() => set投放时段模式('all_day')} className="mr-1.5" />
                     <span className="text-sm">全天</span>
                   </label>
-                  <label className="flex items-center cursor-pointer mr-5">
-                    <input type="radio" name="time_mode" checked={投放时段模式 === 'time_range'} onChange={() => set投放时段模式('time_range')} className="mr-1.5" />
-                    <span className="text-sm">指定开始时间和结束时间</span>
-                  </label>
                   <label className="flex items-center cursor-pointer">
                     <input type="radio" name="time_mode" checked={投放时段模式 === 'multi_slot'} onChange={() => set投放时段模式('multi_slot')} className="mr-1.5" />
                     <span className="text-sm">指定多个时段</span>
@@ -1880,7 +1826,7 @@ function App() {
               {selectedAccountIds.length === 0 ? (
                 <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     if (!acc) return null;
