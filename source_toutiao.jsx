@@ -634,15 +634,10 @@ function App() {
   const [长期投放日期, set长期投放日期] = useState('2026-07-01');
   const [自定义开始日期, set自定义开始日期] = useState('');
   const [自定义结束日期, set自定义结束日期] = useState('');
-  const [投放时段模式, set投放时段模式] = useState('multi_slot'); // 'all_day' | 'time_range' | 'multi_slot'
+  const [投放时段模式, set投放时段模式] = useState('all_day'); // 'all_day' | 'time_range' | 'multi_slot'
   const [timeRangeStart, setTimeRangeStart] = useState('');
   const [timeRangeEnd, setTimeRangeEnd] = useState('');
   const [timeGridSlots, setTimeGridSlots] = useState({});
-  const [首日开始, set首日开始] = useState(false);
-  const [首日开始时间值, set首日开始时间值] = useState('00:00');
-  const [投放时段类型, set投放时段类型] = useState('all_day'); // 'all_day' | 'custom'
-  const [时段开始时间, set时段开始时间] = useState('00:00');
-  const [时段结束时间, set时段结束时间] = useState('23:59');
   const [unitName, setUnitName] = useState('');
   const [showNameVarDropdown, setShowNameVarDropdown] = useState(false);
   const nameVariables = ['日期', '定向包名称', '版位', '创建人'];
@@ -678,8 +673,7 @@ function App() {
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
   // 附加创意组件（点击按钮拉起资产库，多选）
-  const [showCreativeCompModal, setShowCreativeCompModal] = useState(false); // 旧：仅附加创意组件
-  const [showCreativeModal, setShowCreativeModal] = useState(false); // 新：合并面板（附加创意组件+行动号召+智能生成）
+  const [showCreativeCompModal, setShowCreativeCompModal] = useState(false);
   const [selectedCreativeComponents, setSelectedCreativeComponents] = useState([]); // { id, name }
   useEffect(() => {
     const loadAssets = () => {
@@ -1309,7 +1303,7 @@ function App() {
               {selectedAccountIds.length === 0 ? (
                 <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     if (!acc) return null;
@@ -1393,7 +1387,7 @@ function App() {
             {/* 分账户定制商品（网格） */}
             {productAllocMode === 'per_account' && (
               <div className="mb-5 pl-28">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     const pid = perAccountProduct[accountId] || '';
@@ -1496,7 +1490,7 @@ function App() {
               {selectedAccountIds.length === 0 ? (
                 <p className="text-sm text-gray-400">请先选择账户</p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     if (!acc) return null;
@@ -1612,7 +1606,7 @@ function App() {
               {tgtAllocMode === 'per_account' && (
                 <div>
                   <p className="text-xs text-gray-500 mb-3">为每个账户独立选择定向包（仅支持从定向包列表中选择）：</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     {(selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map((id) => {
                       const acc = MOCK.accounts.find(a => a.id === id);
                       if (!acc) return null;
@@ -1801,56 +1795,80 @@ function App() {
                       <input type="date" value={自定义结束日期} onChange={e => set自定义结束日期(e.target.value)} placeholder="结束日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-400 py-2 px-4 bg-gray-50 rounded-lg inline-block">投放将从今天开始，长期有效</p>
-                )}
+                ) : null}
               </div>
 
-              {/* 投放时段 */}
+              {/* 投放时段 - 广点通同款样式 */}
               <div className="mb-2">
                 <div className="block text-sm font-medium text-gray-700 mb-2">投放时段</div>
-                <div className="flex gap-6 mb-3">
-                  <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="time_slot_type" checked={投放时段类型 === 'all_day'} onChange={() => set投放时段类型('all_day')} className="mr-2" />
-                    不限
+                <div className="flex items-center gap-1 mb-4">
+                  <span className="text-sm text-gray-600 mr-2">选择时段</span>
+                  <label className="flex items-center cursor-pointer mr-5">
+                    <input type="radio" name="time_mode" checked={投放时段模式 === 'all_day'} onChange={() => set投放时段模式('all_day')} className="mr-1.5" />
+                    <span className="text-sm">全天</span>
+                  </label>
+                  <label className="flex items-center cursor-pointer mr-5">
+                    <input type="radio" name="time_mode" checked={投放时段模式 === 'time_range'} onChange={() => set投放时段模式('time_range')} className="mr-1.5" />
+                    <span className="text-sm">指定开始时间和结束时间</span>
                   </label>
                   <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="time_slot_type" checked={投放时段类型 === 'custom'} onChange={() => set投放时段类型('custom')} className="mr-2" />
-                    指定开始时间和结束时间
+                    <input type="radio" name="time_mode" checked={投放时段模式 === 'multi_slot'} onChange={() => set投放时段模式('multi_slot')} className="mr-1.5" />
+                    <span className="text-sm">指定多个时段</span>
                   </label>
                 </div>
-                {投放时段类型 === 'custom' ? (
-                  <div className="flex items-center gap-3">
-                    <input type="time" value={时段开始时间} onChange={e => set时段开始时间(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                    <span className="text-sm text-gray-500">至</span>
-                    <input type="time" value={时段结束时间} onChange={e => set时段结束时间(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+
+                {投放时段模式 === 'time_range' && (
+                  <div className="flex gap-4 items-center p-4 bg-gray-50 rounded-lg border border-gray-200 max-w-xl">
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-500 mb-1">开始时间</label>
+                      <input
+                        type="time"
+                        value={timeRangeStart}
+                        onChange={e => setTimeRangeStart(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                      />
+                    </div>
+                    <span className="text-gray-400 mt-5">至</span>
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-500 mb-1">结束时间</label>
+                      <input
+                        type="time"
+                        value={timeRangeEnd}
+                        onChange={e => setTimeRangeEnd(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                      />
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-400 py-2 px-4 bg-gray-50 rounded-lg inline-block">全天投放（00:00 - 23:59）</p>
+                )}
+
+                {投放时段模式 === 'multi_slot' && (
+                  <TimeGrid value={timeGridSlots} onChange={setTimeGridSlots} />
                 )}
               </div>
             </div>
             </div>
             )}
 
-              {/* 项目名称 */}
-              <div>
-                <div className="block text-sm font-medium text-gray-700 mb-1">项目名称 <span className="text-red-500">*</span></div>
-                <div className="flex items-center gap-2 max-w-md">
-                  <input
-                    type="text"
-                    value={unitName}
-                    onChange={e => setUnitName(e.target.value)}
-                    placeholder="输入项目名称"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div className="flex items-center gap-1 text-sm text-gray-500">
-                    {nameVariables.map(v => (
-                      <span key={v} onClick={() => setUnitName(unitName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
-                    ))}
+              {/* 项目名称：仅在"搭建项目和单元"显示，左侧 label 对齐 */}
+              {buildType === 'project_unit' && (
+                <div className="flex items-start gap-3">
+                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">项目名称 <span className="text-red-500">*</span></label>
+                  <div className="flex items-center gap-2 max-w-md w-full">
+                    <input
+                      type="text"
+                      value={unitName}
+                      onChange={e => setUnitName(e.target.value)}
+                      placeholder="输入项目名称"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                      {nameVariables.map(v => (
+                        <span key={v} onClick={() => setUnitName(unitName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
           {/* 账户单元明细（仅搭建单元模式） */}
           {buildType === 'unit_only' && (
@@ -1862,7 +1880,7 @@ function App() {
               {selectedAccountIds.length === 0 ? (
                 <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     if (!acc) return null;
@@ -1953,40 +1971,84 @@ function App() {
               })()}
             </div>
 
-            {/* 创意组件：合并「附加创意组件 + 行动号召 + 智能生成」为单按钮拉起统一面板 */}
+            {/* 创意组件：截图样式 — 三个独立子项 */}
             <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-3">创意组件</h4>
-              <button
-                type="button"
-                onClick={() => setShowCreativeModal(true)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[240px] flex items-center justify-between"
-              >
-                <span className={
-                  (selectedCreativeComponents.length > 0 || ctaList.length > 0 || smartGen)
-                    ? 'text-gray-900' : 'text-gray-400'
-                }>
-                  {selectedCreativeComponents.length > 0 || ctaList.length > 0 || smartGen
-                    ? `已配置（附加创意 ${selectedCreativeComponents.length} · 行动号召 ${ctaList.length} · 智能生成${smartGen ? '开' : '关'}）`
-                    : '点击选择附加创意组件、行动号召与智能生成'}
-                </span>
-                <i className="fas fa-chevron-down ml-2 text-gray-400 text-sm"></i>
-              </button>
-              {(selectedCreativeComponents.length > 0 || ctaList.length > 0) && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {selectedCreativeComponents.map(cc => (
-                    <span key={cc.id} className="tag bg-blue-100 text-blue-800 text-xs px-2 py-1 flex items-center gap-1">
-                      {cc.name}
-                      <button onClick={() => setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id))} className="text-blue-500 hover:text-blue-700"><i className="fas fa-times"></i></button>
-                    </span>
-                  ))}
-                  {ctaList.map((c, i) => (
-                    <span key={'cta_' + i} className="tag bg-purple-100 text-purple-800 text-xs px-2 py-1 flex items-center gap-1">
-                      {c}
-                      <button onClick={() => setCtaList(ctaList.filter((_, idx) => idx !== i))} className="text-purple-500 hover:text-purple-700"><i className="fas fa-times"></i></button>
-                    </span>
-                  ))}
+              <h4 className="text-sm font-bold text-gray-900 mb-4">创意组件</h4>
+
+              {/* 1. 附加创意组件 */}
+              <div className="mb-5">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-sm font-medium text-gray-700">附加创意组件</span>
+                  <i className="far fa-question-circle text-gray-400 text-xs" title="选择资产库中的附加创意组件"></i>
                 </div>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setShowCreativeCompModal(true)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+                >
+                  素材库选择
+                </button>
+                {selectedCreativeComponents.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {selectedCreativeComponents.map(cc => (
+                      <span key={cc.id} className="tag bg-blue-100 text-blue-800 text-xs px-2 py-1 flex items-center gap-1">
+                        {cc.name}
+                        <button onClick={() => setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id))} className="text-blue-500 hover:text-blue-700"><i className="fas fa-times"></i></button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. 行动号召 */}
+              <div className="mb-5">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-sm font-medium text-gray-700">行动号召</span>
+                  <span className="text-red-500">*</span>
+                  <i className="far fa-question-circle text-gray-400 text-xs" title="回车添加行动号召文案，最多 10 条"></i>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={ctaInput}
+                    onChange={e => setCtaInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const v = ctaInput.trim();
+                        if (v && ctaList.length < 10 && !ctaList.includes(v)) {
+                          setCtaList([...ctaList, v]);
+                          setCtaInput('');
+                        } else if (ctaList.length >= 10) {
+                          notify('行动号召最多 10 条', 'error');
+                        }
+                      }
+                    }}
+                    placeholder="输入行动号召文案，回车添加（最多10条）"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-xs text-gray-400">{ctaList.length}/10</span>
+                </div>
+                {ctaList.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {ctaList.map((c, i) => (
+                      <span key={i} className="tag bg-gray-100 text-gray-800 text-xs px-2 py-1 flex items-center gap-1">
+                        {c}
+                        <button onClick={() => setCtaList(ctaList.filter((_, idx) => idx !== i))} className="text-gray-500 hover:text-gray-700"><i className="fas fa-times"></i></button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 3. 开启智能生成 */}
+              <div>
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" checked={smartGen} onChange={e => setSmartGen(e.target.checked)} className="w-4 h-4" />
+                  <span className="text-sm font-medium text-gray-700">开启智能生成</span>
+                  <i className="far fa-question-circle text-gray-400 text-xs" title="开启后系统将智能生成创意组合"></i>
+                </label>
+              </div>
             </div>
 
             {/* 来源 */}
@@ -2209,105 +2271,48 @@ function App() {
         selectedCopies={selectedCopies}
       />
 
-      {/* ===== 创意组件 - 统一面板（附加创意组件 + 行动号召 + 智能生成） ===== */}
-      {showCreativeModal && (
-        <div className="modal-overlay" onClick={() => setShowCreativeModal(false)}>
+      {/* ===== 附加创意组件 - 资产库弹窗 ===== */}
+      {showCreativeCompModal && (
+        <div className="modal-overlay" onClick={() => setShowCreativeCompModal(false)}>
           <div className="modal-content w-full max-w-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-bold">创意组件配置</h3>
-              <button onClick={() => setShowCreativeModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
+              <h3 className="text-lg font-bold">选择附加创意组件（资产库）</h3>
+              <button onClick={() => setShowCreativeCompModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
             </div>
-            <div className="overflow-y-auto p-4 space-y-5" style={{ maxHeight: '60vh' }}>
-              {/* 1. 附加创意组件（资产库） */}
-              <div>
-                <h4 className="text-sm font-bold text-gray-900 mb-2">附加创意组件 <span className="text-xs font-normal text-gray-400">（资产库，可多选）</span></h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {MOCK.creativeComponents.map(cc => {
-                    const checked = selectedCreativeComponents.some(x => x.id === cc.id);
-                    return (
-                      <label key={cc.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                        <div className="flex items-center min-w-0">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => {
-                              if (checked) {
-                                setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id));
-                              } else {
-                                setSelectedCreativeComponents([...selectedCreativeComponents, { id: cc.id, name: cc.name }]);
-                              }
-                            }}
-                            className="mr-3 flex-shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <span className="text-sm font-medium">{cc.name}</span>
-                            <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">{cc.type}</span>
-                            <p className="text-xs text-gray-500 mt-0.5 truncate">{cc.desc}</p>
-                          </div>
+            <div className="overflow-y-auto p-4" style={{ maxHeight: '55vh' }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {MOCK.creativeComponents.map(cc => {
+                  const checked = selectedCreativeComponents.some(x => x.id === cc.id);
+                  return (
+                    <label key={cc.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => {
+                            if (checked) {
+                              setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id));
+                            } else {
+                              setSelectedCreativeComponents([...selectedCreativeComponents, { id: cc.id, name: cc.name }]);
+                            }
+                          }}
+                          className="mr-3"
+                        />
+                        <div>
+                          <span className="text-sm font-medium">{cc.name}</span>
+                          <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">{cc.type}</span>
+                          <p className="text-xs text-gray-500 mt-0.5">{cc.desc}</p>
                         </div>
-                        {checked && <i className="fas fa-check text-blue-500 flex-shrink-0"></i>}
-                      </label>
-                    );
-                  })}
-                </div>
-                {selectedCreativeComponents.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {selectedCreativeComponents.map(cc => (
-                      <span key={cc.id} className="tag bg-blue-100 text-blue-800 text-xs px-2 py-1 flex items-center gap-1">
-                        {cc.name}
-                        <button onClick={() => setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id))} className="text-blue-500 hover:text-blue-700"><i className="fas fa-times"></i></button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* 2. 行动号召 */}
-              <div className="border-t pt-4">
-                <h4 className="text-sm font-bold text-gray-900 mb-2">行动号召 <span className="text-red-500">*</span> <span className="text-xs font-normal text-gray-400">（回车添加，最多10条）</span></h4>
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={ctaInput}
-                    onChange={e => setCtaInput(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const v = ctaInput.trim();
-                        if (v && ctaList.length < 10 && !ctaList.includes(v)) {
-                          setCtaList([...ctaList, v]);
-                          setCtaInput('');
-                        } else if (ctaList.length >= 10) {
-                          notify('行动号召最多 10 条', 'error');
-                        }
-                      }
-                    }}
-                    placeholder="输入行动号召文案，回车添加（最多10条）"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-xs text-gray-400">{ctaList.length}/10</span>
-                </div>
-                {ctaList.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {ctaList.map((c, i) => (
-                      <span key={i} className="tag bg-purple-100 text-purple-800 text-xs px-2 py-1 flex items-center gap-1">
-                        {c}
-                        <button onClick={() => setCtaList(ctaList.filter((_, idx) => idx !== i))} className="text-purple-500 hover:text-purple-700"><i className="fas fa-times"></i></button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* 3. 智能生成 */}
-              <div className="border-t pt-4">
-                <label className="flex items-center cursor-pointer">
-                  <input type="checkbox" checked={smartGen} onChange={e => setSmartGen(e.target.checked)} className="mr-2 w-4 h-4" />
-                  <span className="text-sm text-gray-700">智能生成</span>
-                </label>
+                      </div>
+                      {checked && <i className="fas fa-check text-blue-500"></i>}
+                    </label>
+                  );
+                })}
               </div>
             </div>
             <div className="p-4 border-t flex justify-end items-center gap-2">
-              <span className="text-sm text-gray-500">附加创意 {selectedCreativeComponents.length} · 行动号召 {ctaList.length} · 智能生成{smartGen ? '开' : '关'}</span>
-              <button onClick={() => setShowCreativeModal(false)} className="btn-primary">确认</button>
+              <span className="text-sm text-gray-500">已选 {selectedCreativeComponents.length} 个</span>
+              <button onClick={() => setShowCreativeCompModal(false)} className="btn-primary">确认</button>
             </div>
           </div>
         </div>
