@@ -45,6 +45,14 @@ const MOCK = {
     { id: 'act_002', name: '双11狂欢活动' },
     { id: 'act_003', name: '会员日专享活动' }
   ],
+  // 商品库（营销产品下拉）
+  productLibrary: [
+    { id: 'p_001', name: '5G智享套餐', image: '📱', sellingPoints: ['高速流量', '全国通话', '免费副卡'] },
+    { id: 'p_002', name: '家庭千兆宽带', image: '🌐', sellingPoints: ['千兆速率', '稳定不掉线', '免费安装'] },
+    { id: 'p_003', name: '合约机0元购', image: '📦', sellingPoints: ['0元购机', '月租返还', '免息分期'] },
+    { id: 'p_004', name: '移动云盘会员', image: '☁️', sellingPoints: ['空间扩容', '自动备份', '多端同步'] },
+    { id: 'p_005', name: '权益会员包', image: '🎁', sellingPoints: ['视频会员', '音乐会员', '购物折扣'] }
+  ],
   // 转化目标（按业务单元分类）
   conversionsByBusinessUnit: {
     'baiju': [
@@ -350,11 +358,32 @@ function MultiSelectDropdown({ options, selected, onChange, placeholder = '请�
   );
 }
 
+// 优化师：根据账户ID确定性映射到姓名（原型 mock）
+const OPTIMIZERS = ['张伟', '李娜', '王芳', '刘洋', '陈静', '赵磊', '孙强', '周敏'];
+function getOptimizerName(accountId) {
+  let h = 0;
+  for (let i = 0; i < accountId.length; i++) h = (h * 31 + accountId.charCodeAt(i)) >>> 0;
+  return OPTIMIZERS[h % OPTIMIZERS.length];
+}
+
 // 当前登录优化师（原型 mock；用于和账户优化师比对，不一致时标红警示）
 const LOGIN_USER = '张伟';
 
 // 通知组件
 const { Notification, MaterialModal, CopyModal, TimeGrid } = window.UI;
+
+// 按钮开关组件（关闭状态样式）
+function ToggleSwitch({ checked, onChange }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-blue-500' : 'bg-gray-300'}`}
+    >
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
+    </button>
+  );
+}
 
 // 主应用
 function App() {
@@ -385,8 +414,8 @@ function App() {
 
   const [businessType, setBusinessType] = useState('benefit_A');
   const [channel, setChannel] = useState('oceanengine');
-  const [selectedAccountIds, setSelectedAccountIds] = useState([]);
-  const [buildType, setBuildType] = useState('unit_creative'); // 搭建类型：unit_creative=搭建单元和创意, creative_only=仅搭建创意
+  const [selectedAccountIds, setSelectedAccountIds] = useState(MOCK.accounts.map(a => a.id)); // 默认全选账户
+  const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和单元, unit_only=仅搭建单元
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const accountDropdownRef = useRef(null);
 
@@ -435,6 +464,14 @@ function App() {
   const [promotionType, setPromotionType] = useState('operator');
   // 营销目的
   const [marketingObjective, setMarketingObjective] = useState('lead');
+  // 营销场景：short_video=短视频, image_text=图文
+  const [marketingScene, setMarketingScene] = useState('short_video');
+  // 营销产品分配：shared=全账户共用, per_account=分账户定制
+  const [productAllocMode, setProductAllocMode] = useState('shared');
+  const [perAccountProduct, setPerAccountProduct] = useState({}); // { [accountId]: productId }
+  // 目标优化类型 / 深度优化方式 开关（默认关闭）
+  const [targetOptType, setTargetOptType] = useState(false);
+  const [deepOptType, setDeepOptType] = useState(false);
   // 产品（根据推广产品类型动态变化）
   const getProductsForBusinessUnit = () => {
     if (promotionType === 'activity') return MOCK.activityProducts || [];
@@ -605,6 +642,12 @@ function App() {
   // 创意资产（与 index.html 共用 ad_brand_images）：品牌形象（type=brand） / 营销组件（type=component）
   const [creativeAssets, setCreativeAssets] = useState([]);
   const [selectedComponent, setSelectedComponent] = useState(null); // {id, title, btnText, thumb}
+  // 行动号召：输入文案回车添加，上限10条，默认开启智能生成
+  const [ctaList, setCtaList] = useState([]); // string[]
+  const [ctaInput, setCtaInput] = useState('');
+  const [smartGen, setSmartGen] = useState(true); // 默认开启智能生成
+  // 来源（文本输入）
+  const [sourceText, setSourceText] = useState('');
   useEffect(() => {
     const loadAssets = () => {
       try {
@@ -688,27 +731,20 @@ function App() {
   })();
   const validationErrors = (() => {
     const errors = [];
-    if (selectedAccountIds.length === 0) errors.push('请选择账户');
     if (bidAmount === '') errors.push('请设置出价');
     if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
     if (selectedMaterials.length === 0) errors.push('请选择素材');
     if (selectedCopies.length === 0) errors.push('请选择文案');
     if (unitName === '') errors.push('请输入单元名称');
-    if (buildType === 'creative_only') {
-      if (selectedAccountIds.length === 0) {
-        // 已校检账户，这里只需校检每个账户是否选了单元
-      } else {
-        selectedAccountIds.forEach(function(id) {
-          var su = selectedUnits[id];
-          if (!su || su.length === 0) errors.push('账户 ' + (MOCK.accounts.find(function(a){return a.id === id;}) || {name:id}).name + ' 未选择营销单元');
-        });
-      }
+    if (buildType === 'unit_only') {
+      selectedAccountIds.forEach(function(id) {
+        var su = selectedUnits[id];
+        if (!su || su.length === 0) errors.push('账户 ' + (MOCK.accounts.find(function(a){return a.id === id;}) || {name:id}).name + ' 未选择营销单元');
+      });
     }
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
     // 创意数量上限 1000：超限直接拦截，阻止立即运行
     if (getBuildSummary().totalCreatives > 1000) errors.push('创意数量超限（1000个），请减少物料选择');
-    if (quickLaunch && quickLaunchBudget === '') errors.push('请填写一键起量预算');
-    if (quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000)) errors.push('一键起量预算需在 200 ~ 10000 元之间');
     return errors;
   })();
 
@@ -771,7 +807,7 @@ function App() {
       : Math.max(selectedTargetingPackages.length, 1);
 
     let totalUnits = 0;
-    if (buildType === 'creative_only') {
+    if (buildType === 'unit_only') {
       totalUnits = selectedAccountIds.reduce(function(sum, id) {
         const su = selectedUnits[id] || [];
         return sum + su.length;
@@ -836,15 +872,23 @@ function App() {
         if (data.bidAmount !== undefined) setBidAmount(data.bidAmount);
         if (data.dailyBudget !== undefined) setDailyBudget(data.dailyBudget);
         if (data.投放日期类型) set投放日期类型(data.投放日期类型);
-        if (data.投放时段模式) set投放时段模式(data.投放时段模式);
-        if (data.timeGridSlots) setTimeGridSlots(data.timeGridSlots);
+        if (data.自定义开始日期) set自定义开始日期(data.自定义开始日期);
+        if (data.自定义结束日期) set自定义结束日期(data.自定义结束日期);
         if (data.materials) setSelectedMaterials(data.materials);
         if (data.copies) setSelectedCopies(data.copies);
         if (data.composeRule) setComposeRule(data.composeRule);
         if (data.composeStrategy) setComposeStrategy(data.composeStrategy);
-        if (data.marketingComponentType) setMarketingComponentType(data.marketingComponentType);
-        if (data.actionButtonType) setActionButtonType(data.actionButtonType);
-        if (data.landingPageMacro !== undefined) setLandingPageMacro(data.landingPageMacro);
+        if (data.marketingObjective) setMarketingObjective(data.marketingObjective);
+        if (data.marketingScene) setMarketingScene(data.marketingScene);
+        if (data.productAllocMode) setProductAllocMode(data.productAllocMode);
+        if (data.specificProduct) setSpecificProduct(data.specificProduct);
+        if (data.perAccountProduct) setPerAccountProduct(data.perAccountProduct);
+        if (data.targetOptType !== undefined) setTargetOptType(data.targetOptType);
+        if (data.deepOptType !== undefined) setDeepOptType(data.deepOptType);
+        if (data.ctaList) setCtaList(data.ctaList);
+        if (data.smartGen !== undefined) setSmartGen(data.smartGen);
+        if (data.sourceText !== undefined) setSourceText(data.sourceText);
+        if (data.creativeName !== undefined) setCreativeName(data.creativeName);
         notify('已恢复上次保存的草稿', 'success');
       }
     } catch(e) { console.error('恢复草稿失败', e); }
@@ -862,14 +906,12 @@ function App() {
         locationTypeResident, ageSelections, customAgeMin, customAgeMax,
         genderSelection, audienceMode, selectedTargetAudiences, selectedExcludeAudiences,
         excludeConvertedMode, conversionBehavior, conversionTimeRange,
-        bidAmount, dailyBudget, onePartyData,
-        投放日期类型, 长期投放日期, 自定义开始日期, 自定义结束日期,
-        投放时段模式, timeRangeStart, timeRangeEnd, timeGridSlots,
-        首日开始, 首日开始时间值,
-        creativeEnhanceMax, selectedMaterials, selectedCopies,
-        landingPageMacro,
+        bidAmount, dailyBudget,
+        投放日期类型, 自定义开始日期, 自定义结束日期,
+        selectedMaterials, selectedCopies,
         composeRule, composeStrategy,
-        marketingComponentType, actionButtonType,
+        marketingObjective, marketingScene, productAllocMode, specificProduct, perAccountProduct,
+        targetOptType, deepOptType, ctaList, smartGen, sourceText, creativeName,
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
     } catch(e) { console.error('保存草稿失败', e); }
@@ -1023,7 +1065,7 @@ function App() {
           {[
             {id:'section-basic', label:'基础配置', icon:'fa-cog'},
             {id:'section-unit', label:'营销单元', icon:'fa-bullseye'},
-            {id:'section-creative', label:'创意配置', icon:'fa-paint-brush'},
+            {id:'section-creative', label:'单元配置', icon:'fa-paint-brush'},
             {id:'section-run', label:'运行配置', icon:'fa-play'},
           ].map(s => (
             <a key={s.id} href={'#'+s.id} onClick={e => { e.preventDefault(); document.getElementById(s.id)?.scrollIntoView({behavior:'smooth'}); }}
@@ -1088,82 +1130,21 @@ function App() {
                 {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
               </select>
             </div>
-            {/* 选择账户：选项框缩短，刷新按钮在选项框右侧 */}
-            <div className="flex items-center gap-3 mb-5 flex-wrap">
-              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">选择账户 <span className="text-red-500">*</span></label>
-              <div className="relative max-w-sm w-full" ref={accountDropdownRef}>
-                {/* 合并搜索框和已选标签 */}
-                <div
-                  className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center text-sm"
-                  onClick={() => { setShowAccountDropdown(!showAccountDropdown); }}
-                >
-                  {selectedAccountIds.length === 0 ? (
-                    <span className="text-gray-400" onClick={e => { e.stopPropagation(); setShowAccountDropdown(true); }}>点击或输入账户ID搜索...</span>
-                  ) : (
-                    selectedAccountIds.slice(0, 5).map(id => {
-                      const acc = MOCK.accounts.find(a => a.id === id);
-                      return (
-                        <span key={id} className="tag">
-                          {acc ? acc.name : id}
-                          <button onClick={(e) => { e.stopPropagation(); toggleAccount(id); }}><i className="fas fa-times"></i></button>
-                        </span>
-                      );
-                    })
-                  )}
-                  {selectedAccountIds.length > 5 && (
-                    <span className="text-xs text-blue-600 font-medium ml-1">+{selectedAccountIds.length - 5}</span>
-                  )}
-                  <span className="ml-auto text-gray-400 text-xs"><i className="fas fa-chevron-down"></i></span>
-                </div>
-                {showAccountDropdown && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
-                    <div className="p-2 border-b">
-                      <input type="text" value={accountSearchText} onChange={e => setAccountSearchText(e.target.value)}
-                        placeholder="输入账户ID搜索，支持英文逗号批量搜索..."
-                        className="w-full px-3 py-1.5 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400"
-                        onClick={e => e.stopPropagation()} autoFocus
-                      />
-                    </div>
-                    <div className="max-h-48 overflow-y-auto">
-                      {filteredAccounts.length === 0 ? (
-                        <div className="px-3 py-4 text-sm text-gray-400 text-center">无匹配账户</div>
-                      ) : (
-                        filteredAccounts.map(acc => (
-                          <div key={acc.id} onClick={() => toggleAccount(acc.id)}
-                            className="px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-2 text-sm border-b border-gray-100 last:border-b-0"
-                          >
-                            <input type="checkbox" checked={selectedAccountIds.includes(acc.id)} onChange={() => {}}
-                              className="w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0" />
-                            <span className="flex-1 truncate min-w-0">{acc.id}</span>
-                            {selectedAccountIds.includes(acc.id) && (
-                              <i className="fas fa-check text-blue-500 flex-shrink-0"></i>
-                            )}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <button onClick={() => { notify('账户列表已刷新', 'success'); }} className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50 whitespace-nowrap">
-                <i className="fas fa-sync-alt mr-1"></i>刷新账户列表
-              </button>
-            </div>
             {/* 搭建类型 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">搭建类型 <span className="text-red-500">*</span></label>
               <div className="flex gap-3">
-                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'unit_creative' ? '#1890ff' : '#e5e7eb', background: buildType === 'unit_creative' ? '#eff6ff' : '#fff' }}>
-                  <input type="radio" name="buildType" value="unit_creative" checked={buildType === 'unit_creative'} onChange={() => setBuildType('unit_creative')} className="w-4 h-4 mr-2 text-blue-600" />
-                  <span>搭建单元和创意</span>
+                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'project_unit' ? '#1890ff' : '#e5e7eb', background: buildType === 'project_unit' ? '#eff6ff' : '#fff' }}>
+                  <input type="radio" name="buildType" value="project_unit" checked={buildType === 'project_unit'} onChange={() => setBuildType('project_unit')} className="w-4 h-4 mr-2 text-blue-600" />
+                  <span>搭建项目和单元</span>
                 </label>
-                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'creative_only' ? '#1890ff' : '#e5e7eb', background: buildType === 'creative_only' ? '#eff6ff' : '#fff' }}>
-                  <input type="radio" name="buildType" value="creative_only" checked={buildType === 'creative_only'} onChange={() => setBuildType('creative_only')} className="w-4 h-4 mr-2 text-blue-600" />
-                  <span>仅搭建创意</span>
+                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'unit_only' ? '#1890ff' : '#e5e7eb', background: buildType === 'unit_only' ? '#eff6ff' : '#fff' }}>
+                  <input type="radio" name="buildType" value="unit_only" checked={buildType === 'unit_only'} onChange={() => setBuildType('unit_only')} className="w-4 h-4 mr-2 text-blue-600" />
+                  <span>仅搭建单元</span>
                 </label>
               </div>
             </div>
-            {/* 投放链匹配结果：全宽整行，置于主体选择与选择账户下方 */}
+            {/* 投放链匹配结果：全宽整行，置于任务名称/主体/搭建类型下方 */}
             <div className="mt-6 pt-6 border-t border-gray-100">
               <div className="flex items-center gap-2 mb-2">
                 <div className="block text-sm font-medium text-gray-700">投放链匹配结果</div>
@@ -1175,9 +1156,6 @@ function App() {
                 </button>
               </div>
               <div key={matchRefreshKey} className="border border-gray-200 rounded-lg overflow-hidden bg-white min-h-[120px]">
-                {selectedAccountIds.length === 0 && (
-                  <p className="text-sm text-gray-400 p-3 pb-0">请先选择账户（下方为示例数据）</p>
-                )}
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 text-gray-600 text-left">
@@ -1231,44 +1209,90 @@ function App() {
         <div id="section-unit" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-            <h2 className="text-base font-semibold text-gray-900">{buildType === 'creative_only' ? '账户单元明细' : '营销单元配置'}</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>{buildType === 'creative_only' ? '仅搭建创意：为每个账户选择营销单元' : '配置定向、出价、投放设置'}</span>
+            <h2 className="text-base font-semibold text-gray-900">项目配置</h2>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置营销目的、产品、优化目标与投放设置</span>
           </div>
-          {buildType === 'unit_creative' ? (
+          {buildType === 'unit_only' ? (
+            <div className="p-6">
+              <p className="text-sm text-gray-400 py-4">仅搭建单元模式：项目配置沿用默认设置，请在下方「单元配置」为每个账户选择营销单元</p>
+            </div>
+          ) : (
             <div className="p-6 space-y-6">
             {/* 营销目的 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销目的 <span className="text-red-500">*</span></label>
               <select value={marketingObjective} onChange={e => setMarketingObjective(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                {MOCK.marketingObjectives.map(mo => <option key={mo.id} value={mo.id}>{mo.name}</option>)}
+                <option value="lead">销售线索</option>
               </select>
             </div>
-            {/* 推广产品 */}
+            {/* 营销场景 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">推广产品</label>
-              <select value={promotionType} onChange={e => setPromotionType(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                <option value="activity">活动</option>
-                <option value="operator">运营商产品</option>
-              </select>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销场景</label>
+              <div className="flex gap-3">
+                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: marketingScene === 'short_video' ? '#1890ff' : '#e5e7eb', background: marketingScene === 'short_video' ? '#eff6ff' : '#fff' }}>
+                  <input type="radio" name="marketingScene" value="short_video" checked={marketingScene === 'short_video'} onChange={() => setMarketingScene('short_video')} className="w-4 h-4 mr-2 text-blue-600" />
+                  <span>短视频</span>
+                </label>
+                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: marketingScene === 'image_text' ? '#1890ff' : '#e5e7eb', background: marketingScene === 'image_text' ? '#eff6ff' : '#fff' }}>
+                  <input type="radio" name="marketingScene" value="image_text" checked={marketingScene === 'image_text'} onChange={() => setMarketingScene('image_text')} className="w-4 h-4 mr-2 text-blue-600" />
+                  <span>图文</span>
+                </label>
+              </div>
             </div>
-            {/* 产品 */}
+            {/* 营销产品 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">产品 <span className="text-red-500">*</span></label>
-              <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                {getProductsForBusinessUnit().map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销产品 <span className="text-red-500">*</span></label>
+              <select value={productAllocMode} onChange={e => setProductAllocMode(e.target.value)} className="w-40 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                <option value="shared">全账户共用</option>
+                <option value="per_account">分账户定制</option>
               </select>
+              {productAllocMode === 'shared' ? (
+                <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                  {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
+                </select>
+              ) : (
+                <span className="text-sm text-gray-500">分账户定制：在下方按账户分别选择商品</span>
+              )}
             </div>
-            {/* 营销载体 */}
+            {/* 分账户定制商品（网格） */}
+            {productAllocMode === 'per_account' && (
+              <div className="mb-5 pl-28">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {selectedAccountIds.map(accountId => {
+                    const acc = MOCK.accounts.find(a => a.id === accountId);
+                    const pid = perAccountProduct[accountId] || '';
+                    return (
+                      <div key={accountId} className="border border-gray-200 rounded-lg p-2.5 bg-gray-50">
+                        <div className="text-xs font-semibold text-gray-900 truncate mb-1.5" title={acc ? acc.name : accountId}>{acc ? acc.name : accountId}</div>
+                        <select value={pid} onChange={e => setPerAccountProduct(prev => ({ ...prev, [accountId]: e.target.value }))} className="w-full px-2 py-1 border border-gray-300 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                          <option value="">请选择商品</option>
+                          {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {/* 获取线索方式 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销载体</label>
-              <input type="text" value="页面跳转" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">获取线索方式</label>
+              <input type="text" value="自研落地页" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
             </div>
-            {/* 转化 */}
+            {/* 优化目标 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">转化</label>
-              <select value={conversionGoal} onChange={e => setConversionGoal(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                {(MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => <option key={conv.id} value={conv.id}>{conv.name}</option>)}
-              </select>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">优化目标</label>
+              <input type="text" value="表单提交" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
+            </div>
+            {/* 目标优化类型：关闭开关 */}
+            <div className="flex items-center justify-between mb-5">
+              <label className="text-sm font-medium text-gray-700">目标优化类型</label>
+              <ToggleSwitch checked={targetOptType} onChange={setTargetOptType} />
+            </div>
+            {/* 深度优化方式：关闭开关 */}
+            <div className="flex items-center justify-between mb-5">
+              <label className="text-sm font-medium text-gray-700">深度优化方式</label>
+              <ToggleSwitch checked={deepOptType} onChange={setDeepOptType} />
             </div>
 
 
@@ -1348,7 +1372,7 @@ function App() {
                         <div className="flex items-center gap-2 mb-2">
                           <label className="flex items-center cursor-pointer">
                             <input type="radio" name={`audience_mode_${accountId}`} value="unlimited" checked={audienceSettings.mode === 'unlimited'} onChange={() => updateAccountAudience(accountId, { mode: 'unlimited' })} className="mr-1 w-3 h-3" />
-                            <span className="text-xs">不限</span>
+                            <span className="text-xs">定向</span>
                           </label>
                           <label className="flex items-center cursor-pointer">
                             <input type="radio" name={`audience_mode_${accountId}`} value="exclude" checked={audienceSettings.mode === 'exclude'} onChange={() => updateAccountAudience(accountId, { mode: 'exclude' })} className="mr-1 w-3 h-3" />
@@ -1559,20 +1583,12 @@ function App() {
             <div className="border-t pt-4">
               <h3 className="text-base font-semibold text-gray-900 mb-3">出价与预算</h3>
 
-              {/* 计费方式 & 出价场景（固定，与出价/日预算同宽） */}
+              {/* 竞价策略 & 出价（固定，与日预算同宽） */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-1">计费方式</div>
-                  <input type="text" value="oCPM" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                  <div className="block text-sm font-medium text-gray-700 mb-1">竞价策略</div>
+                  <input type="text" value="稳定成本" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
                 </div>
-                <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-1">出价场景</div>
-                  <input type="text" value="常规投放" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-left" />
-                </div>
-              </div>
-
-              {/* 出价 / 日预算 同一行 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></div>
                   <input
@@ -1598,6 +1614,10 @@ function App() {
                     <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
                   )}
                 </div>
+              </div>
+
+              {/* 日预算 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="block text-sm font-medium text-gray-700 mb-1">日预算（元）</div>
                   <input
@@ -1609,80 +1629,26 @@ function App() {
                   />
                 </div>
               </div>
-
-              {/* 一键起量（独立一行：文字 - 按钮 - 起量预算，从左到右） */}
-              <div className="mt-4 flex items-center gap-4">
-                <span className="text-sm font-medium text-gray-700">一键起量</span>
-                <div className="flex items-center gap-4">
-                  <span className={`text-sm font-medium ${!quickLaunch ? 'text-gray-400' : 'text-green-600'}`}>关闭</span>
-                  <button
-                    onClick={() => setQuickLaunch(!quickLaunch)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${quickLaunch ? 'bg-blue-500' : 'bg-gray-300'}`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${quickLaunch ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
-                  <span className={`text-sm font-medium ${quickLaunch ? 'text-green-600' : 'text-gray-400'}`}>开启</span>
-                  {quickLaunch && (
-                    <input
-                      type="number"
-                      min="200"
-                      max="10000"
-                      step="1"
-                      value={quickLaunchBudget}
-                      onChange={e => setQuickLaunchBudget(e.target.value)}
-                      onBlur={e => {
-                        const v = e.target.value;
-                        if (v === '') return;
-                        let n = parseFloat(v);
-                        if (isNaN(n)) return;
-                        if (n < 200) n = 200;
-                        if (n > 10000) n = 10000;
-                        setQuickLaunchBudget(String(n));
-                      }}
-                      placeholder="200 ~ 10000（必填）"
-                      className={`w-32 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) ? 'border-red-400 focus:ring-red-400' : 'border-orange-300 focus:ring-orange-500'}`}
-                    />
-                  )}
-                </div>
-              </div>
-              {quickLaunch && quickLaunchBudget !== '' && (parseFloat(quickLaunchBudget) < 200 || parseFloat(quickLaunchBudget) > 10000) && (
-                <p className="text-xs text-red-500 mt-1 ml-[68px]">一键起量预算需在 200 ~ 10000 元之间</p>
-              )}
-
-              {/* 一方数据跑量加强：文字左侧 / 锁定关闭状态在右（不贴屏幕边） */}
-              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-700">一方数据跑量加强</span>
-                <button
-                  disabled
-                  className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
-                >
-                  <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                </button>
-              </div>
             </div>
 
             {/* 投放设置 */}
             <div className="border-t pt-4">
               <h3 className="text-base font-semibold text-gray-900 mb-4">投放设置</h3>
-              
+
               {/* 投放日期 */}
               <div className="mb-6">
                 <div className="block text-sm font-medium text-gray-700 mb-2">投放日期</div>
                 <div className="flex gap-6 mb-3">
                   <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="date_type" checked={投放日期类型 === 'custom'} onChange={() => set投放日期类型('custom')} className="mr-2" />
-                    指定开始及结束日期
+                    <input type="radio" name="date_type" checked={投放日期类型 === 'long_term'} onChange={() => set投放日期类型('long_term')} className="mr-2" />
+                    从今天起长期投放
                   </label>
                   <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="date_type" checked={投放日期类型 === 'long_term'} onChange={() => set投放日期类型('long_term')} className="mr-2" />
-                    长期投放
+                    <input type="radio" name="date_type" checked={投放日期类型 === 'custom'} onChange={() => set投放日期类型('custom')} className="mr-2" />
+                    设置开始和结束日期
                   </label>
                 </div>
-                {投放日期类型 === 'long_term' ? (
-                  <div className="relative w-full max-w-xs">
-                    <input type="date" value={长期投放日期} onChange={e => set长期投放日期(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
-                ) : (
+                {投放日期类型 === 'custom' ? (
                   <div className="flex gap-4">
                     <div>
                       <input type="date" value={自定义开始日期} onChange={e => set自定义开始日期(e.target.value)} placeholder="开始日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
@@ -1691,89 +1657,13 @@ function App() {
                       <input type="date" value={自定义结束日期} onChange={e => set自定义结束日期(e.target.value)} placeholder="结束日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
                   </div>
+                ) : (
+                  <p className="text-sm text-gray-400 py-2 px-4 bg-gray-50 rounded-lg inline-block">投放将从今天开始，长期有效</p>
                 )}
               </div>
-
-              {/* 投放时段 - 周历网格样式 */}
-              <div className="mb-5">
-                <div className="block text-sm font-medium text-gray-700 mb-3">投放时段</div>
-                <div className="flex items-center gap-1 mb-4">
-                  <span className="text-sm text-gray-600 mr-2">选择时段</span>
-                  <label className="flex items-center cursor-pointer mr-5">
-                    <input type="radio" name="time_mode" checked={投放时段模式 === 'all_day'} onChange={() => set投放时段模式('all_day')} className="mr-1.5" />
-                    <span className="text-sm">全天</span>
-                  </label>
-                  <label className="flex items-center cursor-pointer mr-5">
-                    <input type="radio" name="time_mode" checked={投放时段模式 === 'time_range'} onChange={() => set投放时段模式('time_range')} className="mr-1.5" />
-                    <span className="text-sm">指定开始时间和结束时间</span>
-                  </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="time_mode" checked={投放时段模式 === 'multi_slot'} onChange={() => set投放时段模式('multi_slot')} className="mr-1.5" />
-                    <span className="text-sm">指定多个时段</span>
-                  </label>
-                </div>
-                
-                {/* 时间范围模式：显示起止时间输入 */}
-                {投放时段模式 === 'time_range' && (
-                  <div className="flex gap-4 items-center p-4 bg-gray-50 rounded-lg border border-gray-200 max-w-xl">
-                    <div className="flex-1">
-                      <label className="block text-xs text-gray-500 mb-1">开始时间</label>
-                      <input 
-                        type="time" 
-                        value={timeRangeStart} 
-                        onChange={e => setTimeRangeStart(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                      />
-                    </div>
-                    <span className="text-gray-400 mt-5">至</span>
-                    <div className="flex-1">
-                      <label className="block text-xs text-gray-500 mb-1">结束时间</label>
-                      <input 
-                        type="time" 
-                        value={timeRangeEnd} 
-                        onChange={e => setTimeRangeEnd(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* 多时段模式：显示周历网格 */}
-                {投放时段模式 === 'multi_slot' && (
-                  <TimeGrid value={timeGridSlots} onChange={setTimeGridSlots} />
-                )}
-
-                {投放时段模式 === 'all_day' && (
-                  <p className="text-sm text-gray-400 py-2 px-4 bg-gray-50 rounded-lg inline-block">已选择"全天"，将在所有时间段投放</p>
-                )}
-              </div>
-
-              {/* 首日开始时间 */}
-              <div className="mb-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <label className="text-sm font-medium text-gray-700">首日开始时间</label>
-                  <button
-                    onClick={() => set首日开始(!首日开始)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${首日开始 ? 'bg-blue-500' : 'bg-gray-300'}`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${首日开始 ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
-                  <span className="text-sm text-gray-500">{首日开始 ? '已开启' : '未开启'}</span>
-                </div>
-                {/* 开启后显示时间选择 */}
-                {首日开始 && (
-                  <div className="ml-1 flex items-center gap-3 animate-fadeIn">
-                    <label className="text-xs text-gray-500">选择开始时间</label>
-                    <input
-                      type="time"
-                      value={首日开始时间值}
-                      onChange={e => set首日开始时间值(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    />
-                    <span className="text-xs text-gray-400">广告将在投放首日该时间开始投放</span>
-                  </div>
-                )}
-              </div>
+            </div>
+            </div>
+            )}
 
               {/* 营销单元名称 */}
               <div>
@@ -1793,10 +1683,10 @@ function App() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-          ) : (
-            <div className="p-6">
+
+          {/* 账户单元明细（仅搭建单元模式） */}
+          {buildType === 'unit_only' && (
+            <div className="p-6 border-t border-gray-200">
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-sm font-medium text-gray-700">账户单元明细 <span className="text-red-500">*</span></span>
                 <span className="text-xs text-gray-400">每个账户下选择要投放的营销单元（支持多选，每个账户至少选 1 个）</span>
@@ -1852,21 +1742,10 @@ function App() {
         <div id="section-creative" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-            <h2 className="text-base font-semibold text-gray-900">创意配置</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、落地页</span>
+            <h2 className="text-base font-semibold text-gray-900">单元配置</h2>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、产品与创意组件</span>
           </div>
           <div className="p-6 space-y-6">
-            {/* 创意增强Max - 已禁用，锁定为关闭 */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">创意增强Max</span>
-              <button
-                disabled
-                className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed opacity-60"
-              >
-                <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-              </button>
-            </div>
-
             {/* 素材选择（视频+图片） */}
             <div>
               <div className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</div>
@@ -1883,86 +1762,91 @@ function App() {
               </button>
             </div>
 
-            {/* 品牌形象 */}
+            {/* 产品信息：读取商品库 */}
             <div className="border-t pt-4">
-              <div className="space-y-4">
-                {/* 品牌形象 行 */}
-                <div className="flex items-start gap-3 flex-wrap">
-                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">品牌形象</label>
-                  <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                    <option value="custom">自定义</option>
-                    <option value="video_account">抖音号</option>
-                  </select>
-                  <div className="max-w-md flex-1 min-w-[240px]">
-                    {brandImageType === 'custom' ? (
-                      <div>
-                        {creativeAssets.filter(a => a.type === 'brand').length === 0 ? (
-                          <p className="text-xs text-gray-400">暂无创意资产中的品牌形象，请先在「创意资产」菜单上传</p>
-                        ) : (
-                          <ImageSelect
-                            value={selectedBrandImage ? selectedBrandImage.id : ''}
-                            placeholder="选择品牌形象"
-                            emptyText="暂无创意资产中的品牌形象，请先在「创意资产」菜单上传"
-                            options={creativeAssets.filter(a => a.type === 'brand').map(bi => ({ value: bi.id, label: bi.name, thumb: bi.thumb }))}
-                            onSelect={o => {
-                              const bi = creativeAssets.filter(a => a.type === 'brand').find(x => x.id === o.value);
-                              setSelectedBrandImage(bi || null);
-                            }}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <select
-                        value={selectedVideoAccount ? selectedVideoAccount.id : ''}
-                        onChange={e => {
-                          const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
-                          setSelectedVideoAccount(va || null);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      >
-                        <option value="">选择抖音号</option>
-                        {MOCK.videoAccounts.map(va => (
-                          <option key={va.id} value={va.id}>{va.name}</option>
+              <h4 className="text-sm font-bold text-gray-900 mb-3">产品信息</h4>
+              {(() => {
+                const pid = productAllocMode === 'per_account' ? (perAccountProduct[selectedAccountIds[0]] || '') : specificProduct;
+                const prod = MOCK.productLibrary.find(p => p.id === pid);
+                if (!prod) return <p className="text-xs text-gray-400">请在「项目配置」选择营销产品</p>;
+                return (
+                  <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="w-16 h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-3xl flex-shrink-0">{prod.image}</div>
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-gray-900 mb-1">{prod.name}</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {prod.sellingPoints.map((sp, i) => (
+                          <span key={i} className="text-xs text-gray-600 bg-white border border-gray-200 rounded px-2 py-0.5">{sp}</span>
                         ))}
-                      </select>
-                    )}
-                  </div>
-                </div>
-                {/* 营销组件 行 */}
-                <div className="flex items-start gap-3 flex-wrap">
-                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">营销组件</label>
-                  <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                      <option value="action_button">行动按钮</option>
-                      <option value="floating_card">浮层卡片</option>
-                    </select>
-                  <div className="max-w-md flex-1 min-w-[240px]">
-                    {marketingComponentType === 'action_button' ? (
-                      <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="claim">立即领取</option>
-                        <option value="details">查看详情</option>
-                      </select>
-                    ) : (
-                      <div>
-                        {creativeAssets.filter(a => a.type === 'component').length === 0 ? (
-                          <p className="text-xs text-gray-400">暂无创意资产中的营销组件，请先在「创意资产」菜单上传</p>
-                        ) : (
-                          <ImageSelect
-                            value={selectedComponent ? selectedComponent.id : ''}
-                            placeholder="选择营销组件"
-                            emptyText="暂无创意资产中的营销组件，请先在「创意资产」菜单上传"
-                            options={creativeAssets.filter(a => a.type === 'component').map(c => ({ value: c.id, label: c.btnText, thumb: c.thumb }))}
-                            onSelect={o => {
-                              const c = creativeAssets.filter(a => a.type === 'component').find(x => x.id === o.value);
-                              setSelectedComponent(c || null);
-                            }}
-                          />
-                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
-                <p className="text-xs text-gray-400">所有创意共用同一个品牌形象和营销组件</p>
+                );
+              })()}
+            </div>
+
+            {/* 创意组件：附加创意组件 */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">创意组件</h4>
+              <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: 'additional' === 'additional' ? '#1890ff' : '#e5e7eb' }}>
+                <input type="checkbox" checked={true} readOnly className="w-4 h-4 mr-2 text-blue-600" />
+                <span>附加创意组件</span>
+              </label>
+              <div className="mt-3 pl-6">
+                <label className="flex items-center cursor-pointer">
+                  <input type="checkbox" checked={smartGen} onChange={e => setSmartGen(e.target.checked)} className="mr-2 w-4 h-4" />
+                  <span className="text-sm text-gray-700">智能生成（默认开启）</span>
+                </label>
               </div>
+            </div>
+
+            {/* 行动号召：输入文案回车添加，上限10 */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-bold text-gray-900 mb-2">行动号召 <span className="text-red-500">*</span></h4>
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="text"
+                  value={ctaInput}
+                  onChange={e => setCtaInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const v = ctaInput.trim();
+                      if (v && ctaList.length < 10 && !ctaList.includes(v)) {
+                        setCtaList([...ctaList, v]);
+                        setCtaInput('');
+                      } else if (ctaList.length >= 10) {
+                        notify('行动号召最多 10 条', 'error');
+                      }
+                    }
+                  }}
+                  placeholder="输入行动号召文案，回车添加（最多10条）"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-xs text-gray-400">{ctaList.length}/10</span>
+              </div>
+              {ctaList.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {ctaList.map((c, i) => (
+                    <span key={i} className="tag bg-blue-100 text-blue-800 text-xs px-2 py-1 flex items-center gap-1">
+                      {c}
+                      <button onClick={() => setCtaList(ctaList.filter((_, idx) => idx !== i))} className="text-blue-500 hover:text-blue-700"><i className="fas fa-times"></i></button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 来源 */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-bold text-gray-900 mb-2">来源</h4>
+              <input
+                type="text"
+                value={sourceText}
+                onChange={e => setSourceText(e.target.value)}
+                placeholder="请输入来源信息"
+                className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             {/* 创意素材分配 */}
@@ -2324,16 +2208,14 @@ function App() {
                   items.push({ label: '单创意素材数', value: String(composeRule.materials), required: false, ok: true });
                   items.push({ label: '单创意文案数', value: String(composeRule.copies), required: false, ok: true });
                   items.push({ label: '创意分配策略', value: composeStrategy === 'average' ? '平均分配' : '复制分配', required: false, ok: true });
-                  items.push({ label: '品牌形象', value: brandImageType === 'video_account' ? (selectedVideoAccount ? selectedVideoAccount.name : '未选择抖音号') : (selectedBrandImage ? selectedBrandImage.name : '未选择'), required: false, ok: brandImageType === 'video_account' ? !!selectedVideoAccount : !!selectedBrandImage });
-                  items.push({ label: '营销组件', value: marketingComponentType === 'action_button' ? ('行动按钮（' + actionButtonType + '）') : (selectedComponent ? selectedComponent.btnText : '未选择'), required: false, ok: marketingComponentType === 'action_button' ? !!actionButtonType : !!selectedComponent });
+                  items.push({ label: '营销产品', value: (productAllocMode === 'shared' ? (MOCK.productLibrary.find(p => p.id === specificProduct) || {}).name : '分账户定制') || '未设置', required: false, ok: !!(productAllocMode === 'shared' ? specificProduct : Object.keys(perAccountProduct).length > 0) });
+                  items.push({ label: '行动号召', value: ctaList.length > 0 ? (ctaList.length + ' 条') : '未设置', required: true, ok: ctaList.length > 0 });
+                  items.push({ label: '来源', value: sourceText || '未设置', required: false, ok: !!sourceText });
                   items.push({ label: '创意名称', value: creativeName || '未设置', required: false, ok: !!creativeName });
                   items.push({ label: '运行模式', value: runMode === 'scheduled' ? '定时运行' : '立即运行', required: false, ok: true });
                   if (runMode === 'scheduled') items.push({ label: '定时时间', value: (scheduledDate && scheduledTime) ? (scheduledDate + ' ' + scheduledTime) : '未设置', required: true, ok: !!(scheduledDate && scheduledTime) });
-                  items.push({ label: '投放日期类型', value: 投放日期类型 || '未设置', required: false, ok: !!投放日期类型 });
-                  items.push({ label: '投放时段模式', value: 投放时段模式 || '未设置', required: false, ok: !!投放时段模式 });
-                  items.push({ label: '搭建类型', value: buildType === 'creative_only' ? '仅搭建创意' : '搭建单元+创意', required: false, ok: true });
-                  items.push({ label: '一键起量', value: quickLaunch ? (quickLaunchBudget !== '' ? ('已开启（¥' + quickLaunchBudget + '）') : '已开启（未填预算）') : '未开启', required: false, ok: !quickLaunch || quickLaunchBudget !== '' });
-                  if (quickLaunch) items.push({ label: '起量预算', value: quickLaunchBudget !== '' ? ('¥' + quickLaunchBudget) : '未设置', required: true, ok: quickLaunchBudget !== '' });
+                  items.push({ label: '投放日期', value: 投放日期类型 === 'long_term' ? '从今天起长期投放' : '设置开始和结束日期', required: false, ok: true });
+                  items.push({ label: '搭建类型', value: buildType === 'unit_only' ? '仅搭建单元' : '搭建项目和单元', required: false, ok: true });
                   items.push({ label: '推官链接', value: getDefaultLandingPage(selectedAccountIds[0] || '') ? '已设置' : '未设置', required: false, ok: true });
                   return items;
                 })();
