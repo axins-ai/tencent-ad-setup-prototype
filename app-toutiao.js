@@ -2420,13 +2420,13 @@ function App() {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
-  }, "单元名称 ", /*#__PURE__*/React.createElement("span", {
+  }, "项目名称 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: unitName,
     onChange: e => setUnitName(e.target.value),
-    placeholder: "输入单元名称",
+    placeholder: "输入项目名称",
     className: "w-80 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 text-sm text-gray-500"
