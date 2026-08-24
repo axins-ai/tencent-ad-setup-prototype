@@ -2420,6 +2420,13 @@
       gdtItem.addEventListener('mouseleave', function() { this.style.background = 'white'; });
       gdtItem.addEventListener('click', function() { selectChannel('gdt'); });
     }
+    // 头条选项
+    var toutiaoItem = document.querySelector('[data-channel="toutiao"]');
+    if (toutiaoItem) {
+      toutiaoItem.addEventListener('mouseenter', function() { this.style.background = '#f5f5f5'; });
+      toutiaoItem.addEventListener('mouseleave', function() { this.style.background = 'white'; });
+      toutiaoItem.addEventListener('click', function() { selectChannel('toutiao'); });
+    }
 
     // -- 新建定向包按钮 --
     var btnNewPkg = document.getElementById('btn-new-tgt-pkg');

@@ -533,7 +533,49 @@ const MOCK = {
       xianggang: ['香港'],
       aomen: ['澳门']
     }
-  }
+  },
+  // 附加创意组件 - 资产库（点击「附加创意组件」按钮拉起）
+  creativeComponents: [{
+    id: 'cc_001',
+    name: '门店地址卡',
+    type: '门店',
+    desc: '展示附近门店与地图导航'
+  }, {
+    id: 'cc_002',
+    name: '表单组件',
+    type: '表单',
+    desc: '落地页内嵌留资表单'
+  }, {
+    id: 'cc_003',
+    name: '商品卡片',
+    type: '商品',
+    desc: '展示商品主图与卖点'
+  }, {
+    id: 'cc_004',
+    name: '优惠券组件',
+    type: '优惠',
+    desc: '领取与使用优惠券'
+  }, {
+    id: 'cc_005',
+    name: '预约组件',
+    type: '预约',
+    desc: '在线预约到店/服务'
+  }, {
+    id: 'cc_006',
+    name: '电话拨打',
+    type: '联系',
+    desc: '一键拨打咨询电话'
+  }, {
+    id: 'cc_007',
+    name: '投票调研',
+    type: '互动',
+    desc: '用户投票与问卷'
+  }, {
+    id: 'cc_008',
+    name: '粉丝关注',
+    type: '关注',
+    desc: '引导关注抖音号'
+  }]
 };
 
 // 素材库弹窗（视频+图片，带排序和日期维度）
@@ -974,6 +1016,9 @@ function App() {
   const [timeGridSlots, setTimeGridSlots] = useState({});
   const [首日开始, set首日开始] = useState(false);
   const [首日开始时间值, set首日开始时间值] = useState('00:00');
+  const [投放时段类型, set投放时段类型] = useState('all_day'); // 'all_day' | 'custom'
+  const [时段开始时间, set时段开始时间] = useState('00:00');
+  const [时段结束时间, set时段结束时间] = useState('23:59');
   const [unitName, setUnitName] = useState('');
   const [showNameVarDropdown, setShowNameVarDropdown] = useState(false);
   const nameVariables = ['日期', '定向包名称', '版位', '创建人'];
@@ -1011,6 +1056,9 @@ function App() {
   const [smartGen, setSmartGen] = useState(true); // 默认开启智能生成
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
+  // 附加创意组件（点击按钮拉起资产库，多选）
+  const [showCreativeCompModal, setShowCreativeCompModal] = useState(false);
+  const [selectedCreativeComponents, setSelectedCreativeComponents] = useState([]); // { id, name }
   useEffect(() => {
     const loadAssets = () => {
       try {
@@ -1247,6 +1295,7 @@ function App() {
         if (data.smartGen !== undefined) setSmartGen(data.smartGen);
         if (data.sourceText !== undefined) setSourceText(data.sourceText);
         if (data.creativeName !== undefined) setCreativeName(data.creativeName);
+        if (data.selectedCreativeComponents) setSelectedCreativeComponents(data.selectedCreativeComponents);
         notify('已恢复上次保存的草稿', 'success');
       }
     } catch (e) {
@@ -1301,7 +1350,8 @@ function App() {
         ctaList,
         smartGen,
         sourceText,
-        creativeName
+        creativeName,
+        selectedCreativeComponents
       };
       localStorage.setItem('ad_task_form_' + currentTaskId, JSON.stringify(data));
     } catch (e) {
@@ -1476,7 +1526,7 @@ function App() {
     icon: 'fa-cog'
   }, {
     id: 'section-unit',
-    label: '营销单元',
+    label: '项目配置',
     icon: 'fa-bullseye'
   }, {
     id: 'section-creative',
@@ -1546,7 +1596,7 @@ function App() {
     className: "text-xs text-gray-400 ml-auto font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle mr-1"
-  }), "选择主体和投放账户")), /*#__PURE__*/React.createElement("div", {
+  }), "选择投放账户与搭建类型")), /*#__PURE__*/React.createElement("div", {
     className: "p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
@@ -1562,19 +1612,6 @@ function App() {
     maxLength: 50,
     className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   })), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 mb-5"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
-  }, "主体选择 ", /*#__PURE__*/React.createElement("span", {
-    className: "text-red-500"
-  }, "*")), /*#__PURE__*/React.createElement("select", {
-    value: businessUnit,
-    onChange: e => setBusinessUnit(e.target.value),
-    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-  }, MOCK.businessUnits.map(bu => /*#__PURE__*/React.createElement("option", {
-    key: bu.id,
-    value: bu.id
-  }, bu.name, "（", bu.id, "）")))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
@@ -1716,47 +1753,47 @@ function App() {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
   }, "营销场景"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-3"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm",
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flex items-center px-4 py-2 border rounded-lg text-sm",
     style: {
-      borderColor: marketingScene === 'short_video' ? '#1890ff' : '#e5e7eb',
-      background: marketingScene === 'short_video' ? '#eff6ff' : '#fff'
+      borderColor: '#1890ff',
+      background: '#eff6ff'
     }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "marketingScene",
-    value: "short_video",
-    checked: marketingScene === 'short_video',
-    onChange: () => setMarketingScene('short_video'),
-    className: "w-4 h-4 mr-2 text-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "短视频")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm",
-    style: {
-      borderColor: marketingScene === 'image_text' ? '#1890ff' : '#e5e7eb',
-      background: marketingScene === 'image_text' ? '#eff6ff' : '#fff'
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "marketingScene",
-    value: "image_text",
-    checked: marketingScene === 'image_text',
-    onChange: () => setMarketingScene('image_text'),
-    className: "w-4 h-4 mr-2 text-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "图文")))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-check-circle text-blue-500 mr-2 text-xs"
+  }), /*#__PURE__*/React.createElement("span", null, "短视频+图文")))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
   }, "营销产品 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
-  }, "*")), /*#__PURE__*/React.createElement("select", {
-    value: productAllocMode,
-    onChange: e => setProductAllocMode(e.target.value),
-    className: "w-40 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "shared"
-  }, "全账户共用"), /*#__PURE__*/React.createElement("option", {
-    value: "per_account"
-  }, "分账户定制")), productAllocMode === 'shared' ? /*#__PURE__*/React.createElement("select", {
+  }, "*")), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm",
+    style: {
+      borderColor: productAllocMode === 'shared' ? '#1890ff' : '#e5e7eb',
+      background: productAllocMode === 'shared' ? '#eff6ff' : '#fff'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "productAllocMode",
+    checked: productAllocMode === 'shared',
+    onChange: () => setProductAllocMode('shared'),
+    className: "w-4 h-4 mr-2 text-blue-600"
+  }), /*#__PURE__*/React.createElement("span", null, "全账户共用")), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm",
+    style: {
+      borderColor: productAllocMode === 'per_account' ? '#1890ff' : '#e5e7eb',
+      background: productAllocMode === 'per_account' ? '#eff6ff' : '#fff'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "productAllocMode",
+    checked: productAllocMode === 'per_account',
+    onChange: () => setProductAllocMode('per_account'),
+    className: "w-4 h-4 mr-2 text-blue-600"
+  }), /*#__PURE__*/React.createElement("span", null, "分账户定制"))), productAllocMode === 'shared' ? /*#__PURE__*/React.createElement("select", {
     value: specificProduct,
     onChange: e => setSpecificProduct(e.target.value),
     className: "w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
@@ -1883,7 +1920,7 @@ function App() {
     className: "text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-copy mr-1"
-  }), "批量同步")))), /*#__PURE__*/React.createElement("p", {
+  }), "批量同步"))), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
   }, "每个账户需单独配置，支持批量同步"), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
@@ -1971,7 +2008,7 @@ function App() {
         className: "fas fa-times text-xs"
       }))) : null;
     }))));
-  })), /*#__PURE__*/React.createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "text-base font-semibold text-gray-900 mb-3"
@@ -2235,9 +2272,47 @@ function App() {
     className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }))) : /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400 py-2 px-4 bg-gray-50 rounded-lg inline-block"
-  }, "投放将从今天开始，长期有效")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "投放将从今天开始，长期有效")), /*#__PURE__*/React.createElement("div", {
+    className: "mb-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "投放时段"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-6 mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "time_slot_type",
+    checked: 投放时段类型 === 'all_day',
+    onChange: () => set投放时段类型('all_day'),
+    className: "mr-2"
+  }), "不限"), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "time_slot_type",
+    checked: 投放时段类型 === 'custom',
+    onChange: () => set投放时段类型('custom'),
+    className: "mr-2"
+  }), "指定开始时间和结束时间")), 投放时段类型 === 'custom' ? /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "time",
+    value: 时段开始时间,
+    onChange: e => set时段开始时间(e.target.value),
+    className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-500"
+  }, "至"), /*#__PURE__*/React.createElement("input", {
+    type: "time",
+    value: 时段结束时间,
+    onChange: e => set时段结束时间(e.target.value),
+    className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+  })) : /*#__PURE__*/React.createElement("p", {
+    className: "text-sm text-gray-400 py-2 px-4 bg-gray-50 rounded-lg inline-block"
+  }, "全天投放（00:00 - 23:59）")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "营销单元名称 ", /*#__PURE__*/React.createElement("span", {
+  }, "项目名称 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 max-w-md"
@@ -2245,7 +2320,7 @@ function App() {
     type: "text",
     value: unitName,
     onChange: e => setUnitName(e.target.value),
-    placeholder: "输入营销单元名称",
+    placeholder: "输入项目名称",
     className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 text-sm text-gray-500"
@@ -2376,28 +2451,25 @@ function App() {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-gray-900 mb-3"
-  }, "创意组件"), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm",
-    style: {
-      borderColor: 'additional' === 'additional' ? '#1890ff' : '#e5e7eb'
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: true,
-    readOnly: true,
-    className: "w-4 h-4 mr-2 text-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "附加创意组件")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 pl-6"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: smartGen,
-    onChange: e => setSmartGen(e.target.checked),
-    className: "mr-2 w-4 h-4"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-sm text-gray-700"
-  }, "智能生成（默认开启）")))), /*#__PURE__*/React.createElement("div", {
+  }, "创意组件"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setShowCreativeCompModal(true),
+    className: "px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[200px] flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: selectedCreativeComponents.length > 0 ? 'text-gray-900' : 'text-gray-400'
+  }, selectedCreativeComponents.length > 0 ? `已选 ${selectedCreativeComponents.length} 个附加创意组件` : '点击选择附加创意组件'), /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-chevron-down ml-2 text-gray-400 text-sm"
+  })), selectedCreativeComponents.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap gap-1.5 mt-2"
+  }, selectedCreativeComponents.map(cc => /*#__PURE__*/React.createElement("span", {
+    key: cc.id,
+    className: "tag bg-blue-100 text-blue-800 text-xs px-2 py-1 flex items-center gap-1"
+  }, cc.name, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id)),
+    className: "text-blue-500 hover:text-blue-700"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-times"
+  })))))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-gray-900 mb-2"
@@ -2436,6 +2508,17 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-times"
   })))))), /*#__PURE__*/React.createElement("div", {
+    className: "border-t pt-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: smartGen,
+    onChange: e => setSmartGen(e.target.checked),
+    className: "mr-2 w-4 h-4"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-700"
+  }, "智能生成"))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-gray-900 mb-2"
@@ -2655,7 +2738,66 @@ function App() {
       setShowCopyModal(false);
     },
     selectedCopies: selectedCopies
-  }), runModal && /*#__PURE__*/React.createElement("div", {
+  }), showCreativeCompModal && /*#__PURE__*/React.createElement("div", {
+    className: "modal-overlay",
+    onClick: () => setShowCreativeCompModal(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-content w-full max-w-2xl",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between p-4 border-b"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-lg font-bold"
+  }, "选择附加创意组件（资产库）"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowCreativeCompModal(false),
+    className: "text-gray-400 hover:text-gray-600"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-times"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "overflow-y-auto p-4",
+    style: {
+      maxHeight: '55vh'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-2 gap-2"
+  }, MOCK.creativeComponents.map(cc => {
+    const checked = selectedCreativeComponents.some(x => x.id === cc.id);
+    return /*#__PURE__*/React.createElement("label", {
+      key: cc.id,
+      className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: checked,
+      onChange: () => {
+        if (checked) {
+          setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id));
+        } else {
+          setSelectedCreativeComponents([...selectedCreativeComponents, {
+            id: cc.id,
+            name: cc.name
+          }]);
+        }
+      },
+      className: "mr-3"
+    }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+      className: "text-sm font-medium"
+    }, cc.name), /*#__PURE__*/React.createElement("span", {
+      className: "ml-2 text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded"
+    }, cc.type), /*#__PURE__*/React.createElement("p", {
+      className: "text-xs text-gray-500 mt-0.5"
+    }, cc.desc))), checked && /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-check text-blue-500"
+    }));
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "p-4 border-t flex justify-end items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-500"
+  }, "已选 ", selectedCreativeComponents.length, " 个"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowCreativeCompModal(false),
+    className: "btn-primary"
+  }, "确认")))), runModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     style: {
       position: 'fixed',
