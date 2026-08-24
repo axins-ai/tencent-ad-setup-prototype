@@ -449,6 +449,8 @@ function App() {
   const [taskName, setTaskName] = useState('');
   // 仅搭建创意：每个账户下已选营销单元（多选）{ [accountId]: string[] }
   const [selectedUnits, setSelectedUnits] = useState({});
+  // 仅搭建单元：按账户选择要搭建的项目
+  const [selectedProjects, setSelectedProjects] = useState({}); // { [accountId]: projectId[] }
   // 根据账户 id 确定性生成该账户下的营销单元明细（mock 数据）
   const getAccountUnits = (accountId) => {
     let h = 0; const s = '' + (accountId || '');
@@ -459,6 +461,19 @@ function App() {
     for (let i = 0; i < n; i++) {
       const hh = (h + i * 2654435761) >>> 0;
       arr.push({ id: accountId + '_u' + i, name: cats[hh % cats.length] + '单元_' + String.fromCharCode(65 + (i % 26)) + (i + 1) });
+    }
+    return arr;
+  };
+  // 账户下的项目列表（确定性生成，模拟「已选账户下的项目列表」）
+  const getAccountProjects = (accountId) => {
+    let h = 0; const s = '' + (accountId || '');
+    for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; }
+    const n = 2 + (h % 3); // 2~4 个项目
+    const cats = ['618大促', '品牌专区', '新品首发', '常规投放', '拉新拉活'];
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+      const hh = (h + i * 40503) >>> 0;
+      arr.push({ id: accountId + '_p' + i, name: cats[hh % cats.length] + '项目_' + String.fromCharCode(65 + (i % 26)) + (i + 1) });
     }
     return arr;
   };
@@ -663,7 +678,8 @@ function App() {
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
   // 附加创意组件（点击按钮拉起资产库，多选）
-  const [showCreativeCompModal, setShowCreativeCompModal] = useState(false);
+  const [showCreativeCompModal, setShowCreativeCompModal] = useState(false); // 旧：仅附加创意组件
+  const [showCreativeModal, setShowCreativeModal] = useState(false); // 新：合并面板（附加创意组件+行动号召+智能生成）
   const [selectedCreativeComponents, setSelectedCreativeComponents] = useState([]); // { id, name }
   useEffect(() => {
     const loadAssets = () => {
@@ -1141,6 +1157,67 @@ function App() {
                 className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
             </div>
+            {/* 选择账户：选项框缩短，刷新按钮在选项框右侧 */}
+            <div className="flex items-center gap-3 mb-5 flex-wrap">
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">选择账户 <span className="text-red-500">*</span></label>
+              <div className="relative max-w-sm w-full" ref={accountDropdownRef}>
+                {/* 合并搜索框和已选标签 */}
+                <div
+                  className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer bg-white min-h-[42px] flex flex-wrap gap-1 items-center text-sm"
+                  onClick={() => { setShowAccountDropdown(!showAccountDropdown); }}
+                >
+                  {selectedAccountIds.length === 0 ? (
+                    <span className="text-gray-400" onClick={e => { e.stopPropagation(); setShowAccountDropdown(true); }}>点击或输入账户ID搜索...</span>
+                  ) : (
+                    selectedAccountIds.slice(0, 5).map(id => {
+                      const acc = MOCK.accounts.find(a => a.id === id);
+                      return (
+                        <span key={id} className="tag">
+                          {acc ? acc.name : id}
+                          <button onClick={(e) => { e.stopPropagation(); toggleAccount(id); }}><i className="fas fa-times"></i></button>
+                        </span>
+                      );
+                    })
+                  )}
+                  {selectedAccountIds.length > 5 && (
+                    <span className="text-xs text-blue-600 font-medium ml-1">+{selectedAccountIds.length - 5}</span>
+                  )}
+                  <span className="ml-auto text-gray-400 text-xs"><i className="fas fa-chevron-down"></i></span>
+                </div>
+                {showAccountDropdown && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <div className="p-2 border-b">
+                      <input type="text" value={accountSearchText} onChange={e => setAccountSearchText(e.target.value)}
+                        placeholder="输入账户ID搜索，支持英文逗号批量搜索..."
+                        className="w-full px-3 py-1.5 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400"
+                        onClick={e => e.stopPropagation()} autoFocus
+                      />
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {filteredAccounts.length === 0 ? (
+                        <div className="px-3 py-4 text-sm text-gray-400 text-center">无匹配账户</div>
+                      ) : (
+                        filteredAccounts.map(acc => (
+                          <div key={acc.id} onClick={() => toggleAccount(acc.id)}
+                            className="px-4 py-2.5 cursor-pointer hover:bg-blue-50 flex items-center gap-2 text-sm border-b border-gray-100 last:border-b-0"
+                          >
+                            <input type="checkbox" checked={selectedAccountIds.includes(acc.id)} onChange={() => {}}
+                              className="w-4 h-4 text-blue-600 rounded pointer-events-none flex-shrink-0" />
+                            <span className="flex-1 truncate min-w-0">{acc.id}</span>
+                            {selectedAccountIds.includes(acc.id) && (
+                              <i className="fas fa-check text-blue-500 flex-shrink-0"></i>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <button onClick={() => { notify('账户列表已刷新', 'success'); }} className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50 whitespace-nowrap">
+                <i className="fas fa-sync-alt mr-1"></i>刷新账户列表
+              </button>
+            </div>
             {/* 搭建类型 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">搭建类型 <span className="text-red-500">*</span></label>
@@ -1225,7 +1302,53 @@ function App() {
           </div>
           {buildType === 'unit_only' ? (
             <div className="p-6">
-              <p className="text-sm text-gray-400 py-4">仅搭建单元模式：项目配置沿用默认设置，请在下方「单元配置」为每个账户选择营销单元</p>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-sm font-medium text-gray-700">需要搭建单元的项目 <span className="text-red-500">*</span></span>
+                <span className="text-xs text-gray-400">为每个账户选择要搭建单元的营销项目（支持多选，每个账户至少选 1 个）</span>
+              </div>
+              {selectedAccountIds.length === 0 ? (
+                <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {selectedAccountIds.map(accountId => {
+                    const acc = MOCK.accounts.find(a => a.id === accountId);
+                    if (!acc) return null;
+                    const projects = getAccountProjects(accountId);
+                    const sel = selectedProjects[accountId] || [];
+                    return (
+                      <div key={accountId} className="border border-gray-200 rounded-lg p-2.5 bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center gap-1.5 mb-2 min-w-0">
+                          <i className="fas fa-folder-open text-blue-500 text-xs flex-shrink-0"></i>
+                          <span className="text-xs font-semibold text-gray-900 truncate" title={acc.name}>
+                            {acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name}
+                          </span>
+                        </div>
+                        <MultiSelectDropdown
+                          options={projects.map(p => ({ value: p.id, label: p.name }))}
+                          selected={sel}
+                          onChange={vals => setSelectedProjects(prev => ({ ...prev, [accountId]: vals }))}
+                          placeholder="选择项目"
+                          emptyText="该账户暂无可搭建项目"
+                          compact
+                          panelMaxHeight={200}
+                        />
+                        {sel.length > 0 ? (
+                          <div className="flex flex-wrap gap-0.5 mt-1.5">
+                            {sel.map(pid => {
+                              const p = projects.find(x => x.id === pid);
+                              return p ? (
+                                <span key={pid} className="tag bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5">{p.name.length > 8 ? p.name.substring(0, 8) + '...' : p.name}</span>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-orange-400 mt-1.5"><i className="fas fa-exclamation-triangle mr-0.5"></i>未选择</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           ) : (
             <div className="p-6 space-y-6">
@@ -1297,15 +1420,23 @@ function App() {
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">优化目标</label>
               <input type="text" value="表单提交" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
             </div>
-            {/* 目标优化类型：关闭开关 */}
-            <div className="flex items-center justify-between mb-5">
-              <label className="text-sm font-medium text-gray-700">目标优化类型</label>
-              <ToggleSwitch checked={targetOptType} onChange={setTargetOptType} />
+            {/* 目标优化类型：锁定关闭状态（禁用按钮，左对齐） */}
+            <div className="flex items-center gap-3 mb-5">
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">目标优化类型</label>
+              <button type="button" disabled
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed">
+                <i className="fas fa-lock text-xs"></i>
+                <span>关闭</span>
+              </button>
             </div>
-            {/* 深度优化方式：关闭开关 */}
-            <div className="flex items-center justify-between mb-5">
-              <label className="text-sm font-medium text-gray-700">深度优化方式</label>
-              <ToggleSwitch checked={deepOptType} onChange={setDeepOptType} />
+            {/* 深度优化方式：锁定关闭状态（禁用按钮，左对齐） */}
+            <div className="flex items-center gap-3 mb-5">
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">深度优化方式</label>
+              <button type="button" disabled
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed">
+                <i className="fas fa-lock text-xs"></i>
+                <span>关闭</span>
+              </button>
             </div>
 
 
@@ -1822,20 +1953,25 @@ function App() {
               })()}
             </div>
 
-            {/* 创意组件：附加创意组件（按钮拉起资产库） */}
+            {/* 创意组件：合并「附加创意组件 + 行动号召 + 智能生成」为单按钮拉起统一面板 */}
             <div className="border-t pt-4">
               <h4 className="text-sm font-bold text-gray-900 mb-3">创意组件</h4>
               <button
                 type="button"
-                onClick={() => setShowCreativeCompModal(true)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[200px] flex items-center justify-between"
+                onClick={() => setShowCreativeModal(true)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[240px] flex items-center justify-between"
               >
-                <span className={selectedCreativeComponents.length > 0 ? 'text-gray-900' : 'text-gray-400'}>
-                  {selectedCreativeComponents.length > 0 ? `已选 ${selectedCreativeComponents.length} 个附加创意组件` : '点击选择附加创意组件'}
+                <span className={
+                  (selectedCreativeComponents.length > 0 || ctaList.length > 0 || smartGen)
+                    ? 'text-gray-900' : 'text-gray-400'
+                }>
+                  {selectedCreativeComponents.length > 0 || ctaList.length > 0 || smartGen
+                    ? `已配置（附加创意 ${selectedCreativeComponents.length} · 行动号召 ${ctaList.length} · 智能生成${smartGen ? '开' : '关'}）`
+                    : '点击选择附加创意组件、行动号召与智能生成'}
                 </span>
                 <i className="fas fa-chevron-down ml-2 text-gray-400 text-sm"></i>
               </button>
-              {selectedCreativeComponents.length > 0 && (
+              {(selectedCreativeComponents.length > 0 || ctaList.length > 0) && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {selectedCreativeComponents.map(cc => (
                     <span key={cc.id} className="tag bg-blue-100 text-blue-800 text-xs px-2 py-1 flex items-center gap-1">
@@ -1843,53 +1979,14 @@ function App() {
                       <button onClick={() => setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id))} className="text-blue-500 hover:text-blue-700"><i className="fas fa-times"></i></button>
                     </span>
                   ))}
-                </div>
-              )}
-            </div>
-
-            {/* 行动号召：输入文案回车添加，上限10 */}
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-2">行动号召 <span className="text-red-500">*</span></h4>
-              <div className="flex items-center gap-2 mb-2">
-                <input
-                  type="text"
-                  value={ctaInput}
-                  onChange={e => setCtaInput(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      const v = ctaInput.trim();
-                      if (v && ctaList.length < 10 && !ctaList.includes(v)) {
-                        setCtaList([...ctaList, v]);
-                        setCtaInput('');
-                      } else if (ctaList.length >= 10) {
-                        notify('行动号召最多 10 条', 'error');
-                      }
-                    }
-                  }}
-                  placeholder="输入行动号召文案，回车添加（最多10条）"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="text-xs text-gray-400">{ctaList.length}/10</span>
-              </div>
-              {ctaList.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
                   {ctaList.map((c, i) => (
-                    <span key={i} className="tag bg-blue-100 text-blue-800 text-xs px-2 py-1 flex items-center gap-1">
+                    <span key={'cta_' + i} className="tag bg-purple-100 text-purple-800 text-xs px-2 py-1 flex items-center gap-1">
                       {c}
-                      <button onClick={() => setCtaList(ctaList.filter((_, idx) => idx !== i))} className="text-blue-500 hover:text-blue-700"><i className="fas fa-times"></i></button>
+                      <button onClick={() => setCtaList(ctaList.filter((_, idx) => idx !== i))} className="text-purple-500 hover:text-purple-700"><i className="fas fa-times"></i></button>
                     </span>
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* 智能生成：置于行动号召下方，删除“默认开启”文案 */}
-            <div className="border-t pt-4">
-              <label className="flex items-center cursor-pointer">
-                <input type="checkbox" checked={smartGen} onChange={e => setSmartGen(e.target.checked)} className="mr-2 w-4 h-4" />
-                <span className="text-sm text-gray-700">智能生成</span>
-              </label>
             </div>
 
             {/* 来源 */}
@@ -2112,48 +2209,105 @@ function App() {
         selectedCopies={selectedCopies}
       />
 
-      {/* ===== 附加创意组件 - 资产库弹窗 ===== */}
-      {showCreativeCompModal && (
-        <div className="modal-overlay" onClick={() => setShowCreativeCompModal(false)}>
+      {/* ===== 创意组件 - 统一面板（附加创意组件 + 行动号召 + 智能生成） ===== */}
+      {showCreativeModal && (
+        <div className="modal-overlay" onClick={() => setShowCreativeModal(false)}>
           <div className="modal-content w-full max-w-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-bold">选择附加创意组件（资产库）</h3>
-              <button onClick={() => setShowCreativeCompModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
+              <h3 className="text-lg font-bold">创意组件配置</h3>
+              <button onClick={() => setShowCreativeModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
             </div>
-            <div className="overflow-y-auto p-4" style={{ maxHeight: '55vh' }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {MOCK.creativeComponents.map(cc => {
-                  const checked = selectedCreativeComponents.some(x => x.id === cc.id);
-                  return (
-                    <label key={cc.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => {
-                            if (checked) {
-                              setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id));
-                            } else {
-                              setSelectedCreativeComponents([...selectedCreativeComponents, { id: cc.id, name: cc.name }]);
-                            }
-                          }}
-                          className="mr-3"
-                        />
-                        <div>
-                          <span className="text-sm font-medium">{cc.name}</span>
-                          <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">{cc.type}</span>
-                          <p className="text-xs text-gray-500 mt-0.5">{cc.desc}</p>
+            <div className="overflow-y-auto p-4 space-y-5" style={{ maxHeight: '60vh' }}>
+              {/* 1. 附加创意组件（资产库） */}
+              <div>
+                <h4 className="text-sm font-bold text-gray-900 mb-2">附加创意组件 <span className="text-xs font-normal text-gray-400">（资产库，可多选）</span></h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {MOCK.creativeComponents.map(cc => {
+                    const checked = selectedCreativeComponents.some(x => x.id === cc.id);
+                    return (
+                      <label key={cc.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <div className="flex items-center min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => {
+                              if (checked) {
+                                setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id));
+                              } else {
+                                setSelectedCreativeComponents([...selectedCreativeComponents, { id: cc.id, name: cc.name }]);
+                              }
+                            }}
+                            className="mr-3 flex-shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <span className="text-sm font-medium">{cc.name}</span>
+                            <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">{cc.type}</span>
+                            <p className="text-xs text-gray-500 mt-0.5 truncate">{cc.desc}</p>
+                          </div>
                         </div>
-                      </div>
-                      {checked && <i className="fas fa-check text-blue-500"></i>}
-                    </label>
-                  );
-                })}
+                        {checked && <i className="fas fa-check text-blue-500 flex-shrink-0"></i>}
+                      </label>
+                    );
+                  })}
+                </div>
+                {selectedCreativeComponents.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {selectedCreativeComponents.map(cc => (
+                      <span key={cc.id} className="tag bg-blue-100 text-blue-800 text-xs px-2 py-1 flex items-center gap-1">
+                        {cc.name}
+                        <button onClick={() => setSelectedCreativeComponents(selectedCreativeComponents.filter(x => x.id !== cc.id))} className="text-blue-500 hover:text-blue-700"><i className="fas fa-times"></i></button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* 2. 行动号召 */}
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-bold text-gray-900 mb-2">行动号召 <span className="text-red-500">*</span> <span className="text-xs font-normal text-gray-400">（回车添加，最多10条）</span></h4>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={ctaInput}
+                    onChange={e => setCtaInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const v = ctaInput.trim();
+                        if (v && ctaList.length < 10 && !ctaList.includes(v)) {
+                          setCtaList([...ctaList, v]);
+                          setCtaInput('');
+                        } else if (ctaList.length >= 10) {
+                          notify('行动号召最多 10 条', 'error');
+                        }
+                      }
+                    }}
+                    placeholder="输入行动号召文案，回车添加（最多10条）"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-xs text-gray-400">{ctaList.length}/10</span>
+                </div>
+                {ctaList.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {ctaList.map((c, i) => (
+                      <span key={i} className="tag bg-purple-100 text-purple-800 text-xs px-2 py-1 flex items-center gap-1">
+                        {c}
+                        <button onClick={() => setCtaList(ctaList.filter((_, idx) => idx !== i))} className="text-purple-500 hover:text-purple-700"><i className="fas fa-times"></i></button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* 3. 智能生成 */}
+              <div className="border-t pt-4">
+                <label className="flex items-center cursor-pointer">
+                  <input type="checkbox" checked={smartGen} onChange={e => setSmartGen(e.target.checked)} className="mr-2 w-4 h-4" />
+                  <span className="text-sm text-gray-700">智能生成</span>
+                </label>
               </div>
             </div>
             <div className="p-4 border-t flex justify-end items-center gap-2">
-              <span className="text-sm text-gray-500">已选 {selectedCreativeComponents.length} 个</span>
-              <button onClick={() => setShowCreativeCompModal(false)} className="btn-primary">确认</button>
+              <span className="text-sm text-gray-500">附加创意 {selectedCreativeComponents.length} · 行动号召 {ctaList.length} · 智能生成{smartGen ? '开' : '关'}</span>
+              <button onClick={() => setShowCreativeModal(false)} className="btn-primary">确认</button>
             </div>
           </div>
         </div>
