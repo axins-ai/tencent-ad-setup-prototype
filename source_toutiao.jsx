@@ -1337,7 +1337,7 @@ function App() {
             {/* 分账户定制商品（网格） */}
             {productAllocMode === 'per_account' && (
               <div className="mb-5 pl-28">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     const pid = perAccountProduct[accountId] || '';
@@ -1440,7 +1440,7 @@ function App() {
               {selectedAccountIds.length === 0 ? (
                 <p className="text-sm text-gray-400">请先选择账户</p>
               ) : (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     if (!acc) return null;
@@ -1556,7 +1556,7 @@ function App() {
               {tgtAllocMode === 'per_account' && (
                 <div>
                   <p className="text-xs text-gray-500 mb-3">为每个账户独立选择定向包（仅支持从定向包列表中选择）：</p>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {(selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map((id) => {
                       const acc = MOCK.accounts.find(a => a.id === id);
                       if (!acc) return null;
@@ -1797,8 +1797,8 @@ function App() {
 
               {/* 项目名称：仅在"搭建项目和单元"显示，左侧 label 对齐 */}
               {buildType === 'project_unit' && (
-                <div className="flex items-start gap-3">
-                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">项目名称 <span className="text-red-500">*</span></label>
+                <div className="flex items-center gap-3 mb-5">
+                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目名称 <span className="text-red-500">*</span></label>
                   <div className="flex items-center gap-2 max-w-md w-full">
                     <input
                       type="text"
@@ -1826,7 +1826,7 @@ function App() {
               {selectedAccountIds.length === 0 ? (
                 <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
               ) : (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   {selectedAccountIds.map(accountId => {
                     const acc = MOCK.accounts.find(a => a.id === accountId);
                     if (!acc) return null;

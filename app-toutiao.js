@@ -1892,7 +1892,7 @@ function App() {
   }, "分账户定制：在下方按账户分别选择商品")), productAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", {
     className: "mb-5 pl-28"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-2"
+    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     const pid = perAccountProduct[accountId] || '';
@@ -2018,7 +2018,7 @@ function App() {
   }, "每个账户需单独配置，支持批量同步"), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
   }, "请先选择账户") : /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-2"
+    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     if (!acc) return null;
@@ -2155,7 +2155,7 @@ function App() {
   }), "巨量引擎渠道：同一定向包内容在同一账户下仅对应一个单元")), tgtAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
   }, "为每个账户独立选择定向包（仅支持从定向包列表中选择）："), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-2"
+    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
   }, (selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
     if (!acc) return null;
@@ -2417,9 +2417,9 @@ function App() {
     value: timeGridSlots,
     onChange: setTimeGridSlots
   })))), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
-    className: "flex items-start gap-3"
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2"
+    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
   }, "项目名称 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("div", {
@@ -2449,7 +2449,7 @@ function App() {
   }, "每个账户下选择要投放的营销单元（支持多选，每个账户至少选 1 个）")), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "text-sm text-gray-400 py-4"
   }, "请先在「基础配置」选择投放账户") : /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-2"
+    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
   }, selectedAccountIds.map(accountId => {
     const acc = MOCK.accounts.find(a => a.id === accountId);
     if (!acc) return null;
