@@ -1795,23 +1795,21 @@ function App() {
             </div>
             )}
 
-              {/* 项目名称：仅在"搭建项目和单元"显示，左侧 label 对齐 */}
+              {/* 单元名称：仅搭建项目和单元显示，与上方字段对齐 */}
               {buildType === 'project_unit' && (
                 <div className="flex items-center gap-3 mb-5">
-                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目名称 <span className="text-red-500">*</span></label>
-                  <div className="flex items-center gap-2 max-w-md w-full">
-                    <input
-                      type="text"
-                      value={unitName}
-                      onChange={e => setUnitName(e.target.value)}
-                      placeholder="输入项目名称"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                      {nameVariables.map(v => (
-                        <span key={v} onClick={() => setUnitName(unitName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
-                      ))}
-                    </div>
+                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">单元名称 <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    value={unitName}
+                    onChange={e => setUnitName(e.target.value)}
+                    placeholder="输入单元名称"
+                    className="w-80 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                    {nameVariables.map(v => (
+                      <span key={v} onClick={() => setUnitName(unitName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
+                    ))}
                   </div>
                 </div>
               )}
@@ -2112,15 +2110,15 @@ function App() {
               </div>
             </div>
 
-            {/* 创意名称（卡片内最后一项） */}
+            {/* 单元名称（卡片内最后一项） */}
             <div>
-              <div className="block text-sm font-medium text-gray-700 mb-1">创意名称</div>
+              <div className="block text-sm font-medium text-gray-700 mb-1">单元名称</div>
               <div className="flex items-center gap-2 max-w-md">
                 <input
                   type="text"
                   value={creativeName}
                   onChange={e => setCreativeName(e.target.value)}
-                  placeholder="输入创意名称（支持变量）"
+                  placeholder="输入单元名称（支持变量）"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <div className="flex items-center gap-1 text-sm text-gray-500">
@@ -2418,7 +2416,7 @@ function App() {
                   items.push({ label: '营销产品', value: (productAllocMode === 'shared' ? (MOCK.productLibrary.find(p => p.id === specificProduct) || {}).name : '分账户定制') || '未设置', required: false, ok: !!(productAllocMode === 'shared' ? specificProduct : Object.keys(perAccountProduct).length > 0) });
                   items.push({ label: '行动号召', value: ctaList.length > 0 ? (ctaList.length + ' 条') : '未设置', required: true, ok: ctaList.length > 0 });
                   items.push({ label: '来源', value: sourceText || '未设置', required: false, ok: !!sourceText });
-                  items.push({ label: '创意名称', value: creativeName || '未设置', required: false, ok: !!creativeName });
+                  items.push({ label: '单元名称', value: creativeName || '未设置', required: false, ok: !!creativeName });
                   items.push({ label: '运行模式', value: runMode === 'scheduled' ? '定时运行' : '立即运行', required: false, ok: true });
                   if (runMode === 'scheduled') items.push({ label: '定时时间', value: (scheduledDate && scheduledTime) ? (scheduledDate + ' ' + scheduledTime) : '未设置', required: true, ok: !!(scheduledDate && scheduledTime) });
                   items.push({ label: '投放日期', value: 投放日期类型 === 'long_term' ? '从今天起长期投放' : '设置开始和结束日期', required: false, ok: true });

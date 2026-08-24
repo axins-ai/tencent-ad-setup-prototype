@@ -2420,23 +2420,21 @@ function App() {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
-  }, "项目名称 ", /*#__PURE__*/React.createElement("span", {
+  }, "单元名称 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
-  }, "*")), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 max-w-md w-full"
-  }, /*#__PURE__*/React.createElement("input", {
+  }, "*")), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: unitName,
     onChange: e => setUnitName(e.target.value),
-    placeholder: "输入项目名称",
-    className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+    placeholder: "输入单元名称",
+    className: "w-80 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 text-sm text-gray-500"
   }, nameVariables.map(v => /*#__PURE__*/React.createElement("span", {
     key: v,
     onClick: () => setUnitName(unitName + '{' + v + '}'),
     className: "text-blue-500 hover:text-blue-700 cursor-pointer"
-  }, "+", v))))), buildType === 'unit_only' && /*#__PURE__*/React.createElement("div", {
+  }, "+", v)))), buildType === 'unit_only' && /*#__PURE__*/React.createElement("div", {
     className: "p-6 border-t border-gray-200"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-4"
@@ -2753,13 +2751,13 @@ function App() {
     className: "text-xs text-gray-400 mt-1 leading-relaxed"
   }, /*#__PURE__*/React.createElement("div", null, "规则：默认根据素材确定创意数，文案选取方式为顺序选取"), /*#__PURE__*/React.createElement("div", null, "复制分配：预估可生成创意数 = 单元数 × 已选素材数 ÷ 单创意素材数；"), /*#__PURE__*/React.createElement("div", null, "平均分配：预估可生成创意数 = 已选素材数 ÷ 单创意素材数")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "创意名称"), /*#__PURE__*/React.createElement("div", {
+  }, "单元名称"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 max-w-md"
   }, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: creativeName,
     onChange: e => setCreativeName(e.target.value),
-    placeholder: "输入创意名称（支持变量）",
+    placeholder: "输入单元名称（支持变量）",
     className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 text-sm text-gray-500"
@@ -3213,7 +3211,7 @@ function App() {
           ok: !!sourceText
         });
         items.push({
-          label: '创意名称',
+          label: '单元名称',
           value: creativeName || '未设置',
           required: false,
           ok: !!creativeName
