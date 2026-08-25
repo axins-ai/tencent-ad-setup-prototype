@@ -811,13 +811,12 @@ function App() {
   const [businessType, setBusinessType] = useState('benefit_A');
   const [channel, setChannel] = useState('oceanengine');
   const [selectedAccountIds, setSelectedAccountIds] = useState(MOCK.accounts.map(a => a.id)); // 默认全选账户
-  const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和项目, unit_only=仅搭建项目
-  // 项目/广告生成规则
+  const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和广告, unit_only=仅搭建广告
+  // 项目生成规则
   const [projectGenRule, setProjectGenRule] = useState('total_per_project'); // total_per_project=按总广告数/每项目广告数, fixed=指定数量
   const [adsPerProject, setAdsPerProject] = useState(10); // 每个项目广告数上限
   const [projectsPerAccount, setProjectsPerAccount] = useState(1); // 每个账户指定项目数量
-  const [adGenRule, setAdGenRule] = useState('creative_group'); // creative_group=按广告组数, fixed=指定数量
-  const [adsPerProjectFixed, setAdsPerProjectFixed] = useState(100); // 每个项目指定广告数
+  const [projectRuleHover, setProjectRuleHover] = useState(null); // 项目生成规则角标 hover 提示
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const accountDropdownRef = useRef(null);
 
@@ -1102,7 +1101,7 @@ function App() {
   const [videoStrategy, setVideoStrategy] = useState('average');
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 广告分配策略
   const [hoverStrategy, setHoverStrategy] = useState(null); // 悬停展示策略注释
-  // 截图样式单元配置：账户分配规则 / 广告组配置 / 广告组数据
+  // 截图样式广告配置：账户分配规则 / 广告组配置 / 广告组数据
   const [accountAllocMode, setAccountAllocMode] = useState('all'); // 'all'=全账户复用, 'average'=平均分配
   const [groupVideos, setGroupVideos] = useState(1);
   const [groupImages, setGroupImages] = useState(1);
@@ -1327,7 +1326,7 @@ function App() {
     };
   }
 
-  // ===== 截图样式单元配置：广告组操作 =====
+  // ===== 截图样式广告配置：广告组操作 =====
   const ensureAccountGroups = accountIds => {
     setAccountGroups(prev => {
       const next = {
@@ -1737,7 +1736,7 @@ function App() {
     icon: 'fa-bullseye'
   }, {
     id: 'section-creative',
-    label: '单元配置',
+    label: '广告配置',
     icon: 'fa-paint-brush'
   }, {
     id: 'section-run',
@@ -1914,7 +1913,7 @@ function App() {
     checked: buildType === 'project_unit',
     onChange: () => setBuildType('project_unit'),
     className: "w-4 h-4 mr-2 text-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "搭建项目和项目")), /*#__PURE__*/React.createElement("label", {
+  }), /*#__PURE__*/React.createElement("span", null, "搭建项目和广告")), /*#__PURE__*/React.createElement("label", {
     className: "flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm",
     style: {
       borderColor: buildType === 'unit_only' ? '#1890ff' : '#e5e7eb',
@@ -1927,91 +1926,62 @@ function App() {
     checked: buildType === 'unit_only',
     onChange: () => setBuildType('unit_only'),
     className: "w-4 h-4 mr-2 text-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "仅搭建项目")))), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
-    className: "mb-5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
+  }), /*#__PURE__*/React.createElement("span", null, "仅搭建广告")))), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 mb-5"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
   }, "项目生成规则"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl"
+    className: "flex gap-3"
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
-    onClick: () => {
-      setProjectGenRule('total_per_project');
-      if (adGenRule !== 'creative_group') setAdGenRule('creative_group');
-    },
-    className: `relative rounded-lg border px-4 py-4 text-left transition ${projectGenRule === 'total_per_project' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
+    onClick: () => setProjectGenRule('total_per_project'),
+    className: `relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'total_per_project' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
   }, /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-bold text-gray-900 mb-1"
-  }, "按总广告数/每项目广告数"), /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-gray-500"
-  }, "根据生成的广告总数与项目内广告数上限，自动生成项目")), /*#__PURE__*/React.createElement("button", {
+    className: "text-sm font-medium text-gray-900"
+  }, "按总广告数/每项目广告数"), /*#__PURE__*/React.createElement("span", {
+    className: "absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer group",
+    onMouseEnter: () => setProjectRuleHover('total_per_project'),
+    onMouseLeave: () => setProjectRuleHover(null)
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-info"
+  }), projectRuleHover === 'total_per_project' && /*#__PURE__*/React.createElement("span", {
+    className: "absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none"
+  }, "根据生成的广告总数与项目内广告数上限，自动生成项目"))), /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: () => setProjectGenRule('fixed'),
-    className: `relative rounded-lg border px-4 py-4 text-left transition ${projectGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
+    className: `relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
   }, /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-bold text-gray-900 mb-1"
-  }, "指定数量"), /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-blue-500"
-  }, "手动指定每个账户的项目数量"))), projectGenRule === 'total_per_project' && /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 flex items-center gap-3"
+    className: "text-sm font-medium text-gray-900"
+  }, "指定数量"), /*#__PURE__*/React.createElement("span", {
+    className: "absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer",
+    onMouseEnter: () => setProjectRuleHover('fixed'),
+    onMouseLeave: () => setProjectRuleHover(null)
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-info"
+  }), projectRuleHover === 'fixed' && /*#__PURE__*/React.createElement("span", {
+    className: "absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none"
+  }, "手动指定每个账户的项目数量")))), projectGenRule === 'total_per_project' && /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "text-sm text-gray-700"
+    className: "text-sm text-gray-700 whitespace-nowrap"
   }, "每个项目广告数上限"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
     max: "1000",
     value: adsPerProject,
     onChange: e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1))),
-    className: "w-28 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+    className: "w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
   })), projectGenRule === 'fixed' && /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 flex items-center gap-3"
+    className: "flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "text-sm text-gray-700"
+    className: "text-sm text-gray-700 whitespace-nowrap"
   }, "每个账户指定项目数"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
     max: "100",
     value: projectsPerAccount,
     onChange: e => setProjectsPerAccount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1))),
-    className: "w-28 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "mb-5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
-  }, "广告生成规则"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl"
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: () => setAdGenRule('creative_group'),
-    className: `relative rounded-lg border px-4 py-4 text-left transition ${adGenRule === 'creative_group' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-bold text-gray-900 mb-1"
-  }, "按广告组数"), /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-gray-500"
-  }, "基于广告组数生成广告，自动匹配标题包，不足时循环使用")), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: () => setAdGenRule('fixed'),
-    className: `relative rounded-lg border px-4 py-4 text-left transition ${adGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`,
-    disabled: projectGenRule === 'total_per_project',
-    style: {
-      opacity: projectGenRule === 'total_per_project' ? 0.5 : 1,
-      cursor: projectGenRule === 'total_per_project' ? 'not-allowed' : 'pointer'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-bold text-gray-900 mb-1"
-  }, "指定数量"), /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-blue-500"
-  }, "先基于广告组数生成广告，未达到指定数量时循环使用；超过则舍弃"))), adGenRule === 'fixed' && /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "text-sm text-gray-700"
-  }, "每个项目指定广告数"), /*#__PURE__*/React.createElement("input", {
-    type: "number",
-    min: "1",
-    max: "1000",
-    value: adsPerProjectFixed,
-    onChange: e => setAdsPerProjectFixed(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1))),
-    className: "w-28 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+    className: "w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "mt-6 pt-6 border-t border-gray-100"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2778,14 +2748,16 @@ function App() {
     className: "w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold"
   }, "3"), /*#__PURE__*/React.createElement("h2", {
     className: "text-base font-semibold text-gray-900"
-  }, "单元配置"), /*#__PURE__*/React.createElement("span", {
+  }, "广告配置"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-400 ml-auto font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "far fa-clock mr-1"
   }), "配置广告素材、广告文案、产品与广告组件")), /*#__PURE__*/React.createElement("div", {
     className: "p-6 space-y-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 flex-wrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-gray-700"
   }, "广告素材 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*"), "（已选 ", /*#__PURE__*/React.createElement("span", {
@@ -2798,8 +2770,10 @@ function App() {
     className: "btn-secondary"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-photo-video mr-2"
-  }), "选择素材（视频/图片）")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
+  }), "选择素材（视频/图片）")), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 flex-wrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-gray-700"
   }, "广告文案 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*"), "（已选 ", /*#__PURE__*/React.createElement("span", {
@@ -2842,7 +2816,7 @@ function App() {
   }, "附加广告组件")), /*#__PURE__*/React.createElement("div", {
     className: "mb-5"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-1.5 mb-2"
+    className: "flex items-center gap-2 mb-2 flex-wrap"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700"
   }, "行动号召"), /*#__PURE__*/React.createElement("span", {
@@ -2850,9 +2824,7 @@ function App() {
   }, "*"), /*#__PURE__*/React.createElement("i", {
     className: "far fa-question-circle text-gray-400 text-xs",
     title: "回车添加行动号召文案，最多 10 条"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 mb-2"
-  }, /*#__PURE__*/React.createElement("input", {
+  }), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: ctaInput,
     onChange: e => setCtaInput(e.target.value),
@@ -2869,7 +2841,7 @@ function App() {
       }
     },
     placeholder: "输入行动号召文案，回车添加（最多10条）",
-    className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+    className: "flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-400"
   }, ctaList.length, "/10")), ctaList.length > 0 && /*#__PURE__*/React.createElement("div", {
@@ -2894,8 +2866,10 @@ function App() {
   }, "开启智能生成"), /*#__PURE__*/React.createElement("i", {
     className: "far fa-question-circle text-gray-400 text-xs",
     title: "开启后系统将智能生成广告组合"
-  })))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", {
-    className: "text-sm font-bold text-gray-900 mb-2"
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 flex-wrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-gray-700"
   }, "来源"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: sourceText,
@@ -2907,14 +2881,14 @@ function App() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
+    className: "flex items-center gap-4 flex-wrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-gray-700"
   }, "素材数量配置"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-3 max-w-md"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-gray-500 mb-1"
-  }, "图片"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1"
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-500"
+  }, "图片"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
     max: "15",
@@ -2926,14 +2900,14 @@ function App() {
         images: v
       });
     },
-    className: "w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+    className: "w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-gray-500 flex-shrink-0"
-  }, "个"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-gray-500 mb-1"
-  }, "视频"), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs text-gray-500"
+  }, "个")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1"
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-500"
+  }, "视频"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
     max: "15",
@@ -2945,14 +2919,14 @@ function App() {
         videos: v
       });
     },
-    className: "w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+    className: "w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-gray-500 flex-shrink-0"
-  }, "个"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-gray-500 mb-1"
-  }, "文案"), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs text-gray-500"
+  }, "个")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1"
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-500"
+  }, "文案"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "1",
     max: "3",
@@ -2964,21 +2938,23 @@ function App() {
         copies: v
       });
     },
-    className: "w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+    className: "w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-gray-500 flex-shrink-0"
-  }, "个")))), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs text-gray-500"
+  }, "个"))), /*#__PURE__*/React.createElement("div", {
     className: "text-xs text-gray-400 mt-1"
   }, "单个广告内的素材数量")), /*#__PURE__*/React.createElement("div", {
     className: "pt-2 mb-6"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-2"
+    className: "flex items-center gap-3 flex-wrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-gray-700"
   }, "广告分配策略"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 gap-3 max-w-md"
+    className: "flex gap-3"
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: () => setComposeStrategy('copy'),
-    className: `relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
+    className: `relative rounded-lg border px-3 py-2 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
   }, /*#__PURE__*/React.createElement("div", {
     className: "text-sm font-medium text-gray-900"
   }, "复制分配"), /*#__PURE__*/React.createElement("span", {
@@ -2992,7 +2968,7 @@ function App() {
   }, "所有项目共用同一批广告"))), /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: () => setComposeStrategy('average'),
-    className: `relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
+    className: `relative rounded-lg border px-3 py-2 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
   }, /*#__PURE__*/React.createElement("div", {
     className: "text-sm font-medium text-gray-900"
   }, "平均分配"), /*#__PURE__*/React.createElement("span", {
@@ -3003,7 +2979,7 @@ function App() {
     className: "fas fa-info"
   }), hoverStrategy === 'average' && /*#__PURE__*/React.createElement("span", {
     className: "absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1"
-  }, "根据项目数均分广告数"))))), /*#__PURE__*/React.createElement("div", {
+  }, "根据项目数均分广告数")))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-blue-50 border border-blue-200 rounded-lg p-3 mt-6"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-1"
@@ -3030,14 +3006,14 @@ function App() {
   })(), /*#__PURE__*/React.createElement("div", {
     className: "text-xs text-gray-400 mt-1 leading-relaxed"
   }, /*#__PURE__*/React.createElement("div", null, "规则：默认根据素材确定广告数，文案选取方式为顺序选取"), /*#__PURE__*/React.createElement("div", null, "复制分配：预估可生成广告数 = 项目数 × 已选素材数 ÷ 单广告素材数；"), /*#__PURE__*/React.createElement("div", null, "平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数"))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "项目名称"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 max-w-md"
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium text-gray-700 flex-shrink-0"
+  }, "广告名称"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: creativeName,
     onChange: e => setCreativeName(e.target.value),
-    placeholder: "输入项目名称（支持变量）",
+    placeholder: "输入广告名称（支持变量）",
     className: "flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-1 text-sm text-gray-500"
@@ -3513,7 +3489,7 @@ function App() {
           ok: !!sourceText
         });
         items.push({
-          label: '项目名称',
+          label: '广告名称',
           value: creativeName || '未设置',
           required: false,
           ok: !!creativeName

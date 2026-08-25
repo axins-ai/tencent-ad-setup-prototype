@@ -438,13 +438,12 @@ function App() {
   const [businessType, setBusinessType] = useState('benefit_A');
   const [channel, setChannel] = useState('oceanengine');
   const [selectedAccountIds, setSelectedAccountIds] = useState(MOCK.accounts.map(a => a.id)); // 默认全选账户
-  const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和项目, unit_only=仅搭建项目
-  // 项目/广告生成规则
+  const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和广告, unit_only=仅搭建广告
+  // 项目生成规则
   const [projectGenRule, setProjectGenRule] = useState('total_per_project'); // total_per_project=按总广告数/每项目广告数, fixed=指定数量
   const [adsPerProject, setAdsPerProject] = useState(10); // 每个项目广告数上限
   const [projectsPerAccount, setProjectsPerAccount] = useState(1); // 每个账户指定项目数量
-  const [adGenRule, setAdGenRule] = useState('creative_group'); // creative_group=按广告组数, fixed=指定数量
-  const [adsPerProjectFixed, setAdsPerProjectFixed] = useState(100); // 每个项目指定广告数
+  const [projectRuleHover, setProjectRuleHover] = useState(null); // 项目生成规则角标 hover 提示
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const accountDropdownRef = useRef(null);
 
@@ -674,7 +673,7 @@ function App() {
   const [videoStrategy, setVideoStrategy] = useState('average');
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 广告分配策略
   const [hoverStrategy, setHoverStrategy] = useState(null); // 悬停展示策略注释
-  // 截图样式单元配置：账户分配规则 / 广告组配置 / 广告组数据
+  // 截图样式广告配置：账户分配规则 / 广告组配置 / 广告组数据
   const [accountAllocMode, setAccountAllocMode] = useState('all'); // 'all'=全账户复用, 'average'=平均分配
   const [groupVideos, setGroupVideos] = useState(1);
   const [groupImages, setGroupImages] = useState(1);
@@ -900,7 +899,7 @@ function App() {
     return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, creativesPerUnit, totalCreatives, perUnitCreatives, UNIT_LIMIT, CREATIVE_LIMIT, overLimit, overUnit };
   }
 
-  // ===== 截图样式单元配置：广告组操作 =====
+  // ===== 截图样式广告配置：广告组操作 =====
   const ensureAccountGroups = (accountIds) => {
     setAccountGroups(prev => {
       const next = { ...prev };
@@ -1206,7 +1205,7 @@ function App() {
           {[
             {id:'section-basic', label:'基础配置', icon:'fa-cog'},
             {id:'section-unit', label:'项目配置', icon:'fa-bullseye'},
-            {id:'section-creative', label:'单元配置', icon:'fa-paint-brush'},
+            {id:'section-creative', label:'广告配置', icon:'fa-paint-brush'},
             {id:'section-run', label:'运行配置', icon:'fa-play'},
           ].map(s => (
             <a key={s.id} href={'#'+s.id} onClick={e => { e.preventDefault(); document.getElementById(s.id)?.scrollIntoView({behavior:'smooth'}); }}
@@ -1330,71 +1329,58 @@ function App() {
               <div className="flex gap-3">
                 <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'project_unit' ? '#1890ff' : '#e5e7eb', background: buildType === 'project_unit' ? '#eff6ff' : '#fff' }}>
                   <input type="radio" name="buildType" value="project_unit" checked={buildType === 'project_unit'} onChange={() => setBuildType('project_unit')} className="w-4 h-4 mr-2 text-blue-600" />
-                  <span>搭建项目和项目</span>
+                  <span>搭建项目和广告</span>
                 </label>
                 <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'unit_only' ? '#1890ff' : '#e5e7eb', background: buildType === 'unit_only' ? '#eff6ff' : '#fff' }}>
                   <input type="radio" name="buildType" value="unit_only" checked={buildType === 'unit_only'} onChange={() => setBuildType('unit_only')} className="w-4 h-4 mr-2 text-blue-600" />
-                  <span>仅搭建项目</span>
+                  <span>仅搭建广告</span>
                 </label>
               </div>
             </div>
 
-            {/* 项目生成规则（仅搭建项目和项目时显示） */}
+            {/* 项目生成规则（仅搭建项目和广告时显示） */}
             {buildType === 'project_unit' && (
-              <div className="mb-5">
-                <div className="block text-sm font-medium text-gray-700 mb-2">项目生成规则</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
-                  <button type="button" onClick={() => { setProjectGenRule('total_per_project'); if (adGenRule !== 'creative_group') setAdGenRule('creative_group'); }}
-                    className={`relative rounded-lg border px-4 py-4 text-left transition ${projectGenRule === 'total_per_project' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                    <div className="text-sm font-bold text-gray-900 mb-1">按总广告数/每项目广告数</div>
-                    <div className="text-xs text-gray-500">根据生成的广告总数与项目内广告数上限，自动生成项目</div>
+              <div className="flex items-center gap-3 mb-5">
+                <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目生成规则</label>
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setProjectGenRule('total_per_project')}
+                    className={`relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'total_per_project' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                    <div className="text-sm font-medium text-gray-900">按总广告数/每项目广告数</div>
+                    <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer group"
+                      onMouseEnter={() => setProjectRuleHover('total_per_project')} onMouseLeave={() => setProjectRuleHover(null)}>
+                      <i className="fas fa-info"></i>
+                      {projectRuleHover === 'total_per_project' && (
+                        <span className="absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none">根据生成的广告总数与项目内广告数上限，自动生成项目</span>
+                      )}
+                    </span>
                   </button>
                   <button type="button" onClick={() => setProjectGenRule('fixed')}
-                    className={`relative rounded-lg border px-4 py-4 text-left transition ${projectGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                    <div className="text-sm font-bold text-gray-900 mb-1">指定数量</div>
-                    <div className="text-xs text-blue-500">手动指定每个账户的项目数量</div>
+                    className={`relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                    <div className="text-sm font-medium text-gray-900">指定数量</div>
+                    <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer"
+                      onMouseEnter={() => setProjectRuleHover('fixed')} onMouseLeave={() => setProjectRuleHover(null)}>
+                      <i className="fas fa-info"></i>
+                      {projectRuleHover === 'fixed' && (
+                        <span className="absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none">手动指定每个账户的项目数量</span>
+                      )}
+                    </span>
                   </button>
                 </div>
                 {projectGenRule === 'total_per_project' && (
-                  <div className="mt-3 flex items-center gap-3">
-                    <label className="text-sm text-gray-700">每个项目广告数上限</label>
-                    <input type="number" min="1" max="1000" value={adsPerProject} onChange={e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))} className="w-28 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-700 whitespace-nowrap">每个项目广告数上限</label>
+                    <input type="number" min="1" max="1000" value={adsPerProject} onChange={e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
                 )}
                 {projectGenRule === 'fixed' && (
-                  <div className="mt-3 flex items-center gap-3">
-                    <label className="text-sm text-gray-700">每个账户指定项目数</label>
-                    <input type="number" min="1" max="100" value={projectsPerAccount} onChange={e => setProjectsPerAccount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))} className="w-28 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-gray-700 whitespace-nowrap">每个账户指定项目数</label>
+                    <input type="number" min="1" max="100" value={projectsPerAccount} onChange={e => setProjectsPerAccount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
                 )}
               </div>
             )}
-
-            {/* 广告生成规则 */}
-            <div className="mb-5">
-              <div className="block text-sm font-medium text-gray-700 mb-2">广告生成规则</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
-                <button type="button" onClick={() => setAdGenRule('creative_group')}
-                  className={`relative rounded-lg border px-4 py-4 text-left transition ${adGenRule === 'creative_group' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                  <div className="text-sm font-bold text-gray-900 mb-1">按广告组数</div>
-                  <div className="text-xs text-gray-500">基于广告组数生成广告，自动匹配标题包，不足时循环使用</div>
-                </button>
-                <button type="button" onClick={() => setAdGenRule('fixed')}
-                  className={`relative rounded-lg border px-4 py-4 text-left transition ${adGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}
-                  disabled={projectGenRule === 'total_per_project'}
-                  style={{ opacity: projectGenRule === 'total_per_project' ? 0.5 : 1, cursor: projectGenRule === 'total_per_project' ? 'not-allowed' : 'pointer' }}>
-                  <div className="text-sm font-bold text-gray-900 mb-1">指定数量</div>
-                  <div className="text-xs text-blue-500">先基于广告组数生成广告，未达到指定数量时循环使用；超过则舍弃</div>
-                </button>
-              </div>
-              {adGenRule === 'fixed' && (
-                <div className="mt-3 flex items-center gap-3">
-                  <label className="text-sm text-gray-700">每个项目指定广告数</label>
-                  <input type="number" min="1" max="1000" value={adsPerProjectFixed} onChange={e => setAdsPerProjectFixed(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))} className="w-28 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-                </div>
-              )}
-            </div>
-
+            
             {/* 投放链匹配结果：全宽整行，置于任务名称/主体/搭建类型下方 */}
             <div className="mt-6 pt-6 border-t border-gray-100">
               <div className="flex items-center gap-2 mb-2">
@@ -2043,13 +2029,13 @@ function App() {
         <div id="section-creative" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-            <h2 className="text-base font-semibold text-gray-900">单元配置</h2>
+            <h2 className="text-base font-semibold text-gray-900">广告配置</h2>
             <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置广告素材、广告文案、产品与广告组件</span>
           </div>
           <div className="p-6 space-y-6">
             {/* 广告素材（视频+图片） */}
-            <div>
-              <div className="block text-sm font-medium text-gray-700 mb-2">广告素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-medium text-gray-700">广告素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</span>
               <button onClick={() => { setMaterialPickerTarget(null); setShowMaterialModal(true); }} className="btn-secondary">
                 <i className="fas fa-photo-video mr-2"></i>选择素材（视频/图片）
               </button>
@@ -2061,8 +2047,8 @@ function App() {
 
 
             {/* 广告文案 */}
-            <div>
-              <div className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-medium text-gray-700">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</span>
               <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
                 <i className="fas fa-font mr-2"></i>选择广告文案
               </button>
@@ -2100,13 +2086,11 @@ function App() {
               </div>
               {/* 行动号召 */}
               <div className="mb-5">
-                <div className="flex items-center gap-1.5 mb-2">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="text-sm font-medium text-gray-700">行动号召</span>
                   <span className="text-red-500">*</span>
                   <i className="far fa-question-circle text-gray-400 text-xs" title="回车添加行动号召文案，最多 10 条"></i>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <input type="text" value={ctaInput} onChange={e => setCtaInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = ctaInput.trim(); if (v && ctaList.length < 10 && !ctaList.includes(v)) { setCtaList([...ctaList, v]); setCtaInput(''); } else if (ctaList.length >= 10) { notify('行动号召最多 10 条', 'error'); } } }} placeholder="输入行动号召文案，回车添加（最多10条）" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input type="text" value={ctaInput} onChange={e => setCtaInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = ctaInput.trim(); if (v && ctaList.length < 10 && !ctaList.includes(v)) { setCtaList([...ctaList, v]); setCtaInput(''); } else if (ctaList.length >= 10) { notify('行动号召最多 10 条', 'error'); } } }} placeholder="输入行动号召文案，回车添加（最多10条）" className="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                   <span className="text-xs text-gray-400">{ctaList.length}/10</span>
                 </div>
                 {ctaList.length > 0 && (
@@ -2131,8 +2115,8 @@ function App() {
             </div>
 
             {/* 来源 */}
-            <div>
-              <h4 className="text-sm font-bold text-gray-900 mb-2">来源</h4>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-medium text-gray-700">来源</span>
               <input type="text" value={sourceText} onChange={e => setSourceText(e.target.value)} placeholder="请输入来源信息" className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
@@ -2141,43 +2125,37 @@ function App() {
               <div className="space-y-4">
                 {/* 素材数量配置：图片x个/视频x个/文案x个 */}
                 <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-2">素材数量配置</div>
-                  <div className="grid grid-cols-3 gap-3 max-w-md">
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1">图片</div>
-                      <div className="flex items-center gap-1">
-                        <input type="number" min="1" max="15" value={composeRule.images}
-                          onChange={e => {
-                            const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
-                            setComposeRule({...composeRule, images: v});
-                          }}
-                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                        <span className="text-xs text-gray-500 flex-shrink-0">个</span>
-                      </div>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <span className="text-sm font-medium text-gray-700">素材数量配置</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-500">图片</span>
+                      <input type="number" min="1" max="15" value={composeRule.images}
+                        onChange={e => {
+                          const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                          setComposeRule({...composeRule, images: v});
+                        }}
+                        className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                      <span className="text-xs text-gray-500">个</span>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1">视频</div>
-                      <div className="flex items-center gap-1">
-                        <input type="number" min="1" max="15" value={composeRule.videos}
-                          onChange={e => {
-                            const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
-                            setComposeRule({...composeRule, videos: v});
-                          }}
-                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                        <span className="text-xs text-gray-500 flex-shrink-0">个</span>
-                      </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-500">视频</span>
+                      <input type="number" min="1" max="15" value={composeRule.videos}
+                        onChange={e => {
+                          const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                          setComposeRule({...composeRule, videos: v});
+                        }}
+                        className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                      <span className="text-xs text-gray-500">个</span>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1">文案</div>
-                      <div className="flex items-center gap-1">
-                        <input type="number" min="1" max="3" value={composeRule.copies}
-                          onChange={e => {
-                            const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
-                            setComposeRule({...composeRule, copies: v});
-                          }}
-                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                        <span className="text-xs text-gray-500 flex-shrink-0">个</span>
-                      </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-500">文案</span>
+                      <input type="number" min="1" max="3" value={composeRule.copies}
+                        onChange={e => {
+                          const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
+                          setComposeRule({...composeRule, copies: v});
+                        }}
+                        className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                      <span className="text-xs text-gray-500">个</span>
                     </div>
                   </div>
                   <div className="text-xs text-gray-400 mt-1">单个广告内的素材数量</div>
@@ -2185,30 +2163,32 @@ function App() {
 
                 {/* 广告分配策略 */}
                 <div className="pt-2 mb-6">
-                  <div className="block text-sm font-medium text-gray-700 mb-2">广告分配策略</div>
-                  <div className="grid grid-cols-2 gap-3 max-w-md">
-                    <button type="button" onClick={() => setComposeStrategy('copy')}
-                      className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                      <div className="text-sm font-medium text-gray-900">复制分配</div>
-                      <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs cursor-pointer"
-                        onMouseEnter={() => setHoverStrategy('copy')} onMouseLeave={() => setHoverStrategy(null)}>
-                        <i className="fas fa-info"></i>
-                        {hoverStrategy === 'copy' && (
-                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">所有项目共用同一批广告</span>
-                        )}
-                      </span>
-                    </button>
-                    <button type="button" onClick={() => setComposeStrategy('average')}
-                      className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                      <div className="text-sm font-medium text-gray-900">平均分配</div>
-                      <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs cursor-pointer"
-                        onMouseEnter={() => setHoverStrategy('average')} onMouseLeave={() => setHoverStrategy(null)}>
-                        <i className="fas fa-info"></i>
-                        {hoverStrategy === 'average' && (
-                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">根据项目数均分广告数</span>
-                        )}
-                      </span>
-                    </button>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-sm font-medium text-gray-700">广告分配策略</span>
+                    <div className="flex gap-3">
+                      <button type="button" onClick={() => setComposeStrategy('copy')}
+                        className={`relative rounded-lg border px-3 py-2 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                        <div className="text-sm font-medium text-gray-900">复制分配</div>
+                        <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs cursor-pointer"
+                          onMouseEnter={() => setHoverStrategy('copy')} onMouseLeave={() => setHoverStrategy(null)}>
+                          <i className="fas fa-info"></i>
+                          {hoverStrategy === 'copy' && (
+                            <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">所有项目共用同一批广告</span>
+                          )}
+                        </span>
+                      </button>
+                      <button type="button" onClick={() => setComposeStrategy('average')}
+                        className={`relative rounded-lg border px-3 py-2 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                        <div className="text-sm font-medium text-gray-900">平均分配</div>
+                        <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs cursor-pointer"
+                          onMouseEnter={() => setHoverStrategy('average')} onMouseLeave={() => setHoverStrategy(null)}>
+                          <i className="fas fa-info"></i>
+                          {hoverStrategy === 'average' && (
+                            <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">根据项目数均分广告数</span>
+                          )}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -2249,11 +2229,11 @@ function App() {
               </div>
             </div>
 
-            {/* 项目名称 */}
+            {/* 广告名称 */}
             <div>
-              <div className="block text-sm font-medium text-gray-700 mb-1">项目名称</div>
               <div className="flex items-center gap-2 max-w-md">
-                <input type="text" value={creativeName} onChange={e => setCreativeName(e.target.value)} placeholder="输入项目名称（支持变量）" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                <span className="text-sm font-medium text-gray-700 flex-shrink-0">广告名称</span>
+                <input type="text" value={creativeName} onChange={e => setCreativeName(e.target.value)} placeholder="输入广告名称（支持变量）" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                 <div className="flex items-center gap-1 text-sm text-gray-500">
                   {creativeNameVariables.map(v => (
                     <span key={v} onClick={() => setCreativeName(creativeName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
@@ -2562,7 +2542,7 @@ function App() {
                   items.push({ label: '营销产品', value: (productAllocMode === 'shared' ? (MOCK.productLibrary.find(p => p.id === specificProduct) || {}).name : '分账户定制') || '未设置', required: false, ok: !!(productAllocMode === 'shared' ? specificProduct : Object.keys(perAccountProduct).length > 0) });
                   items.push({ label: '行动号召', value: ctaList.length > 0 ? (ctaList.length + ' 条') : '未设置', required: true, ok: ctaList.length > 0 });
                   items.push({ label: '来源', value: sourceText || '未设置', required: false, ok: !!sourceText });
-                  items.push({ label: '项目名称', value: creativeName || '未设置', required: false, ok: !!creativeName });
+                  items.push({ label: '广告名称', value: creativeName || '未设置', required: false, ok: !!creativeName });
                   items.push({ label: '运行模式', value: runMode === 'scheduled' ? '定时运行' : '立即运行', required: false, ok: true });
                   if (runMode === 'scheduled') items.push({ label: '定时时间', value: (scheduledDate && scheduledTime) ? (scheduledDate + ' ' + scheduledTime) : '未设置', required: true, ok: !!(scheduledDate && scheduledTime) });
                   items.push({ label: '投放日期', value: 投放日期类型 === 'long_term' ? '从今天起长期投放' : '设置开始和结束日期', required: false, ok: true });
