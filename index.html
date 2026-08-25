@@ -167,8 +167,8 @@
         <div id="tp-rows"></div>
       </div>
       <!-- 新建/编辑表单弹窗 -->
-      <div id="tgt-pkg-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;overflow:hidden;padding:24px 12px;box-sizing:border-box;">
-        <div style="background:white;border-radius:12px;width:100%;max-width:900px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;">
+      <div id="tgt-pkg-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;width:92vw;max-width:900px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;flex-shrink:0;">
             <h3 style="font-size:16px;font-weight:600;margin:0;" id="tgt-pkg-form-title">新建定向包</h3>
             <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
@@ -704,6 +704,8 @@
   var tasks = [];
   var currentLogTaskId = null;
   var currentTaskId = null;
+  var taskListPage = 1;           // 任务列表当前页码
+  var TASK_PAGE_SIZE = 10;        // 每页显示的任务条数
   var targetingPackages = [];
     var copyTexts = [];
     try {
@@ -1297,7 +1299,13 @@
       return;
     }
     var placementMap = { 'wechat_video':'视频号','wechat_mp':'微信公众号与小程序','wechat_article':'公众号','qq_space':'QQ空间','tencent_video':'腾讯视频','tencent_news':'腾讯新闻','all':'全版位' };
-    var pageItems = filtered.slice().reverse();
+    var allItems = filtered.slice().reverse();
+    var totalCount = allItems.length;
+    var totalPages = Math.max(1, Math.ceil(totalCount / TASK_PAGE_SIZE));
+    if (taskListPage > totalPages) taskListPage = totalPages;
+    if (taskListPage < 1) taskListPage = 1;
+    var startIdx = (taskListPage - 1) * TASK_PAGE_SIZE;
+    var pageItems = allItems.slice(startIdx, startIdx + TASK_PAGE_SIZE);
     var html = '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">';
     html += '<div style="display:flex;align-items:center;padding:16px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">' +
       '<div style="flex:0.5;text-align:center;">序号</div>' +
@@ -1309,6 +1317,7 @@
       '<div style="flex:1.6;text-align:center;">操作</div>' +
       '</div>';
     pageItems.forEach(function(task, idx) {
+      var globalIdx = startIdx + idx;
       var taskData = null;
       try { taskData = JSON.parse(localStorage.getItem('ad_task_form_' + task.id) || 'null'); } catch(e) {}
       var placementVal = taskData && taskData.placement ? taskData.placement : '';
@@ -1317,7 +1326,7 @@
       var _btVal = task.buildType || (taskData && taskData.buildType) || 'unit_creative';
       var _btText = _btVal === 'creative_only' ? '仅搭建创意' : '搭建单元和创意';
       html += '<div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;text-align:center;">' +
-        '<div style="flex:0.5;color:#9ca3af;">' + (idx + 1) + '</div>' +
+        '<div style="flex:0.5;color:#9ca3af;">' + (globalIdx + 1) + '</div>' +
         '<div style="flex:1.2;font-weight:500;display:flex;flex-direction:column;align-items:center;line-height:1.4;">' + escapeHtml(task.name) + '<span style="font-size:12px;color:#9ca3af;font-weight:400;">' + formatDate(task.createdAt) + '</span></div>' +
         '<div style="flex:0.7;display:flex;flex-direction:column;align-items:center;"><span style="padding:4px 10px;background:#E6F7FF;color:#1890FF;border-radius:999px;font-size:13px;">' + escapeHtml(task.channelName) + '</span></div>' +
         '<div style="flex:0.9;display:flex;justify-content:center;"><span style="padding:4px 10px;background:#f0f5ff;color:#1890ff;border-radius:999px;font-size:13px;">' + escapeHtml(placementDisplay) + '</span></div>' +
@@ -1332,6 +1341,18 @@
       '</div>';
     });
     html += '</div>';
+    // 分页器（超过一页时显示页码）
+    if (totalPages > 1) {
+      html += '<div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:16px 20px;flex-wrap:wrap;">';
+      html += '<button data-task-page="prev" ' + (taskListPage <= 1 ? 'disabled ' : '') + 'style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:white;cursor:pointer;font-size:13px;color:#333;' + (taskListPage <= 1 ? 'opacity:0.4;cursor:not-allowed;' : '') + '">上一页</button>';
+      for (var pi = 1; pi <= totalPages; pi++) {
+        var active = pi === taskListPage;
+        html += '<button data-task-page="' + pi + '" style="min-width:32px;padding:6px 10px;border:1px solid ' + (active ? '#1890FF' : '#e5e7eb') + ';border-radius:6px;background:' + (active ? '#1890FF' : 'white') + ';color:' + (active ? 'white' : '#333') + ';cursor:pointer;font-size:13px;font-weight:' + (active ? '600' : '400') + ';">' + pi + '</button>';
+      }
+      html += '<button data-task-page="next" ' + (taskListPage >= totalPages ? 'disabled ' : '') + 'style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:white;cursor:pointer;font-size:13px;color:#333;' + (taskListPage >= totalPages ? 'opacity:0.4;cursor:not-allowed;' : '') + '">下一页</button>';
+      html += '<span style="font-size:12px;color:#9ca3af;margin-left:8px;">共 ' + totalCount + ' 条 · 第 ' + taskListPage + '/' + totalPages + ' 页</span>';
+      html += '</div>';
+    }
     container.innerHTML = html;
   }
 
@@ -2941,6 +2962,15 @@
       taskContainer.addEventListener('click', function(e) {
         var btn = e.target.closest('button');
         if (!btn) return;
+        // 分页按钮
+        var pageAttr = btn.getAttribute('data-task-page');
+        if (pageAttr !== null) {
+          if (pageAttr === 'prev') { taskListPage = Math.max(1, taskListPage - 1); }
+          else if (pageAttr === 'next') { taskListPage = taskListPage + 1; }
+          else { taskListPage = parseInt(pageAttr, 10) || 1; }
+          renderTaskList();
+          return;
+        }
         var taskId = btn.getAttribute('data-task-id');
         if (!taskId) return;
         if (btn.textContent.indexOf('日志') >= 0) { openLogPage(taskId); return; }
@@ -2951,7 +2981,7 @@
     }
 
     // -- 任务列表筛选（渠道 / 版位 / 名称 / 状态）--
-    function applyTaskFilters() { renderTaskList(); }
+    function applyTaskFilters() { taskListPage = 1; renderTaskList(); }
     var fChannel = document.getElementById('filter-channel');
     var fPlacement = document.getElementById('filter-placement');
     var fStatus = document.getElementById('filter-status');

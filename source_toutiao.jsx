@@ -1340,40 +1340,42 @@ function App() {
 
             {/* 项目生成规则（仅搭建项目和广告时显示） */}
             {buildType === 'project_unit' && (
-              <div className="flex items-center gap-3 mb-5">
-                <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目生成规则</label>
-                <div className="flex gap-3">
-                  <button type="button" onClick={() => setProjectGenRule('total_per_project')}
-                    className={`relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'total_per_project' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                    <div className="text-sm font-medium text-gray-900">按总广告数/每项目广告数</div>
-                    <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer group"
-                      onMouseEnter={() => setProjectRuleHover('total_per_project')} onMouseLeave={() => setProjectRuleHover(null)}>
-                      <i className="fas fa-info"></i>
-                      {projectRuleHover === 'total_per_project' && (
-                        <span className="absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none">根据生成的广告总数与项目内广告数上限，自动生成项目</span>
-                      )}
-                    </span>
-                  </button>
-                  <button type="button" onClick={() => setProjectGenRule('fixed')}
-                    className={`relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                    <div className="text-sm font-medium text-gray-900">指定数量</div>
-                    <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer"
-                      onMouseEnter={() => setProjectRuleHover('fixed')} onMouseLeave={() => setProjectRuleHover(null)}>
-                      <i className="fas fa-info"></i>
-                      {projectRuleHover === 'fixed' && (
-                        <span className="absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none">手动指定每个账户的项目数量</span>
-                      )}
-                    </span>
-                  </button>
+              <div className="mb-5">
+                <div className="flex items-center gap-3">
+                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目生成规则</label>
+                  <div className="flex gap-3">
+                    <button type="button" onClick={() => setProjectGenRule('total_per_project')}
+                      className={`relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'total_per_project' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                      <div className="text-sm font-medium text-gray-900">按总广告数/每项目广告数</div>
+                      <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer group"
+                        onMouseEnter={() => setProjectRuleHover('total_per_project')} onMouseLeave={() => setProjectRuleHover(null)}>
+                        <i className="fas fa-info"></i>
+                        {projectRuleHover === 'total_per_project' && (
+                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none">根据生成的广告总数与项目内广告数上限，自动生成项目</span>
+                        )}
+                      </span>
+                    </button>
+                    <button type="button" onClick={() => setProjectGenRule('fixed')}
+                      className={`relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                      <div className="text-sm font-medium text-gray-900">指定数量</div>
+                      <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer"
+                        onMouseEnter={() => setProjectRuleHover('fixed')} onMouseLeave={() => setProjectRuleHover(null)}>
+                        <i className="fas fa-info"></i>
+                        {projectRuleHover === 'fixed' && (
+                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none">手动指定每个账户的项目数量</span>
+                        )}
+                      </span>
+                    </button>
+                  </div>
                 </div>
                 {projectGenRule === 'total_per_project' && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mt-3 pl-28">
                     <label className="text-sm text-gray-700 whitespace-nowrap">每个项目广告数上限</label>
                     <input type="number" min="1" max="1000" value={adsPerProject} onChange={e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
                 )}
                 {projectGenRule === 'fixed' && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mt-3 pl-28">
                     <label className="text-sm text-gray-700 whitespace-nowrap">每个账户指定项目数</label>
                     <input type="number" min="1" max="100" value={projectsPerAccount} onChange={e => setProjectsPerAccount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
@@ -1469,44 +1471,52 @@ function App() {
               </div>
             </div>
             {/* 营销产品：全账户共用/分账户定制 做成按钮单选，与定向配置交互一致 */}
-            <div className="flex items-center gap-3 mb-5">
-              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销产品 <span className="text-red-500">*</span></label>
-              <div className="flex gap-3">
-                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: productAllocMode === 'shared' ? '#1890ff' : '#e5e7eb', background: productAllocMode === 'shared' ? '#eff6ff' : '#fff' }}>
-                  <input type="radio" name="productAllocMode" checked={productAllocMode === 'shared'} onChange={() => setProductAllocMode('shared')} className="w-4 h-4 mr-2 text-blue-600" />
-                  <span>全账户共用</span>
-                </label>
-                <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: productAllocMode === 'per_account' ? '#1890ff' : '#e5e7eb', background: productAllocMode === 'per_account' ? '#eff6ff' : '#fff' }}>
-                  <input type="radio" name="productAllocMode" checked={productAllocMode === 'per_account'} onChange={() => setProductAllocMode('per_account')} className="w-4 h-4 mr-2 text-blue-600" />
-                  <span>分账户定制</span>
-                </label>
+            <div className="mb-5">
+              <div className="flex items-center gap-3">
+                <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">营销产品 <span className="text-red-500">*</span></label>
+                <div className="flex gap-3">
+                  <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: productAllocMode === 'shared' ? '#1890ff' : '#e5e7eb', background: productAllocMode === 'shared' ? '#eff6ff' : '#fff' }}>
+                    <input type="radio" name="productAllocMode" checked={productAllocMode === 'shared'} onChange={() => setProductAllocMode('shared')} className="w-4 h-4 mr-2 text-blue-600" />
+                    <span>全账户共用</span>
+                  </label>
+                  <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: productAllocMode === 'per_account' ? '#1890ff' : '#e5e7eb', background: productAllocMode === 'per_account' ? '#eff6ff' : '#fff' }}>
+                    <input type="radio" name="productAllocMode" checked={productAllocMode === 'per_account'} onChange={() => setProductAllocMode('per_account')} className="w-4 h-4 mr-2 text-blue-600" />
+                    <span>分账户定制</span>
+                  </label>
+                </div>
               </div>
               {productAllocMode === 'shared' ? (
-                <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                  {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
-                </select>
+                <div className="mt-3 pl-28">
+                  <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
+                  </select>
+                </div>
               ) : (
-                <span className="text-sm text-gray-500">分账户定制：在下方按账户分别选择商品</span>
+                <p className="text-sm text-gray-500 mt-2 pl-28">分账户定制：在下方按账户分别选择商品</p>
               )}
             </div>
             {/* 分账户定制商品（网格） */}
             {productAllocMode === 'per_account' && (
               <div className="mb-5 pl-28">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {selectedAccountIds.map(accountId => {
-                    const acc = MOCK.accounts.find(a => a.id === accountId);
-                    const pid = perAccountProduct[accountId] || '';
-                    return (
-                      <div key={accountId} className="border border-gray-200 rounded-lg p-2.5 bg-gray-50">
-                        <div className="text-xs font-semibold text-gray-900 truncate mb-1.5" title={acc ? acc.name : accountId}>{acc ? acc.name : accountId}</div>
-                        <select value={pid} onChange={e => setPerAccountProduct(prev => ({ ...prev, [accountId]: e.target.value }))} className="w-full px-2 py-1 border border-gray-300 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500">
-                          <option value="">请选择商品</option>
-                          {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
-                        </select>
-                      </div>
-                    );
-                  })}
-                </div>
+                {selectedAccountIds.length === 0 ? (
+                  <p className="text-sm text-gray-400">请先选择账户</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {selectedAccountIds.map(accountId => {
+                      const acc = MOCK.accounts.find(a => a.id === accountId);
+                      const pid = perAccountProduct[accountId] || '';
+                      return (
+                        <div key={accountId} className="border border-gray-200 rounded-lg p-2.5 bg-gray-50">
+                          <div className="text-xs font-semibold text-gray-900 truncate mb-1.5" title={acc ? acc.name : accountId}>{acc ? acc.name : accountId}</div>
+                          <select value={pid} onChange={e => setPerAccountProduct(prev => ({ ...prev, [accountId]: e.target.value }))} className="w-full px-2 py-1 border border-gray-300 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500">
+                            <option value="">请选择商品</option>
+                            {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
+                          </select>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
             {/* 获取线索方式 */}
@@ -1876,52 +1886,46 @@ function App() {
               </div>
             </div>
 
-            {/* 投放设置 */}
+            {/* 投放设置（去掉标题，直接放投放日期/投放时段/项目名称） */}
             <div className="border-t pt-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">投放设置</h3>
 
               {/* 投放日期 */}
-              <div className="mb-6">
-                <div className="block text-sm font-medium text-gray-700 mb-2">投放日期</div>
-                <div className="flex gap-6 mb-3">
+              <div className="mb-5">
+                <div className="flex items-center gap-6 flex-wrap">
+                  <span className="text-sm font-medium text-gray-700">投放日期</span>
                   <label className="flex items-center cursor-pointer">
                     <input type="radio" name="date_type" checked={投放日期类型 === 'long_term'} onChange={() => set投放日期类型('long_term')} className="mr-2" />
-                    从今天起长期投放
+                    <span className="text-sm">从今天起长期投放</span>
                   </label>
                   <label className="flex items-center cursor-pointer">
                     <input type="radio" name="date_type" checked={投放日期类型 === 'custom'} onChange={() => set投放日期类型('custom')} className="mr-2" />
-                    设置开始和结束日期
+                    <span className="text-sm">设置开始和结束日期</span>
                   </label>
                 </div>
                 {投放日期类型 === 'custom' ? (
-                  <div className="flex gap-4">
-                    <div>
-                      <input type="date" value={自定义开始日期} onChange={e => set自定义开始日期(e.target.value)} placeholder="开始日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                      <input type="date" value={自定义结束日期} onChange={e => set自定义结束日期(e.target.value)} placeholder="结束日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
+                  <div className="flex gap-4 mt-3 pl-28">
+                    <input type="date" value={自定义开始日期} onChange={e => set自定义开始日期(e.target.value)} placeholder="开始日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="date" value={自定义结束日期} onChange={e => set自定义结束日期(e.target.value)} placeholder="结束日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                 ) : null}
               </div>
 
-              {/* 投放时段 - 广点通同款样式 */}
-              <div className="mb-2">
-                <div className="block text-sm font-medium text-gray-700 mb-2">投放时段</div>
-                <div className="flex items-center gap-1 mb-4">
-                  <span className="text-sm text-gray-600 mr-2">选择时段</span>
-                  <label className="flex items-center cursor-pointer mr-5">
+              {/* 投放时段 */}
+              <div className="mb-5">
+                <div className="flex items-center gap-6 flex-wrap">
+                  <span className="text-sm font-medium text-gray-700">投放时段</span>
+                  <label className="flex items-center cursor-pointer">
                     <input type="radio" name="time_mode" checked={投放时段模式 === 'all_day'} onChange={() => set投放时段模式('all_day')} className="mr-1.5" />
                     <span className="text-sm">全天</span>
                   </label>
                   <label className="flex items-center cursor-pointer">
                     <input type="radio" name="time_mode" checked={投放时段模式 === 'multi_slot'} onChange={() => set投放时段模式('multi_slot')} className="mr-1.5" />
-                    <span className="text-sm">指定多个时段</span>
+                    <span className="text-sm">指定多时段</span>
                   </label>
                 </div>
 
                 {投放时段模式 === 'time_range' && (
-                  <div className="flex gap-4 items-center p-4 bg-gray-50 rounded-lg border border-gray-200 max-w-xl">
+                  <div className="flex gap-4 items-center p-4 bg-gray-50 rounded-lg border border-gray-200 max-w-xl mt-3">
                     <div className="flex-1">
                       <label className="block text-xs text-gray-500 mb-1">开始时间</label>
                       <input
@@ -1945,11 +1949,13 @@ function App() {
                 )}
 
                 {投放时段模式 === 'multi_slot' && (
-                  <TimeGrid value={timeGridSlots} onChange={setTimeGridSlots} />
+                  <div className="mt-3 pl-28">
+                    <TimeGrid value={timeGridSlots} onChange={setTimeGridSlots} />
+                  </div>
                 )}
               </div>
 
-              {/* 项目名称：仅在搭建项目和项目时填写，与其它字段左对齐 */}
+              {/* 项目名称：仅在搭建项目时填写，与其它字段左对齐 */}
               {buildType === 'project_unit' && (
                 <div className="flex items-center gap-3 mb-5">
                   <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目名称 <span className="text-red-500">*</span></label>
@@ -2201,23 +2207,21 @@ function App() {
                     const over = s.overLimit || s.overUnit;
                     const isAvg = composeStrategy === 'average';
                     return (
-                      <p className={`text-lg font-bold ${over ? 'text-red-600' : 'text-blue-600'}`}>
-                        {isNaN(total) ? 0 : total} 个广告
-                        {s.overLimit && <span className="text-xs font-normal text-red-500 ml-2">（已超限，单次任务上限 1000 个）</span>}
-                        {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单项目超限，上限 100 个）</span>}
-                        <span className="text-xs font-normal text-gray-500 ml-2">
-                          {isAvg
-                            ? `素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`
-                            : `项目数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`}
-                        </span>
-                      </p>
-                    );
-                  })()}
-                  {(() => {
-                    const s = getBuildSummary();
-                    if (!s.overUnit) return null;
-                    return (
-                      <div className="mt-2 text-xs text-red-500">单个项目广告数 {s.perUnitCreatives} 超出上限 100 个，请调整素材 / 单广告素材数 / 项目数</div>
+                      <div>
+                        <p className={`text-lg font-bold ${over ? 'text-red-600' : 'text-blue-600'}`}>
+                          {isNaN(total) ? 0 : total} 个广告
+                          {s.overLimit && <span className="text-xs font-normal text-red-500 ml-2">（已超限，单次任务上限 1000 个）</span>}
+                          {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单项目超限，上限 100 个）</span>}
+                          <span className="text-xs font-normal text-gray-500 ml-2">
+                            {isAvg
+                              ? `素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`
+                              : `项目数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`}
+                          </span>
+                        </p>
+                        {s.overUnit && (
+                          <div className="mt-2 text-xs text-red-500">单个项目广告数 {s.perUnitCreatives} 超出上限 100 个，请调整素材 / 单广告素材数 / 项目数</div>
+                        )}
+                      </div>
                     );
                   })()}
                   <div className="text-xs text-gray-400 mt-1 leading-relaxed">
