@@ -2034,21 +2034,6 @@ function App() {
             <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、产品与创意组件</span>
           </div>
           <div className="p-6 space-y-6">
-            {/* 多账户分配规则 */}
-            <div>
-              <div className="block text-sm font-medium text-gray-700 mb-2">多账户分配规则</div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <button type="button" onClick={() => setAccountAllocMode('all')} className={`rounded-lg border px-4 py-4 text-left transition ${accountAllocMode === 'all' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                  <div className="text-sm font-bold text-gray-900 mb-1">全账户复用</div>
-                  <div className="text-xs text-gray-500">所有账户都使用一样的素材</div>
-                </button>
-                <button type="button" onClick={() => setAccountAllocMode('average')} className={`rounded-lg border px-4 py-4 text-left transition ${accountAllocMode === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                  <div className="text-sm font-bold text-gray-900 mb-1">平均分配</div>
-                  <div className="text-xs text-gray-500">素材平均分到每个账户中</div>
-                </button>
-              </div>
-            </div>
-
             {/* 创意素材（视频+图片） */}
             <div>
               <div className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</div>
@@ -2057,86 +2042,85 @@ function App() {
               </button>
             </div>
 
-            {/* 品牌形象 & 营销组件 */}
+
+
+            {/* 创意制作（按账户分创意组）已下线；创意素材选择请见上方「创意素材」按钮 */}
+
+
+            {/* 广告文案 */}
             <div className="border-t pt-4">
-              <div className="space-y-4">
-                {/* 品牌形象 行 */}
-                <div className="flex items-start gap-3 flex-wrap">
-                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">品牌形象</label>
-                  <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                    <option value="custom">自定义</option>
-                    <option value="video_account">视频号</option>
-                  </select>
-                  <div className="max-w-md flex-1 min-w-[240px]">
-                    {brandImageType === 'custom' ? (
-                      <div>
-                        {creativeAssets.filter(a => a.type === 'brand').length === 0 ? (
-                          <p className="text-xs text-gray-400">暂无创意资产中的品牌形象，请先在「创意资产」菜单上传</p>
-                        ) : (
-                          <ImageSelect
-                            value={selectedBrandImage ? selectedBrandImage.id : ''}
-                            placeholder="选择品牌形象"
-                            emptyText="暂无创意资产中的品牌形象，请先在「创意资产」菜单上传"
-                            options={creativeAssets.filter(a => a.type === 'brand').map(bi => ({ value: bi.id, label: bi.name, thumb: bi.thumb }))}
-                            onSelect={o => {
-                              const bi = creativeAssets.filter(a => a.type === 'brand').find(x => x.id === o.value);
-                              setSelectedBrandImage(bi || null);
-                            }}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <select
-                        value={selectedVideoAccount ? selectedVideoAccount.id : ''}
-                        onChange={e => {
-                          const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
-                          setSelectedVideoAccount(va || null);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      >
-                        <option value="">选择视频号</option>
-                        {MOCK.videoAccounts.map(va => (
-                          <option key={va.id} value={va.id}>{va.name}</option>
+              <div className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</div>
+              <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
+                <i className="fas fa-font mr-2"></i>选择广告文案
+              </button>
+            </div>
+
+            {/* 产品信息 */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">产品信息</h4>
+              {(() => {
+                const pid = productAllocMode === 'per_account' ? (perAccountProduct[selectedAccountIds[0]] || '') : specificProduct;
+                const prod = MOCK.productLibrary.find(p => p.id === pid);
+                if (!prod) return <p className="text-xs text-gray-400">请在「项目配置」选择营销产品</p>;
+                return (
+                  <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="w-16 h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-3xl flex-shrink-0">{prod.image}</div>
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-gray-900 mb-1">{prod.name}</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {prod.sellingPoints.map((sp, i) => (
+                          <span key={i} className="text-xs text-gray-600 bg-white border border-gray-200 rounded px-2 py-0.5">{sp}</span>
                         ))}
-                      </select>
-                    )}
-                  </div>
-                </div>
-                {/* 营销组件 行 */}
-                <div className="flex items-start gap-3 flex-wrap">
-                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">营销组件</label>
-                  <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                    <option value="action_button">行动按钮</option>
-                    <option value="floating_card">浮层卡片</option>
-                  </select>
-                  <div className="max-w-md flex-1 min-w-[240px]">
-                    {marketingComponentType === 'action_button' ? (
-                      <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="claim">立即领取</option>
-                        <option value="details">查看详情</option>
-                      </select>
-                    ) : (
-                      <div>
-                        {creativeAssets.filter(a => a.type === 'component').length === 0 ? (
-                          <p className="text-xs text-gray-400">暂无创意资产中的营销组件，请先在「创意资产」菜单上传</p>
-                        ) : (
-                          <ImageSelect
-                            value={selectedComponent ? selectedComponent.id : ''}
-                            placeholder="选择营销组件"
-                            emptyText="暂无创意资产中的营销组件，请先在「创意资产」菜单上传"
-                            options={creativeAssets.filter(a => a.type === 'component').map(c => ({ value: c.id, label: c.btnText, thumb: c.thumb }))}
-                            onSelect={o => {
-                              const c = creativeAssets.filter(a => a.type === 'component').find(x => x.id === o.value);
-                              setSelectedComponent(c || null);
-                            }}
-                          />
-                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
-                <p className="text-xs text-gray-400">所有创意共用同一个品牌形象和营销组件</p>
+                );
+              })()}
+            </div>
+
+            {/* 创意组件 */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-bold text-gray-900 mb-4">创意组件</h4>
+              {/* 附加创意组件（置灰不可交互） */}
+              <div className="mb-5">
+                <button type="button" disabled className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 text-sm cursor-not-allowed">附加创意组件</button>
               </div>
+              {/* 行动号召 */}
+              <div className="mb-5">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-sm font-medium text-gray-700">行动号召</span>
+                  <span className="text-red-500">*</span>
+                  <i className="far fa-question-circle text-gray-400 text-xs" title="回车添加行动号召文案，最多 10 条"></i>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <input type="text" value={ctaInput} onChange={e => setCtaInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = ctaInput.trim(); if (v && ctaList.length < 10 && !ctaList.includes(v)) { setCtaList([...ctaList, v]); setCtaInput(''); } else if (ctaList.length >= 10) { notify('行动号召最多 10 条', 'error'); } } }} placeholder="输入行动号召文案，回车添加（最多10条）" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                  <span className="text-xs text-gray-400">{ctaList.length}/10</span>
+                </div>
+                {ctaList.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {ctaList.map((c, i) => (
+                      <span key={i} className="tag bg-gray-100 text-gray-800 text-xs px-2 py-1 flex items-center gap-1">
+                        {c}
+                        <button onClick={() => setCtaList(ctaList.filter((_, idx) => idx !== i))} className="text-gray-500 hover:text-gray-700"><i className="fas fa-times"></i></button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* 开启智能生成 */}
+              <div>
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" checked={smartGen} onChange={e => setSmartGen(e.target.checked)} className="w-4 h-4" />
+                  <span className="text-sm font-medium text-gray-700">开启智能生成</span>
+                  <i className="far fa-question-circle text-gray-400 text-xs" title="开启后系统将智能生成创意组合"></i>
+                </label>
+              </div>
+            </div>
+
+            {/* 来源 */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-bold text-gray-900 mb-2">来源</h4>
+              <input type="text" value={sourceText} onChange={e => setSourceText(e.target.value)} placeholder="请输入来源信息" className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
             {/* 创意素材分配 */}
@@ -2234,86 +2218,6 @@ function App() {
                   </div>
                 </div>
               </div>
-            </div>
-
-
-            {/* 创意制作（按账户分创意组）已下线；创意素材选择请见上方「创意素材」按钮 */}
-
-
-            {/* 广告文案 */}
-            <div className="border-t pt-4">
-              <div className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</div>
-              <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
-                <i className="fas fa-font mr-2"></i>选择广告文案
-              </button>
-            </div>
-
-            {/* 产品信息 */}
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-3">产品信息</h4>
-              {(() => {
-                const pid = productAllocMode === 'per_account' ? (perAccountProduct[selectedAccountIds[0]] || '') : specificProduct;
-                const prod = MOCK.productLibrary.find(p => p.id === pid);
-                if (!prod) return <p className="text-xs text-gray-400">请在「项目配置」选择营销产品</p>;
-                return (
-                  <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-16 h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-3xl flex-shrink-0">{prod.image}</div>
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold text-gray-900 mb-1">{prod.name}</div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {prod.sellingPoints.map((sp, i) => (
-                          <span key={i} className="text-xs text-gray-600 bg-white border border-gray-200 rounded px-2 py-0.5">{sp}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* 创意组件 */}
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-4">创意组件</h4>
-              {/* 附加创意组件（置灰不可交互） */}
-              <div className="mb-5">
-                <button type="button" disabled className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 text-sm cursor-not-allowed">附加创意组件</button>
-              </div>
-              {/* 行动号召 */}
-              <div className="mb-5">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-sm font-medium text-gray-700">行动号召</span>
-                  <span className="text-red-500">*</span>
-                  <i className="far fa-question-circle text-gray-400 text-xs" title="回车添加行动号召文案，最多 10 条"></i>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <input type="text" value={ctaInput} onChange={e => setCtaInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = ctaInput.trim(); if (v && ctaList.length < 10 && !ctaList.includes(v)) { setCtaList([...ctaList, v]); setCtaInput(''); } else if (ctaList.length >= 10) { notify('行动号召最多 10 条', 'error'); } } }} placeholder="输入行动号召文案，回车添加（最多10条）" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-                  <span className="text-xs text-gray-400">{ctaList.length}/10</span>
-                </div>
-                {ctaList.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {ctaList.map((c, i) => (
-                      <span key={i} className="tag bg-gray-100 text-gray-800 text-xs px-2 py-1 flex items-center gap-1">
-                        {c}
-                        <button onClick={() => setCtaList(ctaList.filter((_, idx) => idx !== i))} className="text-gray-500 hover:text-gray-700"><i className="fas fa-times"></i></button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* 开启智能生成 */}
-              <div>
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" checked={smartGen} onChange={e => setSmartGen(e.target.checked)} className="w-4 h-4" />
-                  <span className="text-sm font-medium text-gray-700">开启智能生成</span>
-                  <i className="far fa-question-circle text-gray-400 text-xs" title="开启后系统将智能生成创意组合"></i>
-                </label>
-              </div>
-            </div>
-
-            {/* 来源 */}
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-2">来源</h4>
-              <input type="text" value={sourceText} onChange={e => setSourceText(e.target.value)} placeholder="请输入来源信息" className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
             {/* 单元名称 */}
