@@ -167,13 +167,13 @@
         <div id="tp-rows"></div>
       </div>
       <!-- 新建/编辑表单弹窗 -->
-      <div id="tgt-pkg-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
-        <div style="background:white;border-radius:12px;width:92vw;max-width:900px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;flex-shrink:0;">
+      <div id="tgt-pkg-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;padding:24px 15px;">
+        <div style="background:white;border-radius:12px;width:92vw;max-width:900px;max-height:calc(100vh - 48px);overflow-y:auto;box-sizing:border-box;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
             <h3 style="font-size:16px;font-weight:600;margin:0;" id="tgt-pkg-form-title">新建定向包</h3>
             <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
           </div>
-          <div style="padding:20px;flex:1;overflow-y:auto;min-height:0;">
+          <div style="padding:20px;">
             <!-- 定向包名称 -->
             <div style="margin-bottom:20px;">
               <div style="display:block;font-size:14px;font-weight:500;color:#333;margin-bottom:8px;">定向包名称 <span style="color:#ff4d4f;">*</span></div>
@@ -460,7 +460,7 @@
 
           </div>
 
-          <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;flex-shrink:0;">
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #e5e7eb;">
             <button style="padding:8px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;color:#333;">取消</button>
             <button style="padding:8px 20px;background:#1890FF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">保存</button>
           </div>
@@ -712,6 +712,8 @@
       tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
       // 总是确保示例任务与搭建日志存在（合并策略，不覆盖用户自建任务）
       seedTasks();
+      // 清理任务列表：每个（渠道×搭建类型）组合只保留一条，避免列表无限增长
+      cleanupTasks();
       tasks = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
 
     // 初始化排除已转化显示逻辑
@@ -810,24 +812,18 @@
   }
 
   // ========== 选择渠道 → 加载表单 ==========
+  // 新建任务：仅生成 taskId 并打开表单，不立即写入任务列表。
+  // 只有点击「保存草稿」或「运行/返回」时才真正注册到任务列表。
+  var pendingChannel = null; // 新建任务的渠道（未保存前）
   window.selectChannel = function(channelId) {
     hideDropdown();
-    var newTask = {
-      id: 'task_' + Date.now(),
-      name: '任务-' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
-      channel: channelId,
-      channelName: channelId === 'gdt' ? '广点通' : (channelId === 'toutiao' ? '头条' : channelId),
-      createdAt: new Date().toISOString(),
-      status: 'draft',
-      buildType: 'unit_creative'
-    };
-    tasks.push(newTask);
-    try { localStorage.setItem('ad_tasks', JSON.stringify(tasks)); } catch(e) {}
-    currentTaskId = newTask.id;
-    openForm(newTask.id);
+    var newTaskId = 'task_' + Date.now();
+    pendingChannel = channelId;
+    currentTaskId = newTaskId;
+    openForm(newTaskId, channelId);
   };
 
-  function openForm(taskId) {
+  function openForm(taskId, channelHint) {
     var vtl = document.getElementById('view-task-list');
     if (vtl) vtl.style.display = 'none';
     var vf = document.getElementById('view-form');
@@ -840,7 +836,8 @@
     var frame = document.getElementById('form-frame');
     var task = null;
     for (var _i = 0; _i < tasks.length; _i++) { if (tasks[_i].id === taskId) { task = tasks[_i]; break; } }
-    var formPage = (task && task.channel === 'toutiao') ? 'form-toutiao.html' : 'form.html';
+    var channelId = (task && task.channel) || channelHint || 'gdt';
+    var formPage = channelId === 'toutiao' ? 'form-toutiao.html' : 'form.html';
     frame.src = formPage + '?taskId=' + encodeURIComponent(taskId);
   }
 
@@ -1078,6 +1075,41 @@
       try { has = (localStorage.getItem(key) || '').length > 2; } catch (e) {}
       if (!has) { try { seedBuildLogs(t); } catch (e) {} }
     });
+  }
+
+  // 清理任务列表：每个（渠道×搭建类型）组合只保留一条，优先保留示例任务（seed_ 前缀），
+  // 否则保留最早一条，删除其余重复/自建任务，避免列表无限增长。
+  function cleanupTasks() {
+    try {
+      var all = JSON.parse(localStorage.getItem('ad_tasks') || '[]');
+      if (!all.length) return;
+      // 先删除所有「新建后未真正保存」产生的临时任务（task_ 前缀且无对应表单数据）
+      var keep = {};
+      var result = [];
+      all.forEach(function(t) {
+        var bt = t.buildType || 'unit_creative';
+        var key = (t.channel || 'gdt') + '|' + bt;
+        if (!keep[key]) {
+          keep[key] = t;
+        } else {
+          // 已存在同组合任务：保留示例任务（seed_ 前缀）优先，其次保留更早的
+          var existing = keep[key];
+          var existingIsSeed = (existing.id || '').indexOf('seed_') === 0;
+          var curIsSeed = (t.id || '').indexOf('seed_') === 0;
+          if (curIsSeed && !existingIsSeed) {
+            keep[key] = t;
+          } else if (curIsSeed === existingIsSeed) {
+            // 同为 seed 或同为自建：保留更早创建的
+            var eTime = existing.createdAt ? Date.parse(existing.createdAt) : 0;
+            var cTime = t.createdAt ? Date.parse(t.createdAt) : 0;
+            if (cTime && (!eTime || cTime < eTime)) keep[key] = t;
+          }
+          // 否则保留 existing
+        }
+      });
+      result = Object.keys(keep).map(function(k) { return keep[k]; });
+      localStorage.setItem('ad_tasks', JSON.stringify(result));
+    } catch (e) {}
   }
 
   function renderLogList(taskId) {
@@ -1341,19 +1373,63 @@
       '</div>';
     });
     html += '</div>';
-    // 分页器（超过一页时显示页码）
+    // 分页器：右下角，含「总条数 + 单页数量选择 + 页码(最多6个,超出省略号)」
+    var pageItems2 = getPageItems(taskListPage, totalPages);
+    html += '<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:14px 20px;flex-wrap:wrap;">';
+    // 数据总条数
+    html += '<span style="font-size:13px;color:#6b7280;">共 <span style="color:#333;font-weight:600;">' + totalCount + '</span> 条</span>';
+    // 单页展示数量选择
+    html += '<select data-page-size style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;color:#333;background:white;cursor:pointer;outline:none;">';
+    [10, 20, 50].forEach(function(ps) {
+      html += '<option value="' + ps + '"' + (TASK_PAGE_SIZE === ps ? ' selected' : '') + '>' + ps + ' 条/页</option>';
+    });
+    html += '</select>';
+    // 页码（带省略号）
     if (totalPages > 1) {
-      html += '<div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:16px 20px;flex-wrap:wrap;">';
-      html += '<button data-task-page="prev" ' + (taskListPage <= 1 ? 'disabled ' : '') + 'style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:white;cursor:pointer;font-size:13px;color:#333;' + (taskListPage <= 1 ? 'opacity:0.4;cursor:not-allowed;' : '') + '">上一页</button>';
-      for (var pi = 1; pi <= totalPages; pi++) {
-        var active = pi === taskListPage;
-        html += '<button data-task-page="' + pi + '" style="min-width:32px;padding:6px 10px;border:1px solid ' + (active ? '#1890FF' : '#e5e7eb') + ';border-radius:6px;background:' + (active ? '#1890FF' : 'white') + ';color:' + (active ? 'white' : '#333') + ';cursor:pointer;font-size:13px;font-weight:' + (active ? '600' : '400') + ';">' + pi + '</button>';
-      }
-      html += '<button data-task-page="next" ' + (taskListPage >= totalPages ? 'disabled ' : '') + 'style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:white;cursor:pointer;font-size:13px;color:#333;' + (taskListPage >= totalPages ? 'opacity:0.4;cursor:not-allowed;' : '') + '">下一页</button>';
-      html += '<span style="font-size:12px;color:#9ca3af;margin-left:8px;">共 ' + totalCount + ' 条 · 第 ' + taskListPage + '/' + totalPages + ' 页</span>';
+      html += '<div style="display:flex;align-items:center;gap:4px;">';
+      // 上一页
+      html += '<button data-task-page="prev" ' + (taskListPage <= 1 ? 'disabled ' : '') + 'style="padding:5px 10px;border:1px solid #e5e7eb;border-radius:6px;background:white;cursor:pointer;font-size:13px;color:#333;' + (taskListPage <= 1 ? 'opacity:0.4;cursor:not-allowed;' : '') + '">&lt;</button>';
+      pageItems2.forEach(function(it) {
+        if (it === '...') {
+          html += '<span style="padding:5px 6px;font-size:13px;color:#9ca3af;">…</span>';
+        } else {
+          var active = it === taskListPage;
+          html += '<button data-task-page="' + it + '" style="min-width:30px;padding:5px 8px;border:1px solid ' + (active ? '#1890FF' : '#e5e7eb') + ';border-radius:6px;background:' + (active ? '#1890FF' : 'white') + ';color:' + (active ? 'white' : '#333') + ';cursor:pointer;font-size:13px;font-weight:' + (active ? '600' : '400') + ';">' + it + '</button>';
+        }
+      });
+      // 下一页
+      html += '<button data-task-page="next" ' + (taskListPage >= totalPages ? 'disabled ' : '') + 'style="padding:5px 10px;border:1px solid #e5e7eb;border-radius:6px;background:white;cursor:pointer;font-size:13px;color:#333;' + (taskListPage >= totalPages ? 'opacity:0.4;cursor:not-allowed;' : '') + '">&gt;</button>';
       html += '</div>';
     }
+    html += '</div>';
     container.innerHTML = html;
+  }
+
+  // 生成分页页码序列（最多6个数字 + 省略号占位）
+  function getPageItems(current, total) {
+    if (total <= 6) {
+      var arr = [];
+      for (var i = 1; i <= total; i++) arr.push(i);
+      return arr;
+    }
+    // 总是包含 1 和 total，中间补当前页附近，用 ... 占位，保证数字+省略号合计展示可控
+    var set = [1, total];
+    for (var d = -1; d <= 1; d++) {
+      var p = current + d;
+      if (p >= 1 && p <= total) set.push(p);
+    }
+    // 若当前页靠边，补充相邻页
+    if (current <= 2) { set.push(2, 3); }
+    if (current >= total - 1) { set.push(total - 1, total - 2); }
+    // 去重 + 排序
+    set = set.filter(function(v, idx, a) { return a.indexOf(v) === idx; }).sort(function(a, b) { return a - b; });
+    // 插入省略号
+    var out = [];
+    for (var j = 0; j < set.length; j++) {
+      if (j > 0 && set[j] - set[j - 1] > 1) out.push('...');
+      out.push(set[j]);
+    }
+    return out;
   }
 
   // ========== 定向包表单年龄多选逻辑 ==========
@@ -2737,17 +2813,30 @@
   // ========== 跨页面通信 ==========
   window.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'TASK_FORM_SAVE') {
-      // 同步表单保存的搭建类型到任务对象，保证列表/筛选一致
+      // 保存草稿/返回：若任务尚未注册（新建未保存），在此刻才真正写入任务列表
       try {
         var sid = (event.data.taskId) || currentTaskId;
         var stask = null;
         for (var _i = 0; _i < tasks.length; _i++) { if (tasks[_i].id === sid) { stask = tasks[_i]; break; } }
-        if (stask) {
-          var sfd = null;
-          try { sfd = JSON.parse(localStorage.getItem('ad_task_form_' + sid) || 'null'); } catch (e) {}
-          if (sfd && sfd.buildType) stask.buildType = sfd.buildType;
-          localStorage.setItem('ad_tasks', JSON.stringify(tasks));
+        if (!stask) {
+          // 新建任务首次保存：注册到任务列表
+          var ch = pendingChannel || 'gdt';
+          stask = {
+            id: sid,
+            name: '任务-' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+            channel: ch,
+            channelName: ch === 'gdt' ? '广点通' : (ch === 'toutiao' ? '头条' : ch),
+            createdAt: new Date().toISOString(),
+            status: 'draft',
+            buildType: 'unit_creative'
+          };
+          tasks.push(stask);
+          pendingChannel = null;
         }
+        var sfd = null;
+        try { sfd = JSON.parse(localStorage.getItem('ad_task_form_' + sid) || 'null'); } catch (e) {}
+        if (sfd && sfd.buildType) stask.buildType = sfd.buildType;
+        localStorage.setItem('ad_tasks', JSON.stringify(tasks));
       } catch (e) {}
       renderTaskList();
     } else if (event.data && event.data.type === 'GOTO_TASKS') {
@@ -2977,6 +3066,14 @@
         if (btn.textContent.indexOf('编辑') >= 0) editTask(taskId);
         if (btn.textContent.indexOf('复制') >= 0) copyTask(taskId);
         if (btn.textContent.indexOf('删除') >= 0) deleteTask(taskId);
+      });
+      // 单页数量选择
+      taskContainer.addEventListener('change', function(e) {
+        var sel = e.target && e.target.getAttribute && e.target.getAttribute('data-page-size');
+        if (sel === null) return;
+        TASK_PAGE_SIZE = parseInt(e.target.value, 10) || 10;
+        taskListPage = 1;
+        renderTaskList();
       });
     }
 

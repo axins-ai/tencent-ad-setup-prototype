@@ -1662,6 +1662,14 @@ function App() {
     setRunResult(null);
     setRunProgress(0);
     setRunModal(true);
+    // 运行即视为真正提交任务：通知父窗口注册到任务列表
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+          type: 'TASK_FORM_SAVE'
+        }, '*');
+      }
+    } catch (e) {}
     runStartRef.current = Date.now();
     const timer = setInterval(() => {
       setRunProgress(p => Math.min(100, p + Math.floor(Math.random() * 7) + 4));

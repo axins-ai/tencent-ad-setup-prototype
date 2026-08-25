@@ -93,6 +93,9 @@ html { scroll-behavior: smooth; }
   }
   function doSave() {
     if (window.__doSaveForm) window.__doSaveForm();
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'TASK_FORM_SAVE' }, '*');
+    }
     alert('草稿已保存！');
   }
   </script>
