@@ -248,7 +248,7 @@ const MOCK = {
       aomen: ['澳门']
     }
   },
-  // 附加创意组件 - 资产库（点击「附加创意组件」按钮拉起）
+  // 附加广告组件 - 资产库（点击「附加广告组件」按钮拉起）
   creativeComponents: [
     { id: 'cc_001', name: '门店地址卡', type: '门店', desc: '展示附近门店与地图导航' },
     { id: 'cc_002', name: '表单组件', type: '表单', desc: '落地页内嵌留资表单' },
@@ -314,7 +314,7 @@ function ImageSelect({ value, options, placeholder, emptyText, onSelect }) {
   );
 }
 // 通用「点击展开」多选下拉（替代原生 select multiple，保证美观）
-function MultiSelectDropdown({ options, selected, onChange, placeholder = '请选择', emptyText = '暂无选项', triggerClass = '', panelMaxHeight = 240, compact = false }) {
+function MultiSelectDropdown({ options, selected, onChange, placeholder = '请选择', emptyText = '暂无选项', triggerClass = '', panelMaxHeight = 240, compact = false, single = false }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
@@ -326,12 +326,19 @@ function MultiSelectDropdown({ options, selected, onChange, placeholder = '请�
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
   const toggle = (val) => {
-    const next = selected.includes(val) ? selected.filter(x => x !== val) : [...selected, val];
-    onChange(next);
+    if (single) {
+      // 单选：点击已选项则清空，否则替换为该项
+      onChange((selected.length === 1 && selected[0] === val) ? [] : [val]);
+    } else {
+      const next = selected.includes(val) ? selected.filter(x => x !== val) : [...selected, val];
+      onChange(next);
+    }
   };
   const summary = selected.length === 0
     ? <span className="text-gray-400">{placeholder}</span>
-    : <span className="text-gray-800">{`已选 ${selected.length} 个`}</span>;
+    : (single
+        ? <span className="text-gray-800 truncate">{options.find(o => o.value === selected[0]) ? options.find(o => o.value === selected[0]).label : placeholder}</span>
+        : <span className="text-gray-800">{`已选 ${selected.length} 个`}</span>);
   return (
     <div className="relative" ref={ref}>
       <button
@@ -431,12 +438,12 @@ function App() {
   const [businessType, setBusinessType] = useState('benefit_A');
   const [channel, setChannel] = useState('oceanengine');
   const [selectedAccountIds, setSelectedAccountIds] = useState(MOCK.accounts.map(a => a.id)); // 默认全选账户
-  const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和单元, unit_only=仅搭建单元
+  const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和项目, unit_only=仅搭建项目
   // 项目/广告生成规则
   const [projectGenRule, setProjectGenRule] = useState('total_per_project'); // total_per_project=按总广告数/每项目广告数, fixed=指定数量
   const [adsPerProject, setAdsPerProject] = useState(10); // 每个项目广告数上限
   const [projectsPerAccount, setProjectsPerAccount] = useState(1); // 每个账户指定项目数量
-  const [adGenRule, setAdGenRule] = useState('creative_group'); // creative_group=按创意组数, fixed=指定数量
+  const [adGenRule, setAdGenRule] = useState('creative_group'); // creative_group=按广告组数, fixed=指定数量
   const [adsPerProjectFixed, setAdsPerProjectFixed] = useState(100); // 每个项目指定广告数
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const accountDropdownRef = useRef(null);
@@ -455,23 +462,23 @@ function App() {
   // 投放链匹配结果刷新计数（用于强制重算/重渲染）
   const [matchRefreshKey, setMatchRefreshKey] = useState(0);
 
-  // ===== 营销单元配置 =====
+  // ===== 营销项目配置 =====
   // 任务名称
   const [taskName, setTaskName] = useState('');
-  // 仅搭建创意：每个账户下已选营销单元（多选）{ [accountId]: string[] }
+  // 仅搭建广告：每个账户下已选营销项目（多选）{ [accountId]: string[] }
   const [selectedUnits, setSelectedUnits] = useState({});
-  // 仅搭建单元：按账户选择要搭建的项目
+  // 仅搭建项目：按账户选择要搭建的项目
   const [selectedProjects, setSelectedProjects] = useState({}); // { [accountId]: projectId[] }
-  // 根据账户 id 确定性生成该账户下的营销单元明细（mock 数据）
+  // 根据账户 id 确定性生成该账户下的营销项目明细（mock 数据）
   const getAccountUnits = (accountId) => {
     let h = 0; const s = '' + (accountId || '');
     for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; }
-    const n = 3 + (h % 4); // 3~6 个单元
+    const n = 3 + (h % 4); // 3~6 个项目
     const cats = ['品牌', '促销', '新品', '活动', '拉新', '留存'];
     const arr = [];
     for (let i = 0; i < n; i++) {
       const hh = (h + i * 2654435761) >>> 0;
-      arr.push({ id: accountId + '_u' + i, name: cats[hh % cats.length] + '单元_' + String.fromCharCode(65 + (i % 26)) + (i + 1) });
+      arr.push({ id: accountId + '_u' + i, name: cats[hh % cats.length] + '项目_' + String.fromCharCode(65 + (i % 26)) + (i + 1) });
     }
     return arr;
   };
@@ -518,13 +525,16 @@ function App() {
     const products = MOCK.productsByBusinessUnit['baiju'] || [];
     return products.length > 0 ? products[0].id : '';
   });
-  // 当业务单元或推广产品类型变化时，重置产品选择 + 清空已选账户
+  // 当业务单元或推广产品类型变化时，重置产品选择 + 清空已选账户（跳过首次挂载，避免清空默认全选账户）
+  const prevBuRef = useRef(businessUnit);
   useEffect(() => {
+    if (prevBuRef.current === businessUnit) return; // 跳过首次挂载
+    prevBuRef.current = businessUnit;
     const products = getProductsForBusinessUnit();
     setSpecificProduct(products.length > 0 ? products[0].id : '');
     setSelectedAccountIds([]);
   }, [businessUnit, promotionType]);
-  // ===== 营销单元配置 - 定向相关 =====
+  // ===== 营销项目配置 - 定向相关 =====
   const [targetingSource, setTargetingSource] = useState('package');
   // 用户自建定向包（从 localStorage 读取，与 index.html 共用 ad_targeting_packages）
   const [userTgtPkgs, setUserTgtPkgs] = useState([]);
@@ -544,7 +554,7 @@ function App() {
     // 同时从已选中移除
     setSelectedTargetingPackages(selectedTargetingPackages.filter(tid => tid !== id));
   };
-  // 改为多选：支持定向包组合（同账户不同定向包 = 多个单元）
+  // 改为多选：支持定向包组合（同账户不同定向包 = 多个项目）
   const [selectedTargetingPackages, setSelectedTargetingPackages] = useState([]);
   const [showTgtPkgModal, setShowTgtPkgModal] = useState(false);
   // 定向包分配策略：shared=全账户共用 / per_account=分账户定制
@@ -554,7 +564,8 @@ function App() {
   const [modalTargetAccount, setModalTargetAccount] = useState(null);
   const openSharedTgtModal = () => { setModalSelectedIds([...selectedTargetingPackages]); setModalTargetAccount(null); setShowTgtPkgModal(true); };
   const openPerAccountTgtModal = (accountId) => { setModalSelectedIds([...(perAccountTgtPkgs[accountId] || [])]); setModalTargetAccount(accountId); setShowTgtPkgModal(true); };
-  const toggleModalTp = (tpId) => { setModalSelectedIds(prev => prev.includes(tpId) ? prev.filter(x => x !== tpId) : [...prev, tpId]); };
+  // 单选：一个任务只能选择一个定向包
+  const toggleModalTp = (tpId) => { setModalSelectedIds(prev => (prev.length === 1 && prev[0] === tpId) ? [] : [tpId]); };
   const confirmTgtPkgModal = () => { if (modalTargetAccount === null) { setSelectedTargetingPackages(modalSelectedIds); } else { setPerAccountTgtPkgs(prev => ({ ...prev, [modalTargetAccount]: modalSelectedIds })); } setShowTgtPkgModal(false); };
   const handleNewTgtPkg = () => { try { window.parent.postMessage({ type: 'GOTO_TARGETING_PACKAGES' }, '*'); } catch (e) {} };
   const handleRefreshTgtPkgs = () => { try { const raw = localStorage.getItem('ad_targeting_packages'); if (raw) setUserTgtPkgs(JSON.parse(raw)); notify('定向包列表已刷新', 'success'); } catch (e) { notify('刷新定向包列表失败', 'error'); } };
@@ -653,7 +664,7 @@ function App() {
   const [showNameVarDropdown, setShowNameVarDropdown] = useState(false);
   const nameVariables = ['日期', '定向包名称', '版位', '创建人'];
   
-  // ===== 创意配置 =====
+  // ===== 广告配置 =====
   const [creativeMax, setCreativeMax] = useState(false);
   const [creativeEnhanceMax, setCreativeEnhanceMax] = useState(false);
   const [creativeName, setCreativeName] = useState('');
@@ -661,9 +672,9 @@ function App() {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
-  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 创意分配策略
+  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 广告分配策略
   const [hoverStrategy, setHoverStrategy] = useState(null); // 悬停展示策略注释
-  // 截图样式单元配置：账户分配规则 / 创意组配置 / 创意组数据
+  // 截图样式单元配置：账户分配规则 / 广告组配置 / 广告组数据
   const [accountAllocMode, setAccountAllocMode] = useState('all'); // 'all'=全账户复用, 'average'=平均分配
   const [groupVideos, setGroupVideos] = useState(1);
   const [groupImages, setGroupImages] = useState(1);
@@ -672,15 +683,15 @@ function App() {
   const [landingPageMacro, setLandingPageMacro] = useState('');
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
-  // 创意素材分配
-  const [composeRule, setComposeRule] = useState({ materials: 1, copies: 1 });
+  // 素材数量配置：图片x个 / 视频x个 / 文案x个（单个广告内的素材数量）
+  const [composeRule, setComposeRule] = useState({ images: 1, videos: 1, copies: 1 });
   // 品牌形象 & 营销组件
   const [brandImageType, setBrandImageType] = useState('video_account'); // 'custom' | 'video_account'
   const [selectedBrandImage, setSelectedBrandImage] = useState(null); // {id, name, url}
   const [selectedVideoAccount, setSelectedVideoAccount] = useState(null); // {id, name}
   const [marketingComponentType, setMarketingComponentType] = useState('floating_card'); // 'floating_card' | 'action_button'
   const [actionButtonType, setActionButtonType] = useState('claim'); // 'claim' | 'details'
-  // 创意资产（与 index.html 共用 ad_brand_images）：品牌形象（type=brand） / 营销组件（type=component）
+  // 广告资产（与 index.html 共用 ad_brand_images）：品牌形象（type=brand） / 营销组件（type=component）
   const [creativeAssets, setCreativeAssets] = useState([]);
   const [selectedComponent, setSelectedComponent] = useState(null); // {id, title, btnText, thumb}
   // 行动号召：输入文案回车添加，上限10条，默认开启智能生成
@@ -689,7 +700,7 @@ function App() {
   const [smartGen, setSmartGen] = useState(true); // 默认开启智能生成
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
-  // 附加创意组件（点击按钮拉起资产库，多选）
+  // 附加广告组件（点击按钮拉起资产库，多选）
   const [showCreativeCompModal, setShowCreativeCompModal] = useState(false);
   const [selectedCreativeComponents, setSelectedCreativeComponents] = useState([]); // { id, name }
   useEffect(() => {
@@ -779,16 +790,16 @@ function App() {
     if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
     if (selectedMaterials.length === 0) errors.push('请选择素材');
     if (selectedCopies.length === 0) errors.push('请选择文案');
-    if (unitName === '') errors.push('请输入单元名称');
+    if (unitName === '') errors.push('请输入项目名称');
     if (buildType === 'unit_only') {
       selectedAccountIds.forEach(function(id) {
         var su = selectedUnits[id];
-        if (!su || su.length === 0) errors.push('账户 ' + (MOCK.accounts.find(function(a){return a.id === id;}) || {name:id}).name + ' 未选择营销单元');
+        if (!su || su.length === 0) errors.push('账户 ' + (MOCK.accounts.find(function(a){return a.id === id;}) || {name:id}).name + ' 未选择营销项目');
       });
     }
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
-    // 创意数量上限 1000：超限直接拦截，阻止立即运行
-    if (getBuildSummary().totalCreatives > 1000) errors.push('创意数量超限（1000个），请减少物料选择');
+    // 广告数量上限 1000：超限直接拦截，阻止立即运行
+    if (getBuildSummary().totalCreatives > 1000) errors.push('广告数量超限（1000个），请减少物料选择');
     return errors;
   })();
 
@@ -810,11 +821,11 @@ function App() {
     return acc.kaboshi || '';
   };
 
-  // 生成创意组合（考虑定向包组合）
+  // 生成广告组合（考虑定向包组合）
   const getCreativeCombos = () => {
     if (selectedMaterials.length === 0 || selectedCopies.length === 0) return [];
     const combos = [];
-    // 每个定向包 × 每个素材 × 每个文案 = 一个创意
+    // 每个定向包 × 每个素材 × 每个文案 = 一个广告
     const tpCount = selectedTargetingPackages.length || 1; // 若未选定向包，默认为1
     for (let t = 0; t < Math.max(tpCount, 1); t++) {
       for (let m of selectedMaterials) {
@@ -830,13 +841,13 @@ function App() {
     return combos;
   };
 
-  // 计算搭建总数（新增：定向包组合 + 创意数量分配）
+  // 计算搭建总数（新增：定向包组合 + 广告数量分配）
   function getBuildSummary() {
     const accountCount = selectedAccountIds.length;
     const materialCount = selectedMaterials.length;
     const copyCount = selectedCopies.length;
 
-    // 各账户单元数 = 该账户定向包数（默认至少1）
+    // 各账户项目数 = 该账户定向包数（默认至少1）
     const tpFor = (accountId) => {
       if (tgtAllocMode === 'per_account') {
         return Math.max((perAccountTgtPkgs[accountId] || []).length, 1);
@@ -860,15 +871,15 @@ function App() {
       totalUnits = selectedAccountIds.reduce((sum, id) => sum + tpFor(id), 0);
     }
 
-    // 根据素材确定创意数：每个创意捆绑「单创意素材数」个素材（文案仅顺序选取，不影响总数）
+    // 根据素材确定广告数：每个广告捆绑「图片+视频」个素材（文案仅顺序选取，不影响总数）
     let creativesPerUnit = 0;
     {
-      const m = composeRule.materials || 1;
+      const m = ((composeRule.images || 0) + (composeRule.videos || 0)) || 1;
       creativesPerUnit = m > 0 ? Math.floor(materialCount / m) : 0;
       if (creativesPerUnit < 0) creativesPerUnit = 0;
     }
-    // 平均分配：素材在单元间均分 → 总创意数 = 每单元创意数 = 已选素材数 ÷ 单创意素材数
-    // 复制分配：每个单元独立使用全部素材 → 单元数 × (素材数 ÷ 单创意素材数)
+    // 平均分配：素材在项目间均分 → 总广告数 = 每项目广告数 = 已选素材数 ÷ 单广告素材数
+    // 复制分配：每个项目独立使用全部素材 → 项目数 × (素材数 ÷ 单广告素材数)
     let totalCreatives = 0;
     if (composeStrategy === 'average') {
       totalCreatives = creativesPerUnit;
@@ -878,9 +889,9 @@ function App() {
 
     const CREATIVE_LIMIT = 1000;
     const overLimit = totalCreatives > CREATIVE_LIMIT;
-    // 单个单元最多可分配 100 个创意：
-    // 复制分配：每单元共用全部素材 = 每单元创意数(creativesPerUnit)
-    // 平均分配：总创意数在单元间均分 → 每单元 = creativesPerUnit ÷ 单元数
+    // 单个项目最多可分配 100 个广告：
+    // 复制分配：每项目共用全部素材 = 每项目广告数(creativesPerUnit)
+    // 平均分配：总广告数在项目间均分 → 每项目 = creativesPerUnit ÷ 项目数
     const perUnitCreatives = composeStrategy === 'average'
       ? (totalUnits > 0 ? Math.floor(creativesPerUnit / totalUnits) : creativesPerUnit)
       : creativesPerUnit;
@@ -889,13 +900,13 @@ function App() {
     return { accountCount, tpCount, unitsPerAccount, totalUnits, materialCount, copyCount, creativesPerUnit, totalCreatives, perUnitCreatives, UNIT_LIMIT, CREATIVE_LIMIT, overLimit, overUnit };
   }
 
-  // ===== 截图样式单元配置：创意组操作 =====
+  // ===== 截图样式单元配置：广告组操作 =====
   const ensureAccountGroups = (accountIds) => {
     setAccountGroups(prev => {
       const next = { ...prev };
       accountIds.forEach(id => {
         if (!next[id] || next[id].length === 0) {
-          next[id] = [{ id: id + '_g1', name: groupNameTpl || '创意组01', videoMaterials: [], imageMaterials: [] }];
+          next[id] = [{ id: id + '_g1', name: groupNameTpl || '广告组01', videoMaterials: [], imageMaterials: [] }];
         }
       });
       return next;
@@ -906,7 +917,7 @@ function App() {
     setAccountGroups(prev => {
       const list = prev[accountId] || [];
       const idx = list.length + 1;
-      const name = (groupNameTpl || '创意组').replace(/\{n\}/g, String(idx)) || ('创意组' + String(idx).padStart(2, '0'));
+      const name = (groupNameTpl || '广告组').replace(/\{n\}/g, String(idx)) || ('广告组' + String(idx).padStart(2, '0'));
       return { ...prev, [accountId]: [...list, { id: accountId + '_g' + idx, name, videoMaterials: [], imageMaterials: [] }] };
     });
   };
@@ -1115,11 +1126,11 @@ function App() {
 
   const handleRun = () => {
     if (selectedAccountIds.length === 0) { notify('请先选择账户', 'error'); return; }
-    // 创意数量超限：单次任务最多 1000 条、单个单元最多 100 个，任一超限均阻止运行
+    // 广告数量超限：单次任务最多 1000 条、单个项目最多 100 个，任一超限均阻止运行
     const s = getBuildSummary();
     if (s.overLimit || s.overUnit) {
       setShowValidationSummary(true);
-      notify('创意数量超限（单次任务最多 1000 条、单个单元最多 100 个），请调整物料选择', 'error');
+      notify('广告数量超限（单次任务最多 1000 条、单个项目最多 100 个），请调整物料选择', 'error');
       return;
     }
     runBgRef.current = false;
@@ -1319,16 +1330,16 @@ function App() {
               <div className="flex gap-3">
                 <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'project_unit' ? '#1890ff' : '#e5e7eb', background: buildType === 'project_unit' ? '#eff6ff' : '#fff' }}>
                   <input type="radio" name="buildType" value="project_unit" checked={buildType === 'project_unit'} onChange={() => setBuildType('project_unit')} className="w-4 h-4 mr-2 text-blue-600" />
-                  <span>搭建项目和单元</span>
+                  <span>搭建项目和项目</span>
                 </label>
                 <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: buildType === 'unit_only' ? '#1890ff' : '#e5e7eb', background: buildType === 'unit_only' ? '#eff6ff' : '#fff' }}>
                   <input type="radio" name="buildType" value="unit_only" checked={buildType === 'unit_only'} onChange={() => setBuildType('unit_only')} className="w-4 h-4 mr-2 text-blue-600" />
-                  <span>仅搭建单元</span>
+                  <span>仅搭建项目</span>
                 </label>
               </div>
             </div>
 
-            {/* 项目生成规则（仅搭建项目和单元时显示） */}
+            {/* 项目生成规则（仅搭建项目和项目时显示） */}
             {buildType === 'project_unit' && (
               <div className="mb-5">
                 <div className="block text-sm font-medium text-gray-700 mb-2">项目生成规则</div>
@@ -1365,15 +1376,15 @@ function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
                 <button type="button" onClick={() => setAdGenRule('creative_group')}
                   className={`relative rounded-lg border px-4 py-4 text-left transition ${adGenRule === 'creative_group' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                  <div className="text-sm font-bold text-gray-900 mb-1">按创意组数</div>
-                  <div className="text-xs text-gray-500">基于创意组数生成广告，自动匹配标题包，不足时循环使用</div>
+                  <div className="text-sm font-bold text-gray-900 mb-1">按广告组数</div>
+                  <div className="text-xs text-gray-500">基于广告组数生成广告，自动匹配标题包，不足时循环使用</div>
                 </button>
                 <button type="button" onClick={() => setAdGenRule('fixed')}
                   className={`relative rounded-lg border px-4 py-4 text-left transition ${adGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}
                   disabled={projectGenRule === 'total_per_project'}
                   style={{ opacity: projectGenRule === 'total_per_project' ? 0.5 : 1, cursor: projectGenRule === 'total_per_project' ? 'not-allowed' : 'pointer' }}>
                   <div className="text-sm font-bold text-gray-900 mb-1">指定数量</div>
-                  <div className="text-xs text-blue-500">先基于创意组数生成广告，未达到指定数量时循环使用；超过则舍弃</div>
+                  <div className="text-xs text-blue-500">先基于广告组数生成广告，未达到指定数量时循环使用；超过则舍弃</div>
                 </button>
               </div>
               {adGenRule === 'fixed' && (
@@ -1445,7 +1456,7 @@ function App() {
           </div>
         </div>
 
-        {/* ===== 2. 营销单元配置 ===== */}
+        {/* ===== 2. 营销项目配置 ===== */}
         <div id="section-unit" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
@@ -1680,7 +1691,7 @@ function App() {
               </div>
               {tgtAllocMode === 'shared' && (
                 <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-2">选择定向包（可多选，不同定向包将创建不同单元）</div>
+                  <div className="block text-sm font-medium text-gray-700 mb-2">选择定向包（一个任务仅能选择一个定向包）</div>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {selectedTargetingPackages.map(tpId => {
                       const tp = MOCK.targetingPackages.find(t => t.id === tpId) || userTgtPkgs.find(t => t.id === tpId);
@@ -1697,15 +1708,15 @@ function App() {
                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[200px]"
                   >
                     <span className={selectedTargetingPackages.length > 0 ? 'text-gray-900' : 'text-gray-400'}>
-                      {selectedTargetingPackages.length > 0 ? `已选 ${selectedTargetingPackages.length} 个定向包` : '点击选择定向包'}
+                      {selectedTargetingPackages.length > 0 ? (MOCK.targetingPackages.find(t => t.id === selectedTargetingPackages[0]) || userTgtPkgs.find(t => t.id === selectedTargetingPackages[0]) || {}).name : '点击选择定向包'}
                     </span>
                     <i className="fas fa-chevron-down ml-2 text-gray-400 text-sm"></i>
                   </button>
                   {selectedTargetingPackages.length === 0 && (
-                    <p className="text-xs text-orange-500 mt-1"><i className="fas fa-exclamation-circle mr-1"></i>请至少选择一个定向包</p>
+                    <p className="text-xs text-orange-500 mt-1"><i className="fas fa-exclamation-circle mr-1"></i>请选择一个定向包</p>
                   )}
                   {channel === 'oceanengine' && selectedTargetingPackages.length > 0 && (
-                    <p className="text-xs text-blue-500 mt-1"><i className="fas fa-info-circle mr-1"></i>巨量引擎渠道：同一定向包内容在同一账户下仅对应一个单元</p>
+                    <p className="text-xs text-blue-500 mt-1"><i className="fas fa-info-circle mr-1"></i>巨量引擎渠道：一个任务仅能选择一个定向包，同一定向包内容在同一账户下仅对应一个项目</p>
                   )}
                 </div>
               )}
@@ -1713,7 +1724,7 @@ function App() {
               {/* 分账户定制：每个账户独立选择定向包 */}
               {tgtAllocMode === 'per_account' && (
                 <div>
-                  <p className="text-xs text-gray-500 mb-3">为每个账户独立选择定向包（仅支持从定向包列表中选择）：</p>
+                  <p className="text-xs text-gray-500 mb-3">为每个账户独立选择一个定向包（每个账户仅能选一个）：</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {(selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map((id) => {
                       const acc = MOCK.accounts.find(a => a.id === id);
@@ -1734,6 +1745,7 @@ function App() {
                             placeholder="选择定向包"
                             emptyText="暂无可用的定向包"
                             compact
+                            single
                             panelMaxHeight={220}
                           />
                           {sel.length > 0 && (
@@ -1769,7 +1781,8 @@ function App() {
                               <label key={tp.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                                 <div className="flex items-center">
                                   <input
-                                    type="checkbox"
+                                    type="radio"
+                                    name="tgt_pkg_single"
                                     checked={modalSelectedIds.includes(tp.id)}
                                     onChange={() => toggleModalTp(tp.id)}
                                     className="mr-3"
@@ -1791,7 +1804,8 @@ function App() {
                                   <label key={tp.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                                     <div className="flex items-center">
                                       <input
-                                        type="checkbox"
+                                        type="radio"
+                                        name="tgt_pkg_single"
                                         checked={modalSelectedIds.includes(tp.id)}
                                         onChange={() => toggleModalTp(tp.id)}
                                         className="mr-3"
@@ -1817,8 +1831,7 @@ function App() {
                           </div>
                         </div>
                         <div className="p-4 border-t flex justify-end items-center gap-2">
-                          <span className="text-sm text-gray-500">已选 {modalSelectedIds.length} 个定向包</span>
-                          <button onClick={confirmTgtPkgModal} className="btn-primary">确认</button>
+                          <span className="text-sm text-gray-500">已选 {modalSelectedIds.length} 个定向包</span>                          <button onClick={confirmTgtPkgModal} className="btn-primary">确认</button>
                         </div>
                       </div>
                     </div>
@@ -1950,7 +1963,7 @@ function App() {
                 )}
               </div>
 
-              {/* 项目名称：仅在搭建项目和单元时填写，与其它字段左对齐 */}
+              {/* 项目名称：仅在搭建项目和项目时填写，与其它字段左对齐 */}
               {buildType === 'project_unit' && (
                 <div className="flex items-center gap-3 mb-5">
                   <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目名称 <span className="text-red-500">*</span></label>
@@ -1972,12 +1985,12 @@ function App() {
             </div>
             )}
 
-          {/* 账户单元明细（仅搭建单元模式） */}
+          {/* 账户项目明细（仅搭建项目模式） */}
           {buildType === 'unit_only' && (
             <div className="p-6 border-t border-gray-200">
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-sm font-medium text-gray-700">账户单元明细 <span className="text-red-500">*</span></span>
-                <span className="text-xs text-gray-400">每个账户下选择要投放的营销单元（支持多选，每个账户至少选 1 个）</span>
+                <span className="text-sm font-medium text-gray-700">账户项目明细 <span className="text-red-500">*</span></span>
+                <span className="text-xs text-gray-400">每个账户下选择要投放的营销项目（支持多选，每个账户至少选 1 个）</span>
               </div>
               {selectedAccountIds.length === 0 ? (
                 <div className="text-sm text-gray-400 py-4">请先在「基础配置」选择投放账户</div>
@@ -2000,8 +2013,8 @@ function App() {
                           options={units.map(u => ({ value: u.id, label: u.name }))}
                           selected={sel}
                           onChange={vals => setSelectedUnits(prev => ({ ...prev, [accountId]: vals }))}
-                          placeholder="选择营销单元"
-                          emptyText="该账户暂无可投放单元"
+                          placeholder="选择营销项目"
+                          emptyText="该账户暂无可投放项目"
                           compact
                           panelMaxHeight={200}
                         />
@@ -2026,17 +2039,17 @@ function App() {
           )}
         </div>
 
-        {/* ===== 底部：创意配置 ===== */}
+        {/* ===== 底部：广告配置 ===== */}
         <div id="section-creative" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
             <h2 className="text-base font-semibold text-gray-900">单元配置</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置素材、文案、产品与创意组件</span>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置广告素材、广告文案、产品与广告组件</span>
           </div>
           <div className="p-6 space-y-6">
-            {/* 创意素材（视频+图片） */}
+            {/* 广告素材（视频+图片） */}
             <div>
-              <div className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</div>
+              <div className="block text-sm font-medium text-gray-700 mb-2">广告素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</div>
               <button onClick={() => { setMaterialPickerTarget(null); setShowMaterialModal(true); }} className="btn-secondary">
                 <i className="fas fa-photo-video mr-2"></i>选择素材（视频/图片）
               </button>
@@ -2044,11 +2057,11 @@ function App() {
 
 
 
-            {/* 创意制作（按账户分创意组）已下线；创意素材选择请见上方「创意素材」按钮 */}
+            {/* 广告制作（按账户分广告组）已下线；广告素材选择请见上方「广告素材」按钮 */}
 
 
             {/* 广告文案 */}
-            <div className="border-t pt-4">
+            <div>
               <div className="block text-sm font-medium text-gray-700 mb-2">广告文案 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedCopies.length}/50</span> 条）</div>
               <button onClick={() => setShowCopyModal(true)} className="btn-secondary">
                 <i className="fas fa-font mr-2"></i>选择广告文案
@@ -2056,7 +2069,7 @@ function App() {
             </div>
 
             {/* 产品信息 */}
-            <div className="border-t pt-4">
+            <div>
               <h4 className="text-sm font-bold text-gray-900 mb-3">产品信息</h4>
               {(() => {
                 const pid = productAllocMode === 'per_account' ? (perAccountProduct[selectedAccountIds[0]] || '') : specificProduct;
@@ -2078,12 +2091,12 @@ function App() {
               })()}
             </div>
 
-            {/* 创意组件 */}
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-4">创意组件</h4>
-              {/* 附加创意组件（置灰不可交互） */}
+            {/* 广告组件 */}
+            <div>
+              <h4 className="text-sm font-bold text-gray-900 mb-4">广告组件</h4>
+              {/* 附加广告组件（置灰不可交互） */}
               <div className="mb-5">
-                <button type="button" disabled className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 text-sm cursor-not-allowed">附加创意组件</button>
+                <button type="button" disabled className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 text-sm cursor-not-allowed">附加广告组件</button>
               </div>
               {/* 行动号召 */}
               <div className="mb-5">
@@ -2112,51 +2125,67 @@ function App() {
                 <label className="flex items-center gap-1.5 cursor-pointer">
                   <input type="checkbox" checked={smartGen} onChange={e => setSmartGen(e.target.checked)} className="w-4 h-4" />
                   <span className="text-sm font-medium text-gray-700">开启智能生成</span>
-                  <i className="far fa-question-circle text-gray-400 text-xs" title="开启后系统将智能生成创意组合"></i>
+                  <i className="far fa-question-circle text-gray-400 text-xs" title="开启后系统将智能生成广告组合"></i>
                 </label>
               </div>
             </div>
 
             {/* 来源 */}
-            <div className="border-t pt-4">
+            <div>
               <h4 className="text-sm font-bold text-gray-900 mb-2">来源</h4>
               <input type="text" value={sourceText} onChange={e => setSourceText(e.target.value)} placeholder="请输入来源信息" className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
-            {/* 创意素材分配 */}
+            {/* 素材数量配置 */}
             <div className="border-t pt-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-4">创意素材分配</h4>
               <div className="space-y-4">
-                {/* 创意素材数量 */}
+                {/* 素材数量配置：图片x个/视频x个/文案x个 */}
                 <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-2">创意素材数量</div>
-                  <div className="grid grid-cols-2 gap-3 max-w-md">
+                  <div className="block text-sm font-medium text-gray-700 mb-2">素材数量配置</div>
+                  <div className="grid grid-cols-3 gap-3 max-w-md">
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">单创意素材</div>
-                      <input type="number" min="1" max="15" value={composeRule.materials}
-                        onChange={e => {
-                          const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
-                          setComposeRule({...composeRule, materials: v});
-                        }}
-                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                      <div className="text-xs text-gray-400 mt-1">范围 1~15</div>
+                      <div className="text-xs text-gray-500 mb-1">图片</div>
+                      <div className="flex items-center gap-1">
+                        <input type="number" min="1" max="15" value={composeRule.images}
+                          onChange={e => {
+                            const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                            setComposeRule({...composeRule, images: v});
+                          }}
+                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span className="text-xs text-gray-500 flex-shrink-0">个</span>
+                      </div>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">单创意文案</div>
-                      <input type="number" min="1" max="3" value={composeRule.copies}
-                        onChange={e => {
-                          const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
-                          setComposeRule({...composeRule, copies: v});
-                        }}
-                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-                      <div className="text-xs text-gray-400 mt-1">范围 1~3</div>
+                      <div className="text-xs text-gray-500 mb-1">视频</div>
+                      <div className="flex items-center gap-1">
+                        <input type="number" min="1" max="15" value={composeRule.videos}
+                          onChange={e => {
+                            const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                            setComposeRule({...composeRule, videos: v});
+                          }}
+                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span className="text-xs text-gray-500 flex-shrink-0">个</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">文案</div>
+                      <div className="flex items-center gap-1">
+                        <input type="number" min="1" max="3" value={composeRule.copies}
+                          onChange={e => {
+                            const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
+                            setComposeRule({...composeRule, copies: v});
+                          }}
+                          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span className="text-xs text-gray-500 flex-shrink-0">个</span>
+                      </div>
                     </div>
                   </div>
+                  <div className="text-xs text-gray-400 mt-1">单个广告内的素材数量</div>
                 </div>
 
-                {/* 创意分配策略 */}
-                <div className="border-t pt-4 mb-6">
-                  <div className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</div>
+                {/* 广告分配策略 */}
+                <div className="pt-2 mb-6">
+                  <div className="block text-sm font-medium text-gray-700 mb-2">广告分配策略</div>
                   <div className="grid grid-cols-2 gap-3 max-w-md">
                     <button type="button" onClick={() => setComposeStrategy('copy')}
                       className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
@@ -2165,7 +2194,7 @@ function App() {
                         onMouseEnter={() => setHoverStrategy('copy')} onMouseLeave={() => setHoverStrategy(null)}>
                         <i className="fas fa-info"></i>
                         {hoverStrategy === 'copy' && (
-                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">所有单元共用同一批创意</span>
+                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">所有项目共用同一批广告</span>
                         )}
                       </span>
                     </button>
@@ -2176,16 +2205,16 @@ function App() {
                         onMouseEnter={() => setHoverStrategy('average')} onMouseLeave={() => setHoverStrategy(null)}>
                         <i className="fas fa-info"></i>
                         {hoverStrategy === 'average' && (
-                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">根据单元数均分创意数</span>
+                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">根据项目数均分广告数</span>
                         )}
                       </span>
                     </button>
                   </div>
                 </div>
 
-                {/* 预估可生成创意数 */}
+                {/* 预估可生成广告数 */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-6">
-                  <p className="text-xs text-gray-500 mb-1">预估可生成创意数：</p>
+                  <p className="text-xs text-gray-500 mb-1">预估可生成广告数：</p>
                   {(() => {
                     const s = getBuildSummary();
                     const total = s.totalCreatives;
@@ -2193,13 +2222,13 @@ function App() {
                     const isAvg = composeStrategy === 'average';
                     return (
                       <p className={`text-lg font-bold ${over ? 'text-red-600' : 'text-blue-600'}`}>
-                        {isNaN(total) ? 0 : total} 个创意
+                        {isNaN(total) ? 0 : total} 个广告
                         {s.overLimit && <span className="text-xs font-normal text-red-500 ml-2">（已超限，单次任务上限 1000 个）</span>}
-                        {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单单元超限，上限 100 个）</span>}
+                        {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单项目超限，上限 100 个）</span>}
                         <span className="text-xs font-normal text-gray-500 ml-2">
                           {isAvg
-                            ? `素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials}`
-                            : `单元数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials}`}
+                            ? `素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`
+                            : `项目数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`}
                         </span>
                       </p>
                     );
@@ -2208,23 +2237,23 @@ function App() {
                     const s = getBuildSummary();
                     if (!s.overUnit) return null;
                     return (
-                      <div className="mt-2 text-xs text-red-500">单个单元创意数 {s.perUnitCreatives} 超出上限 100 个，请调整素材 / 单创意素材数 / 单元数</div>
+                      <div className="mt-2 text-xs text-red-500">单个项目广告数 {s.perUnitCreatives} 超出上限 100 个，请调整素材 / 单广告素材数 / 项目数</div>
                     );
                   })()}
                   <div className="text-xs text-gray-400 mt-1 leading-relaxed">
-                    <div>规则：默认根据素材确定创意数，文案选取方式为顺序选取</div>
-                    <div>复制分配：预估可生成创意数 = 单元数 × 已选素材数 ÷ 单创意素材数；</div>
-                    <div>平均分配：预估可生成创意数 = 已选素材数 ÷ 单创意素材数</div>
+                    <div>规则：默认根据素材确定广告数，文案选取方式为顺序选取</div>
+                    <div>复制分配：预估可生成广告数 = 项目数 × 已选素材数 ÷ 单广告素材数；</div>
+                    <div>平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 单元名称 */}
-            <div className="border-t pt-4">
-              <div className="block text-sm font-medium text-gray-700 mb-1">单元名称</div>
+            {/* 项目名称 */}
+            <div>
+              <div className="block text-sm font-medium text-gray-700 mb-1">项目名称</div>
               <div className="flex items-center gap-2 max-w-md">
-                <input type="text" value={creativeName} onChange={e => setCreativeName(e.target.value)} placeholder="输入单元名称（支持变量）" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                <input type="text" value={creativeName} onChange={e => setCreativeName(e.target.value)} placeholder="输入项目名称（支持变量）" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                 <div className="flex items-center gap-1 text-sm text-gray-500">
                   {creativeNameVariables.map(v => (
                     <span key={v} onClick={() => setCreativeName(creativeName + '{' + v + '}')} className="text-blue-500 hover:text-blue-700 cursor-pointer">+{v}</span>
@@ -2331,12 +2360,12 @@ function App() {
         channel="toutiao"
       />
 
-      {/* ===== 附加创意组件 - 资产库弹窗 ===== */}
+      {/* ===== 附加广告组件 - 资产库弹窗 ===== */}
       {showCreativeCompModal && (
         <div className="modal-overlay" onClick={() => setShowCreativeCompModal(false)}>
           <div className="modal-content w-full max-w-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-bold">选择附加创意组件（资产库）</h3>
+              <h3 className="text-lg font-bold">选择附加广告组件（资产库）</h3>
               <button onClick={() => setShowCreativeCompModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
             </div>
             <div className="overflow-y-auto p-4" style={{ maxHeight: '55vh' }}>
@@ -2387,7 +2416,7 @@ function App() {
                 <h3 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
                   <i className="fas fa-cog fa-spin text-blue-500"></i>搭建进行中…
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">正在为 {selectedAccountIds.length || 3} 个账户搭建创意，请稍候</p>
+                <p className="text-sm text-gray-500 mb-4">正在为 {selectedAccountIds.length || 3} 个账户搭建广告，请稍候</p>
                 <div style={{ height:'10px', background:'#eef2f7', borderRadius:'999px', overflow:'hidden' }}>
                   <div style={{ height:'100%', width: runProgress + '%', background:'linear-gradient(90deg,#1890ff,#52c41a)', transition:'width .2s' }}></div>
                 </div>
@@ -2409,8 +2438,8 @@ function App() {
                     <thead>
                       <tr className="bg-gray-50 text-gray-600 text-left">
                         <th className="px-3 py-2 font-medium">账户</th>
-                        <th className="px-3 py-2 font-medium">单元</th>
-                        <th className="px-3 py-2 font-medium">创意</th>
+                        <th className="px-3 py-2 font-medium">项目</th>
+                        <th className="px-3 py-2 font-medium">广告</th>
                         <th className="px-3 py-2 font-medium">失败原因</th>
                       </tr>
                     </thead>
@@ -2458,7 +2487,7 @@ function App() {
             </div>
             <div className="overflow-auto flex-1 p-6" style={{maxHeight: '70vh'}}>
               {/* 核心统计卡片 */}
-              {/* 搭建总量预览卡片已按需求删除（文案与创意数无关，不再用 账户×单元×文案 估算） */}
+              {/* 搭建总量预览卡片已按需求删除（文案与广告数无关，不再用 账户×项目×文案 估算） */}
 
               {/* 详细拆解 */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -2468,7 +2497,7 @@ function App() {
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                   <p className="text-3xl font-bold text-green-600">{totalUnits}</p>
-                  <p className="text-xs text-green-700 mt-1">总单元数</p>
+                  <p className="text-xs text-green-700 mt-1">总项目数</p>
                 </div>
                 <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
                   <p className="text-3xl font-bold text-orange-600">{materialCount}</p>
@@ -2497,7 +2526,7 @@ function App() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-gray-900">{unitsPerAccount} 单元 × {materialCount} 素材 = <span className="text-blue-600">{Math.floor(totalCreatives / accountCount)} 创意</span></p>
+                          <p className="text-sm font-bold text-gray-900">{unitsPerAccount} 项目 × {materialCount} 素材 = <span className="text-blue-600">{Math.floor(totalCreatives / accountCount)} 广告</span></p>
                         </div>
                       </div>
                     );
@@ -2520,23 +2549,24 @@ function App() {
                   items.push({ label: '营销目的', value: mo ? mo.name : '未设置', required: false, ok: !!mo });
                   items.push({ label: '产品', value: prod ? prod.name : '未设置', required: true, ok: !!prod });
                   items.push({ label: '转化目标', value: conv ? conv.name : '未设置', required: true, ok: !!conv });
-                  items.push({ label: '营销单元名称', value: unitName || '未设置', required: true, ok: !!unitName });
+                  items.push({ label: '营销项目名称', value: unitName || '未设置', required: true, ok: !!unitName });
                   items.push({ label: '地域定向', value: geoDetail, required: false, ok: geoOk });
                   items.push({ label: '出价', value: bidAmount !== '' ? ('¥' + bidAmount) : '未设置', required: true, ok: bidAmount !== '' });
                   items.push({ label: '日预算', value: dailyBudget !== '' ? ('¥' + dailyBudget) : '未设置', required: false, ok: dailyBudget !== '' });
-                  items.push({ label: '创意素材数', value: (selectedMaterials.length + ' 个'), required: true, ok: selectedMaterials.length > 0 });
+                  items.push({ label: '广告素材数', value: (selectedMaterials.length + ' 个'), required: true, ok: selectedMaterials.length > 0 });
                   items.push({ label: '广告文案数', value: (selectedCopies.length + ' 条'), required: true, ok: selectedCopies.length > 0 });
-                  items.push({ label: '单创意素材数', value: String(composeRule.materials), required: false, ok: true });
-                  items.push({ label: '单创意文案数', value: String(composeRule.copies), required: false, ok: true });
-                  items.push({ label: '创意分配策略', value: composeStrategy === 'average' ? '平均分配' : '复制分配', required: false, ok: true });
+                  items.push({ label: '图片个数', value: String(composeRule.images || 0), required: false, ok: true });
+                  items.push({ label: '视频个数', value: String(composeRule.videos || 0), required: false, ok: true });
+                  items.push({ label: '文案个数', value: String(composeRule.copies || 0), required: false, ok: true });
+                  items.push({ label: '广告分配策略', value: composeStrategy === 'average' ? '平均分配' : '复制分配', required: false, ok: true });
                   items.push({ label: '营销产品', value: (productAllocMode === 'shared' ? (MOCK.productLibrary.find(p => p.id === specificProduct) || {}).name : '分账户定制') || '未设置', required: false, ok: !!(productAllocMode === 'shared' ? specificProduct : Object.keys(perAccountProduct).length > 0) });
                   items.push({ label: '行动号召', value: ctaList.length > 0 ? (ctaList.length + ' 条') : '未设置', required: true, ok: ctaList.length > 0 });
                   items.push({ label: '来源', value: sourceText || '未设置', required: false, ok: !!sourceText });
-                  items.push({ label: '单元名称', value: creativeName || '未设置', required: false, ok: !!creativeName });
+                  items.push({ label: '项目名称', value: creativeName || '未设置', required: false, ok: !!creativeName });
                   items.push({ label: '运行模式', value: runMode === 'scheduled' ? '定时运行' : '立即运行', required: false, ok: true });
                   if (runMode === 'scheduled') items.push({ label: '定时时间', value: (scheduledDate && scheduledTime) ? (scheduledDate + ' ' + scheduledTime) : '未设置', required: true, ok: !!(scheduledDate && scheduledTime) });
                   items.push({ label: '投放日期', value: 投放日期类型 === 'long_term' ? '从今天起长期投放' : '设置开始和结束日期', required: false, ok: true });
-                  items.push({ label: '搭建类型', value: buildType === 'unit_only' ? '仅搭建单元' : '搭建项目和单元', required: false, ok: true });
+                  items.push({ label: '搭建类型', value: buildType === 'unit_only' ? '仅搭建项目' : '搭建项目和项目', required: false, ok: true });
                   items.push({ label: '推官链接', value: getDefaultLandingPage(selectedAccountIds[0] || '') ? '已设置' : '未设置', required: false, ok: true });
                   return items;
                 })();
@@ -2573,7 +2603,7 @@ function App() {
               <button
                 onClick={() => {
                   setShowPreview(false);
-                  notify(`已确认搭建 ${accountCount} 个账户 × ${totalUnits} 个单元，共 ${totalCreatives} 个创意`, 'success');
+                  notify(`已确认搭建 ${accountCount} 个账户 × ${totalUnits} 个项目，共 ${totalCreatives} 个广告`, 'success');
                 }}
                 className="btn-primary"
               >
