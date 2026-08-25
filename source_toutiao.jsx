@@ -2049,93 +2049,196 @@ function App() {
               </div>
             </div>
 
-            {/* 每个创意组配置 */}
+            {/* 创意素材（视频+图片） */}
+            <div>
+              <div className="block text-sm font-medium text-gray-700 mb-2">创意素材 <span className="text-red-500">*</span>（已选 <span className="text-red-500">{selectedMaterials.length}/500</span> 个）</div>
+              <button onClick={() => { setMaterialPickerTarget(null); setShowMaterialModal(true); }} className="btn-secondary">
+                <i className="fas fa-photo-video mr-2"></i>选择素材（视频/图片）
+              </button>
+            </div>
+
+            {/* 品牌形象 & 营销组件 */}
             <div className="border-t pt-4">
-              <div className="flex items-center gap-1 mb-2">
-                <span className="text-sm font-medium text-gray-700">每个创意组配置</span>
-              </div>
-              <div className="flex items-center gap-4 mb-2">
-                <div className="flex items-center gap-2">
-                  <input type="number" min="0" max="10" value={groupVideos} onChange={e => setGroupVideos(Math.max(0, Math.min(10, parseInt(e.target.value) || 0)))} className="w-16 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm text-center" />
-                  <span className="text-sm text-gray-700">个视频</span>
+              <div className="space-y-4">
+                {/* 品牌形象 行 */}
+                <div className="flex items-start gap-3 flex-wrap">
+                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">品牌形象</label>
+                  <select value={brandImageType} onChange={e => setBrandImageType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    <option value="custom">自定义</option>
+                    <option value="video_account">视频号</option>
+                  </select>
+                  <div className="max-w-md flex-1 min-w-[240px]">
+                    {brandImageType === 'custom' ? (
+                      <div>
+                        {creativeAssets.filter(a => a.type === 'brand').length === 0 ? (
+                          <p className="text-xs text-gray-400">暂无创意资产中的品牌形象，请先在「创意资产」菜单上传</p>
+                        ) : (
+                          <ImageSelect
+                            value={selectedBrandImage ? selectedBrandImage.id : ''}
+                            placeholder="选择品牌形象"
+                            emptyText="暂无创意资产中的品牌形象，请先在「创意资产」菜单上传"
+                            options={creativeAssets.filter(a => a.type === 'brand').map(bi => ({ value: bi.id, label: bi.name, thumb: bi.thumb }))}
+                            onSelect={o => {
+                              const bi = creativeAssets.filter(a => a.type === 'brand').find(x => x.id === o.value);
+                              setSelectedBrandImage(bi || null);
+                            }}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <select
+                        value={selectedVideoAccount ? selectedVideoAccount.id : ''}
+                        onChange={e => {
+                          const va = MOCK.videoAccounts.find(x => x.id === e.target.value);
+                          setSelectedVideoAccount(va || null);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      >
+                        <option value="">选择视频号</option>
+                        {MOCK.videoAccounts.map(va => (
+                          <option key={va.id} value={va.id}>{va.name}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input type="number" min="0" max="10" value={groupImages} onChange={e => setGroupImages(Math.max(0, Math.min(10, parseInt(e.target.value) || 0)))} className="w-16 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm text-center" />
-                  <span className="text-sm text-gray-700">个图片</span>
+                {/* 营销组件 行 */}
+                <div className="flex items-start gap-3 flex-wrap">
+                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 pt-2">营销组件</label>
+                  <select value={marketingComponentType} onChange={e => setMarketingComponentType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    <option value="action_button">行动按钮</option>
+                    <option value="floating_card">浮层卡片</option>
+                  </select>
+                  <div className="max-w-md flex-1 min-w-[240px]">
+                    {marketingComponentType === 'action_button' ? (
+                      <select value={actionButtonType} onChange={e => setActionButtonType(e.target.value)} className="w-fit px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="claim">立即领取</option>
+                        <option value="details">查看详情</option>
+                      </select>
+                    ) : (
+                      <div>
+                        {creativeAssets.filter(a => a.type === 'component').length === 0 ? (
+                          <p className="text-xs text-gray-400">暂无创意资产中的营销组件，请先在「创意资产」菜单上传</p>
+                        ) : (
+                          <ImageSelect
+                            value={selectedComponent ? selectedComponent.id : ''}
+                            placeholder="选择营销组件"
+                            emptyText="暂无创意资产中的营销组件，请先在「创意资产」菜单上传"
+                            options={creativeAssets.filter(a => a.type === 'component').map(c => ({ value: c.id, label: c.btnText, thumb: c.thumb }))}
+                            onSelect={o => {
+                              const c = creativeAssets.filter(a => a.type === 'component').find(x => x.id === o.value);
+                              setSelectedComponent(c || null);
+                            }}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
+                <p className="text-xs text-gray-400">所有创意共用同一个品牌形象和营销组件</p>
               </div>
             </div>
 
-
-            {/* 账户创意制作区 */}
-            <div className="border-t pt-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-bold text-gray-900">创意制作</h4>
-                <span className="text-xs text-gray-400">按账户分别配置创意组</span>
-              </div>
-              {selectedAccountIds.length === 0 && <p className="text-sm text-gray-400">请先选择账户</p>}
-              {selectedAccountIds.map(accountId => {
-                const acc = MOCK.accounts.find(a => a.id === accountId);
-                const groups = accountGroups[accountId] || [];
-                return (
-                  <div key={accountId} className="border border-gray-200 rounded-lg bg-white">
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                      <span className="text-sm font-semibold text-blue-600">账户{selectedAccountIds.indexOf(accountId) + 1}：{acc ? acc.name : accountId}</span>
+            {/* 创意素材分配 */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-bold text-gray-900 mb-4">创意素材分配</h4>
+              <div className="space-y-4">
+                {/* 创意素材数量 */}
+                <div>
+                  <div className="block text-sm font-medium text-gray-700 mb-2">创意素材数量</div>
+                  <div className="grid grid-cols-2 gap-3 max-w-md">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">单创意素材</div>
+                      <input type="number" min="1" max="15" value={composeRule.materials}
+                        onChange={e => {
+                          const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                          setComposeRule({...composeRule, materials: v});
+                        }}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                      <div className="text-xs text-gray-400 mt-1">范围 1~15</div>
                     </div>
-                    <div className="p-4 space-y-4">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <button type="button" onClick={() => { setMaterialPickerTarget({ accountId, groupIndex: -1, type: 'batch' }); setShowMaterialModal(true); }} className="px-3 py-1.5 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"><i className="fas fa-plus mr-1"></i>批量添加素材</button>
-                        <button type="button" onClick={() => { const shuffled = [...MOCK.materialLibrary].sort(() => Math.random() - 0.5); batchFillGroups(accountId, shuffled.slice(0, groups.length * (groupVideos + groupImages))); }} className="px-3 py-1.5 border border-gray-300 text-gray-700 text-xs rounded hover:bg-gray-50">随机选择</button>
-                        <button type="button" onClick={() => { setAccountGroups(prev => ({ ...prev, [accountId]: [] })); }} className="px-3 py-1.5 border border-gray-300 text-gray-700 text-xs rounded hover:bg-gray-50">清空</button>
-                        <button type="button" onClick={() => addGroup(accountId)} className="px-3 py-1.5 border border-gray-300 text-gray-700 text-xs rounded hover:bg-gray-50"><i className="fas fa-plus mr-1"></i>添加创意组</button>
-                      </div>
-                      {groups.length === 0 && <p className="text-xs text-gray-400">暂无创意组，点击添加</p>}
-                      {groups.map((group, gidx) => (
-                        <div key={group.id} className="border border-gray-200 rounded-lg p-3">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <input type="text" value={group.name} onChange={e => updateGroupName(accountId, gidx, e.target.value)} className="px-2 py-1 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500" />
-                              <i className="fas fa-pencil-alt text-gray-400 text-xs"></i>
-                            </div>
-                            <button onClick={() => removeGroup(accountId, gidx)} className="text-gray-400 hover:text-red-500"><i className="fas fa-trash-alt"></i></button>
-                          </div>
-                          <div className="mb-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs text-gray-500">视频选择（{group.videoMaterials.length}/{groupVideos}）</span>
-                              <button type="button" onClick={() => openMaterialPicker(accountId, gidx, 'video')} className="text-xs text-blue-600 hover:text-blue-800"><i className="fas fa-plus mr-1"></i>添加视频</button>
-                            </div>
-                            {group.videoMaterials.length === 0 ? <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center text-xs text-gray-400">暂无视频，点击添加</div> : (
-                              <div className="flex flex-wrap gap-2">
-                                {group.videoMaterials.map(m => (
-                                  <div key={m.id} className="relative w-16 h-16 rounded bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-500">{m.type === 'video' ? '🎬' : '🖼️'}
-                                    <button onClick={() => removeGroupMaterial(accountId, gidx, 'video', m.id)} className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center"><i className="fas fa-times"></i></button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          <div className="mb-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs text-gray-500">图片选择（{group.imageMaterials.length}/{groupImages}）</span>
-                              <button type="button" onClick={() => openMaterialPicker(accountId, gidx, 'image')} className="text-xs text-blue-600 hover:text-blue-800"><i className="fas fa-plus mr-1"></i>添加图片</button>
-                            </div>
-                            {group.imageMaterials.length === 0 ? <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center text-xs text-gray-400">暂无图片，点击添加</div> : (
-                              <div className="flex flex-wrap gap-2">
-                                {group.imageMaterials.map(m => (
-                                  <div key={m.id} className="relative w-16 h-16 rounded bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-500">{m.type === 'video' ? '🎬' : '🖼️'}
-                                    <button onClick={() => removeGroupMaterial(accountId, gidx, 'image', m.id)} className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center"><i className="fas fa-times"></i></button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">单创意文案</div>
+                      <input type="number" min="1" max="3" value={composeRule.copies}
+                        onChange={e => {
+                          const v = Math.max(1, Math.min(3, parseInt(e.target.value) || 1));
+                          setComposeRule({...composeRule, copies: v});
+                        }}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                      <div className="text-xs text-gray-400 mt-1">范围 1~3</div>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+
+                {/* 创意分配策略 */}
+                <div className="border-t pt-4 mb-6">
+                  <div className="block text-sm font-medium text-gray-700 mb-2">创意分配策略</div>
+                  <div className="grid grid-cols-2 gap-3 max-w-md">
+                    <button type="button" onClick={() => setComposeStrategy('copy')}
+                      className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                      <div className="text-sm font-medium text-gray-900">复制分配</div>
+                      <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs cursor-pointer"
+                        onMouseEnter={() => setHoverStrategy('copy')} onMouseLeave={() => setHoverStrategy(null)}>
+                        <i className="fas fa-info"></i>
+                        {hoverStrategy === 'copy' && (
+                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">所有单元共用同一批创意</span>
+                        )}
+                      </span>
+                    </button>
+                    <button type="button" onClick={() => setComposeStrategy('average')}
+                      className={`relative rounded-lg border px-3 py-3 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
+                      <div className="text-sm font-medium text-gray-900">平均分配</div>
+                      <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs cursor-pointer"
+                        onMouseEnter={() => setHoverStrategy('average')} onMouseLeave={() => setHoverStrategy(null)}>
+                        <i className="fas fa-info"></i>
+                        {hoverStrategy === 'average' && (
+                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">根据单元数均分创意数</span>
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 预估可生成创意数 */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-6">
+                  <p className="text-xs text-gray-500 mb-1">预估可生成创意数：</p>
+                  {(() => {
+                    const s = getBuildSummary();
+                    const total = s.totalCreatives;
+                    const over = s.overLimit || s.overUnit;
+                    const isAvg = composeStrategy === 'average';
+                    return (
+                      <p className={`text-lg font-bold ${over ? 'text-red-600' : 'text-blue-600'}`}>
+                        {isNaN(total) ? 0 : total} 个创意
+                        {s.overLimit && <span className="text-xs font-normal text-red-500 ml-2">（已超限，单次任务上限 1000 个）</span>}
+                        {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单单元超限，上限 100 个）</span>}
+                        <span className="text-xs font-normal text-gray-500 ml-2">
+                          {isAvg
+                            ? `素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials}`
+                            : `单元数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单创意素材数 ${composeRule.materials}`}
+                        </span>
+                      </p>
+                    );
+                  })()}
+                  {(() => {
+                    const s = getBuildSummary();
+                    if (!s.overUnit) return null;
+                    return (
+                      <div className="mt-2 text-xs text-red-500">单个单元创意数 {s.perUnitCreatives} 超出上限 100 个，请调整素材 / 单创意素材数 / 单元数</div>
+                    );
+                  })()}
+                  <div className="text-xs text-gray-400 mt-1 leading-relaxed">
+                    <div>规则：默认根据素材确定创意数，文案选取方式为顺序选取</div>
+                    <div>复制分配：预估可生成创意数 = 单元数 × 已选素材数 ÷ 单创意素材数；</div>
+                    <div>平均分配：预估可生成创意数 = 已选素材数 ÷ 单创意素材数</div>
+                  </div>
+                </div>
+              </div>
             </div>
+
+
+            {/* 创意制作（按账户分创意组）已下线；创意素材选择请见上方「创意素材」按钮 */}
+
 
             {/* 广告文案 */}
             <div className="border-t pt-4">
