@@ -90,14 +90,15 @@ const MOCK = {
     { id: 'sp_004', name: '电信天翼畅享套餐' }
   ],
   targetingPackages: [
-    { id: 'tp_001', name: '一线城市年轻人群', region: '北京/上海/广州/深圳', age: '18-35', gender: '不限' },
-    { id: 'tp_002', name: '全国流量敏感用户', region: '全国', age: '20-45', gender: '不限' },
-    { id: 'tp_003', name: '学生群体', region: '全国', age: '18-24', gender: '不限' },
-    { id: 'tp_004', name: '上班族', region: '一二线城市', age: '25-40', gender: '不限' },
-    { id: 'tp_005', name: '中老年群体', region: '全国', age: '40-65', gender: '不限' },
-    { id: 'tp_006', name: '游戏爱好者', region: '全国', age: '18-30', gender: '男' },
-    { id: 'tp_007', name: '视频观看用户', region: '全国', age: '18-45', gender: '女' },
-    { id: 'tp_008', name: '电商购物用户', region: '一二三线城市', age: '22-40', gender: '女' }
+    { id: 'tp_001', channel: 'toutiao', name: '一线城市年轻人群', region: '北京/上海/广州/深圳', age: '18-35', gender: '不限' },
+    { id: 'tp_002', channel: 'toutiao', name: '全国流量敏感用户', region: '全国', age: '20-45', gender: '不限' },
+    { id: 'tp_003', channel: 'toutiao', name: '学生群体', region: '全国', age: '18-24', gender: '不限' },
+    { id: 'tp_004', channel: 'toutiao', name: '上班族', region: '一二线城市', age: '25-40', gender: '不限' },
+    { id: 'tp_005', channel: 'toutiao', name: '中老年群体', region: '全国', age: '40-65', gender: '不限' },
+    { id: 'tp_006', channel: 'toutiao', name: '游戏爱好者', region: '全国', age: '18-30', gender: '男' },
+    { id: 'tp_007', channel: 'toutiao', name: '视频观看用户', region: '全国', age: '18-45', gender: '女' },
+    { id: 'tp_008', channel: 'toutiao', name: '电商购物用户', region: '一二三线城市', age: '22-40', gender: '女' },
+    { id: 'tp_tt_001', channel: 'toutiao', name: '头条-美妆兴趣人群', region: '全国', age: '18-35', gender: '女' }
   ],
   regions: ['北京','上海','广州','深圳','杭州','成都','重庆','武汉','南京','西安','全国'],
   ages: ['18-24','25-30','31-35','36-40','41-50','不限'],
@@ -152,13 +153,17 @@ const MOCK = {
     { id: 'c_005', content: '全国通用，无漫游费', ctr: 2.5 },
     { id: 'c_006', content: '套餐可续订，随时取消', ctr: 3.8 },
     { id: 'c_007', content: '5G极速，畅快体验', ctr: 3.2 },
-    { id: 'c_008', content: '家庭共享，多人更划算', ctr: 2.9 }
+    { id: 'c_008', content: '家庭共享，多人更划算', ctr: 2.9 },
+    { id: 'c_tt_001', content: '刷到就是缘分，点个关注不迷路～', ctr: 3.6 },
+    { id: 'c_tt_002', content: '这款好物真的绝了，姐妹们冲鸭！', ctr: 4.1 },
+    { id: 'c_tt_003', content: '限时福利，点击下方链接马上领', ctr: 3.3 }
   ],
   // 文案包
   copyPackages: [
-    { id: 'cpkg_001', name: '新客引流包', copies: ['c_002', 'c_003', 'c_007'] },
-    { id: 'cpkg_002', name: '优惠促活包', copies: ['c_001', 'c_004', 'c_006'] },
-    { id: 'cpkg_003', name: '品牌形象包', copies: ['c_005', 'c_008'] }
+    { id: 'cpkg_001', channel: 'toutiao', name: '新客引流包', copies: ['c_002', 'c_003', 'c_007'] },
+    { id: 'cpkg_002', channel: 'toutiao', name: '优惠促活包', copies: ['c_001', 'c_004', 'c_006'] },
+    { id: 'cpkg_003', channel: 'toutiao', name: '品牌形象包', copies: ['c_005', 'c_008'] },
+    { id: 'cpkg_tt_001', channel: 'toutiao', name: '头条-短视频种草包', copies: ['c_tt_001', 'c_tt_002', 'c_tt_003'] }
   ],
   // 级联地区数据（用于自定义定向）
   // 若已加载 region-data.js，则使用完整数据；否则使用内联数据（降级）
@@ -1723,7 +1728,7 @@ function App() {
                             </span>
                           </div>
                           <MultiSelectDropdown
-                            options={[...MOCK.targetingPackages, ...userTgtPkgs].map(tp => ({ value: tp.id, label: tp.name }))}
+                            options={[...MOCK.targetingPackages, ...userTgtPkgs].filter(tp => tp.channel === 'toutiao').map(tp => ({ value: tp.id, label: tp.name }))}
                             selected={sel}
                             onChange={vals => setPerAccountTgtPkgs(prev => ({ ...prev, [id]: vals }))}
                             placeholder="选择定向包"
@@ -1760,7 +1765,7 @@ function App() {
                         <div className="overflow-y-auto p-4" style={{maxHeight: '55vh'}}>
                           <div className="space-y-2">
                             <p className="text-sm font-medium text-gray-700 mb-2">系统定向包</p>
-                            {MOCK.targetingPackages.map(tp => (
+                            {MOCK.targetingPackages.filter(tp => tp.channel === 'toutiao').map(tp => (
                               <label key={tp.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                                 <div className="flex items-center">
                                   <input
@@ -1779,10 +1784,10 @@ function App() {
                                 )}
                               </label>
                             ))}
-                            {userTgtPkgs.length > 0 && (
+                            {userTgtPkgs.filter(tp => tp.channel === 'toutiao').length > 0 && (
                               <>
                                 <p className="text-sm font-medium text-gray-700 mb-2 mt-4">自建定向包</p>
-                                {userTgtPkgs.map(tp => (
+                                {userTgtPkgs.filter(tp => tp.channel === 'toutiao').map(tp => (
                                   <label key={tp.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                                     <div className="flex items-center">
                                       <input
@@ -2314,6 +2319,9 @@ function App() {
           setShowCopyModal(false);
         }}
         selectedCopies={selectedCopies}
+        copyLibrary={MOCK.copyLibrary}
+        copyPackages={MOCK.copyPackages}
+        channel="toutiao"
       />
 
       {/* ===== 附加创意组件 - 资产库弹窗 ===== */}

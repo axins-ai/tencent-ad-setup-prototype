@@ -83,14 +83,14 @@ const MOCK = {
     { id: 'sp_004', name: '电信天翼畅享套餐' }
   ],
   targetingPackages: [
-    { id: 'tp_001', name: '一线城市年轻人群', region: '北京/上海/广州/深圳', age: '18-35', gender: '不限' },
-    { id: 'tp_002', name: '全国流量敏感用户', region: '全国', age: '20-45', gender: '不限' },
-    { id: 'tp_003', name: '学生群体', region: '全国', age: '18-24', gender: '不限' },
-    { id: 'tp_004', name: '上班族', region: '一二线城市', age: '25-40', gender: '不限' },
-    { id: 'tp_005', name: '中老年群体', region: '全国', age: '40-65', gender: '不限' },
-    { id: 'tp_006', name: '游戏爱好者', region: '全国', age: '18-30', gender: '男' },
-    { id: 'tp_007', name: '视频观看用户', region: '全国', age: '18-45', gender: '女' },
-    { id: 'tp_008', name: '电商购物用户', region: '一二三线城市', age: '22-40', gender: '女' }
+    { id: 'tp_001', channel: 'gdt', name: '一线城市年轻人群', region: '北京/上海/广州/深圳', age: '18-35', gender: '不限' },
+    { id: 'tp_002', channel: 'gdt', name: '全国流量敏感用户', region: '全国', age: '20-45', gender: '不限' },
+    { id: 'tp_003', channel: 'gdt', name: '学生群体', region: '全国', age: '18-24', gender: '不限' },
+    { id: 'tp_004', channel: 'gdt', name: '上班族', region: '一二线城市', age: '25-40', gender: '不限' },
+    { id: 'tp_005', channel: 'gdt', name: '中老年群体', region: '全国', age: '40-65', gender: '不限' },
+    { id: 'tp_006', channel: 'gdt', name: '游戏爱好者', region: '全国', age: '18-30', gender: '男' },
+    { id: 'tp_007', channel: 'gdt', name: '视频观看用户', region: '全国', age: '18-45', gender: '女' },
+    { id: 'tp_008', channel: 'gdt', name: '电商购物用户', region: '一二三线城市', age: '22-40', gender: '女' }
   ],
   regions: ['北京','上海','广州','深圳','杭州','成都','重庆','武汉','南京','西安','全国'],
   ages: ['18-24','25-30','31-35','36-40','41-50','不限'],
@@ -149,9 +149,9 @@ const MOCK = {
   ],
   // 文案包
   copyPackages: [
-    { id: 'cpkg_001', name: '新客引流包', copies: ['c_002', 'c_003', 'c_007'] },
-    { id: 'cpkg_002', name: '优惠促活包', copies: ['c_001', 'c_004', 'c_006'] },
-    { id: 'cpkg_003', name: '品牌形象包', copies: ['c_005', 'c_008'] }
+    { id: 'cpkg_001', channel: 'gdt', name: '新客引流包', copies: ['c_002', 'c_003', 'c_007'] },
+    { id: 'cpkg_002', channel: 'gdt', name: '优惠促活包', copies: ['c_001', 'c_004', 'c_006'] },
+    { id: 'cpkg_003', channel: 'gdt', name: '品牌形象包', copies: ['c_005', 'c_008'] }
   ],
   videoSceneOptions: [
     { id: 'vs_001', label: '视频号原生广告-主入口', tip: '朋友圈上方视频号信息流中的广告位' },
@@ -1825,7 +1825,7 @@ function App() {
                             </span>
                           </div>
                           <MultiSelectDropdown
-                            options={[...MOCK.targetingPackages, ...userTgtPkgs].map(tp => ({ value: tp.id, label: tp.name }))}
+                            options={[...MOCK.targetingPackages, ...userTgtPkgs].filter(tp => tp.channel === 'gdt').map(tp => ({ value: tp.id, label: tp.name }))}
                             selected={sel}
                             onChange={vals => setPerAccountTgtPkgs(prev => ({ ...prev, [id]: vals }))}
                             placeholder="选择定向包"
@@ -1862,7 +1862,7 @@ function App() {
                         <div className="overflow-y-auto p-4" style={{maxHeight: '55vh'}}>
                           <div className="space-y-2">
                             <p className="text-sm font-medium text-gray-700 mb-2">系统定向包</p>
-                            {MOCK.targetingPackages.map(tp => (
+                            {MOCK.targetingPackages.filter(tp => tp.channel === 'gdt').map(tp => (
                               <label key={tp.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                                 <div className="flex items-center">
                                   <input
@@ -1881,10 +1881,10 @@ function App() {
                                 )}
                               </label>
                             ))}
-                            {userTgtPkgs.length > 0 && (
+                            {userTgtPkgs.filter(tp => tp.channel === 'gdt').length > 0 && (
                               <>
                                 <p className="text-sm font-medium text-gray-700 mb-2 mt-4">自建定向包</p>
-                                {userTgtPkgs.map(tp => (
+                                {userTgtPkgs.filter(tp => tp.channel === 'gdt').map(tp => (
                                   <label key={tp.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                                     <div className="flex items-center">
                                       <input
@@ -2547,6 +2547,9 @@ function App() {
           setShowCopyModal(false);
         }}
         selectedCopies={selectedCopies}
+        copyLibrary={MOCK.copyLibrary}
+        copyPackages={MOCK.copyPackages}
+        channel="gdt"
       />
 
       {/* ===== 立即运行：进度弹窗（可转后台运行） ===== */}

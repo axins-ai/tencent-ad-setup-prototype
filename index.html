@@ -167,8 +167,8 @@
         <div id="tp-rows"></div>
       </div>
       <!-- 新建/编辑表单弹窗 -->
-      <div id="tgt-pkg-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
-        <div style="background:white;border-radius:12px;width:90vw;max-width:900px;max-height:85vh;overflow-y:auto;">
+      <div id="tgt-pkg-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;justify-content:center;overflow-y:auto;padding:24px 12px;">
+        <div style="background:white;border-radius:12px;width:90vw;max-width:900px;max-height:90vh;overflow-y:auto;margin:auto;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
             <h3 style="font-size:16px;font-weight:600;margin:0;" id="tgt-pkg-form-title">新建定向包</h3>
             <button style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">×</button>
@@ -657,13 +657,17 @@
                   <input type="radio" name="cp-channel" value="gdt" checked style="margin-right:6px;">
                   <span style="font-size:14px;">广点通</span>
                 </label>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                  <input type="radio" name="cp-channel" value="toutiao" style="margin-right:6px;">
+                  <span style="font-size:14px;">头条</span>
+                </label>
               </div>
             </div>
             <!-- 文案列表 -->
             <div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                 <div style="font-size:14px;font-weight:500;color:#374151;"><span style="color:red">*</span> 文案内容</div>
-                <span style="font-size:12px;color:#9ca3af;">单条不超过30字（含标点符号）</span>
+                <span style="font-size:12px;color:#9ca3af;">单条 5-55 字（含标点符号）</span>
               </div>
               <div id="cp-copy-list">
                 <!-- 动态生成文案行 -->
@@ -2571,7 +2575,7 @@
       return;
     }
     if (emptyEl) emptyEl.style.display = 'none';
-    var chMap = { 'gdt': '广点通' };
+    var chMap = { 'gdt': '广点通', 'toutiao': '头条' };
     var html = '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">';
     html += '<div style="display:flex;align-items:center;padding:13px 20px;background:#fafafa;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#6b7280;">' +
       '<div style="flex:0.6;text-align:center;">序号</div>' +
@@ -2600,6 +2604,10 @@
   window.openCopyPkgModal = function(idx) {
     editingPkgIdx = idx >= 0 ? idx : -1;
     document.getElementById('cp-name-input').value = idx >= 0 ? copyPackages[idx].name : '';
+    if (idx >= 0) {
+      var chRadio = document.querySelector('input[name="cp-channel"][value="' + (copyPackages[idx].channel || 'gdt') + '"]');
+      if (chRadio) chRadio.checked = true;
+    }
     var listEl = document.getElementById('cp-copy-list');
     if (listEl) listEl.innerHTML = '';
     if (idx >= 0) {
@@ -2632,11 +2640,11 @@
     div.className = 'cp-row';
     div.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
     div.innerHTML =
-      '<input type="text" maxlength="30" placeholder="输入文案内容..." value="' + escapeHtml(val) + '"' +
+      '<input type="text" maxlength="55" placeholder="输入文案内容..." value="' + escapeHtml(val) + '"' +
         ' class="cp-text-input" data-rid="' + rid + '"' +
         ' style="flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;"' +
-        ' oninput="var v=this.value;if(v.length>30){this.value=v.substring(0,30);}this.nextSibling.textContent=v.length+\'/30\';">' +
-      '<span style="font-size:12px;color:#9ca3af;white-space:nowrap;min-width:28px;">' + (val ? val.length : 0) + '/30</span>' +
+        ' oninput="var v=this.value;if(v.length>55){this.value=v.substring(0,55);}this.nextSibling.textContent=v.length+\'/55\';">' +
+      '<span style="font-size:12px;color:#9ca3af;white-space:nowrap;min-width:28px;">' + (val ? val.length : 0) + '/55</span>' +
       '<button type="button" onclick="removeCopyRow(\'' + rid + '\')" style="padding:5px 8px;background:none;border:1px solid #fecaca;border-radius:4px;cursor:pointer;font-size:13px;color:#ef4444;" title="删除这条"><i class="fas fa-times"></i></button>';
     listEl.appendChild(div);
     // 绑定回车添加下一行
@@ -2659,6 +2667,12 @@
       if (v) copies.push(v);
     });
     if (copies.length === 0) { alert('请至少添加一条文案'); return; }
+    for (var ci = 0; ci < copies.length; ci++) {
+      if (copies[ci].length < 5 || copies[ci].length > 55) {
+        alert('每条文案需为 5-55 字（含标点符号），当前第 ' + (ci + 1) + ' 条为 ' + copies[ci].length + ' 字，请调整');
+        return;
+      }
+    }
 
     if (editingPkgIdx >= 0) {
       copyPackages[editingPkgIdx].name = name;

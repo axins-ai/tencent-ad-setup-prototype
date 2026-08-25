@@ -330,21 +330,22 @@
     show,
     onClose,
     onConfirm,
-    selectedCopies
+    selectedCopies,
+    copyLibrary,
+    copyPackages,
+    channel
   }) {
     const [localSelected, setLocalSelected] = React.useState(selectedCopies.map(c => c.id));
-    const [copies, setCopies] = React.useState(MOCK.copyLibrary);
-    const [packages, setPackages] = React.useState(MOCK.copyPackages);
+    const [copies, setCopies] = React.useState(copyLibrary || MOCK.copyLibrary);
+    const [packages, setPackages] = React.useState(copyPackages || MOCK.copyPackages);
     const [expandedPkg, setExpandedPkg] = React.useState(null); // 当前展开的文案包id
-    const [showNewPkg, setShowNewPkg] = React.useState(false);
-    const [newPkgName, setNewPkgName] = React.useState('');
-    const [newPkgCopies, setNewPkgCopies] = React.useState(['']); // 最多10条，与文案包菜单一致
 
+    // 仅展示当前渠道的文案包（channel 与包数据一致：gdt/toutiao）
+    const filteredPackages = (packages || []).filter(pkg => !channel || pkg.channel === channel);
     React.useEffect(() => {
       if (show) {
         setLocalSelected(selectedCopies.map(c => c.id));
         setExpandedPkg(null);
-        setShowNewPkg(false);
       }
     }, [show, selectedCopies]);
     const toggleSelect = id => {
@@ -365,45 +366,6 @@
         const newSelected = [...new Set([...localSelected, ...pkgCopyIds])];
         setLocalSelected(newSelected);
       }
-    };
-    const handleAddCopyRow = () => {
-      if (newPkgCopies.length >= 10) {
-        alert('单个文案包最多添加 10 条文案');
-        return;
-      }
-      setNewPkgCopies([...newPkgCopies, '']);
-    };
-    const handleRemoveCopyRow = i => {
-      if (newPkgCopies.length <= 1) return;
-      setNewPkgCopies(newPkgCopies.filter((_, idx) => idx !== i));
-    };
-    const handleAddPackage = () => {
-      if (!newPkgName.trim()) {
-        alert('请输入文案包名称');
-        return;
-      }
-      const validCopies = newPkgCopies.filter(c => c.trim());
-      if (validCopies.length === 0) {
-        alert('请至少输入一条文案');
-        return;
-      }
-      const newCopyIds = validCopies.map((_, i) => `c_${Date.now()}_${i}`);
-      const newCopies = validCopies.map((content, i) => ({
-        id: newCopyIds[i],
-        content: content.trim(),
-        ctr: 0
-      }));
-      const newPkg = {
-        id: `cpkg_${Date.now()}`,
-        name: newPkgName.trim(),
-        copies: newCopyIds
-      };
-      setCopies([...copies, ...newCopies]);
-      setPackages([...packages, newPkg]);
-      setLocalSelected([...localSelected, ...newCopyIds]);
-      setNewPkgName('');
-      setNewPkgCopies(['']);
-      setShowNewPkg(false);
     };
     const handleConfirm = () => {
       const result = localSelected.map(id => copies.find(c => c.id === id)).filter(Boolean);
@@ -433,71 +395,13 @@
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-times"
     }))), /*#__PURE__*/React.createElement("div", {
-      className: "px-4 py-2 border-b bg-gray-50 flex gap-3"
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setShowNewPkg(!showNewPkg),
-      className: "btn-secondary text-sm"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-plus mr-1"
-    }), showNewPkg ? '收起' : '新增文案包')), showNewPkg && /*#__PURE__*/React.createElement("div", {
-      className: "px-4 py-3 border-b bg-blue-50 animate-fadeIn"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-3 mb-3"
-    }, /*#__PURE__*/React.createElement("label", {
-      className: "text-sm text-gray-700 font-medium"
-    }, "文案包名称："), /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      value: newPkgName,
-      onChange: e => setNewPkgName(e.target.value),
-      placeholder: "输入文案包名称",
-      className: "flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-    })), /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-gray-500 mb-2"
-    }, "输入文案内容（最多10条，至少1条，单条不超过30字）："), newPkgCopies.map((v, i) => /*#__PURE__*/React.createElement("div", {
-      key: i,
-      className: "flex items-center gap-2 mb-2"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-xs text-gray-500 w-12"
-    }, i + 1, "."), /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      value: v,
-      maxLength: 30,
-      onChange: e => {
-        const newArr = [...newPkgCopies];
-        newArr[i] = e.target.value;
-        setNewPkgCopies(newArr);
-      },
-      placeholder: `文案${i + 1}（${v.length}/30）`,
-      className: "flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-    }), newPkgCopies.length > 1 && /*#__PURE__*/React.createElement("button", {
-      type: "button",
-      onClick: () => handleRemoveCopyRow(i),
-      className: "px-2 py-1.5 border border-red-200 rounded text-xs text-red-500 hover:bg-red-50",
-      title: "删除这条"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-times"
-    })))), /*#__PURE__*/React.createElement("button", {
-      type: "button",
-      onClick: handleAddCopyRow,
-      className: "mt-1 inline-flex items-center gap-1 px-3 py-1.5 border border-dashed border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-gray-50"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-plus"
-    }), " 添加一条文案"), /*#__PURE__*/React.createElement("div", {
-      className: "flex justify-end gap-2 mt-2"
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setShowNewPkg(false),
-      className: "btn-secondary text-sm"
-    }, "取消"), /*#__PURE__*/React.createElement("button", {
-      onClick: handleAddPackage,
-      className: "btn-primary text-sm"
-    }, "创建文案包"))), /*#__PURE__*/React.createElement("div", {
       className: "overflow-y-auto flex-1 p-4",
       style: {
         maxHeight: '55vh'
       }
     }, /*#__PURE__*/React.createElement("div", {
       className: "space-y-3"
-    }, packages.map(pkg => {
+    }, filteredPackages.map(pkg => {
       const pkgCopyIds = pkg.copies;
       const allSelected = pkgCopyIds.every(id => localSelected.includes(id));
       const someSelected = pkgCopyIds.some(id => localSelected.includes(id));
@@ -538,7 +442,9 @@
           className: "text-sm text-gray-600 pl-1"
         }, "• ", copy.content));
       })));
-    }))), /*#__PURE__*/React.createElement("div", {
+    }), filteredPackages.length === 0 && /*#__PURE__*/React.createElement("div", {
+      className: "text-center text-sm text-gray-400 py-8"
+    }, "当前渠道暂无文案包"))), /*#__PURE__*/React.createElement("div", {
       className: "p-4 border-t flex justify-between items-center"
     }, /*#__PURE__*/React.createElement("span", {
       className: "text-sm text-gray-600"

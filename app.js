@@ -188,48 +188,56 @@ const MOCK = {
   }],
   targetingPackages: [{
     id: 'tp_001',
+    channel: 'gdt',
     name: '一线城市年轻人群',
     region: '北京/上海/广州/深圳',
     age: '18-35',
     gender: '不限'
   }, {
     id: 'tp_002',
+    channel: 'gdt',
     name: '全国流量敏感用户',
     region: '全国',
     age: '20-45',
     gender: '不限'
   }, {
     id: 'tp_003',
+    channel: 'gdt',
     name: '学生群体',
     region: '全国',
     age: '18-24',
     gender: '不限'
   }, {
     id: 'tp_004',
+    channel: 'gdt',
     name: '上班族',
     region: '一二线城市',
     age: '25-40',
     gender: '不限'
   }, {
     id: 'tp_005',
+    channel: 'gdt',
     name: '中老年群体',
     region: '全国',
     age: '40-65',
     gender: '不限'
   }, {
     id: 'tp_006',
+    channel: 'gdt',
     name: '游戏爱好者',
     region: '全国',
     age: '18-30',
     gender: '男'
   }, {
     id: 'tp_007',
+    channel: 'gdt',
     name: '视频观看用户',
     region: '全国',
     age: '18-45',
     gender: '女'
   }, {
     id: 'tp_008',
+    channel: 'gdt',
     name: '电商购物用户',
     region: '一二三线城市',
     age: '22-40',
@@ -341,14 +349,17 @@ const MOCK = {
   // 文案包
   copyPackages: [{
     id: 'cpkg_001',
+    channel: 'gdt',
     name: '新客引流包',
     copies: ['c_002', 'c_003', 'c_007']
   }, {
     id: 'cpkg_002',
+    channel: 'gdt',
     name: '优惠促活包',
     copies: ['c_001', 'c_004', 'c_006']
   }, {
     id: 'cpkg_003',
+    channel: 'gdt',
     name: '品牌形象包',
     copies: ['c_005', 'c_008']
   }],
@@ -2501,7 +2512,7 @@ function App() {
       className: "text-xs font-semibold text-gray-900 truncate",
       title: acc.name
     }, acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name)), /*#__PURE__*/React.createElement(MultiSelectDropdown, {
-      options: [...MOCK.targetingPackages, ...userTgtPkgs].map(tp => ({
+      options: [...MOCK.targetingPackages, ...userTgtPkgs].filter(tp => tp.channel === 'gdt').map(tp => ({
         value: tp.id,
         label: tp.name
       })),
@@ -2549,7 +2560,7 @@ function App() {
     className: "space-y-2"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-2"
-  }, "系统定向包"), MOCK.targetingPackages.map(tp => /*#__PURE__*/React.createElement("label", {
+  }, "系统定向包"), MOCK.targetingPackages.filter(tp => tp.channel === 'gdt').map(tp => /*#__PURE__*/React.createElement("label", {
     key: tp.id,
     className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2565,9 +2576,9 @@ function App() {
     className: "text-xs text-gray-500 mt-0.5"
   }, tp.region, "，", tp.age, "岁，", tp.gender))), modalSelectedIds.includes(tp.id) && /*#__PURE__*/React.createElement("i", {
     className: "fas fa-check text-blue-500"
-  }))), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+  }))), userTgtPkgs.filter(tp => tp.channel === 'gdt').length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-2 mt-4"
-  }, "自建定向包"), userTgtPkgs.map(tp => /*#__PURE__*/React.createElement("label", {
+  }, "自建定向包"), userTgtPkgs.filter(tp => tp.channel === 'gdt').map(tp => /*#__PURE__*/React.createElement("label", {
     key: tp.id,
     className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
   }, /*#__PURE__*/React.createElement("div", {
@@ -3262,7 +3273,10 @@ function App() {
       setSelectedCopies(copies);
       setShowCopyModal(false);
     },
-    selectedCopies: selectedCopies
+    selectedCopies: selectedCopies,
+    copyLibrary: MOCK.copyLibrary,
+    copyPackages: MOCK.copyPackages,
+    channel: "gdt"
   }), runModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     style: {

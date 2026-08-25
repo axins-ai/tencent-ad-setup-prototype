@@ -212,51 +212,66 @@ const MOCK = {
   }],
   targetingPackages: [{
     id: 'tp_001',
+    channel: 'toutiao',
     name: '一线城市年轻人群',
     region: '北京/上海/广州/深圳',
     age: '18-35',
     gender: '不限'
   }, {
     id: 'tp_002',
+    channel: 'toutiao',
     name: '全国流量敏感用户',
     region: '全国',
     age: '20-45',
     gender: '不限'
   }, {
     id: 'tp_003',
+    channel: 'toutiao',
     name: '学生群体',
     region: '全国',
     age: '18-24',
     gender: '不限'
   }, {
     id: 'tp_004',
+    channel: 'toutiao',
     name: '上班族',
     region: '一二线城市',
     age: '25-40',
     gender: '不限'
   }, {
     id: 'tp_005',
+    channel: 'toutiao',
     name: '中老年群体',
     region: '全国',
     age: '40-65',
     gender: '不限'
   }, {
     id: 'tp_006',
+    channel: 'toutiao',
     name: '游戏爱好者',
     region: '全国',
     age: '18-30',
     gender: '男'
   }, {
     id: 'tp_007',
+    channel: 'toutiao',
     name: '视频观看用户',
     region: '全国',
     age: '18-45',
     gender: '女'
   }, {
     id: 'tp_008',
+    channel: 'toutiao',
     name: '电商购物用户',
     region: '一二三线城市',
     age: '22-40',
+    gender: '女'
+  }, {
+    id: 'tp_tt_001',
+    channel: 'toutiao',
+    name: '头条-美妆兴趣人群',
+    region: '全国',
+    age: '18-35',
     gender: '女'
   }],
   regions: ['北京', '上海', '广州', '深圳', '杭州', '成都', '重庆', '武汉', '南京', '西安', '全国'],
@@ -361,20 +376,40 @@ const MOCK = {
     id: 'c_008',
     content: '家庭共享，多人更划算',
     ctr: 2.9
+  }, {
+    id: 'c_tt_001',
+    content: '刷到就是缘分，点个关注不迷路～',
+    ctr: 3.6
+  }, {
+    id: 'c_tt_002',
+    content: '这款好物真的绝了，姐妹们冲鸭！',
+    ctr: 4.1
+  }, {
+    id: 'c_tt_003',
+    content: '限时福利，点击下方链接马上领',
+    ctr: 3.3
   }],
   // 文案包
   copyPackages: [{
     id: 'cpkg_001',
+    channel: 'toutiao',
     name: '新客引流包',
     copies: ['c_002', 'c_003', 'c_007']
   }, {
     id: 'cpkg_002',
+    channel: 'toutiao',
     name: '优惠促活包',
     copies: ['c_001', 'c_004', 'c_006']
   }, {
     id: 'cpkg_003',
+    channel: 'toutiao',
     name: '品牌形象包',
     copies: ['c_005', 'c_008']
+  }, {
+    id: 'cpkg_tt_001',
+    channel: 'toutiao',
+    name: '头条-短视频种草包',
+    copies: ['c_tt_001', 'c_tt_002', 'c_tt_003']
   }],
   // 级联地区数据（用于自定义定向）
   // 若已加载 region-data.js，则使用完整数据；否则使用内联数据（降级）
@@ -2399,7 +2434,7 @@ function App() {
       className: "text-xs font-semibold text-gray-900 truncate",
       title: acc.name
     }, acc.name.length > 10 ? acc.name.substring(0, 10) + '...' : acc.name)), /*#__PURE__*/React.createElement(MultiSelectDropdown, {
-      options: [...MOCK.targetingPackages, ...userTgtPkgs].map(tp => ({
+      options: [...MOCK.targetingPackages, ...userTgtPkgs].filter(tp => tp.channel === 'toutiao').map(tp => ({
         value: tp.id,
         label: tp.name
       })),
@@ -2447,7 +2482,7 @@ function App() {
     className: "space-y-2"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-2"
-  }, "系统定向包"), MOCK.targetingPackages.map(tp => /*#__PURE__*/React.createElement("label", {
+  }, "系统定向包"), MOCK.targetingPackages.filter(tp => tp.channel === 'toutiao').map(tp => /*#__PURE__*/React.createElement("label", {
     key: tp.id,
     className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2463,9 +2498,9 @@ function App() {
     className: "text-xs text-gray-500 mt-0.5"
   }, tp.region, "，", tp.age, "岁，", tp.gender))), modalSelectedIds.includes(tp.id) && /*#__PURE__*/React.createElement("i", {
     className: "fas fa-check text-blue-500"
-  }))), userTgtPkgs.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+  }))), userTgtPkgs.filter(tp => tp.channel === 'toutiao').length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-medium text-gray-700 mb-2 mt-4"
-  }, "自建定向包"), userTgtPkgs.map(tp => /*#__PURE__*/React.createElement("label", {
+  }, "自建定向包"), userTgtPkgs.filter(tp => tp.channel === 'toutiao').map(tp => /*#__PURE__*/React.createElement("label", {
     key: tp.id,
     className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
   }, /*#__PURE__*/React.createElement("div", {
@@ -3144,7 +3179,10 @@ function App() {
       setSelectedCopies(copies);
       setShowCopyModal(false);
     },
-    selectedCopies: selectedCopies
+    selectedCopies: selectedCopies,
+    copyLibrary: MOCK.copyLibrary,
+    copyPackages: MOCK.copyPackages,
+    channel: "toutiao"
   }), showCreativeCompModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     onClick: () => setShowCreativeCompModal(false)
