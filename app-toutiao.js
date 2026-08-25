@@ -810,7 +810,7 @@ function App() {
   };
   const [businessType, setBusinessType] = useState('benefit_A');
   const [channel, setChannel] = useState('oceanengine');
-  const [selectedAccountIds, setSelectedAccountIds] = useState(MOCK.accounts.map(a => a.id)); // 默认全选账户
+  const [selectedAccountIds, setSelectedAccountIds] = useState([]); // 新建时默认不选账户，由用户手动选择
   const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和广告, unit_only=仅搭建广告
   // 项目生成规则
   const [projectGenRule, setProjectGenRule] = useState('total_per_project'); // total_per_project=按总广告数/每项目广告数, fixed=指定数量
@@ -1468,7 +1468,7 @@ function App() {
       const saved = localStorage.getItem('ad_task_form_' + currentTaskId);
       if (saved) {
         const data = JSON.parse(saved);
-        if (data.selectedAccountIds) setSelectedAccountIds(data.selectedAccountIds);
+        if (data.selectedAccountIds) setSelectedAccountIds([...new Set(data.selectedAccountIds)]);
         if (data.unitName) setUnitName(data.unitName);
         if (data.buildType) setBuildType(data.buildType);
         if (data.selectedUnits) setSelectedUnits(data.selectedUnits);
