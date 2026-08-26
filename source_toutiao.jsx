@@ -1840,65 +1840,14 @@ function App() {
                   )}
             </div>
 
-            {/* 出价与预算 */}
+            {/* 排期与预算出价 */}
             <div className="border-t pt-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">出价与预算</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-4">排期与预算出价</h3>
 
-              {/* 竞价策略 & 出价（固定，与日预算同宽） */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-1">竞价策略</div>
-                  <input type="text" value="稳定成本" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
-                </div>
-                <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></div>
-                  <input
-                    type="number"
-                    min="0.01"
-                    max="300"
-                    step="0.01"
-                    value={bidAmount}
-                    onChange={e => setBidAmount(e.target.value)}
-                    onBlur={e => {
-                      const v = e.target.value;
-                      if (v === '') return;
-                      let n = parseFloat(v);
-                      if (isNaN(n)) return;
-                      if (n < 0.01) n = 0.01;
-                      if (n > 300) n = 300;
-                      setBidAmount(String(n));
-                    }}
-                    placeholder="0.01 ~ 300"
-                    className={`w-1/2 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
-                  />
-                  {bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && (
-                    <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
-                  )}
-                </div>
-              </div>
-
-              {/* 日预算 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-1">日预算（元）</div>
-                  <input
-                    type="number"
-                    value={dailyBudget}
-                    onChange={e => setDailyBudget(e.target.value)}
-                    placeholder="输入日预算，留空=不限"
-                    className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* 投放设置（去掉标题，直接放投放日期/投放时段/项目名称） */}
-            <div className="border-t pt-4">
-
-              {/* 投放日期 */}
+              {/* 投放时间（日期） */}
               <div className="mb-5">
                 <div className="flex items-center gap-6 flex-wrap">
-                  <span className="text-sm font-medium text-gray-700">投放日期</span>
+                  <span className="text-sm font-medium text-gray-700">投放时间</span>
                   <label className="flex items-center cursor-pointer">
                     <input type="radio" name="date_type" checked={投放日期类型 === 'long_term'} onChange={() => set投放日期类型('long_term')} className="mr-2" />
                     <span className="text-sm">从今天起长期投放</span>
@@ -1961,8 +1910,57 @@ function App() {
                 )}
               </div>
 
-              {/* 项目名称：仅在搭建项目时填写，与其它字段左对齐 */}
-              {buildType === 'project_unit' && (
+              {/* 竞价策略 & 出价（固定） */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <div className="block text-sm font-medium text-gray-700 mb-1">竞价策略</div>
+                  <input type="text" value="稳定成本" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                </div>
+                <div>
+                  <div className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></div>
+                  <input
+                    type="number"
+                    min="0.01"
+                    max="300"
+                    step="0.01"
+                    value={bidAmount}
+                    onChange={e => setBidAmount(e.target.value)}
+                    onBlur={e => {
+                      const v = e.target.value;
+                      if (v === '') return;
+                      let n = parseFloat(v);
+                      if (isNaN(n)) return;
+                      if (n < 0.01) n = 0.01;
+                      if (n > 300) n = 300;
+                      setBidAmount(String(n));
+                    }}
+                    placeholder="0.01 ~ 300"
+                    className={`w-1/2 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
+                  />
+                  {bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && (
+                    <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
+                  )}
+                </div>
+              </div>
+
+              {/* 日预算 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <div className="block text-sm font-medium text-gray-700 mb-1">日预算（元）</div>
+                  <input
+                    type="number"
+                    value={dailyBudget}
+                    onChange={e => setDailyBudget(e.target.value)}
+                    placeholder="输入日预算，留空=不限"
+                    className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 项目名称：仅在搭建项目时填写，与其它字段左对齐 */}
+            {buildType === 'project_unit' && (
+              <div className="border-t pt-4 mt-0">
                 <div className="flex items-center gap-3 mb-5">
                   <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目名称 <span className="text-red-500">*</span></label>
                   <input
@@ -1978,8 +1976,8 @@ function App() {
                     ))}
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
             </div>
             )}
 
