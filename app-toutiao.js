@@ -1972,7 +1972,10 @@ function App() {
   }), projectRuleHover === 'fixed' && /*#__PURE__*/React.createElement("span", {
     className: "absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none"
   }, "手动指定每个账户的项目数量"))))), projectGenRule === 'total_per_project' && /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 mt-3 pl-28"
+    className: "flex items-center gap-2 mt-3",
+    style: {
+      paddingLeft: '124px'
+    }
   }, /*#__PURE__*/React.createElement("label", {
     className: "text-sm text-gray-700 whitespace-nowrap"
   }, "每个项目广告数上限"), /*#__PURE__*/React.createElement("input", {
@@ -1983,7 +1986,10 @@ function App() {
     onChange: e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1))),
     className: "w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
   })), projectGenRule === 'fixed' && /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 mt-3 pl-28"
+    className: "flex items-center gap-2 mt-3",
+    style: {
+      paddingLeft: '124px'
+    }
   }, /*#__PURE__*/React.createElement("label", {
     className: "text-sm text-gray-700 whitespace-nowrap"
   }, "每个账户指定项目数"), /*#__PURE__*/React.createElement("input", {
@@ -2140,7 +2146,10 @@ function App() {
     onChange: () => setProductAllocMode('per_account'),
     className: "w-4 h-4 mr-2 text-blue-600"
   }), /*#__PURE__*/React.createElement("span", null, "分账户定制")))), productAllocMode === 'shared' ? /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 pl-28"
+    className: "mt-3",
+    style: {
+      paddingLeft: '124px'
+    }
   }, /*#__PURE__*/React.createElement("select", {
     value: specificProduct,
     onChange: e => setSpecificProduct(e.target.value),
@@ -2149,9 +2158,15 @@ function App() {
     key: sp.id,
     value: sp.id
   }, sp.name)))) : /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-gray-500 mt-2 pl-28"
+    className: "text-sm text-gray-500 mt-2",
+    style: {
+      paddingLeft: '124px'
+    }
   }, "分账户定制：在下方按账户分别选择商品")), productAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", {
-    className: "mb-5 pl-28"
+    className: "mb-5",
+    style: {
+      paddingLeft: '124px'
+    }
   }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
   }, "请先选择账户") : /*#__PURE__*/React.createElement("div", {
@@ -2573,7 +2588,10 @@ function App() {
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
   }, "设置开始和结束日期"))), 投放日期类型 === 'custom' ? /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-4 mt-3 pl-28"
+    className: "flex gap-4 mt-3",
+    style: {
+      paddingLeft: '124px'
+    }
   }, /*#__PURE__*/React.createElement("input", {
     type: "date",
     value: 自定义开始日期,
@@ -2635,7 +2653,10 @@ function App() {
     onChange: e => setTimeRangeEnd(e.target.value),
     className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-full"
   }))), 投放时段模式 === 'multi_slot' && /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 pl-28"
+    className: "mt-3",
+    style: {
+      paddingLeft: '124px'
+    }
   }, /*#__PURE__*/React.createElement(TimeGrid, {
     value: timeGridSlots,
     onChange: setTimeGridSlots
@@ -2647,7 +2668,7 @@ function App() {
     type: "text",
     value: "稳定成本",
     disabled: true,
-    className: "w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
+    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
   })), /*#__PURE__*/React.createElement("div", {
     className: "mb-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2671,7 +2692,7 @@ function App() {
       setBidAmount(String(n));
     },
     placeholder: "0.01 ~ 300",
-    className: `w-1/2 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`
+    className: `w-48 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`
   }), bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-red-500 mt-1"
   }, "出价需在 0.01 ~ 300 元之间")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -2681,13 +2702,13 @@ function App() {
     value: dailyBudget,
     onChange: e => setDailyBudget(e.target.value),
     placeholder: "输入日预算，留空=不限",
-    className: "w-1/2 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
+    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
   }))), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4 mt-0"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 mb-5"
+    className: "flex items-center gap-2 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
+    className: "text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0"
   }, "项目名称 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), /*#__PURE__*/React.createElement("input", {

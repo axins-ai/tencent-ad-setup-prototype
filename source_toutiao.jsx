@@ -1376,13 +1376,13 @@ function App() {
                   </div>
                 </div>
                 {projectGenRule === 'total_per_project' && (
-                  <div className="flex items-center gap-2 mt-3 pl-28">
+                  <div className="flex items-center gap-2 mt-3" style={{ paddingLeft: '124px' }}>
                     <label className="text-sm text-gray-700 whitespace-nowrap">每个项目广告数上限</label>
                     <input type="number" min="1" max="1000" value={adsPerProject} onChange={e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
                 )}
                 {projectGenRule === 'fixed' && (
-                  <div className="flex items-center gap-2 mt-3 pl-28">
+                  <div className="flex items-center gap-2 mt-3" style={{ paddingLeft: '124px' }}>
                     <label className="text-sm text-gray-700 whitespace-nowrap">每个账户指定项目数</label>
                     <input type="number" min="1" max="100" value={projectsPerAccount} onChange={e => setProjectsPerAccount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
@@ -1493,18 +1493,18 @@ function App() {
                 </div>
               </div>
               {productAllocMode === 'shared' ? (
-                <div className="mt-3 pl-28">
+                <div className="mt-3" style={{ paddingLeft: '124px' }}>
                   <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
                   </select>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 mt-2 pl-28">分账户定制：在下方按账户分别选择商品</p>
+                <p className="text-sm text-gray-500 mt-2" style={{ paddingLeft: '124px' }}>分账户定制：在下方按账户分别选择商品</p>
               )}
             </div>
             {/* 分账户定制商品（网格） */}
             {productAllocMode === 'per_account' && (
-              <div className="mb-5 pl-28">
+              <div className="mb-5" style={{ paddingLeft: '124px' }}>
                 {selectedAccountIds.length === 0 ? (
                   <p className="text-sm text-gray-400">请先选择账户</p>
                 ) : (
@@ -1859,7 +1859,7 @@ function App() {
                   </label>
                 </div>
                 {投放日期类型 === 'custom' ? (
-                  <div className="flex gap-4 mt-3 pl-28">
+                  <div className="flex gap-4 mt-3" style={{ paddingLeft: '124px' }}>
                     <input type="date" value={自定义开始日期} onChange={e => set自定义开始日期(e.target.value)} placeholder="开始日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                     <input type="date" value={自定义结束日期} onChange={e => set自定义结束日期(e.target.value)} placeholder="结束日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
@@ -1905,7 +1905,7 @@ function App() {
                 )}
 
                 {投放时段模式 === 'multi_slot' && (
-                  <div className="mt-3 pl-28">
+                  <div className="mt-3" style={{ paddingLeft: '124px' }}>
                     <TimeGrid value={timeGridSlots} onChange={setTimeGridSlots} />
                   </div>
                 )}
@@ -1914,7 +1914,7 @@ function App() {
               {/* 竞价策略（独立一行） */}
               <div className="mb-4">
                 <div className="block text-sm font-medium text-gray-700 mb-1">竞价策略</div>
-                <input type="text" value="稳定成本" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                <input type="text" value="稳定成本" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
               </div>
 
               {/* 出价（竞价策略下一行） */}
@@ -1937,7 +1937,7 @@ function App() {
                     setBidAmount(String(n));
                   }}
                   placeholder="0.01 ~ 300"
-                  className={`w-1/2 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
+                  className={`w-48 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
                 />
                 {bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && (
                   <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
@@ -1952,7 +1952,7 @@ function App() {
                   value={dailyBudget}
                   onChange={e => setDailyBudget(e.target.value)}
                   placeholder="输入日预算，留空=不限"
-                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                  className="w-48 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
                 />
               </div>
             </div>
@@ -1960,8 +1960,8 @@ function App() {
             {/* 项目名称：仅在搭建项目时填写，与其它字段左对齐 */}
             {buildType === 'project_unit' && (
               <div className="border-t pt-4 mt-0">
-                <div className="flex items-center gap-3 mb-5">
-                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目名称 <span className="text-red-500">*</span></label>
+                <div className="flex items-center gap-2 mb-5">
+                  <label className="text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0">项目名称 <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     value={unitName}
