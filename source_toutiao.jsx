@@ -789,6 +789,7 @@ function App() {
     if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
     if (selectedMaterials.length === 0) errors.push('请选择素材');
     if (selectedCopies.length === 0) errors.push('请选择文案');
+    if (((composeRule.images || 0) + (composeRule.videos || 0)) === 0) errors.push('图片和视频不能同时为 0');
     if (unitName === '') errors.push('请输入项目名称');
     if (buildType === 'unit_only') {
       selectedAccountIds.forEach(function(id) {
@@ -1253,7 +1254,7 @@ function App() {
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
             <h2 className="text-base font-semibold text-gray-900">基础配置</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="fas fa-info-circle mr-1"></i>选择投放账户与搭建类型</span>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="fas fa-info-circle mr-1"></i>选择主体和投放账户</span>
           </div>
           <div className="p-6">
             {/* 任务名称：标签在左，输入栏在右 */}
@@ -1267,6 +1268,14 @@ function App() {
                 maxLength={50}
                 className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
+            </div>
+            {/* 主体选择：先选主体，再选账户（主体变化时账户列表按主体过滤） */}
+            <div className="flex items-center gap-3 mb-5">
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">主体选择 <span className="text-red-500">*</span></label>
+              <select value={businessUnit} onChange={e => { setBusinessUnit(e.target.value); setSelectedAccountIds([]); setAccountSearchText(''); }}
+                className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
+              </select>
             </div>
             {/* 选择账户：选项框缩短，刷新按钮在选项框右侧 */}
             <div className="flex items-center gap-3 mb-5 flex-wrap">
@@ -1492,7 +1501,8 @@ function App() {
                 </div>
               </div>
               {productAllocMode === 'shared' ? (
-                <div className="mt-3 pl-28">
+                <div className="mt-3 pl-28 flex items-center gap-2">
+                  <span className="text-sm text-gray-700 whitespace-nowrap">产品列表</span>
                   <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
                   </select>
@@ -1910,51 +1920,49 @@ function App() {
                 )}
               </div>
 
-              {/* 竞价策略 & 出价（固定） */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-1">竞价策略</div>
-                  <input type="text" value="稳定成本" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
-                </div>
-                <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></div>
-                  <input
-                    type="number"
-                    min="0.01"
-                    max="300"
-                    step="0.01"
-                    value={bidAmount}
-                    onChange={e => setBidAmount(e.target.value)}
-                    onBlur={e => {
-                      const v = e.target.value;
-                      if (v === '') return;
-                      let n = parseFloat(v);
-                      if (isNaN(n)) return;
-                      if (n < 0.01) n = 0.01;
-                      if (n > 300) n = 300;
-                      setBidAmount(String(n));
-                    }}
-                    placeholder="0.01 ~ 300"
-                    className={`w-1/2 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
-                  />
-                  {bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && (
-                    <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
-                  )}
-                </div>
+              {/* 竞价策略（独立一行） */}
+              <div className="mb-4">
+                <div className="block text-sm font-medium text-gray-700 mb-1">竞价策略</div>
+                <input type="text" value="稳定成本" disabled className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+              </div>
+
+              {/* 出价（竞价策略下一行） */}
+              <div className="mb-4">
+                <div className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></div>
+                <input
+                  type="number"
+                  min="0.01"
+                  max="300"
+                  step="0.01"
+                  value={bidAmount}
+                  onChange={e => setBidAmount(e.target.value)}
+                  onBlur={e => {
+                    const v = e.target.value;
+                    if (v === '') return;
+                    let n = parseFloat(v);
+                    if (isNaN(n)) return;
+                    if (n < 0.01) n = 0.01;
+                    if (n > 300) n = 300;
+                    setBidAmount(String(n));
+                  }}
+                  placeholder="0.01 ~ 300"
+                  className={`w-1/2 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
+                />
+                {bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && (
+                  <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
+                )}
               </div>
 
               {/* 日预算 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-1">日预算（元）</div>
-                  <input
-                    type="number"
-                    value={dailyBudget}
-                    onChange={e => setDailyBudget(e.target.value)}
-                    placeholder="输入日预算，留空=不限"
-                    className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
-                  />
-                </div>
+              <div>
+                <div className="block text-sm font-medium text-gray-700 mb-1">日预算（元）</div>
+                <input
+                  type="number"
+                  value={dailyBudget}
+                  onChange={e => setDailyBudget(e.target.value)}
+                  placeholder="输入日预算，留空=不限"
+                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                />
               </div>
             </div>
 
@@ -2139,9 +2147,9 @@ function App() {
                     <span className="text-sm font-medium text-gray-700">素材数量配置</span>
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-gray-500">图片</span>
-                      <input type="number" min="1" max="15" value={composeRule.images}
+                      <input type="number" min="0" max="15" value={composeRule.images}
                         onChange={e => {
-                          const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                          const v = Math.max(0, Math.min(15, parseInt(e.target.value) || 0));
                           setComposeRule({...composeRule, images: v});
                         }}
                         className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
@@ -2149,9 +2157,9 @@ function App() {
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-gray-500">视频</span>
-                      <input type="number" min="1" max="15" value={composeRule.videos}
+                      <input type="number" min="0" max="15" value={composeRule.videos}
                         onChange={e => {
-                          const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+                          const v = Math.max(0, Math.min(15, parseInt(e.target.value) || 0));
                           setComposeRule({...composeRule, videos: v});
                         }}
                         className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
@@ -2169,6 +2177,9 @@ function App() {
                     </div>
                   </div>
                   <div className="text-xs text-gray-400 mt-1">单个广告内的素材数量</div>
+                  {((composeRule.images || 0) + (composeRule.videos || 0)) === 0 && (
+                    <p className="text-xs text-red-500 mt-1"><i className="fas fa-exclamation-circle mr-1"></i>图片和视频不能同时为 0</p>
+                  )}
                 </div>
 
                 {/* 广告分配策略 */}

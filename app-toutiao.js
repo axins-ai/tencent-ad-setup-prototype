@@ -1204,6 +1204,7 @@ function App() {
     if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
     if (selectedMaterials.length === 0) errors.push('请选择素材');
     if (selectedCopies.length === 0) errors.push('请选择文案');
+    if ((composeRule.images || 0) + (composeRule.videos || 0) === 0) errors.push('图片和视频不能同时为 0');
     if (unitName === '') errors.push('请输入项目名称');
     if (buildType === 'unit_only') {
       selectedAccountIds.forEach(function (id) {
@@ -1810,7 +1811,7 @@ function App() {
     className: "text-xs text-gray-400 ml-auto font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle mr-1"
-  }), "选择投放账户与搭建类型")), /*#__PURE__*/React.createElement("div", {
+  }), "选择主体和投放账户")), /*#__PURE__*/React.createElement("div", {
     className: "p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
@@ -1826,6 +1827,23 @@ function App() {
     maxLength: 50,
     className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   })), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 mb-5"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
+  }, "主体选择 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*")), /*#__PURE__*/React.createElement("select", {
+    value: businessUnit,
+    onChange: e => {
+      setBusinessUnit(e.target.value);
+      setSelectedAccountIds([]);
+      setAccountSearchText('');
+    },
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, MOCK.businessUnits.map(bu => /*#__PURE__*/React.createElement("option", {
+    key: bu.id,
+    value: bu.id
+  }, bu.name, "（", bu.id, "）")))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5 flex-wrap"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
@@ -2139,8 +2157,10 @@ function App() {
     onChange: () => setProductAllocMode('per_account'),
     className: "w-4 h-4 mr-2 text-blue-600"
   }), /*#__PURE__*/React.createElement("span", null, "分账户定制")))), productAllocMode === 'shared' ? /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 pl-28"
-  }, /*#__PURE__*/React.createElement("select", {
+    className: "mt-3 pl-28 flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-700 whitespace-nowrap"
+  }, "产品列表"), /*#__PURE__*/React.createElement("select", {
     value: specificProduct,
     onChange: e => setSpecificProduct(e.target.value),
     className: "w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
@@ -2639,15 +2659,17 @@ function App() {
     value: timeGridSlots,
     onChange: setTimeGridSlots
   }))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "mb-4"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "竞价策略"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: "稳定成本",
     disabled: true,
     className: "w-1/2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "mb-4"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "出价（元）", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
@@ -2671,9 +2693,7 @@ function App() {
     className: `w-1/2 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`
   }), bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-red-500 mt-1"
-  }, "出价需在 0.01 ~ 300 元之间"))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "出价需在 0.01 ~ 300 元之间")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "block text-sm font-medium text-gray-700 mb-1"
   }, "日预算（元）"), /*#__PURE__*/React.createElement("input", {
     type: "number",
@@ -2681,7 +2701,7 @@ function App() {
     onChange: e => setDailyBudget(e.target.value),
     placeholder: "输入日预算，留空=不限",
     className: "w-1/2 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
-  })))), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
+  }))), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4 mt-0"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
@@ -2908,11 +2928,11 @@ function App() {
     className: "text-xs text-gray-500"
   }, "图片"), /*#__PURE__*/React.createElement("input", {
     type: "number",
-    min: "1",
+    min: "0",
     max: "15",
     value: composeRule.images,
     onChange: e => {
-      const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+      const v = Math.max(0, Math.min(15, parseInt(e.target.value) || 0));
       setComposeRule({
         ...composeRule,
         images: v
@@ -2927,11 +2947,11 @@ function App() {
     className: "text-xs text-gray-500"
   }, "视频"), /*#__PURE__*/React.createElement("input", {
     type: "number",
-    min: "1",
+    min: "0",
     max: "15",
     value: composeRule.videos,
     onChange: e => {
-      const v = Math.max(1, Math.min(15, parseInt(e.target.value) || 1));
+      const v = Math.max(0, Math.min(15, parseInt(e.target.value) || 0));
       setComposeRule({
         ...composeRule,
         videos: v
@@ -2961,7 +2981,11 @@ function App() {
     className: "text-xs text-gray-500"
   }, "个"))), /*#__PURE__*/React.createElement("div", {
     className: "text-xs text-gray-400 mt-1"
-  }, "单个广告内的素材数量")), /*#__PURE__*/React.createElement("div", {
+  }, "单个广告内的素材数量"), (composeRule.images || 0) + (composeRule.videos || 0) === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-red-500 mt-1"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-exclamation-circle mr-1"
+  }), "图片和视频不能同时为 0")), /*#__PURE__*/React.createElement("div", {
     className: "pt-2 mb-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 flex-wrap"
