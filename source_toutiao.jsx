@@ -671,7 +671,7 @@ function App() {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
-  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 广告分配策略
+  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 素材分配策略
   const [hoverStrategy, setHoverStrategy] = useState(null); // 悬停展示策略注释
   // 截图样式广告配置：账户分配规则 / 广告组配置 / 广告组数据
   const [accountAllocMode, setAccountAllocMode] = useState('all'); // 'all'=全账户复用, 'average'=平均分配
@@ -2173,10 +2173,10 @@ function App() {
                   )}
                 </div>
 
-                {/* 广告分配策略 */}
+                {/* 素材分配策略 */}
                 <div className="pt-2 mb-6">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-sm font-medium text-gray-700">广告分配策略</span>
+                    <span className="text-sm font-medium text-gray-700">素材分配策略</span>
                     <div className="flex gap-3">
                       <button type="button" onClick={() => setComposeStrategy('copy')}
                         className={`relative rounded-lg border px-3 py-2 text-left transition ${composeStrategy === 'copy' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
@@ -2185,7 +2185,7 @@ function App() {
                           onMouseEnter={() => setHoverStrategy('copy')} onMouseLeave={() => setHoverStrategy(null)}>
                           <i className="fas fa-info"></i>
                           {hoverStrategy === 'copy' && (
-                            <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">所有项目共用同一批广告</span>
+                            <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">所有账户使用一样的素材</span>
                           )}
                         </span>
                       </button>
@@ -2196,7 +2196,7 @@ function App() {
                           onMouseEnter={() => setHoverStrategy('average')} onMouseLeave={() => setHoverStrategy(null)}>
                           <i className="fas fa-info"></i>
                           {hoverStrategy === 'average' && (
-                            <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">根据项目数均分广告数</span>
+                            <span className="absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1">素材平均分到每个账户中</span>
                           )}
                         </span>
                       </button>
@@ -2220,8 +2220,8 @@ function App() {
                           {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单项目超限，上限 100 个）</span>}
                           <span className="text-xs font-normal text-gray-500 ml-2">
                             {isAvg
-                              ? `素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`
-                              : `项目数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`}
+                              ? `已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`
+                              : `已选账户数 ${s.accountCount} × 已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`}
                           </span>
                         </p>
                         {s.overUnit && (
@@ -2232,7 +2232,7 @@ function App() {
                   })()}
                   <div className="text-xs text-gray-400 mt-1 leading-relaxed">
                     <div>规则：默认根据素材确定广告数，文案选取方式为顺序选取</div>
-                    <div>复制分配：预估可生成广告数 = 项目数 × 已选素材数 ÷ 单广告素材数；</div>
+                    <div>复制分配：预估可生成广告数 = 已选账户数 × 已选素材数 ÷ 单广告素材数；</div>
                     <div>平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数</div>
                   </div>
                 </div>
@@ -2548,7 +2548,7 @@ function App() {
                   items.push({ label: '图片个数', value: String(composeRule.images || 0), required: false, ok: true });
                   items.push({ label: '视频个数', value: String(composeRule.videos || 0), required: false, ok: true });
                   items.push({ label: '文案个数', value: String(composeRule.copies || 0), required: false, ok: true });
-                  items.push({ label: '广告分配策略', value: composeStrategy === 'average' ? '平均分配' : '复制分配', required: false, ok: true });
+                  items.push({ label: '素材分配策略', value: composeStrategy === 'average' ? '平均分配' : '复制分配', required: false, ok: true });
                   items.push({ label: '营销产品', value: (productAllocMode === 'shared' ? (MOCK.productLibrary.find(p => p.id === specificProduct) || {}).name : '分账户定制') || '未设置', required: false, ok: !!(productAllocMode === 'shared' ? specificProduct : Object.keys(perAccountProduct).length > 0) });
                   items.push({ label: '行动号召', value: ctaList.length > 0 ? (ctaList.length + ' 条') : '未设置', required: true, ok: ctaList.length > 0 });
                   items.push({ label: '来源', value: sourceText || '未设置', required: false, ok: !!sourceText });

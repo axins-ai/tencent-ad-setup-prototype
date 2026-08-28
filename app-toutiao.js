@@ -1099,7 +1099,7 @@ function App() {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // {id, name, type, ...}
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
-  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 广告分配策略
+  const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 素材分配策略
   const [hoverStrategy, setHoverStrategy] = useState(null); // 悬停展示策略注释
   // 截图样式广告配置：账户分配规则 / 广告组配置 / 广告组数据
   const [accountAllocMode, setAccountAllocMode] = useState('all'); // 'all'=全账户复用, 'average'=平均分配
@@ -2993,7 +2993,7 @@ function App() {
     className: "flex items-center gap-3 flex-wrap"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700"
-  }, "广告分配策略"), /*#__PURE__*/React.createElement("div", {
+  }, "素材分配策略"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-3"
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
@@ -3009,7 +3009,7 @@ function App() {
     className: "fas fa-info"
   }), hoverStrategy === 'copy' && /*#__PURE__*/React.createElement("span", {
     className: "absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1"
-  }, "所有项目共用同一批广告"))), /*#__PURE__*/React.createElement("button", {
+  }, "所有账户使用一样的素材"))), /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: () => setComposeStrategy('average'),
     className: `relative rounded-lg border px-3 py-2 text-left transition ${composeStrategy === 'average' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
@@ -3023,7 +3023,7 @@ function App() {
     className: "fas fa-info"
   }), hoverStrategy === 'average' && /*#__PURE__*/React.createElement("span", {
     className: "absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1"
-  }, "根据项目数均分广告数")))))), /*#__PURE__*/React.createElement("div", {
+  }, "素材平均分到每个账户中")))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-blue-50 border border-blue-200 rounded-lg p-3 mt-6"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-1"
@@ -3040,12 +3040,12 @@ function App() {
       className: "text-xs font-normal text-red-500 ml-2"
     }, "（单项目超限，上限 100 个）"), /*#__PURE__*/React.createElement("span", {
       className: "text-xs font-normal text-gray-500 ml-2"
-    }, isAvg ? `素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}` : `项目数 ${s.totalUnits} × 素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`)), s.overUnit && /*#__PURE__*/React.createElement("div", {
+    }, isAvg ? `已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}` : `已选账户数 ${s.accountCount} × 已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`)), s.overUnit && /*#__PURE__*/React.createElement("div", {
       className: "mt-2 text-xs text-red-500"
     }, "单个项目广告数 ", s.perUnitCreatives, " 超出上限 100 个，请调整素材 / 单广告素材数 / 项目数"));
   })(), /*#__PURE__*/React.createElement("div", {
     className: "text-xs text-gray-400 mt-1 leading-relaxed"
-  }, /*#__PURE__*/React.createElement("div", null, "规则：默认根据素材确定广告数，文案选取方式为顺序选取"), /*#__PURE__*/React.createElement("div", null, "复制分配：预估可生成广告数 = 项目数 × 已选素材数 ÷ 单广告素材数；"), /*#__PURE__*/React.createElement("div", null, "平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数"))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, "规则：默认根据素材确定广告数，文案选取方式为顺序选取"), /*#__PURE__*/React.createElement("div", null, "复制分配：预估可生成广告数 = 已选账户数 × 已选素材数 ÷ 单广告素材数；"), /*#__PURE__*/React.createElement("div", null, "平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数"))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 max-w-md"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700 flex-shrink-0"
@@ -3505,7 +3505,7 @@ function App() {
           ok: true
         });
         items.push({
-          label: '广告分配策略',
+          label: '素材分配策略',
           value: composeStrategy === 'average' ? '平均分配' : '复制分配',
           required: false,
           ok: true
