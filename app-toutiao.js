@@ -117,44 +117,44 @@ const MOCK = {
       id: 'bj_conv_001',
       name: '表单提交',
       eventAsset: '提交表单事件',
-      source: '巨量引擎'
+      source: '我创建的'
     }, {
       id: 'bj_conv_002',
       name: '在线咨询',
       eventAsset: '发起咨询事件',
-      source: '巨量引擎'
+      source: '共享'
     }, {
       id: 'bj_conv_003',
       name: '电话咨询',
       eventAsset: '拨打电话事件',
-      source: '巨量引擎'
+      source: '我创建的'
     }],
     'fenghua': [{
       id: 'fh_conv_001',
       name: '商品购买',
       eventAsset: '完成支付事件',
-      source: '巨量引擎'
+      source: '我创建的'
     }, {
       id: 'fh_conv_002',
       name: '加入购物车',
       eventAsset: '加购事件',
-      source: '巨量引擎'
+      source: '我创建的'
     }, {
       id: 'fh_conv_003',
       name: '收藏商品',
       eventAsset: '收藏事件',
-      source: '巨量引擎'
+      source: '共享'
     }],
     'fuwei': [{
       id: 'fw_conv_001',
       name: '预约咨询',
       eventAsset: '提交预约事件',
-      source: '巨量引擎'
+      source: '我创建的'
     }, {
       id: 'fw_conv_002',
       name: '服务购买',
       eventAsset: '完成支付事件',
-      source: '巨量引擎'
+      source: '共享'
     }]
   },
   accounts: [{
@@ -2241,7 +2241,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: () => setShowConversionDropdown(!showConversionDropdown),
-    className: "w-80 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center justify-between outline-none focus:ring-2 focus:ring-blue-500"
+    className: "w-96 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center justify-between outline-none focus:ring-2 focus:ring-blue-500"
   }, /*#__PURE__*/React.createElement("span", {
     className: "truncate"
   }, (() => {
@@ -2253,6 +2253,14 @@ function App() {
   })), showConversionDropdown && /*#__PURE__*/React.createElement("div", {
     className: "absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
   }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50 text-xs font-medium text-gray-500"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flex-1"
+  }, "优化目标名称"), /*#__PURE__*/React.createElement("span", {
+    className: "flex-1"
+  }, "事件资产名称"), /*#__PURE__*/React.createElement("span", {
+    className: "w-16 flex-none"
+  }, "来源")), /*#__PURE__*/React.createElement("div", {
     className: "max-h-56 overflow-y-auto"
   }, (MOCK.conversionsByBusinessUnit[businessUnit] || []).length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "px-3 py-4 text-sm text-gray-400 text-center"
@@ -2275,7 +2283,7 @@ function App() {
     }, conv.name), /*#__PURE__*/React.createElement("span", {
       className: "flex-1 truncate text-gray-500"
     }, conv.eventAsset), /*#__PURE__*/React.createElement("span", {
-      className: "flex-none text-gray-400 text-xs"
+      className: "w-16 flex-none text-gray-400 text-xs"
     }, conv.source), active && /*#__PURE__*/React.createElement("i", {
       className: "fas fa-check text-blue-500 text-xs flex-none"
     })));
