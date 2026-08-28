@@ -56,18 +56,18 @@ const MOCK = {
   // 转化目标（按业务单元分类）
   conversionsByBusinessUnit: {
     'baiju': [
-      { id: 'bj_conv_001', name: '白驹-表单提交' },
-      { id: 'bj_conv_002', name: '白驹-在线咨询' },
-      { id: 'bj_conv_003', name: '白驹-电话咨询' }
+      { id: 'bj_conv_001', name: '表单提交', eventAsset: '提交表单事件', source: '巨量引擎' },
+      { id: 'bj_conv_002', name: '在线咨询', eventAsset: '发起咨询事件', source: '巨量引擎' },
+      { id: 'bj_conv_003', name: '电话咨询', eventAsset: '拨打电话事件', source: '巨量引擎' }
     ],
     'fenghua': [
-      { id: 'fh_conv_001', name: '烽华-商品购买' },
-      { id: 'fh_conv_002', name: '烽华-加入购物车' },
-      { id: 'fh_conv_003', name: '烽华-收藏商品' }
+      { id: 'fh_conv_001', name: '商品购买', eventAsset: '完成支付事件', source: '巨量引擎' },
+      { id: 'fh_conv_002', name: '加入购物车', eventAsset: '加购事件', source: '巨量引擎' },
+      { id: 'fh_conv_003', name: '收藏商品', eventAsset: '收藏事件', source: '巨量引擎' }
     ],
     'fuwei': [
-      { id: 'fw_conv_001', name: '服微-预约咨询' },
-      { id: 'fw_conv_002', name: '服微-服务购买' }
+      { id: 'fw_conv_001', name: '预约咨询', eventAsset: '提交预约事件', source: '巨量引擎' },
+      { id: 'fw_conv_002', name: '服务购买', eventAsset: '完成支付事件', source: '巨量引擎' }
     ]
   },
   accounts: [
@@ -638,6 +638,19 @@ function App() {
     const conversions = MOCK.conversionsByBusinessUnit[businessUnit] || [];
     setConversionGoal(conversions.length > 0 ? conversions[0].id : '');
   }, [businessUnit]);
+  // 优化目标下拉显隐
+  const [showConversionDropdown, setShowConversionDropdown] = useState(false);
+  const conversionDropdownRef = useRef(null);
+  // 点击空白处收起优化目标下拉
+  useEffect(() => {
+    const handler = (e) => {
+      if (conversionDropdownRef.current && !conversionDropdownRef.current.contains(e.target)) {
+        setShowConversionDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
   // 转化行为
   const [conversionBehavior, setConversionBehavior] = useState('optimize'); // 'optimize' | 'custom'
   // 转化时间区间
@@ -1531,10 +1544,45 @@ function App() {
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">获取线索方式</label>
               <input type="text" value="自研落地页" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
             </div>
-            {/* 优化目标 */}
+            {/* 优化目标：三段式下拉（优化目标名称 / 事件资产名称 / 来源），单选 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">优化目标</label>
-              <input type="text" value="表单提交" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
+              <div className="relative" ref={conversionDropdownRef}>
+                <button type="button"
+                  onClick={() => setShowConversionDropdown(!showConversionDropdown)}
+                  className="w-80 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center justify-between outline-none focus:ring-2 focus:ring-blue-500">
+                  <span className="truncate">{(() => {
+                    const conv = (MOCK.conversionsByBusinessUnit[businessUnit] || []).find(c => c.id === conversionGoal);
+                    if (!conv) return '请选择优化目标';
+                    return `${conv.name} / ${conv.eventAsset} / ${conv.source}`;
+                  })()}</span>
+                  <i className="fas fa-chevron-down text-gray-400 text-xs ml-2"></i>
+                </button>
+                {showConversionDropdown && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <div className="max-h-56 overflow-y-auto">
+                      {(MOCK.conversionsByBusinessUnit[businessUnit] || []).length === 0 ? (
+                        <div className="px-3 py-4 text-sm text-gray-400 text-center">无优化目标</div>
+                      ) : (
+                        (MOCK.conversionsByBusinessUnit[businessUnit] || []).map(conv => {
+                          const active = conv.id === conversionGoal;
+                          return (
+                            <div key={conv.id} onClick={() => { setConversionGoal(conv.id); setShowConversionDropdown(false); }}
+                              className={`px-3 py-2.5 cursor-pointer border-b border-gray-100 last:border-b-0 ${active ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="flex-1 truncate" style={{ color: active ? '#1890ff' : '#333' }}>{conv.name}</span>
+                                <span className="flex-1 truncate text-gray-500">{conv.eventAsset}</span>
+                                <span className="flex-none text-gray-400 text-xs">{conv.source}</span>
+                                {active && <i className="fas fa-check text-blue-500 text-xs flex-none"></i>}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             {/* 目标优化类型：锁定关闭状态（禁用按钮，左对齐） */}
             <div className="flex items-center gap-3 mb-5">
