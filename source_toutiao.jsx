@@ -733,18 +733,16 @@ function App() {
   const [extraProductNames, setExtraProductNames] = useState([]); // string[]
   // 产品主图：首张为商品库默认图（emoji），用户上传图（dataURL）追加其后，最多 10 张，总上限 11
   const [extraProductImages, setExtraProductImages] = useState([]); // string[] (dataURL)
-  // 产品主图上传弹窗
-  const [showImageUploadModal, setShowImageUploadModal] = useState(false);
-  const [imageUploadError, setImageUploadError] = useState('');
+  // 产品主图上传（点击「+」直接吊起本地文件选择，格式限制文案已展示在表单内）
   const imageUploadRef = useRef(null);
   const handleImageFileChange = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     // 1) 格式校验：jpg / png / jpeg
     const okType = /\.(jpe?g|png)$/i.test(file.name) || ['image/jpeg', 'image/png'].includes(file.type);
-    if (!okType) { setImageUploadError('仅支持 jpg / png / jpeg 格式'); e.target.value = ''; return; }
+    if (!okType) { notify('仅支持 jpg / png / jpeg 格式', 'error'); e.target.value = ''; return; }
     // 2) 大小校验：≤ 1M
-    if (file.size > 1024 * 1024) { setImageUploadError('图片大小需 ≤ 1M'); e.target.value = ''; return; }
+    if (file.size > 1024 * 1024) { notify('图片大小需 ≤ 1M', 'error'); e.target.value = ''; return; }
     // 3) 宽高比 1:1 + 尺寸 108×108：读取后校验
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -752,16 +750,14 @@ function App() {
       const img = new Image();
       img.onload = () => {
         const w = img.naturalWidth, h = img.naturalHeight;
-        if (Math.abs(w - h) > 2) { setImageUploadError('宽高比需为 1:1'); return; }
-        if (Math.abs(w - 108) > 2 || Math.abs(h - 108) > 2) { setImageUploadError('尺寸需为 108×108'); return; }
-        if (extraProductImages.length >= 10) { setImageUploadError('产品主图最多 11 张'); return; }
+        if (Math.abs(w - h) > 2) { notify('宽高比需为 1:1', 'error'); return; }
+        if (Math.abs(w - 108) > 2 || Math.abs(h - 108) > 2) { notify('尺寸需为 108×108', 'error'); return; }
+        if (extraProductImages.length >= 10) { notify('产品主图最多 11 张', 'error'); return; }
         setExtraProductImages(prev => [...prev, dataUrl]);
-        setShowImageUploadModal(false);
-        setImageUploadError('');
         e.target.value = '';
         notify('产品主图上传成功', 'success');
       };
-      img.onerror = () => { setImageUploadError('图片读取失败，请重试'); };
+      img.onerror = () => { notify('图片读取失败，请重试', 'error'); };
       img.src = dataUrl;
     };
     reader.readAsDataURL(file);
@@ -2288,16 +2284,13 @@ function App() {
                     <div className="relative mb-2 max-w-md">
                       <input type="text" value={_defaultName} readOnly disabled className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed" />
                     </div>
-                    {/* 第二个：可额外添加（选填，最多 1 条） */}
-                    <div className="flex items-center gap-2 max-w-md">
-                      <span className="text-xs text-gray-400 flex-shrink-0">选填</span>
-                      <div className="relative flex-1">
-                        <input type="text" maxLength={20} value={extraProductNames[0] || ''} onChange={e => {
-                          const v = e.target.value;
-                          setExtraProductNames(v ? [v] : []);
-                        }} placeholder="请输入" className="w-full px-3 py-2 pr-14 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                        <span className="absolute right-3 text-xs text-gray-400 whitespace-nowrap" style={{ top: '50%', transform: 'translateY(-50%)' }}>{(extraProductNames[0] || '').length}/20</span>
-                      </div>
+                    {/* 第二个：可额外添加（选填，表单校验逻辑控制，最多 1 条） */}
+                    <div className="relative max-w-md">
+                      <input type="text" maxLength={20} value={extraProductNames[0] || ''} onChange={e => {
+                        const v = e.target.value;
+                        setExtraProductNames(v ? [v] : []);
+                      }} placeholder="请输入" className="w-full px-3 py-2 pr-14 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                      <span className="absolute right-3 text-xs text-gray-400 whitespace-nowrap" style={{ top: '50%', transform: 'translateY(-50%)' }}>{(extraProductNames[0] || '').length}/20</span>
                     </div>
                   </div>
 
@@ -2321,15 +2314,21 @@ function App() {
                         </div>
                       ))}
                       {_allImages.length < 11 && (
-                        <button type="button" onClick={() => { setImageUploadError(''); setShowImageUploadModal(true); }} className="w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition">
+                        <button type="button" onClick={() => imageUploadRef.current && imageUploadRef.current.click()} className="w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition">
                           <i className="fas fa-plus"></i>
                         </button>
                       )}
                     </div>
+                    {/* 隐藏的文件选择框：点击「+」直接吊起本地文件上传 */}
+                    <input ref={imageUploadRef} type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" className="hidden" onChange={handleImageFileChange} />
+                    <div className="flex items-start gap-1.5 text-xs text-gray-400 mt-1">
+                      <i className="fas fa-image mt-0.5"></i>
+                      <span>支持格式：jpg / png / jpeg；宽高比 1:1；大小 ≤ 1M；尺寸 108×108 ≤ 尺寸 ≤ 108×108</span>
+                    </div>
                     {extraProductImages.length === 0 && (
-                      <div className="flex items-start gap-1.5 text-xs text-orange-500 mt-2">
+                      <div className="flex items-start gap-1.5 text-xs text-orange-500 mt-1.5">
                         <i className="fas fa-exclamation-circle mt-0.5"></i>
-                        <span>产品主图必须至少手动上传 1 张（jpg/png/jpeg，1:1，≤1M，108×108）</span>
+                        <span>产品主图必须至少手动上传 1 张</span>
                       </div>
                     )}
                   </div>
@@ -2390,8 +2389,8 @@ function App() {
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="text-sm font-medium text-gray-700">行动号召</span>
                   <span className="text-red-500">*</span>
-                  <i className="far fa-question-circle text-gray-400 text-xs" title="回车添加行动号召文案，最多 10 条"></i>
-                  <input type="text" value={ctaInput} onChange={e => setCtaInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = ctaInput.trim(); if (v && ctaList.length < 10 && !ctaList.includes(v)) { setCtaList([...ctaList, v]); setCtaInput(''); } else if (ctaList.length >= 10) { notify('行动号召最多 10 条', 'error'); } } }} placeholder="输入行动号召文案，回车添加（最多10条）" className="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                  <i className="far fa-question-circle text-gray-400 text-xs" title="最多10个行动号召，每个2-4个字，可空格分隔，回车(Enter)提交"></i>
+                  <input type="text" value={ctaInput} onChange={e => setCtaInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = ctaInput.trim(); if (!v) return; if (v.length < 2 || v.length > 4) { notify('行动号召每条需 2-4 个字', 'error'); return; } if (ctaList.length >= 10) { notify('行动号召最多 10 条', 'error'); return; } if (ctaList.includes(v)) { notify('该行动号召已存在', 'error'); return; } setCtaList([...ctaList, v]); setCtaInput(''); } }} placeholder="最多10个行动号召，每个2-4个字，可空格分隔，回车(Enter)提交" className="w-48 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                   <span className="text-xs text-gray-400">{ctaList.length}/10</span>
                 </div>
                 {ctaList.length > 0 && (
@@ -2641,37 +2640,6 @@ function App() {
         copyPackages={MOCK.copyPackages}
         channel="toutiao"
       />
-
-      {/* ===== 产品主图上传弹窗 ===== */}
-      {showImageUploadModal && (
-        <div className="modal-overlay" onClick={() => setShowImageUploadModal(false)}>
-          <div className="modal-content w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-bold">上传产品主图</h3>
-              <button onClick={() => setShowImageUploadModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
-            </div>
-            <div className="p-6">
-              {/* 格式限制说明 */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 text-xs text-gray-600 space-y-1.5">
-                <div><i className="fas fa-image text-blue-400 mr-2"></i>支持格式：jpg / png / jpeg 等图片格式</div>
-                <div><i className="fas fa-expand-arrows-alt text-blue-400 mr-2"></i>宽高比：1:1</div>
-                <div><i className="fas fa-file-image text-blue-400 mr-2"></i>大小：≤ 1M</div>
-                <div><i className="fas fa-ruler text-blue-400 mr-2"></i>尺寸：108×108 ≤ 尺寸 ≤ 108×108</div>
-              </div>
-              {imageUploadError && (
-                <div className="flex items-center gap-1.5 text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
-                  <i className="fas fa-exclamation-circle"></i>
-                  <span>{imageUploadError}</span>
-                </div>
-              )}
-              <button type="button" onClick={() => imageUploadRef.current && imageUploadRef.current.click()} className="btn-primary w-full">
-                <i className="fas fa-folder-open mr-2"></i>打开本地文件上传
-              </button>
-              <input ref={imageUploadRef} type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" className="hidden" onChange={handleImageFileChange} />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ===== 附加创意组件 - 资产库弹窗 ===== */}
       {showCreativeCompModal && (

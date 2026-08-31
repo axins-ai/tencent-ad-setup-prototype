@@ -1182,9 +1182,7 @@ function App() {
   const [extraProductNames, setExtraProductNames] = useState([]); // string[]
   // 产品主图：首张为商品库默认图（emoji），用户上传图（dataURL）追加其后，最多 10 张，总上限 11
   const [extraProductImages, setExtraProductImages] = useState([]); // string[] (dataURL)
-  // 产品主图上传弹窗
-  const [showImageUploadModal, setShowImageUploadModal] = useState(false);
-  const [imageUploadError, setImageUploadError] = useState('');
+  // 产品主图上传（点击「+」直接吊起本地文件选择，格式限制文案已展示在表单内）
   const imageUploadRef = useRef(null);
   const handleImageFileChange = e => {
     const file = e.target.files && e.target.files[0];
@@ -1192,13 +1190,13 @@ function App() {
     // 1) 格式校验：jpg / png / jpeg
     const okType = /\.(jpe?g|png)$/i.test(file.name) || ['image/jpeg', 'image/png'].includes(file.type);
     if (!okType) {
-      setImageUploadError('仅支持 jpg / png / jpeg 格式');
+      notify('仅支持 jpg / png / jpeg 格式', 'error');
       e.target.value = '';
       return;
     }
     // 2) 大小校验：≤ 1M
     if (file.size > 1024 * 1024) {
-      setImageUploadError('图片大小需 ≤ 1M');
+      notify('图片大小需 ≤ 1M', 'error');
       e.target.value = '';
       return;
     }
@@ -1211,25 +1209,23 @@ function App() {
         const w = img.naturalWidth,
           h = img.naturalHeight;
         if (Math.abs(w - h) > 2) {
-          setImageUploadError('宽高比需为 1:1');
+          notify('宽高比需为 1:1', 'error');
           return;
         }
         if (Math.abs(w - 108) > 2 || Math.abs(h - 108) > 2) {
-          setImageUploadError('尺寸需为 108×108');
+          notify('尺寸需为 108×108', 'error');
           return;
         }
         if (extraProductImages.length >= 10) {
-          setImageUploadError('产品主图最多 11 张');
+          notify('产品主图最多 11 张', 'error');
           return;
         }
         setExtraProductImages(prev => [...prev, dataUrl]);
-        setShowImageUploadModal(false);
-        setImageUploadError('');
         e.target.value = '';
         notify('产品主图上传成功', 'success');
       };
       img.onerror = () => {
-        setImageUploadError('图片读取失败，请重试');
+        notify('图片读取失败，请重试', 'error');
       };
       img.src = dataUrl;
     };
@@ -3113,11 +3109,7 @@ function App() {
       disabled: true,
       className: "w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed"
     })), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-2 max-w-md"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-xs text-gray-400 flex-shrink-0"
-    }, "选填"), /*#__PURE__*/React.createElement("div", {
-      className: "relative flex-1"
+      className: "relative max-w-md"
     }, /*#__PURE__*/React.createElement("input", {
       type: "text",
       maxLength: 20,
@@ -3134,7 +3126,7 @@ function App() {
         top: '50%',
         transform: 'translateY(-50%)'
       }
-    }, (extraProductNames[0] || '').length, "/20")))), /*#__PURE__*/React.createElement("div", {
+    }, (extraProductNames[0] || '').length, "/20"))), /*#__PURE__*/React.createElement("div", {
       className: "mb-5"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-1.5 mb-2"
@@ -3165,18 +3157,25 @@ function App() {
       className: "fas fa-times"
     })))), _allImages.length < 11 && /*#__PURE__*/React.createElement("button", {
       type: "button",
-      onClick: () => {
-        setImageUploadError('');
-        setShowImageUploadModal(true);
-      },
+      onClick: () => imageUploadRef.current && imageUploadRef.current.click(),
       className: "w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-plus"
-    }))), extraProductImages.length === 0 && /*#__PURE__*/React.createElement("div", {
-      className: "flex items-start gap-1.5 text-xs text-orange-500 mt-2"
+    }))), /*#__PURE__*/React.createElement("input", {
+      ref: imageUploadRef,
+      type: "file",
+      accept: "image/jpeg,image/png,.jpg,.jpeg,.png",
+      className: "hidden",
+      onChange: handleImageFileChange
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-start gap-1.5 text-xs text-gray-400 mt-1"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-image mt-0.5"
+    }), /*#__PURE__*/React.createElement("span", null, "支持格式：jpg / png / jpeg；宽高比 1:1；大小 ≤ 1M；尺寸 108×108 ≤ 尺寸 ≤ 108×108")), extraProductImages.length === 0 && /*#__PURE__*/React.createElement("div", {
+      className: "flex items-start gap-1.5 text-xs text-orange-500 mt-1.5"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-exclamation-circle mt-0.5"
-    }), /*#__PURE__*/React.createElement("span", null, "产品主图必须至少手动上传 1 张（jpg/png/jpeg，1:1，≤1M，108×108）"))), /*#__PURE__*/React.createElement("div", {
+    }), /*#__PURE__*/React.createElement("span", null, "产品主图必须至少手动上传 1 张"))), /*#__PURE__*/React.createElement("div", {
       className: "mb-3"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-1.5 mb-2"
@@ -3248,7 +3247,7 @@ function App() {
     className: "text-red-500"
   }, "*"), /*#__PURE__*/React.createElement("i", {
     className: "far fa-question-circle text-gray-400 text-xs",
-    title: "回车添加行动号召文案，最多 10 条"
+    title: "最多10个行动号召，每个2-4个字，可空格分隔，回车(Enter)提交"
   }), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: ctaInput,
@@ -3257,16 +3256,25 @@ function App() {
       if (e.key === 'Enter') {
         e.preventDefault();
         const v = ctaInput.trim();
-        if (v && ctaList.length < 10 && !ctaList.includes(v)) {
-          setCtaList([...ctaList, v]);
-          setCtaInput('');
-        } else if (ctaList.length >= 10) {
-          notify('行动号召最多 10 条', 'error');
+        if (!v) return;
+        if (v.length < 2 || v.length > 4) {
+          notify('行动号召每条需 2-4 个字', 'error');
+          return;
         }
+        if (ctaList.length >= 10) {
+          notify('行动号召最多 10 条', 'error');
+          return;
+        }
+        if (ctaList.includes(v)) {
+          notify('该行动号召已存在', 'error');
+          return;
+        }
+        setCtaList([...ctaList, v]);
+        setCtaInput('');
       }
     },
-    placeholder: "输入行动号召文案，回车添加（最多10条）",
-    className: "flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+    placeholder: "最多10个行动号召，每个2-4个字，可空格分隔，回车(Enter)提交",
+    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-gray-400"
   }, ctaList.length, "/10")), ctaList.length > 0 && /*#__PURE__*/React.createElement("div", {
@@ -3552,50 +3560,7 @@ function App() {
     copyLibrary: MOCK.copyLibrary,
     copyPackages: MOCK.copyPackages,
     channel: "toutiao"
-  }), showImageUploadModal && /*#__PURE__*/React.createElement("div", {
-    className: "modal-overlay",
-    onClick: () => setShowImageUploadModal(false)
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal-content w-full max-w-md",
-    onClick: e => e.stopPropagation()
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between p-4 border-b"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-lg font-bold"
-  }, "上传产品主图"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowImageUploadModal(false),
-    className: "text-gray-400 hover:text-gray-600"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-times"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 text-xs text-gray-600 space-y-1.5"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-image text-blue-400 mr-2"
-  }), "支持格式：jpg / png / jpeg 等图片格式"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-expand-arrows-alt text-blue-400 mr-2"
-  }), "宽高比：1:1"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-file-image text-blue-400 mr-2"
-  }), "大小：≤ 1M"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-ruler text-blue-400 mr-2"
-  }), "尺寸：108×108 ≤ 尺寸 ≤ 108×108")), imageUploadError && /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-1.5 text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-exclamation-circle"
-  }), /*#__PURE__*/React.createElement("span", null, imageUploadError)), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: () => imageUploadRef.current && imageUploadRef.current.click(),
-    className: "btn-primary w-full"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-folder-open mr-2"
-  }), "打开本地文件上传"), /*#__PURE__*/React.createElement("input", {
-    ref: imageUploadRef,
-    type: "file",
-    accept: "image/jpeg,image/png,.jpg,.jpeg,.png",
-    className: "hidden",
-    onChange: handleImageFileChange
-  })))), showCreativeCompModal && /*#__PURE__*/React.createElement("div", {
+  }), showCreativeCompModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     onClick: () => setShowCreativeCompModal(false)
   }, /*#__PURE__*/React.createElement("div", {
