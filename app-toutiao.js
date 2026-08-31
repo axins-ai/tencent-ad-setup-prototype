@@ -1178,10 +1178,63 @@ function App() {
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
   // ===== 产品信息（按截图：名称/主图/卖点）=====
-  // 用户额外添加的产品名称（最多 1 条，会与商品库默认名称并存展示）
+  // 用户额外添加的产品名称（选填，最多 1 条，会与商品库默认名称并存展示）
   const [extraProductNames, setExtraProductNames] = useState([]); // string[]
-  // 产品主图：首张为商品库默认图（emoji），用户可追加最多 10 张，总上限 11
-  const [extraProductImages, setExtraProductImages] = useState([]); // string[] (emoji)
+  // 产品主图：首张为商品库默认图（emoji），用户上传图（dataURL）追加其后，最多 10 张，总上限 11
+  const [extraProductImages, setExtraProductImages] = useState([]); // string[] (dataURL)
+  // 产品主图上传弹窗
+  const [showImageUploadModal, setShowImageUploadModal] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState('');
+  const imageUploadRef = useRef(null);
+  const handleImageFileChange = e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    // 1) 格式校验：jpg / png / jpeg
+    const okType = /\.(jpe?g|png)$/i.test(file.name) || ['image/jpeg', 'image/png'].includes(file.type);
+    if (!okType) {
+      setImageUploadError('仅支持 jpg / png / jpeg 格式');
+      e.target.value = '';
+      return;
+    }
+    // 2) 大小校验：≤ 1M
+    if (file.size > 1024 * 1024) {
+      setImageUploadError('图片大小需 ≤ 1M');
+      e.target.value = '';
+      return;
+    }
+    // 3) 宽高比 1:1 + 尺寸 108×108：读取后校验
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      const img = new Image();
+      img.onload = () => {
+        const w = img.naturalWidth,
+          h = img.naturalHeight;
+        if (Math.abs(w - h) > 2) {
+          setImageUploadError('宽高比需为 1:1');
+          return;
+        }
+        if (Math.abs(w - 108) > 2 || Math.abs(h - 108) > 2) {
+          setImageUploadError('尺寸需为 108×108');
+          return;
+        }
+        if (extraProductImages.length >= 10) {
+          setImageUploadError('产品主图最多 11 张');
+          return;
+        }
+        setExtraProductImages(prev => [...prev, dataUrl]);
+        setShowImageUploadModal(false);
+        setImageUploadError('');
+        e.target.value = '';
+        notify('产品主图上传成功', 'success');
+      };
+      img.onerror = () => {
+        setImageUploadError('图片读取失败，请重试');
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  };
   // 产品卖点：textarea 回车提交，每条 6-9 字，最多 10 条
   const [extraSellingPointsInput, setExtraSellingPointsInput] = useState('');
   const [extraSellingPoints, setExtraSellingPoints] = useState([]); // string[]
@@ -1273,6 +1326,8 @@ function App() {
       });
     }
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
+    // 产品主图：必须至少手动上传 1 张（商品库默认图不算手动新增）
+    if (extraProductImages.length === 0) errors.push('产品主图至少需手动上传 1 张');
     // 广告数量上限 1000：超限直接拦截，阻止立即运行
     if (getBuildSummary().totalCreatives > 1000) errors.push('广告数量超限（1000个），请减少物料选择');
     return errors;
@@ -3037,20 +3092,8 @@ function App() {
     const _prod = MOCK.productLibrary.find(p => p.id === _pid);
     const _defaultName = _prod ? _prod.name : '请先在「项目配置」选择营销产品';
     const _defaultImage = _prod ? _prod.image : '';
-    // 图库候选：默认图 + 用户追加图（去重保序），不超过 11
+    // 图库候选：默认图 + 用户上传图，不超过 11
     const _allImages = [_defaultImage, ...extraProductImages].filter(Boolean);
-    // 常见 emoji 候选池（用于「+」加图按钮）
-    const _emojiPool = ['📱', '🌐', '📦', '☁️', '🎁', '🍱', '🎫', '🛒', '🎉', '💎', '🧧', '🏆', '⭐', '🔥', '💼', '📚'];
-    const _addRandomImage = () => {
-      if (_allImages.length >= 11) {
-        notify('产品主图最多 11 张', 'error');
-        return;
-      }
-      const remaining = _emojiPool.filter(e => !_allImages.includes(e));
-      const pool = remaining.length > 0 ? remaining : _emojiPool;
-      const pick = pool[Math.floor(Math.random() * pool.length)];
-      setExtraProductImages(prev => [...prev, pick]);
-    };
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", {
       className: "text-sm font-bold text-gray-900 mb-4"
     }, "产品信息"), /*#__PURE__*/React.createElement("div", {
@@ -3069,14 +3112,12 @@ function App() {
       readOnly: true,
       disabled: true,
       className: "w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed"
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "absolute right-3 text-xs text-gray-400 whitespace-nowrap",
-      style: {
-        top: '50%',
-        transform: 'translateY(-50%)'
-      }
-    }, "商品库")), /*#__PURE__*/React.createElement("div", {
-      className: "relative max-w-md"
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-2 max-w-md"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-400 flex-shrink-0"
+    }, "选填"), /*#__PURE__*/React.createElement("div", {
+      className: "relative flex-1"
     }, /*#__PURE__*/React.createElement("input", {
       type: "text",
       maxLength: 20,
@@ -3093,9 +3134,7 @@ function App() {
         top: '50%',
         transform: 'translateY(-50%)'
       }
-    }, (extraProductNames[0] || '').length, "/20")), /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-gray-500 mt-2"
-    }, "可额外添加1个产品名称，系统将优选预估跑量效果更好的产品名称对用户展示")), /*#__PURE__*/React.createElement("div", {
+    }, (extraProductNames[0] || '').length, "/20")))), /*#__PURE__*/React.createElement("div", {
       className: "mb-5"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-1.5 mb-2"
@@ -3111,8 +3150,12 @@ function App() {
       className: "flex flex-wrap gap-2 mb-2"
     }, _allImages.map((em, i) => /*#__PURE__*/React.createElement("div", {
       key: i,
-      className: "relative w-16 h-16 border border-gray-200 rounded-lg bg-white flex items-center justify-center text-2xl shadow-sm"
-    }, /*#__PURE__*/React.createElement("span", null, em), i === 0 && /*#__PURE__*/React.createElement("span", {
+      className: "relative w-16 h-16 border border-gray-200 rounded-lg bg-white flex items-center justify-center text-2xl shadow-sm overflow-hidden"
+    }, em && em.startsWith('data:image') ? /*#__PURE__*/React.createElement("img", {
+      src: em,
+      alt: "产品主图",
+      className: "w-full h-full object-cover"
+    }) : /*#__PURE__*/React.createElement("span", null, em), i === 0 && /*#__PURE__*/React.createElement("span", {
       className: "absolute bottom-0 left-0 right-0 text-[10px] text-center bg-blue-50 text-blue-500 rounded-b-lg leading-4"
     }, "默认"), i > 0 && /*#__PURE__*/React.createElement("button", {
       type: "button",
@@ -3122,15 +3165,18 @@ function App() {
       className: "fas fa-times"
     })))), _allImages.length < 11 && /*#__PURE__*/React.createElement("button", {
       type: "button",
-      onClick: _addRandomImage,
+      onClick: () => {
+        setImageUploadError('');
+        setShowImageUploadModal(true);
+      },
       className: "w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-plus"
-    }))), _allImages.length < 2 && /*#__PURE__*/React.createElement("div", {
+    }))), extraProductImages.length === 0 && /*#__PURE__*/React.createElement("div", {
       className: "flex items-start gap-1.5 text-xs text-orange-500 mt-2"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-exclamation-circle mt-0.5"
-    }), /*#__PURE__*/React.createElement("span", null, "商品库图片默认投放，需再至少添加1个，系统将优选预估跑量效果更好的产品主图对用户展示"))), /*#__PURE__*/React.createElement("div", {
+    }), /*#__PURE__*/React.createElement("span", null, "产品主图必须至少手动上传 1 张（jpg/png/jpeg，1:1，≤1M，108×108）"))), /*#__PURE__*/React.createElement("div", {
       className: "mb-3"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-1.5 mb-2"
@@ -3506,7 +3552,50 @@ function App() {
     copyLibrary: MOCK.copyLibrary,
     copyPackages: MOCK.copyPackages,
     channel: "toutiao"
-  }), showCreativeCompModal && /*#__PURE__*/React.createElement("div", {
+  }), showImageUploadModal && /*#__PURE__*/React.createElement("div", {
+    className: "modal-overlay",
+    onClick: () => setShowImageUploadModal(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-content w-full max-w-md",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between p-4 border-b"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-lg font-bold"
+  }, "上传产品主图"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowImageUploadModal(false),
+    className: "text-gray-400 hover:text-gray-600"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-times"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "p-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 text-xs text-gray-600 space-y-1.5"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-image text-blue-400 mr-2"
+  }), "支持格式：jpg / png / jpeg 等图片格式"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-expand-arrows-alt text-blue-400 mr-2"
+  }), "宽高比：1:1"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-file-image text-blue-400 mr-2"
+  }), "大小：≤ 1M"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-ruler text-blue-400 mr-2"
+  }), "尺寸：108×108 ≤ 尺寸 ≤ 108×108")), imageUploadError && /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-1.5 text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-exclamation-circle"
+  }), /*#__PURE__*/React.createElement("span", null, imageUploadError)), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => imageUploadRef.current && imageUploadRef.current.click(),
+    className: "btn-primary w-full"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-folder-open mr-2"
+  }), "打开本地文件上传"), /*#__PURE__*/React.createElement("input", {
+    ref: imageUploadRef,
+    type: "file",
+    accept: "image/jpeg,image/png,.jpg,.jpeg,.png",
+    className: "hidden",
+    onChange: handleImageFileChange
+  })))), showCreativeCompModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     onClick: () => setShowCreativeCompModal(false)
   }, /*#__PURE__*/React.createElement("div", {
