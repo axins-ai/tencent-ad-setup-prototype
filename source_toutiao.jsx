@@ -1550,21 +1550,22 @@ function App() {
               <div className="relative" ref={conversionDropdownRef}>
                 <button type="button"
                   onClick={() => setShowConversionDropdown(!showConversionDropdown)}
-                  className="w-96 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center justify-between outline-none focus:ring-2 focus:ring-blue-500">
-                  <span className="truncate">{(() => {
+                  style={{ width: '560px' }}
+                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center justify-between outline-none focus:ring-2 focus:ring-blue-500">
+                  <span className="whitespace-nowrap">{(() => {
                     const conv = (MOCK.conversionsByBusinessUnit[businessUnit] || []).find(c => c.id === conversionGoal);
                     if (!conv) return '请选择优化目标';
                     return `${conv.name} / ${conv.eventAsset} / ${conv.source}`;
                   })()}</span>
-                  <i className="fas fa-chevron-down text-gray-400 text-xs ml-2"></i>
+                  <i className="fas fa-chevron-down text-gray-400 text-xs ml-2 flex-none"></i>
                 </button>
                 {showConversionDropdown && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                  <div className="absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg" style={{ width: '560px' }}>
                     {/* 列头 */}
                     <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50 text-xs font-medium text-gray-500">
-                      <span className="flex-1">优化目标名称</span>
-                      <span className="flex-1">事件资产名称</span>
-                      <span className="w-16 flex-none">来源</span>
+                      <span className="flex-1 whitespace-nowrap">优化目标名称</span>
+                      <span className="flex-1 whitespace-nowrap">事件资产名称</span>
+                      <span className="flex-none whitespace-nowrap">来源</span>
                     </div>
                     <div className="max-h-56 overflow-y-auto">
                       {(MOCK.conversionsByBusinessUnit[businessUnit] || []).length === 0 ? (
@@ -1575,10 +1576,10 @@ function App() {
                           return (
                             <div key={conv.id} onClick={() => { setConversionGoal(conv.id); setShowConversionDropdown(false); }}
                               className={`px-3 py-2.5 cursor-pointer border-b border-gray-100 last:border-b-0 ${active ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
-                              <div className="flex items-center gap-2 text-sm">
-                                <span className="flex-1 truncate" style={{ color: active ? '#1890ff' : '#333' }}>{conv.name}</span>
-                                <span className="flex-1 truncate text-gray-500">{conv.eventAsset}</span>
-                                <span className="w-16 flex-none text-gray-400 text-xs">{conv.source}</span>
+                              <div className="flex items-center gap-3 text-sm">
+                                <span className="flex-1 whitespace-nowrap" style={{ color: active ? '#1890ff' : '#333' }}>{conv.name}</span>
+                                <span className="flex-1 whitespace-nowrap text-gray-500">{conv.eventAsset}</span>
+                                <span className="flex-none whitespace-nowrap text-gray-400 text-xs">{conv.source}</span>
                                 {active && <i className="fas fa-check text-blue-500 text-xs flex-none"></i>}
                               </div>
                             </div>

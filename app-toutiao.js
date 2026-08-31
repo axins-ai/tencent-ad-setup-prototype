@@ -2241,25 +2241,31 @@ function App() {
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: () => setShowConversionDropdown(!showConversionDropdown),
-    className: "w-96 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center justify-between outline-none focus:ring-2 focus:ring-blue-500"
+    style: {
+      width: '560px'
+    },
+    className: "px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center justify-between outline-none focus:ring-2 focus:ring-blue-500"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "truncate"
+    className: "whitespace-nowrap"
   }, (() => {
     const conv = (MOCK.conversionsByBusinessUnit[businessUnit] || []).find(c => c.id === conversionGoal);
     if (!conv) return '请选择优化目标';
     return `${conv.name} / ${conv.eventAsset} / ${conv.source}`;
   })()), /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-chevron-down text-gray-400 text-xs ml-2"
+    className: "fas fa-chevron-down text-gray-400 text-xs ml-2 flex-none"
   })), showConversionDropdown && /*#__PURE__*/React.createElement("div", {
-    className: "absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
+    className: "absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg",
+    style: {
+      width: '560px'
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50 text-xs font-medium text-gray-500"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "flex-1"
+    className: "flex-1 whitespace-nowrap"
   }, "优化目标名称"), /*#__PURE__*/React.createElement("span", {
-    className: "flex-1"
+    className: "flex-1 whitespace-nowrap"
   }, "事件资产名称"), /*#__PURE__*/React.createElement("span", {
-    className: "w-16 flex-none"
+    className: "flex-none whitespace-nowrap"
   }, "来源")), /*#__PURE__*/React.createElement("div", {
     className: "max-h-56 overflow-y-auto"
   }, (MOCK.conversionsByBusinessUnit[businessUnit] || []).length === 0 ? /*#__PURE__*/React.createElement("div", {
@@ -2274,16 +2280,16 @@ function App() {
       },
       className: `px-3 py-2.5 cursor-pointer border-b border-gray-100 last:border-b-0 ${active ? 'bg-blue-50' : 'hover:bg-gray-50'}`
     }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-2 text-sm"
+      className: "flex items-center gap-3 text-sm"
     }, /*#__PURE__*/React.createElement("span", {
-      className: "flex-1 truncate",
+      className: "flex-1 whitespace-nowrap",
       style: {
         color: active ? '#1890ff' : '#333'
       }
     }, conv.name), /*#__PURE__*/React.createElement("span", {
-      className: "flex-1 truncate text-gray-500"
+      className: "flex-1 whitespace-nowrap text-gray-500"
     }, conv.eventAsset), /*#__PURE__*/React.createElement("span", {
-      className: "w-16 flex-none text-gray-400 text-xs"
+      className: "flex-none whitespace-nowrap text-gray-400 text-xs"
     }, conv.source), active && /*#__PURE__*/React.createElement("i", {
       className: "fas fa-check text-blue-500 text-xs flex-none"
     })));
