@@ -1960,7 +1960,7 @@ function App() {
                 )}
 
                 {投放时段模式 === 'multi_slot' && (
-                  <div className="mt-3" style={{ paddingLeft: '124px' }}>
+                  <div className="mt-3">
                     <TimeGrid value={timeGridSlots} onChange={setTimeGridSlots} />
                   </div>
                 )}

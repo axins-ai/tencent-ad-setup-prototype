@@ -2735,10 +2735,7 @@ function App() {
     onChange: e => setTimeRangeEnd(e.target.value),
     className: "px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-full"
   }))), 投放时段模式 === 'multi_slot' && /*#__PURE__*/React.createElement("div", {
-    className: "mt-3",
-    style: {
-      paddingLeft: '124px'
-    }
+    className: "mt-3"
   }, /*#__PURE__*/React.createElement(TimeGrid, {
     value: timeGridSlots,
     onChange: setTimeGridSlots
