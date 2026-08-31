@@ -1840,7 +1840,7 @@ function App() {
     className: "text-xs text-gray-400 ml-auto font-normal"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-info-circle mr-1"
-  }), "选择投放账户与搭建类型")), /*#__PURE__*/React.createElement("div", {
+  }), "选择主体和投放账户")), /*#__PURE__*/React.createElement("div", {
     className: "p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
@@ -1856,6 +1856,19 @@ function App() {
     maxLength: 50,
     className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
   })), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 mb-5"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
+  }, "主体选择 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*")), /*#__PURE__*/React.createElement("select", {
+    value: businessUnit,
+    onChange: e => setBusinessUnit(e.target.value),
+    className: "w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+  }, MOCK.businessUnits.map(bu => /*#__PURE__*/React.createElement("option", {
+    key: bu.id,
+    value: bu.id
+  }, bu.name, "（", bu.id, "）")))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5 flex-wrap"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"

@@ -1267,7 +1267,7 @@ function App() {
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
             <h2 className="text-base font-semibold text-gray-900">基础配置</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="fas fa-info-circle mr-1"></i>选择投放账户与搭建类型</span>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="fas fa-info-circle mr-1"></i>选择主体和投放账户</span>
           </div>
           <div className="p-6">
             {/* 任务名称：标签在左，输入栏在右 */}
@@ -1281,6 +1281,14 @@ function App() {
                 maxLength={50}
                 className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
+            </div>
+            {/* 主体选择：一行一项，与广点通母版一致 */}
+            <div className="flex items-center gap-3 mb-5">
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">主体选择 <span className="text-red-500">*</span></label>
+              <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
+                className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
+              </select>
             </div>
             {/* 选择账户：选项框缩短，刷新按钮在选项框右侧 */}
             <div className="flex items-center gap-3 mb-5 flex-wrap">
