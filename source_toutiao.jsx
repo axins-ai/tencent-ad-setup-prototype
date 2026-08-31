@@ -617,7 +617,7 @@ function App() {
   // 性别
   const [genderSelection, setGenderSelection] = useState('unlimited'); // 'unlimited' | 'male' | 'female'
   // 自定义人群（按账户分别配置）
-  const [accountAudienceSettings, setAccountAudienceSettings] = useState({}); // { [accountId]: { mode: 'unlimited'|'exclude', excludeList: [] } }
+  const [accountAudienceSettings, setAccountAudienceSettings] = useState({}); // { [accountId]: { mode: 'unlimited'|'target'|'exclude', targetList: [], excludeList: [] } }
   // 人群包列表（可刷新）
   const [audiencePackageList, setAudiencePackageList] = useState([...MOCK.customAudiences]);
   const [excludeAudiencePackageList, setExcludeAudiencePackageList] = useState([...MOCK.excludeConversions]);
@@ -632,7 +632,7 @@ function App() {
   };
   // 获取账户的人群配置
   const getAccountAudience = (accountId) => {
-    return accountAudienceSettings[accountId] || { mode: 'unlimited', excludeList: [] };
+    return accountAudienceSettings[accountId] || { mode: 'unlimited', targetList: [], excludeList: [] };
   };
   // 更新账户的人群配置
   const updateAccountAudience = (accountId, updates) => {
@@ -1732,6 +1732,10 @@ function App() {
                         <div className="flex items-center gap-2 mb-2">
                           <label className="flex items-center cursor-pointer">
                             <input type="radio" name={`audience_mode_${accountId}`} value="unlimited" checked={audienceSettings.mode === 'unlimited'} onChange={() => updateAccountAudience(accountId, { mode: 'unlimited' })} className="mr-1 w-3 h-3" />
+                            <span className="text-xs">不限</span>
+                          </label>
+                          <label className="flex items-center cursor-pointer">
+                            <input type="radio" name={`audience_mode_${accountId}`} value="target" checked={audienceSettings.mode === 'target'} onChange={() => updateAccountAudience(accountId, { mode: 'target' })} className="mr-1 w-3 h-3" />
                             <span className="text-xs">定向</span>
                           </label>
                           <label className="flex items-center cursor-pointer">
@@ -1739,6 +1743,40 @@ function App() {
                             <span className="text-xs">排除</span>
                           </label>
                         </div>
+                        {audienceSettings.mode === 'target' && (
+                          <div className="animate-fadeIn">
+                            <select
+                              value=""
+                              onChange={e => {
+                                const val = e.target.value;
+                                if (val && !audienceSettings.targetList.includes(val)) {
+                                  updateAccountAudience(accountId, { targetList: [...audienceSettings.targetList, val] });
+                                }
+                              }}
+                              className="w-full px-1.5 py-1 border border-blue-200 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500"
+                            >
+                              <option value="">+ 定向人群包 +</option>
+                              {audiencePackageList.map(ap => (
+                                <option key={ap.id} value={ap.id} disabled={audienceSettings.targetList.includes(ap.id)}>
+                                  {ap.name.length > 10 ? ap.name.substring(0, 10) + '...' : ap.name}{audienceSettings.targetList.includes(ap.id) ? ' ✓' : ''}
+                                </option>
+                              ))}
+                            </select>
+                            {audienceSettings.targetList.length > 0 && (
+                              <div className="flex flex-wrap gap-0.5 mt-1">
+                                {audienceSettings.targetList.map(id => {
+                                  const pkg = audiencePackageList.find(a => a.id === id);
+                                  return pkg ? (
+                                    <span key={id} className="tag bg-blue-100 text-blue-800 text-xs px-1 py-0">
+                                      {pkg.name.length > 8 ? pkg.name.substring(0, 8) + '...' : pkg.name}
+                                      <button onClick={() => updateAccountAudience(accountId, { targetList: audienceSettings.targetList.filter(i => i !== id) })} className="ml-0.5"><i className="fas fa-times text-xs"></i></button>
+                                    </span>
+                                  ) : null;
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
                         {audienceSettings.mode === 'exclude' && (
                           <div className="animate-fadeIn">
                             <select

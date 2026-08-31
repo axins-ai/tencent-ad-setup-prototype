@@ -1055,7 +1055,7 @@ function App() {
   // 性别
   const [genderSelection, setGenderSelection] = useState('unlimited'); // 'unlimited' | 'male' | 'female'
   // 自定义人群（按账户分别配置）
-  const [accountAudienceSettings, setAccountAudienceSettings] = useState({}); // { [accountId]: { mode: 'unlimited'|'exclude', excludeList: [] } }
+  const [accountAudienceSettings, setAccountAudienceSettings] = useState({}); // { [accountId]: { mode: 'unlimited'|'target'|'exclude', targetList: [], excludeList: [] } }
   // 人群包列表（可刷新）
   const [audiencePackageList, setAudiencePackageList] = useState([...MOCK.customAudiences]);
   const [excludeAudiencePackageList, setExcludeAudiencePackageList] = useState([...MOCK.excludeConversions]);
@@ -1072,6 +1072,7 @@ function App() {
   const getAccountAudience = accountId => {
     return accountAudienceSettings[accountId] || {
       mode: 'unlimited',
+      targetList: [],
       excludeList: []
     };
   };
@@ -2464,6 +2465,19 @@ function App() {
       className: "mr-1 w-3 h-3"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text-xs"
+    }, "不限")), /*#__PURE__*/React.createElement("label", {
+      className: "flex items-center cursor-pointer"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "radio",
+      name: `audience_mode_${accountId}`,
+      value: "target",
+      checked: audienceSettings.mode === 'target',
+      onChange: () => updateAccountAudience(accountId, {
+        mode: 'target'
+      }),
+      className: "mr-1 w-3 h-3"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs"
     }, "定向")), /*#__PURE__*/React.createElement("label", {
       className: "flex items-center cursor-pointer"
     }, /*#__PURE__*/React.createElement("input", {
@@ -2477,7 +2491,41 @@ function App() {
       className: "mr-1 w-3 h-3"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text-xs"
-    }, "排除"))), audienceSettings.mode === 'exclude' && /*#__PURE__*/React.createElement("div", {
+    }, "排除"))), audienceSettings.mode === 'target' && /*#__PURE__*/React.createElement("div", {
+      className: "animate-fadeIn"
+    }, /*#__PURE__*/React.createElement("select", {
+      value: "",
+      onChange: e => {
+        const val = e.target.value;
+        if (val && !audienceSettings.targetList.includes(val)) {
+          updateAccountAudience(accountId, {
+            targetList: [...audienceSettings.targetList, val]
+          });
+        }
+      },
+      className: "w-full px-1.5 py-1 border border-blue-200 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500"
+    }, /*#__PURE__*/React.createElement("option", {
+      value: ""
+    }, "+ 定向人群包 +"), audiencePackageList.map(ap => /*#__PURE__*/React.createElement("option", {
+      key: ap.id,
+      value: ap.id,
+      disabled: audienceSettings.targetList.includes(ap.id)
+    }, ap.name.length > 10 ? ap.name.substring(0, 10) + '...' : ap.name, audienceSettings.targetList.includes(ap.id) ? ' ✓' : ''))), audienceSettings.targetList.length > 0 && /*#__PURE__*/React.createElement("div", {
+      className: "flex flex-wrap gap-0.5 mt-1"
+    }, audienceSettings.targetList.map(id => {
+      const pkg = audiencePackageList.find(a => a.id === id);
+      return pkg ? /*#__PURE__*/React.createElement("span", {
+        key: id,
+        className: "tag bg-blue-100 text-blue-800 text-xs px-1 py-0"
+      }, pkg.name.length > 8 ? pkg.name.substring(0, 8) + '...' : pkg.name, /*#__PURE__*/React.createElement("button", {
+        onClick: () => updateAccountAudience(accountId, {
+          targetList: audienceSettings.targetList.filter(i => i !== id)
+        }),
+        className: "ml-0.5"
+      }, /*#__PURE__*/React.createElement("i", {
+        className: "fas fa-times text-xs"
+      }))) : null;
+    }))), audienceSettings.mode === 'exclude' && /*#__PURE__*/React.createElement("div", {
       className: "animate-fadeIn"
     }, /*#__PURE__*/React.createElement("select", {
       value: "",
