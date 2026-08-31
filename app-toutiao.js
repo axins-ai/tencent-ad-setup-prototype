@@ -3240,7 +3240,7 @@ function App() {
   }, "附加创意组件")), /*#__PURE__*/React.createElement("div", {
     className: "mb-5"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 mb-2 flex-wrap"
+    className: "flex items-center gap-1.5 mb-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700"
   }, "行动号召"), /*#__PURE__*/React.createElement("span", {
@@ -3248,43 +3248,46 @@ function App() {
   }, "*"), /*#__PURE__*/React.createElement("i", {
     className: "far fa-question-circle text-gray-400 text-xs",
     title: "最多10个行动号召，每个2-4个字，可空格分隔，回车(Enter)提交"
-  }), /*#__PURE__*/React.createElement("input", {
-    type: "text",
+  })), /*#__PURE__*/React.createElement("textarea", {
     value: ctaInput,
     onChange: e => setCtaInput(e.target.value),
     onKeyDown: e => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        const v = ctaInput.trim();
-        if (!v) return;
-        if (v.length < 2 || v.length > 4) {
-          notify('行动号召每条需 2-4 个字', 'error');
-          return;
-        }
-        if (ctaList.length >= 10) {
+        const tokens = ctaInput.split(/\s+/).map(s => s.trim()).filter(Boolean);
+        if (tokens.length === 0) return;
+        if (ctaList.length + tokens.length > 10) {
           notify('行动号召最多 10 条', 'error');
           return;
         }
-        if (ctaList.includes(v)) {
-          notify('该行动号召已存在', 'error');
+        const invalid = tokens.find(t => t.length < 2 || t.length > 4);
+        if (invalid) {
+          notify(`「${invalid}」长度需 2-4 个字`, 'error');
           return;
         }
-        setCtaList([...ctaList, v]);
+        const dup = tokens.find(t => ctaList.includes(t));
+        if (dup) {
+          notify(`「${dup}」已存在`, 'error');
+          return;
+        }
+        setCtaList([...ctaList, ...tokens]);
         setCtaInput('');
       }
     },
     placeholder: "最多10个行动号召，每个2-4个字，可空格分隔，回车(Enter)提交",
-    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-gray-400"
-  }, ctaList.length, "/10")), ctaList.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap gap-1.5"
+    rows: 3,
+    className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs text-gray-400 mt-1"
+  }, ctaList.length, "/10"), ctaList.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap gap-1.5 mt-2"
   }, ctaList.map((c, i) => /*#__PURE__*/React.createElement("span", {
     key: i,
-    className: "tag bg-gray-100 text-gray-800 text-xs px-2 py-1 flex items-center gap-1"
+    className: "inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-800 border border-gray-200 rounded px-2 py-0.5"
   }, c, /*#__PURE__*/React.createElement("button", {
+    type: "button",
     onClick: () => setCtaList(ctaList.filter((_, idx) => idx !== i)),
-    className: "text-gray-500 hover:text-gray-700"
+    className: "text-gray-400 hover:text-red-500"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-times"
   })))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
