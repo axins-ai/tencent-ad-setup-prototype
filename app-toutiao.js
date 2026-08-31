@@ -3039,7 +3039,7 @@ function App() {
     const _defaultImage = _prod ? _prod.image : '';
     // 图库候选：默认图 + 用户追加图（去重保序），不超过 11
     const _allImages = [_defaultImage, ...extraProductImages].filter(Boolean);
-    // 常见 emoji 候选池（用于「换一批」「+」按钮）
+    // 常见 emoji 候选池（用于「+」加图按钮）
     const _emojiPool = ['📱', '🌐', '📦', '☁️', '🎁', '🍱', '🎫', '🛒', '🎉', '💎', '🧧', '🏆', '⭐', '🔥', '💼', '📚'];
     const _addRandomImage = () => {
       if (_allImages.length >= 11) {
@@ -3051,44 +3051,9 @@ function App() {
       const pick = pool[Math.floor(Math.random() * pool.length)];
       setExtraProductImages(prev => [...prev, pick]);
     };
-    const _refreshImages = () => {
-      // 重摇用户追加图（默认图保留在第一位）
-      const pool = _emojiPool.filter(e => e !== _defaultImage);
-      const picked = [];
-      for (let i = 0; i < 3 && pool.length > 0; i++) {
-        const idx = Math.floor(Math.random() * pool.length);
-        picked.push(pool[idx]);
-        pool.splice(idx, 1);
-      }
-      setExtraProductImages(picked);
-    };
-    const _addHotSelling = () => {
-      const samples = ['正品保证 全国联保', '限时特惠 立减30', '官方正品 七天退换', '顺丰包邮 当日发', '满199减50', '销量过万 好评'];
-      const picked = [];
-      for (const s of samples) {
-        if (picked.length + extraSellingPoints.length >= 10) break;
-        if (!extraSellingPoints.includes(s)) picked.push(s);
-      }
-      if (picked.length === 0) {
-        notify('卖点已达上限 10 条', 'error');
-        return;
-      }
-      setExtraSellingPoints([...extraSellingPoints, ...picked]);
-    };
-    return /*#__PURE__*/React.createElement("div", {
-      className: "bg-white border border-gray-200 rounded-xl p-4"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-2 mb-4"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "w-5 h-5 bg-blue-500 text-white rounded flex items-center justify-center text-xs"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-list-ul"
-    })), /*#__PURE__*/React.createElement("h4", {
-      className: "text-sm font-bold text-gray-900"
-    }, "产品信息"), /*#__PURE__*/React.createElement("i", {
-      className: "far fa-question-circle text-gray-400 text-xs",
-      title: "为广告创意提供产品名称、主图与卖点，系统将优选效果更好的组合对外展示"
-    })), /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", {
+      className: "text-sm font-bold text-gray-900 mb-4"
+    }, "产品信息"), /*#__PURE__*/React.createElement("div", {
       className: "mb-5"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-1.5 mb-2"
@@ -3097,7 +3062,7 @@ function App() {
     }, "产品名称"), /*#__PURE__*/React.createElement("span", {
       className: "text-red-500"
     }, "*")), /*#__PURE__*/React.createElement("div", {
-      className: "relative mb-2"
+      className: "relative mb-2 max-w-md"
     }, /*#__PURE__*/React.createElement("input", {
       type: "text",
       value: _defaultName,
@@ -3105,9 +3070,13 @@ function App() {
       disabled: true,
       className: "w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed"
     }), /*#__PURE__*/React.createElement("span", {
-      className: "absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"
+      className: "absolute right-3 text-xs text-gray-400 whitespace-nowrap",
+      style: {
+        top: '50%',
+        transform: 'translateY(-50%)'
+      }
     }, "商品库")), /*#__PURE__*/React.createElement("div", {
-      className: "relative"
+      className: "relative max-w-md"
     }, /*#__PURE__*/React.createElement("input", {
       type: "text",
       maxLength: 20,
@@ -3119,7 +3088,11 @@ function App() {
       placeholder: "请输入",
       className: "w-full px-3 py-2 pr-14 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
     }), /*#__PURE__*/React.createElement("span", {
-      className: "absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"
+      className: "absolute right-3 text-xs text-gray-400 whitespace-nowrap",
+      style: {
+        top: '50%',
+        transform: 'translateY(-50%)'
+      }
     }, (extraProductNames[0] || '').length, "/20")), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-gray-500 mt-2"
     }, "可额外添加1个产品名称，系统将优选预估跑量效果更好的产品名称对用户展示")), /*#__PURE__*/React.createElement("div", {
@@ -3196,9 +3169,9 @@ function App() {
       },
       placeholder: "最多10个产品卖点，每个6-9个字，可空格分隔，回车(Enter)提交",
       rows: 3,
-      className: "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
     }), /*#__PURE__*/React.createElement("div", {
-      className: "text-xs text-gray-400 text-right mt-1"
+      className: "text-xs text-gray-400 mt-1"
     }, extraSellingPoints.length, "/10"), extraSellingPoints.length > 0 && /*#__PURE__*/React.createElement("div", {
       className: "flex flex-wrap gap-1.5 mt-2"
     }, extraSellingPoints.map((sp, i) => /*#__PURE__*/React.createElement("span", {
@@ -3210,19 +3183,7 @@ function App() {
       className: "text-blue-400 hover:text-red-500"
     }, /*#__PURE__*/React.createElement("i", {
       className: "fas fa-times"
-    })))))), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-between mt-4 pt-3 border-t border-gray-100"
-    }, /*#__PURE__*/React.createElement("button", {
-      type: "button",
-      onClick: _addHotSelling,
-      className: "text-sm px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 inline-flex items-center gap-1"
-    }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-plus text-xs"
-    }), "近期热卖商品"), /*#__PURE__*/React.createElement("button", {
-      type: "button",
-      onClick: _refreshImages,
-      className: "text-sm text-blue-500 hover:text-blue-600"
-    }, "换一批")));
+    })))))));
   })(), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-gray-900 mb-4"
   }, "创意组件"), /*#__PURE__*/React.createElement("div", {
