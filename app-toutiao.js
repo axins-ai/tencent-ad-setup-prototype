@@ -1120,6 +1120,7 @@ function App() {
   const [selectedTargetAudiences, setSelectedTargetAudiences] = useState([]);
   const [selectedExcludeAudiences, setSelectedExcludeAudiences] = useState([]);
   const [bidAmount, setBidAmount] = useState('');
+  const [bidStrategy, setBidStrategy] = useState('stable_cost'); // 'stable_cost'=稳定成本 | 'max_convert'=最大转化
   const [dailyBudget, setDailyBudget] = useState('');
   const [onePartyData, setOnePartyData] = useState(false); // 默认关闭，且锁定
   const [quickLaunch, setQuickLaunch] = useState(false);
@@ -1239,14 +1240,16 @@ function App() {
     }
   }, [accountSearchText]);
   const overallProgress = (() => {
-    const checks = [selectedAccountIds.length > 0, specificProduct !== '', conversionGoal !== '', targetingSource === 'package' ? selectedTargetingPackages.length > 0 : geoSelectedProvinces.length > 0 || geoMode === 'unlimited', bidAmount !== '', selectedMaterials.length > 0, selectedCopies.length > 0, unitName !== ''];
+    const checks = [selectedAccountIds.length > 0, specificProduct !== '', conversionGoal !== '', targetingSource === 'package' ? selectedTargetingPackages.length > 0 : geoSelectedProvinces.length > 0 || geoMode === 'unlimited', bidStrategy === 'max_convert' ? true : bidAmount !== '', selectedMaterials.length > 0, selectedCopies.length > 0, unitName !== ''];
     const done = checks.filter(Boolean).length;
     return done === 0 ? 0 : Math.round(done / checks.length * 100);
   })();
   const validationErrors = (() => {
     const errors = [];
-    if (bidAmount === '') errors.push('请设置出价');
-    if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
+    if (bidStrategy === 'stable_cost') {
+      if (bidAmount === '') errors.push('请设置出价');
+      if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
+    }
     if (selectedMaterials.length === 0) errors.push('请选择素材');
     if (selectedCopies.length === 0) errors.push('请选择文案');
     if ((composeRule.images || 0) + (composeRule.videos || 0) === 0) errors.push('图片和视频不能同时为 0');
@@ -1528,6 +1531,7 @@ function App() {
         if (data.audienceMode) setAudienceMode(data.audienceMode);
         if (data.excludeConvertedMode) setExcludeConvertedMode(data.excludeConvertedMode);
         if (data.bidAmount !== undefined) setBidAmount(data.bidAmount);
+        if (data.bidStrategy !== undefined) setBidStrategy(data.bidStrategy);
         if (data.dailyBudget !== undefined) setDailyBudget(data.dailyBudget);
         if (data.投放日期类型) set投放日期类型(data.投放日期类型);
         if (data.自定义开始日期) set自定义开始日期(data.自定义开始日期);
@@ -1584,6 +1588,7 @@ function App() {
         conversionBehavior,
         conversionTimeRange,
         bidAmount,
+        bidStrategy,
         dailyBudget,
         投放日期类型,
         自定义开始日期,
@@ -2030,10 +2035,7 @@ function App() {
   }), projectRuleHover === 'fixed' && /*#__PURE__*/React.createElement("span", {
     className: "absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none"
   }, "手动指定每个账户的项目数量"))))), projectGenRule === 'total_per_project' && /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 mt-3",
-    style: {
-      paddingLeft: '124px'
-    }
+    className: "flex items-center gap-2 mt-3"
   }, /*#__PURE__*/React.createElement("label", {
     className: "text-sm text-gray-700 whitespace-nowrap"
   }, "每个项目广告数上限"), /*#__PURE__*/React.createElement("input", {
@@ -2044,10 +2046,7 @@ function App() {
     onChange: e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1))),
     className: "w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
   })), projectGenRule === 'fixed' && /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 mt-3",
-    style: {
-      paddingLeft: '124px'
-    }
+    className: "flex items-center gap-2 mt-3"
   }, /*#__PURE__*/React.createElement("label", {
     className: "text-sm text-gray-700 whitespace-nowrap"
   }, "每个账户指定项目数"), /*#__PURE__*/React.createElement("input", {
@@ -2204,10 +2203,7 @@ function App() {
     onChange: () => setProductAllocMode('per_account'),
     className: "w-4 h-4 mr-2 text-blue-600"
   }), /*#__PURE__*/React.createElement("span", null, "分账户定制")))), productAllocMode === 'shared' ? /*#__PURE__*/React.createElement("div", {
-    className: "mt-3",
-    style: {
-      paddingLeft: '124px'
-    }
+    className: "mt-3"
   }, /*#__PURE__*/React.createElement("select", {
     value: specificProduct,
     onChange: e => setSpecificProduct(e.target.value),
@@ -2216,10 +2212,7 @@ function App() {
     key: sp.id,
     value: sp.id
   }, sp.name)))) : /*#__PURE__*/React.createElement("p", {
-    className: "text-sm text-gray-500 mt-2",
-    style: {
-      paddingLeft: '124px'
-    }
+    className: "text-sm text-gray-500 mt-2"
   }, "分账户定制：在下方按账户分别选择商品")), productAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", {
     className: "mb-5"
   }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
@@ -2753,6 +2746,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "date_type",
+    value: "long_term",
     checked: 投放日期类型 === 'long_term',
     onChange: () => set投放日期类型('long_term'),
     className: "mr-2"
@@ -2763,16 +2757,14 @@ function App() {
   }, /*#__PURE__*/React.createElement("input", {
     type: "radio",
     name: "date_type",
+    value: "custom",
     checked: 投放日期类型 === 'custom',
     onChange: () => set投放日期类型('custom'),
     className: "mr-2"
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
   }, "设置开始和结束日期"))), 投放日期类型 === 'custom' ? /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-4 mt-3",
-    style: {
-      paddingLeft: '124px'
-    }
+    className: "flex gap-4 mt-3"
   }, /*#__PURE__*/React.createElement("input", {
     type: "date",
     value: 自定义开始日期,
@@ -2841,13 +2833,32 @@ function App() {
   }))), /*#__PURE__*/React.createElement("div", {
     className: "mb-4"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
-  }, "竞价策略"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: "稳定成本",
-    disabled: true,
-    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
-  })), /*#__PURE__*/React.createElement("div", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "竞价策略"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-6"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "bid_strategy",
+    value: "stable_cost",
+    checked: bidStrategy === 'stable_cost',
+    onChange: () => setBidStrategy('stable_cost'),
+    className: "mr-2"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "稳定成本")), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "bid_strategy",
+    value: "max_convert",
+    checked: bidStrategy === 'max_convert',
+    onChange: () => setBidStrategy('max_convert'),
+    className: "mr-2"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm"
+  }, "最大转化")))), bidStrategy === 'stable_cost' && /*#__PURE__*/React.createElement("div", {
     className: "mb-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "block text-sm font-medium text-gray-700 mb-1"
@@ -3641,10 +3652,16 @@ function App() {
           ok: geoOk
         });
         items.push({
+          label: '竞价策略',
+          value: bidStrategy === 'max_convert' ? '最大转化' : '稳定成本',
+          required: false,
+          ok: true
+        });
+        items.push({
           label: '出价',
-          value: bidAmount !== '' ? '¥' + bidAmount : '未设置',
-          required: true,
-          ok: bidAmount !== ''
+          value: bidStrategy === 'max_convert' ? '无需出价' : bidAmount !== '' ? '¥' + bidAmount : '未设置',
+          required: bidStrategy !== 'max_convert',
+          ok: bidStrategy === 'max_convert' || bidAmount !== ''
         });
         items.push({
           label: '日预算',

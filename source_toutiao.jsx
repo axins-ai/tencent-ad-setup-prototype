@@ -675,6 +675,7 @@ function App() {
   const [selectedTargetAudiences, setSelectedTargetAudiences] = useState([]);
   const [selectedExcludeAudiences, setSelectedExcludeAudiences] = useState([]);
   const [bidAmount, setBidAmount] = useState('');
+  const [bidStrategy, setBidStrategy] = useState('stable_cost'); // 'stable_cost'=稳定成本 | 'max_convert'=最大转化
   const [dailyBudget, setDailyBudget] = useState('');
   const [onePartyData, setOnePartyData] = useState(false); // 默认关闭，且锁定
   const [quickLaunch, setQuickLaunch] = useState(false);
@@ -803,7 +804,7 @@ function App() {
       specificProduct !== '',
       conversionGoal !== '',
       targetingSource === 'package' ? selectedTargetingPackages.length > 0 : (geoSelectedProvinces.length > 0 || geoMode === 'unlimited'),
-      bidAmount !== '',
+      bidStrategy === 'max_convert' ? true : bidAmount !== '',
       selectedMaterials.length > 0,
       selectedCopies.length > 0,
       unitName !== '',
@@ -813,8 +814,10 @@ function App() {
   })();
   const validationErrors = (() => {
     const errors = [];
-    if (bidAmount === '') errors.push('请设置出价');
-    if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
+    if (bidStrategy === 'stable_cost') {
+      if (bidAmount === '') errors.push('请设置出价');
+      if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
+    }
     if (selectedMaterials.length === 0) errors.push('请选择素材');
     if (selectedCopies.length === 0) errors.push('请选择文案');
     if (((composeRule.images || 0) + (composeRule.videos || 0)) === 0) errors.push('图片和视频不能同时为 0');
@@ -1037,6 +1040,7 @@ function App() {
         if (data.audienceMode) setAudienceMode(data.audienceMode);
         if (data.excludeConvertedMode) setExcludeConvertedMode(data.excludeConvertedMode);
         if (data.bidAmount !== undefined) setBidAmount(data.bidAmount);
+        if (data.bidStrategy !== undefined) setBidStrategy(data.bidStrategy);
         if (data.dailyBudget !== undefined) setDailyBudget(data.dailyBudget);
         if (data.投放日期类型) set投放日期类型(data.投放日期类型);
         if (data.自定义开始日期) set自定义开始日期(data.自定义开始日期);
@@ -1074,7 +1078,7 @@ function App() {
         locationTypeResident, ageSelections, customAgeMin, customAgeMax,
         genderSelection, audienceMode, selectedTargetAudiences, selectedExcludeAudiences,
         excludeConvertedMode, conversionBehavior, conversionTimeRange,
-        bidAmount, dailyBudget,
+        bidAmount, bidStrategy, dailyBudget,
         投放日期类型, 自定义开始日期, 自定义结束日期,
         selectedMaterials, selectedCopies,
         composeRule, composeStrategy,
@@ -1412,13 +1416,13 @@ function App() {
                   </div>
                 </div>
                 {projectGenRule === 'total_per_project' && (
-                  <div className="flex items-center gap-2 mt-3" style={{ paddingLeft: '124px' }}>
+                  <div className="flex items-center gap-2 mt-3">
                     <label className="text-sm text-gray-700 whitespace-nowrap">每个项目广告数上限</label>
                     <input type="number" min="1" max="1000" value={adsPerProject} onChange={e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
                 )}
                 {projectGenRule === 'fixed' && (
-                  <div className="flex items-center gap-2 mt-3" style={{ paddingLeft: '124px' }}>
+                  <div className="flex items-center gap-2 mt-3">
                     <label className="text-sm text-gray-700 whitespace-nowrap">每个账户指定项目数</label>
                     <input type="number" min="1" max="100" value={projectsPerAccount} onChange={e => setProjectsPerAccount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                   </div>
@@ -1529,13 +1533,13 @@ function App() {
                 </div>
               </div>
               {productAllocMode === 'shared' ? (
-                <div className="mt-3" style={{ paddingLeft: '124px' }}>
+                <div className="mt-3">
                   <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
                   </select>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 mt-2" style={{ paddingLeft: '124px' }}>分账户定制：在下方按账户分别选择商品</p>
+                <p className="text-sm text-gray-500 mt-2">分账户定制：在下方按账户分别选择商品</p>
               )}
             </div>
             {/* 分账户定制商品（网格），左对齐营销产品标签 */}
@@ -1989,16 +1993,16 @@ function App() {
                 <div className="flex items-center gap-6 flex-wrap">
                   <span className="text-sm font-medium text-gray-700">投放时间</span>
                   <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="date_type" checked={投放日期类型 === 'long_term'} onChange={() => set投放日期类型('long_term')} className="mr-2" />
+                    <input type="radio" name="date_type" value="long_term" checked={投放日期类型 === 'long_term'} onChange={() => set投放日期类型('long_term')} className="mr-2" />
                     <span className="text-sm">从今天起长期投放</span>
                   </label>
                   <label className="flex items-center cursor-pointer">
-                    <input type="radio" name="date_type" checked={投放日期类型 === 'custom'} onChange={() => set投放日期类型('custom')} className="mr-2" />
+                    <input type="radio" name="date_type" value="custom" checked={投放日期类型 === 'custom'} onChange={() => set投放日期类型('custom')} className="mr-2" />
                     <span className="text-sm">设置开始和结束日期</span>
                   </label>
                 </div>
                 {投放日期类型 === 'custom' ? (
-                  <div className="flex gap-4 mt-3" style={{ paddingLeft: '124px' }}>
+                  <div className="flex gap-4 mt-3">
                     <input type="date" value={自定义开始日期} onChange={e => set自定义开始日期(e.target.value)} placeholder="开始日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                     <input type="date" value={自定义结束日期} onChange={e => set自定义结束日期(e.target.value)} placeholder="结束日期" className="px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
@@ -2050,38 +2054,49 @@ function App() {
                 )}
               </div>
 
-              {/* 竞价策略（独立一行） */}
+              {/* 竞价策略：单选（稳定成本 / 最大转化） */}
               <div className="mb-4">
-                <div className="block text-sm font-medium text-gray-700 mb-1">竞价策略</div>
-                <input type="text" value="稳定成本" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500" />
+                <div className="block text-sm font-medium text-gray-700 mb-2">竞价策略</div>
+                <div className="flex gap-6">
+                  <label className="flex items-center cursor-pointer">
+                    <input type="radio" name="bid_strategy" value="stable_cost" checked={bidStrategy === 'stable_cost'} onChange={() => setBidStrategy('stable_cost')} className="mr-2" />
+                    <span className="text-sm">稳定成本</span>
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input type="radio" name="bid_strategy" value="max_convert" checked={bidStrategy === 'max_convert'} onChange={() => setBidStrategy('max_convert')} className="mr-2" />
+                    <span className="text-sm">最大转化</span>
+                  </label>
+                </div>
               </div>
 
-              {/* 出价（竞价策略下一行） */}
-              <div className="mb-4">
-                <div className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></div>
-                <input
-                  type="number"
-                  min="0.01"
-                  max="300"
-                  step="0.01"
-                  value={bidAmount}
-                  onChange={e => setBidAmount(e.target.value)}
-                  onBlur={e => {
-                    const v = e.target.value;
-                    if (v === '') return;
-                    let n = parseFloat(v);
-                    if (isNaN(n)) return;
-                    if (n < 0.01) n = 0.01;
-                    if (n > 300) n = 300;
-                    setBidAmount(String(n));
-                  }}
-                  placeholder="0.01 ~ 300"
-                  className={`w-48 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
-                />
-                {bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && (
-                  <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
-                )}
-              </div>
+              {/* 出价：仅稳定成本时需配置 */}
+              {bidStrategy === 'stable_cost' && (
+                <div className="mb-4">
+                  <div className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></div>
+                  <input
+                    type="number"
+                    min="0.01"
+                    max="300"
+                    step="0.01"
+                    value={bidAmount}
+                    onChange={e => setBidAmount(e.target.value)}
+                    onBlur={e => {
+                      const v = e.target.value;
+                      if (v === '') return;
+                      let n = parseFloat(v);
+                      if (isNaN(n)) return;
+                      if (n < 0.01) n = 0.01;
+                      if (n > 300) n = 300;
+                      setBidAmount(String(n));
+                    }}
+                    placeholder="0.01 ~ 300"
+                    className={`w-48 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
+                  />
+                  {bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && (
+                    <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
+                  )}
+                </div>
+              )}
 
               {/* 日预算 */}
               <div>
@@ -2680,7 +2695,8 @@ function App() {
                   items.push({ label: '转化目标', value: conv ? conv.name : '未设置', required: true, ok: !!conv });
                   items.push({ label: '营销项目名称', value: unitName || '未设置', required: true, ok: !!unitName });
                   items.push({ label: '地域定向', value: geoDetail, required: false, ok: geoOk });
-                  items.push({ label: '出价', value: bidAmount !== '' ? ('¥' + bidAmount) : '未设置', required: true, ok: bidAmount !== '' });
+                  items.push({ label: '竞价策略', value: bidStrategy === 'max_convert' ? '最大转化' : '稳定成本', required: false, ok: true });
+                  items.push({ label: '出价', value: bidStrategy === 'max_convert' ? '无需出价' : (bidAmount !== '' ? ('¥' + bidAmount) : '未设置'), required: bidStrategy !== 'max_convert', ok: bidStrategy === 'max_convert' || bidAmount !== '' });
                   items.push({ label: '日预算', value: dailyBudget !== '' ? ('¥' + dailyBudget) : '未设置', required: false, ok: dailyBudget !== '' });
                   items.push({ label: '广告素材数', value: (selectedMaterials.length + ' 个'), required: true, ok: selectedMaterials.length > 0 });
                   items.push({ label: '广告文案数', value: (selectedCopies.length + ' 条'), required: true, ok: selectedCopies.length > 0 });
