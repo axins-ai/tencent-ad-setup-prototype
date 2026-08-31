@@ -248,7 +248,7 @@ const MOCK = {
       aomen: ['澳门']
     }
   },
-  // 附加广告组件 - 资产库（点击「附加广告组件」按钮拉起）
+  // 附加创意组件 - 资产库（点击「附加创意组件」按钮拉起）
   creativeComponents: [
     { id: 'cc_001', name: '门店地址卡', type: '门店', desc: '展示附近门店与地图导航' },
     { id: 'cc_002', name: '表单组件', type: '表单', desc: '落地页内嵌留资表单' },
@@ -728,7 +728,15 @@ function App() {
   const [smartGen, setSmartGen] = useState(true); // 默认开启智能生成
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
-  // 附加广告组件（点击按钮拉起资产库，多选）
+  // ===== 产品信息（按截图：名称/主图/卖点）=====
+  // 用户额外添加的产品名称（最多 1 条，会与商品库默认名称并存展示）
+  const [extraProductNames, setExtraProductNames] = useState([]); // string[]
+  // 产品主图：首张为商品库默认图（emoji），用户可追加最多 10 张，总上限 11
+  const [extraProductImages, setExtraProductImages] = useState([]); // string[] (emoji)
+  // 产品卖点：textarea 回车提交，每条 6-9 字，最多 10 条
+  const [extraSellingPointsInput, setExtraSellingPointsInput] = useState('');
+  const [extraSellingPoints, setExtraSellingPoints] = useState([]); // string[]
+  // 附加创意组件（点击按钮拉起资产库，多选）
   const [showCreativeCompModal, setShowCreativeCompModal] = useState(false);
   const [selectedCreativeComponents, setSelectedCreativeComponents] = useState([]); // { id, name }
   useEffect(() => {
@@ -1054,6 +1062,10 @@ function App() {
         if (data.productAllocMode) setProductAllocMode(data.productAllocMode);
         if (data.specificProduct) setSpecificProduct(data.specificProduct);
         if (data.perAccountProduct) setPerAccountProduct(data.perAccountProduct);
+        if (data.extraProductNames) setExtraProductNames(data.extraProductNames);
+        if (data.extraProductImages) setExtraProductImages(data.extraProductImages);
+        if (data.extraSellingPoints) setExtraSellingPoints(data.extraSellingPoints);
+        if (data.extraSellingPointsInput !== undefined) setExtraSellingPointsInput(data.extraSellingPointsInput);
         if (data.targetOptType !== undefined) setTargetOptType(data.targetOptType);
         if (data.deepOptType !== undefined) setDeepOptType(data.deepOptType);
         if (data.ctaList) setCtaList(data.ctaList);
@@ -1083,6 +1095,7 @@ function App() {
         selectedMaterials, selectedCopies,
         composeRule, composeStrategy,
         marketingObjective, marketingScene, productAllocMode, specificProduct, perAccountProduct,
+        extraProductNames, extraProductImages, extraSellingPoints, extraSellingPointsInput,
         targetOptType, deepOptType, ctaList, smartGen, sourceText, creativeName,
         selectedCreativeComponents,
       };
@@ -1533,7 +1546,7 @@ function App() {
                 </div>
               </div>
               {productAllocMode === 'shared' ? (
-                <div className="mt-3">
+                <div className="mt-3" style={{ paddingLeft: '124px' }}>
                   <select value={specificProduct} onChange={e => setSpecificProduct(e.target.value)} className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                     {MOCK.productLibrary.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
                   </select>
@@ -2193,7 +2206,7 @@ function App() {
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
             <span className="w-7 h-7 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
             <h2 className="text-base font-semibold text-gray-900">广告配置</h2>
-            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置广告素材、广告文案、产品与广告组件</span>
+            <span className="text-xs text-gray-400 ml-auto font-normal"><i className="far fa-clock mr-1"></i>配置广告素材、广告文案、产品与创意组件</span>
           </div>
           <div className="p-6 space-y-6">
             {/* 广告素材（视频+图片） */}
@@ -2217,35 +2230,163 @@ function App() {
               </button>
             </div>
 
-            {/* 产品信息 */}
-            <div>
-              <h4 className="text-sm font-bold text-gray-900 mb-3">产品信息</h4>
-              {(() => {
-                const pid = productAllocMode === 'per_account' ? (perAccountProduct[selectedAccountIds[0]] || '') : specificProduct;
-                const prod = MOCK.productLibrary.find(p => p.id === pid);
-                if (!prod) return <p className="text-xs text-gray-400">请在「项目配置」选择营销产品</p>;
-                return (
-                  <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-16 h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-3xl flex-shrink-0">{prod.image}</div>
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold text-gray-900 mb-1">{prod.name}</div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {prod.sellingPoints.map((sp, i) => (
-                          <span key={i} className="text-xs text-gray-600 bg-white border border-gray-200 rounded px-2 py-0.5">{sp}</span>
+            {/* 产品信息 —— 按截图复刻：名称 / 主图 / 卖点 三段式 */}
+            {(() => {
+              // 当前选中的营销产品（用于回填默认名称 / 默认主图 emoji）
+              const _pid = productAllocMode === 'per_account' ? (perAccountProduct[selectedAccountIds[0]] || '') : specificProduct;
+              const _prod = MOCK.productLibrary.find(p => p.id === _pid);
+              const _defaultName = _prod ? _prod.name : '请先在「项目配置」选择营销产品';
+              const _defaultImage = _prod ? _prod.image : '';
+              // 图库候选：默认图 + 用户追加图（去重保序），不超过 11
+              const _allImages = [_defaultImage, ...extraProductImages].filter(Boolean);
+              // 常见 emoji 候选池（用于「换一批」「+」按钮）
+              const _emojiPool = ['📱','🌐','📦','☁️','🎁','🍱','🎫','🛒','🎉','💎','🧧','🏆','⭐','🔥','💼','📚'];
+              const _addRandomImage = () => {
+                if (_allImages.length >= 11) { notify('产品主图最多 11 张', 'error'); return; }
+                const remaining = _emojiPool.filter(e => !_allImages.includes(e));
+                const pool = remaining.length > 0 ? remaining : _emojiPool;
+                const pick = pool[Math.floor(Math.random() * pool.length)];
+                setExtraProductImages(prev => [...prev, pick]);
+              };
+              const _refreshImages = () => {
+                // 重摇用户追加图（默认图保留在第一位）
+                const pool = _emojiPool.filter(e => e !== _defaultImage);
+                const picked = [];
+                for (let i = 0; i < 3 && pool.length > 0; i++) {
+                  const idx = Math.floor(Math.random() * pool.length);
+                  picked.push(pool[idx]);
+                  pool.splice(idx, 1);
+                }
+                setExtraProductImages(picked);
+              };
+              const _addHotSelling = () => {
+                const samples = ['正品保证 全国联保','限时特惠 立减30','官方正品 七天退换','顺丰包邮 当日发','满199减50','销量过万 好评'];
+                const picked = [];
+                for (const s of samples) {
+                  if (picked.length + extraSellingPoints.length >= 10) break;
+                  if (!extraSellingPoints.includes(s)) picked.push(s);
+                }
+                if (picked.length === 0) { notify('卖点已达上限 10 条', 'error'); return; }
+                setExtraSellingPoints([...extraSellingPoints, ...picked]);
+              };
+              return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                  {/* header */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="w-5 h-5 bg-blue-500 text-white rounded flex items-center justify-center text-xs"><i className="fas fa-list-ul"></i></span>
+                    <h4 className="text-sm font-bold text-gray-900">产品信息</h4>
+                    <i className="far fa-question-circle text-gray-400 text-xs" title="为广告创意提供产品名称、主图与卖点，系统将优选效果更好的组合对外展示"></i>
+                  </div>
+
+                  {/* 产品名称 */}
+                  <div className="mb-5">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-sm font-medium text-gray-700">产品名称</span>
+                      <span className="text-red-500">*</span>
+                    </div>
+                    {/* 第一个：商品库默认名称（只读展示） */}
+                    <div className="relative mb-2">
+                      <input type="text" value={_defaultName} readOnly disabled className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed" />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">商品库</span>
+                    </div>
+                    {/* 第二个：可额外添加（最多 1 条） */}
+                    <div className="relative">
+                      <input type="text" maxLength={20} value={extraProductNames[0] || ''} onChange={e => {
+                        const v = e.target.value;
+                        setExtraProductNames(v ? [v] : []);
+                      }} placeholder="请输入" className="w-full px-3 py-2 pr-14 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">{(extraProductNames[0] || '').length}/20</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">可额外添加1个产品名称，系统将优选预估跑量效果更好的产品名称对用户展示</p>
+                  </div>
+
+                  {/* 产品主图 */}
+                  <div className="mb-5">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-sm font-medium text-gray-700">产品主图</span>
+                      <span className="text-red-500">*</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-2">已添加：<span className="text-gray-700">{_allImages.length}</span>/11</div>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {_allImages.map((em, i) => (
+                        <div key={i} className="relative w-16 h-16 border border-gray-200 rounded-lg bg-white flex items-center justify-center text-2xl shadow-sm">
+                          <span>{em}</span>
+                          {i === 0 && <span className="absolute bottom-0 left-0 right-0 text-[10px] text-center bg-blue-50 text-blue-500 rounded-b-lg leading-4">默认</span>}
+                          {i > 0 && <button type="button" onClick={() => setExtraProductImages(prev => prev.filter((_, idx) => idx !== i - 1))} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-700 text-white rounded-full text-[10px] flex items-center justify-center hover:bg-red-500"><i className="fas fa-times"></i></button>}
+                        </div>
+                      ))}
+                      {_allImages.length < 11 && (
+                        <button type="button" onClick={_addRandomImage} className="w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition">
+                          <i className="fas fa-plus"></i>
+                        </button>
+                      )}
+                    </div>
+                    {_allImages.length < 2 && (
+                      <div className="flex items-start gap-1.5 text-xs text-orange-500 mt-2">
+                        <i className="fas fa-exclamation-circle mt-0.5"></i>
+                        <span>商品库图片默认投放，需再至少添加1个，系统将优选预估跑量效果更好的产品主图对用户展示</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 产品卖点 */}
+                  <div className="mb-3">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-sm font-medium text-gray-700">产品卖点</span>
+                      <span className="text-red-500">*</span>
+                      <i className="far fa-question-circle text-gray-400 text-xs" title="每条 6-9 个字，空格分隔多个，回车提交"></i>
+                    </div>
+                    <textarea
+                      value={extraSellingPointsInput}
+                      onChange={e => setExtraSellingPointsInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const tokens = extraSellingPointsInput.split(/\s+/).map(s => s.trim()).filter(Boolean);
+                          if (tokens.length === 0) return;
+                          if (extraSellingPoints.length + tokens.length > 10) { notify('产品卖点最多 10 条', 'error'); return; }
+                          const invalid = tokens.find(t => t.length < 6 || t.length > 9);
+                          if (invalid) { notify(`「${invalid}」长度需 6-9 字`, 'error'); return; }
+                          const dup = tokens.find(t => extraSellingPoints.includes(t));
+                          if (dup) { notify(`「${dup}」已存在`, 'error'); return; }
+                          setExtraSellingPoints([...extraSellingPoints, ...tokens]);
+                          setExtraSellingPointsInput('');
+                        }
+                      }}
+                      placeholder="最多10个产品卖点，每个6-9个字，可空格分隔，回车(Enter)提交"
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+                    />
+                    <div className="text-xs text-gray-400 text-right mt-1">{extraSellingPoints.length}/10</div>
+                    {extraSellingPoints.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {extraSellingPoints.map((sp, i) => (
+                          <span key={i} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-0.5">
+                            {sp}
+                            <button type="button" onClick={() => setExtraSellingPoints(prev => prev.filter((_, idx) => idx !== i))} className="text-blue-400 hover:text-red-500"><i className="fas fa-times"></i></button>
+                          </span>
                         ))}
                       </div>
-                    </div>
+                    )}
                   </div>
-                );
-              })()}
-            </div>
 
-            {/* 广告组件 */}
+                  {/* 底部操作行 */}
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                    <button type="button" onClick={_addHotSelling} className="text-sm px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 inline-flex items-center gap-1">
+                      <i className="fas fa-plus text-xs"></i>近期热卖商品
+                    </button>
+                    <button type="button" onClick={_refreshImages} className="text-sm text-blue-500 hover:text-blue-600">换一批</button>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 创意组件 */}
             <div>
-              <h4 className="text-sm font-bold text-gray-900 mb-4">广告组件</h4>
-              {/* 附加广告组件（置灰不可交互） */}
+              <h4 className="text-sm font-bold text-gray-900 mb-4">创意组件</h4>
+              {/* 附加创意组件（置灰不可交互） */}
               <div className="mb-5">
-                <button type="button" disabled className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 text-sm cursor-not-allowed">附加广告组件</button>
+                <button type="button" disabled className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 text-sm cursor-not-allowed">附加创意组件</button>
               </div>
               {/* 行动号召 */}
               <div className="mb-5">
@@ -2504,12 +2645,12 @@ function App() {
         channel="toutiao"
       />
 
-      {/* ===== 附加广告组件 - 资产库弹窗 ===== */}
+      {/* ===== 附加创意组件 - 资产库弹窗 ===== */}
       {showCreativeCompModal && (
         <div className="modal-overlay" onClick={() => setShowCreativeCompModal(false)}>
           <div className="modal-content w-full max-w-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-bold">选择附加广告组件（资产库）</h3>
+              <h3 className="text-lg font-bold">选择附加创意组件（资产库）</h3>
               <button onClick={() => setShowCreativeCompModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
             </div>
             <div className="overflow-y-auto p-4" style={{ maxHeight: '55vh' }}>
