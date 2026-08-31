@@ -919,6 +919,21 @@ function App() {
   // 目标优化类型 / 深度优化方式 开关（默认关闭）
   const [targetOptType, setTargetOptType] = useState(false);
   const [deepOptType, setDeepOptType] = useState(false);
+  // 深度优化目标（下拉列表选择）
+  const DEEP_OPT_GOALS = ['次留率', '付费率', '注册率', '激活率', '七日留存'];
+  const [deepOptGoal, setDeepOptGoal] = useState('');
+  const [showDeepOptDropdown, setShowDeepOptDropdown] = useState(false);
+  const deepOptDropdownRef = useRef(null);
+  // 点击空白处收起深度优化目标下拉
+  useEffect(() => {
+    const handler = e => {
+      if (deepOptDropdownRef.current && !deepOptDropdownRef.current.contains(e.target)) {
+        setShowDeepOptDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
   // 产品（根据推广产品类型动态变化）
   const getProductsForBusinessUnit = () => {
     if (promotionType === 'activity') return MOCK.activityProducts || [];
@@ -2205,10 +2220,7 @@ function App() {
       paddingLeft: '124px'
     }
   }, "分账户定制：在下方按账户分别选择商品")), productAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", {
-    className: "mb-5",
-    style: {
-      paddingLeft: '124px'
-    }
+    className: "mb-5"
   }, selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-400"
   }, "请先选择账户") : /*#__PURE__*/React.createElement("div", {
@@ -2263,7 +2275,7 @@ function App() {
   }, (() => {
     const conv = (MOCK.conversionsByBusinessUnit[businessUnit] || []).find(c => c.id === conversionGoal);
     if (!conv) return '请选择优化目标';
-    return `${conv.name} / ${conv.eventAsset} / ${conv.source}`;
+    return `${conv.eventAsset} / ${conv.name}`;
   })()), /*#__PURE__*/React.createElement("i", {
     className: "fas fa-chevron-down text-gray-400 text-xs ml-2 flex-none"
   })), showConversionDropdown && /*#__PURE__*/React.createElement("div", {
@@ -2275,11 +2287,9 @@ function App() {
     className: "flex items-center gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50 text-xs font-medium text-gray-500"
   }, /*#__PURE__*/React.createElement("span", {
     className: "flex-1 whitespace-nowrap"
-  }, "优化目标名称"), /*#__PURE__*/React.createElement("span", {
-    className: "flex-1 whitespace-nowrap"
   }, "事件资产名称"), /*#__PURE__*/React.createElement("span", {
-    className: "flex-none whitespace-nowrap"
-  }, "来源")), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1 whitespace-nowrap"
+  }, "优化目标名称")), /*#__PURE__*/React.createElement("div", {
     className: "max-h-56 overflow-y-auto"
   }, (MOCK.conversionsByBusinessUnit[businessUnit] || []).length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "px-3 py-4 text-sm text-gray-400 text-center"
@@ -2295,28 +2305,56 @@ function App() {
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-3 text-sm"
     }, /*#__PURE__*/React.createElement("span", {
+      className: "flex-1 whitespace-nowrap text-gray-500"
+    }, conv.eventAsset), /*#__PURE__*/React.createElement("span", {
       className: "flex-1 whitespace-nowrap",
       style: {
         color: active ? '#1890ff' : '#333'
       }
-    }, conv.name), /*#__PURE__*/React.createElement("span", {
-      className: "flex-1 whitespace-nowrap text-gray-500"
-    }, conv.eventAsset), /*#__PURE__*/React.createElement("span", {
-      className: "flex-none whitespace-nowrap text-gray-400 text-xs"
-    }, conv.source), active && /*#__PURE__*/React.createElement("i", {
+    }, conv.name), active && /*#__PURE__*/React.createElement("i", {
       className: "fas fa-check text-blue-500 text-xs flex-none"
     })));
   }))))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
-  }, "目标优化类型"), /*#__PURE__*/React.createElement("button", {
+  }, "深度优化目标"), /*#__PURE__*/React.createElement("div", {
+    className: "relative",
+    ref: deepOptDropdownRef
+  }, /*#__PURE__*/React.createElement("button", {
     type: "button",
-    disabled: true,
-    className: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-lock text-xs"
-  }), /*#__PURE__*/React.createElement("span", null, "关闭"))), /*#__PURE__*/React.createElement("div", {
+    onClick: () => setShowDeepOptDropdown(!showDeepOptDropdown),
+    className: "w-80 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center justify-between outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "whitespace-nowrap"
+  }, deepOptGoal ? deepOptGoal : '请选择深度优化目标'), /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-chevron-down text-gray-400 text-xs ml-2 flex-none"
+  })), showDeepOptDropdown && /*#__PURE__*/React.createElement("div", {
+    className: "absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-h-56 overflow-y-auto"
+  }, DEEP_OPT_GOALS.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "px-3 py-4 text-sm text-gray-400 text-center"
+  }, "无深度优化目标") : DEEP_OPT_GOALS.map(goal => {
+    const active = goal === deepOptGoal;
+    return /*#__PURE__*/React.createElement("div", {
+      key: goal,
+      onClick: () => {
+        setDeepOptGoal(goal);
+        setShowDeepOptDropdown(false);
+      },
+      className: `px-3 py-2.5 cursor-pointer border-b border-gray-100 last:border-b-0 ${active ? 'bg-blue-50' : 'hover:bg-gray-50'}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-2 text-sm"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "flex-1 whitespace-nowrap",
+      style: {
+        color: active ? '#1890ff' : '#333'
+      }
+    }, goal), active && /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-check text-blue-500 text-xs flex-none"
+    })));
+  }))))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"

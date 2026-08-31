@@ -515,6 +515,21 @@ function App() {
   // 目标优化类型 / 深度优化方式 开关（默认关闭）
   const [targetOptType, setTargetOptType] = useState(false);
   const [deepOptType, setDeepOptType] = useState(false);
+  // 深度优化目标（下拉列表选择）
+  const DEEP_OPT_GOALS = ['次留率', '付费率', '注册率', '激活率', '七日留存'];
+  const [deepOptGoal, setDeepOptGoal] = useState('');
+  const [showDeepOptDropdown, setShowDeepOptDropdown] = useState(false);
+  const deepOptDropdownRef = useRef(null);
+  // 点击空白处收起深度优化目标下拉
+  useEffect(() => {
+    const handler = (e) => {
+      if (deepOptDropdownRef.current && !deepOptDropdownRef.current.contains(e.target)) {
+        setShowDeepOptDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
   // 产品（根据推广产品类型动态变化）
   const getProductsForBusinessUnit = () => {
     if (promotionType === 'activity') return MOCK.activityProducts || [];
@@ -1523,9 +1538,9 @@ function App() {
                 <p className="text-sm text-gray-500 mt-2" style={{ paddingLeft: '124px' }}>分账户定制：在下方按账户分别选择商品</p>
               )}
             </div>
-            {/* 分账户定制商品（网格） */}
+            {/* 分账户定制商品（网格），左对齐营销产品标签 */}
             {productAllocMode === 'per_account' && (
-              <div className="mb-5" style={{ paddingLeft: '124px' }}>
+              <div className="mb-5">
                 {selectedAccountIds.length === 0 ? (
                   <p className="text-sm text-gray-400">请先选择账户</p>
                 ) : (
@@ -1552,7 +1567,7 @@ function App() {
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">获取线索方式</label>
               <input type="text" value="自研落地页" disabled className="w-48 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
             </div>
-            {/* 优化目标：三段式下拉（优化目标名称 / 事件资产名称 / 来源），单选 */}
+            {/* 优化目标：两段式下拉（事件资产名称 / 优化目标名称），单选 */}
             <div className="flex items-center gap-3 mb-5">
               <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">优化目标</label>
               <div className="relative" ref={conversionDropdownRef}>
@@ -1563,17 +1578,16 @@ function App() {
                   <span className="whitespace-nowrap">{(() => {
                     const conv = (MOCK.conversionsByBusinessUnit[businessUnit] || []).find(c => c.id === conversionGoal);
                     if (!conv) return '请选择优化目标';
-                    return `${conv.name} / ${conv.eventAsset} / ${conv.source}`;
+                    return `${conv.eventAsset} / ${conv.name}`;
                   })()}</span>
                   <i className="fas fa-chevron-down text-gray-400 text-xs ml-2 flex-none"></i>
                 </button>
                 {showConversionDropdown && (
                   <div className="absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg" style={{ width: '560px' }}>
-                    {/* 列头 */}
+                    {/* 列头：事件资产名称 / 优化目标名称 */}
                     <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200 bg-gray-50 text-xs font-medium text-gray-500">
-                      <span className="flex-1 whitespace-nowrap">优化目标名称</span>
                       <span className="flex-1 whitespace-nowrap">事件资产名称</span>
-                      <span className="flex-none whitespace-nowrap">来源</span>
+                      <span className="flex-1 whitespace-nowrap">优化目标名称</span>
                     </div>
                     <div className="max-h-56 overflow-y-auto">
                       {(MOCK.conversionsByBusinessUnit[businessUnit] || []).length === 0 ? (
@@ -1585,9 +1599,8 @@ function App() {
                             <div key={conv.id} onClick={() => { setConversionGoal(conv.id); setShowConversionDropdown(false); }}
                               className={`px-3 py-2.5 cursor-pointer border-b border-gray-100 last:border-b-0 ${active ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
                               <div className="flex items-center gap-3 text-sm">
-                                <span className="flex-1 whitespace-nowrap" style={{ color: active ? '#1890ff' : '#333' }}>{conv.name}</span>
                                 <span className="flex-1 whitespace-nowrap text-gray-500">{conv.eventAsset}</span>
-                                <span className="flex-none whitespace-nowrap text-gray-400 text-xs">{conv.source}</span>
+                                <span className="flex-1 whitespace-nowrap" style={{ color: active ? '#1890ff' : '#333' }}>{conv.name}</span>
                                 {active && <i className="fas fa-check text-blue-500 text-xs flex-none"></i>}
                               </div>
                             </div>
@@ -1599,14 +1612,39 @@ function App() {
                 )}
               </div>
             </div>
-            {/* 目标优化类型：锁定关闭状态（禁用按钮，左对齐） */}
+            {/* 深度优化目标：下拉列表选择 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">目标优化类型</label>
-              <button type="button" disabled
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed">
-                <i className="fas fa-lock text-xs"></i>
-                <span>关闭</span>
-              </button>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">深度优化目标</label>
+              <div className="relative" ref={deepOptDropdownRef}>
+                <button type="button"
+                  onClick={() => setShowDeepOptDropdown(!showDeepOptDropdown)}
+                  className="w-80 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center justify-between outline-none focus:ring-2 focus:ring-blue-500">
+                  <span className="whitespace-nowrap">{deepOptGoal ? deepOptGoal : '请选择深度优化目标'}</span>
+                  <i className="fas fa-chevron-down text-gray-400 text-xs ml-2 flex-none"></i>
+                </button>
+                {showDeepOptDropdown && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <div className="max-h-56 overflow-y-auto">
+                      {DEEP_OPT_GOALS.length === 0 ? (
+                        <div className="px-3 py-4 text-sm text-gray-400 text-center">无深度优化目标</div>
+                      ) : (
+                        DEEP_OPT_GOALS.map(goal => {
+                          const active = goal === deepOptGoal;
+                          return (
+                            <div key={goal} onClick={() => { setDeepOptGoal(goal); setShowDeepOptDropdown(false); }}
+                              className={`px-3 py-2.5 cursor-pointer border-b border-gray-100 last:border-b-0 ${active ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="flex-1 whitespace-nowrap" style={{ color: active ? '#1890ff' : '#333' }}>{goal}</span>
+                                {active && <i className="fas fa-check text-blue-500 text-xs flex-none"></i>}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             {/* 深度优化方式：锁定关闭状态（禁用按钮，左对齐） */}
             <div className="flex items-center gap-3 mb-5">
