@@ -729,13 +729,15 @@ function App() {
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
   // ===== 产品信息（按截图：名称/主图/卖点）=====
-  // 用户额外添加的产品名称（选填，最多 1 条，会与商品库默认名称并存展示）
-  const [extraProductNames, setExtraProductNames] = useState([]); // string[]
-  // 产品主图：首张为商品库默认图（emoji），用户上传图（dataURL）追加其后，最多 10 张，总上限 11
-  const [extraProductImages, setExtraProductImages] = useState([]); // string[] (dataURL)
-  // 产品主图上传（点击「+」直接吊起本地文件选择，格式限制文案已展示在表单内）
+  // 多营销产品时每产品一套配置：productInfoMap[pid] = { extraName, images[], sellingPoints[] }
+  const [productInfoMap, setProductInfoMap] = useState({});
+  // 每个产品的卖点输入草稿（textarea 未提交内容），按 pid 独立，切换 Tab 不串
+  const [sellingPointsInputs, setSellingPointsInputs] = useState({});
+  // 多产品 Tabs：当前激活的 pid（null 时自动选中第一个未完成的产品）
+  const [activeProductTab, setActiveProductTab] = useState(null);
+  // 产品主图上传（点击「+」直接吊起本地文件选择；Tabs 任意时刻只渲染一个面板，共用单个 ref）
   const imageUploadRef = useRef(null);
-  const handleImageFileChange = (e) => {
+  const handleImageFileChange = (pid) => (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     // 1) 格式校验：jpg / png / jpeg
@@ -752,8 +754,12 @@ function App() {
         const w = img.naturalWidth, h = img.naturalHeight;
         if (Math.abs(w - h) > 2) { notify('宽高比需为 1:1', 'error'); return; }
         if (Math.abs(w - 108) > 2 || Math.abs(h - 108) > 2) { notify('尺寸需为 108×108', 'error'); return; }
-        if (extraProductImages.length >= 10) { notify('产品主图最多 11 张', 'error'); return; }
-        setExtraProductImages(prev => [...prev, dataUrl]);
+        setProductInfoMap(prev => {
+          const cur = prev[pid] || {};
+          const imgs = cur.images || [];
+          if (imgs.length >= 10) { notify('产品主图最多 11 张', 'error'); return prev; }
+          return { ...prev, [pid]: { ...cur, images: [...imgs, dataUrl] } };
+        });
         e.target.value = '';
         notify('产品主图上传成功', 'success');
       };
@@ -762,9 +768,6 @@ function App() {
     };
     reader.readAsDataURL(file);
   };
-  // 产品卖点：textarea 回车提交，每条 6-9 字，最多 10 条
-  const [extraSellingPointsInput, setExtraSellingPointsInput] = useState('');
-  const [extraSellingPoints, setExtraSellingPoints] = useState([]); // string[]
   // 附加创意组件（点击按钮拉起资产库，多选）
   const [showCreativeCompModal, setShowCreativeCompModal] = useState(false);
   const [selectedCreativeComponents, setSelectedCreativeComponents] = useState([]); // { id, name }
@@ -849,6 +852,11 @@ function App() {
     const done = checks.filter(Boolean).length;
     return done === 0 ? 0 : Math.round((done / checks.length) * 100);
   })();
+  // 已选择的营销产品集合（去重）：shared 单产品；per_account 按账户选择后取去重集合
+  const selectedProductIds = (() => {
+    if (productAllocMode === 'shared') return specificProduct ? [specificProduct] : [];
+    return [...new Set(selectedAccountIds.map(id => perAccountProduct[id]).filter(Boolean))];
+  })();
   const validationErrors = (() => {
     const errors = [];
     if (bidStrategy === 'stable_cost') {
@@ -866,8 +874,22 @@ function App() {
       });
     }
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
-    // 产品主图：必须至少手动上传 1 张（商品库默认图不算手动新增）
-    if (extraProductImages.length === 0) errors.push('产品主图至少需手动上传 1 张');
+    // 产品主图：每个已选营销产品都必须至少手动上传 1 张（商品库默认图不算手动新增）
+    if (selectedProductIds.length === 0) {
+      errors.push('请选择营销产品');
+    } else {
+      selectedProductIds.forEach(pid => {
+        const _pi = productInfoMap[pid] || {};
+        if (!_pi.images || _pi.images.length === 0) {
+          if (selectedProductIds.length === 1) {
+            errors.push('产品主图至少需手动上传 1 张');
+          } else {
+            const _prod = MOCK.productLibrary.find(p => p.id === pid);
+            errors.push('「' + (_prod ? _prod.name : pid) + '」产品主图至少需手动上传 1 张');
+          }
+        }
+      });
+    }
     // 广告数量上限 1000：超限直接拦截，阻止立即运行
     if (getBuildSummary().totalCreatives > 1000) errors.push('广告数量超限（1000个），请减少物料选择');
     return errors;
@@ -1093,10 +1115,20 @@ function App() {
         if (data.productAllocMode) setProductAllocMode(data.productAllocMode);
         if (data.specificProduct) setSpecificProduct(data.specificProduct);
         if (data.perAccountProduct) setPerAccountProduct(data.perAccountProduct);
-        if (data.extraProductNames) setExtraProductNames(data.extraProductNames);
-        if (data.extraProductImages) setExtraProductImages(data.extraProductImages);
-        if (data.extraSellingPoints) setExtraSellingPoints(data.extraSellingPoints);
-        if (data.extraSellingPointsInput !== undefined) setExtraSellingPointsInput(data.extraSellingPointsInput);
+        if (data.productInfoMap) setProductInfoMap(data.productInfoMap);
+        if (data.sellingPointsInputs) setSellingPointsInputs(data.sellingPointsInputs);
+        // 老版本草稿迁移：旧单套字段 → 归入第一个营销产品
+        if (!data.productInfoMap && (data.extraProductImages || data.extraProductNames || data.extraSellingPoints || data.extraSellingPointsInput !== undefined)) {
+          const firstPid = data.specificProduct || (data.perAccountProduct ? (Object.keys(data.perAccountProduct).map(k => data.perAccountProduct[k]).find(Boolean) || '') : '');
+          if (firstPid) {
+            setProductInfoMap({ [firstPid]: {
+              extraName: (data.extraProductNames && data.extraProductNames[0]) || '',
+              images: data.extraProductImages || [],
+              sellingPoints: data.extraSellingPoints || [],
+            }});
+            if (data.extraSellingPointsInput !== undefined) setSellingPointsInputs({ [firstPid]: data.extraSellingPointsInput });
+          }
+        }
         if (data.targetOptType !== undefined) setTargetOptType(data.targetOptType);
         if (data.deepOptType !== undefined) setDeepOptType(data.deepOptType);
         if (data.ctaList) setCtaList(data.ctaList);
@@ -1126,7 +1158,7 @@ function App() {
         selectedMaterials, selectedCopies,
         composeRule, composeStrategy,
         marketingObjective, marketingScene, productAllocMode, specificProduct, perAccountProduct,
-        extraProductNames, extraProductImages, extraSellingPoints, extraSellingPointsInput,
+        productInfoMap, sellingPointsInputs,
         targetOptType, deepOptType, ctaList, smartGen, sourceText, creativeName,
         selectedCreativeComponents,
       };
@@ -2263,116 +2295,193 @@ function App() {
 
             {/* 产品信息 —— 名称 / 主图 / 卖点（与其他配置项平级，不单独卡片） */}
             {(() => {
-              // 当前选中的营销产品（用于回填默认名称 / 默认主图 emoji）
-              const _pid = productAllocMode === 'per_account' ? (perAccountProduct[selectedAccountIds[0]] || '') : specificProduct;
-              const _prod = MOCK.productLibrary.find(p => p.id === _pid);
-              const _defaultName = _prod ? _prod.name : '请先在「项目配置」选择营销产品';
-              const _defaultImage = _prod ? _prod.image : '';
-              // 图库候选：默认图 + 用户上传图，不超过 11
-              const _allImages = [_defaultImage, ...extraProductImages].filter(Boolean);
+              // 每产品一套配置面板（名称/主图/卖点），单产品与多产品 Tabs 共用同一套面板
+              const _renderPanel = (pid, defaultName, defaultImage, imgs, points, allImages) => {
+                const _pi = productInfoMap[pid] || {};
+                const extraName = _pi.extraName || '';
+                return (
+                  <div>
+                    {/* 产品名称 */}
+                    <div className="mb-5">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="text-sm font-medium text-gray-700">产品名称</span>
+                        <span className="text-red-500">*</span>
+                      </div>
+                      {/* 第一个：商品库默认名称（只读展示） */}
+                      <div className="relative mb-2 max-w-md">
+                        <input type="text" value={defaultName} readOnly disabled className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed" />
+                      </div>
+                      {/* 第二个：可额外添加（选填，表单校验逻辑控制，最多 1 条） */}
+                      <div className="relative max-w-md">
+                        <input type="text" maxLength={20} value={extraName} onChange={e => {
+                          const v = e.target.value;
+                          setProductInfoMap(prev => ({ ...prev, [pid]: { ...(prev[pid] || {}), extraName: v } }));
+                        }} placeholder="请输入" className="w-full px-3 py-2 pr-14 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <span className="absolute right-3 text-xs text-gray-400 whitespace-nowrap" style={{ top: '50%', transform: 'translateY(-50%)' }}>{extraName.length}/20</span>
+                      </div>
+                    </div>
+
+                    {/* 产品主图 */}
+                    <div className="mb-5">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="text-sm font-medium text-gray-700">产品主图</span>
+                        <span className="text-red-500">*</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mb-2">已添加：<span className="text-gray-700">{allImages.length}</span>/11</div>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {allImages.map((em, i) => (
+                          <div key={i} className="relative w-16 h-16 border border-gray-200 rounded-lg bg-white flex items-center justify-center text-2xl shadow-sm overflow-hidden">
+                            {em && em.startsWith('data:image') ? (
+                              <img src={em} alt="产品主图" className="w-full h-full object-cover" />
+                            ) : (
+                              <span>{em}</span>
+                            )}
+                            {i === 0 && <span className="absolute bottom-0 left-0 right-0 text-[10px] text-center bg-blue-50 text-blue-500 rounded-b-lg leading-4">默认</span>}
+                            {i > 0 && <button type="button" onClick={() => setProductInfoMap(prev => {
+                              const cur = prev[pid] || {};
+                              return { ...prev, [pid]: { ...cur, images: (cur.images || []).filter((_, idx) => idx !== i - 1) } };
+                            })} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-700 text-white rounded-full text-[10px] flex items-center justify-center hover:bg-red-500"><i className="fas fa-times"></i></button>}
+                          </div>
+                        ))}
+                        {allImages.length < 11 && (
+                          <button type="button" onClick={() => imageUploadRef.current && imageUploadRef.current.click()} className="w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition">
+                            <i className="fas fa-plus"></i>
+                          </button>
+                        )}
+                      </div>
+                      {/* 隐藏的文件选择框：点击「+」直接吊起本地文件上传 */}
+                      <input ref={imageUploadRef} type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" className="hidden" onChange={handleImageFileChange(pid)} />
+                      <div className="flex items-start gap-1.5 text-xs text-gray-400 mt-1">
+                        <i className="fas fa-image mt-0.5"></i>
+                        <span>支持格式：jpg / png / jpeg；宽高比 1:1；大小 ≤ 1M；尺寸 108×108 ≤ 尺寸 ≤ 108×108</span>
+                      </div>
+                      {imgs.length === 0 && (
+                        <div className="flex items-start gap-1.5 text-xs text-orange-500 mt-1.5">
+                          <i className="fas fa-exclamation-circle mt-0.5"></i>
+                          <span>产品主图必须至少手动上传 1 张</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 产品卖点 */}
+                    <div className="mb-3">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="text-sm font-medium text-gray-700">产品卖点</span>
+                        <span className="text-red-500">*</span>
+                        <i className="far fa-question-circle text-gray-400 text-xs" title="每条 6-9 个字，空格分隔多个，回车提交"></i>
+                      </div>
+                      <textarea
+                        value={sellingPointsInputs[pid] || ''}
+                        onChange={e => setSellingPointsInputs(prev => ({ ...prev, [pid]: e.target.value }))}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const tokens = (sellingPointsInputs[pid] || '').split(/\s+/).map(s => s.trim()).filter(Boolean);
+                            if (tokens.length === 0) return;
+                            if (points.length + tokens.length > 10) { notify('产品卖点最多 10 条', 'error'); return; }
+                            const invalid = tokens.find(t => t.length < 6 || t.length > 9);
+                            if (invalid) { notify(`「${invalid}」长度需 6-9 字`, 'error'); return; }
+                            const dup = tokens.find(t => points.includes(t));
+                            if (dup) { notify(`「${dup}」已存在`, 'error'); return; }
+                            setProductInfoMap(prev => {
+                              const cur = prev[pid] || {};
+                              return { ...prev, [pid]: { ...cur, sellingPoints: [...(cur.sellingPoints || []), ...tokens] } };
+                            });
+                            setSellingPointsInputs(prev => ({ ...prev, [pid]: '' }));
+                          }
+                        }}
+                        placeholder="最多10个产品卖点，每个6-9个字，可空格分隔，回车(Enter)提交"
+                        rows={3}
+                        className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+                      />
+                      <div className="text-xs text-gray-400 mt-1">{points.length}/10</div>
+                      {points.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {points.map((sp, i) => (
+                            <span key={i} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-0.5">
+                              {sp}
+                              <button type="button" onClick={() => setProductInfoMap(prev => {
+                                const cur = prev[pid] || {};
+                                return { ...prev, [pid]: { ...cur, sellingPoints: (cur.sellingPoints || []).filter((_, idx) => idx !== i) } };
+                              })} className="text-blue-400 hover:text-red-500"><i className="fas fa-times"></i></button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              };
+
+              // 已选营销产品集合（去重）
+              const _pids = selectedProductIds;
+
+              // 单产品：保持原有展示（与旧版完全一致）
+              if (_pids.length <= 1) {
+                const _pid = _pids[0] || '';
+                const _prod = MOCK.productLibrary.find(p => p.id === _pid);
+                const _defaultName = _prod ? _prod.name : '请先在「项目配置」选择营销产品';
+                const _defaultImage = _prod ? _prod.image : '';
+                const _pi = productInfoMap[_pid] || {};
+                const _imgs = _pi.images || [];
+                const _points = _pi.sellingPoints || [];
+                // 图库候选：默认图 + 用户上传图，不超过 11
+                const _allImages = [_defaultImage, ..._imgs].filter(Boolean);
+                return (
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-900 mb-4">产品信息</h4>
+                    {_renderPanel(_pid, _defaultName, _defaultImage, _imgs, _points, _allImages)}
+                  </div>
+                );
+              }
+
+              // 多产品：Tabs 切换，任意时刻只渲染一个产品的配置面板，页面高度恒定
+              const _active = activeProductTab && _pids.includes(activeProductTab) ? activeProductTab : (_pids.find(pid => {
+                const _p = productInfoMap[pid] || {};
+                return !_p.images || _p.images.length === 0;
+              }) || _pids[0]);
+              const _activeProd = MOCK.productLibrary.find(p => p.id === _active);
+              const _activeDefaultName = _activeProd ? _activeProd.name : '';
+              const _activeDefaultImage = _activeProd ? _activeProd.image : '';
+              const _activePi = productInfoMap[_active] || {};
+              const _activeImgs = _activePi.images || [];
+              const _activePoints = _activePi.sellingPoints || [];
+              const _allActiveImages = [_activeDefaultImage, ..._activeImgs].filter(Boolean);
               return (
                 <div>
                   <h4 className="text-sm font-bold text-gray-900 mb-4">产品信息</h4>
-
-                  {/* 产品名称 */}
-                  <div className="mb-5">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="text-sm font-medium text-gray-700">产品名称</span>
-                      <span className="text-red-500">*</span>
-                    </div>
-                    {/* 第一个：商品库默认名称（只读展示） */}
-                    <div className="relative mb-2 max-w-md">
-                      <input type="text" value={_defaultName} readOnly disabled className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed" />
-                    </div>
-                    {/* 第二个：可额外添加（选填，表单校验逻辑控制，最多 1 条） */}
-                    <div className="relative max-w-md">
-                      <input type="text" maxLength={20} value={extraProductNames[0] || ''} onChange={e => {
-                        const v = e.target.value;
-                        setExtraProductNames(v ? [v] : []);
-                      }} placeholder="请输入" className="w-full px-3 py-2 pr-14 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                      <span className="absolute right-3 text-xs text-gray-400 whitespace-nowrap" style={{ top: '50%', transform: 'translateY(-50%)' }}>{(extraProductNames[0] || '').length}/20</span>
-                    </div>
-                  </div>
-
-                  {/* 产品主图 */}
-                  <div className="mb-5">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="text-sm font-medium text-gray-700">产品主图</span>
-                      <span className="text-red-500">*</span>
-                    </div>
-                    <div className="text-xs text-gray-500 mb-2">已添加：<span className="text-gray-700">{_allImages.length}</span>/11</div>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {_allImages.map((em, i) => (
-                        <div key={i} className="relative w-16 h-16 border border-gray-200 rounded-lg bg-white flex items-center justify-center text-2xl shadow-sm overflow-hidden">
-                          {em && em.startsWith('data:image') ? (
-                            <img src={em} alt="产品主图" className="w-full h-full object-cover" />
-                          ) : (
-                            <span>{em}</span>
-                          )}
-                          {i === 0 && <span className="absolute bottom-0 left-0 right-0 text-[10px] text-center bg-blue-50 text-blue-500 rounded-b-lg leading-4">默认</span>}
-                          {i > 0 && <button type="button" onClick={() => setExtraProductImages(prev => prev.filter((_, idx) => idx !== i - 1))} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-700 text-white rounded-full text-[10px] flex items-center justify-center hover:bg-red-500"><i className="fas fa-times"></i></button>}
-                        </div>
-                      ))}
-                      {_allImages.length < 11 && (
-                        <button type="button" onClick={() => imageUploadRef.current && imageUploadRef.current.click()} className="w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition">
-                          <i className="fas fa-plus"></i>
+                  {/* Tabs：产品名 + 状态圆点（绿=已配置完成 / 红=有缺项 / 灰=未开始） */}
+                  <div className="flex items-center gap-2 mb-4 flex-wrap" style={{ borderBottom: '1px solid #e5e7eb' }}>
+                    {_pids.map(pid => {
+                      const _p = productInfoMap[pid] || {};
+                      const _pImgs = _p.images || [];
+                      const _started = !!(_p.extraName || '').trim() || _pImgs.length > 0 || (_p.sellingPoints || []).length > 0;
+                      const _done = _pImgs.length > 0;
+                      const _isActive = pid === _active;
+                      const _prodT = MOCK.productLibrary.find(p => p.id === pid);
+                      return (
+                        <button
+                          key={pid}
+                          type="button"
+                          onClick={() => setActiveProductTab(pid)}
+                          className={"px-4 py-2 text-sm transition " + (_isActive ? 'text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50')}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            borderRadius: _isActive ? '8px 8px 0 0' : '8px',
+                            border: '1px solid ' + (_isActive ? '#1890ff' : '#e5e7eb'),
+                            borderBottom: _isActive ? 'none' : '1px solid #e5e7eb',
+                            background: _isActive ? '#fff' : '#f5f5f5',
+                          }}
+                          title={_done ? '已配置完成' : (_started ? '有缺项未完成' : '未开始配置')}
+                        >
+                          {_prodT ? _prodT.name : pid}
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: _done ? '#22c55e' : (_started ? '#ef4444' : '#d1d5db'), flexShrink: 0 }} />
                         </button>
-                      )}
-                    </div>
-                    {/* 隐藏的文件选择框：点击「+」直接吊起本地文件上传 */}
-                    <input ref={imageUploadRef} type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" className="hidden" onChange={handleImageFileChange} />
-                    <div className="flex items-start gap-1.5 text-xs text-gray-400 mt-1">
-                      <i className="fas fa-image mt-0.5"></i>
-                      <span>支持格式：jpg / png / jpeg；宽高比 1:1；大小 ≤ 1M；尺寸 108×108 ≤ 尺寸 ≤ 108×108</span>
-                    </div>
-                    {extraProductImages.length === 0 && (
-                      <div className="flex items-start gap-1.5 text-xs text-orange-500 mt-1.5">
-                        <i className="fas fa-exclamation-circle mt-0.5"></i>
-                        <span>产品主图必须至少手动上传 1 张</span>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
-
-                  {/* 产品卖点 */}
-                  <div className="mb-3">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="text-sm font-medium text-gray-700">产品卖点</span>
-                      <span className="text-red-500">*</span>
-                      <i className="far fa-question-circle text-gray-400 text-xs" title="每条 6-9 个字，空格分隔多个，回车提交"></i>
-                    </div>
-                    <textarea
-                      value={extraSellingPointsInput}
-                      onChange={e => setExtraSellingPointsInput(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const tokens = extraSellingPointsInput.split(/\s+/).map(s => s.trim()).filter(Boolean);
-                          if (tokens.length === 0) return;
-                          if (extraSellingPoints.length + tokens.length > 10) { notify('产品卖点最多 10 条', 'error'); return; }
-                          const invalid = tokens.find(t => t.length < 6 || t.length > 9);
-                          if (invalid) { notify(`「${invalid}」长度需 6-9 字`, 'error'); return; }
-                          const dup = tokens.find(t => extraSellingPoints.includes(t));
-                          if (dup) { notify(`「${dup}」已存在`, 'error'); return; }
-                          setExtraSellingPoints([...extraSellingPoints, ...tokens]);
-                          setExtraSellingPointsInput('');
-                        }
-                      }}
-                      placeholder="最多10个产品卖点，每个6-9个字，可空格分隔，回车(Enter)提交"
-                      rows={3}
-                      className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
-                    />
-                    <div className="text-xs text-gray-400 mt-1">{extraSellingPoints.length}/10</div>
-                    {extraSellingPoints.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {extraSellingPoints.map((sp, i) => (
-                          <span key={i} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-0.5">
-                            {sp}
-                            <button type="button" onClick={() => setExtraSellingPoints(prev => prev.filter((_, idx) => idx !== i))} className="text-blue-400 hover:text-red-500"><i className="fas fa-times"></i></button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  {/* 当前产品的配置面板 */}
+                  {_renderPanel(_active, _activeDefaultName, _activeDefaultImage, _activeImgs, _activePoints, _allActiveImages)}
                 </div>
               );
             })()}
