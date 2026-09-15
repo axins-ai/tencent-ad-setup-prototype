@@ -729,11 +729,11 @@ function App() {
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
   // ===== 产品信息（按截图：名称/主图/卖点）=====
-  // 多营销产品时每产品一套配置：productInfoMap[pid] = { extraName, images[], sellingPoints[] }
+  // shared 模式以 productId 为 key；per_account 模式以 accountId 为 key，保证每个账户独立配置
   const [productInfoMap, setProductInfoMap] = useState({});
-  // 每个产品的卖点输入草稿（textarea 未提交内容），按 pid 独立，切换 Tab 不串
+  // 产品卖点输入草稿按配置 key 独立，切换账户 Tab 不串
   const [sellingPointsInputs, setSellingPointsInputs] = useState({});
-  // 多产品 Tabs：当前激活的 pid（null 时自动选中第一个未完成的产品）
+  // 产品信息 Tabs：per_account 模式记录当前激活的 accountId
   const [activeProductTab, setActiveProductTab] = useState(null);
   // 产品主图上传（点击「+」直接吊起本地文件选择；Tabs 任意时刻只渲染一个面板，共用单个 ref）
   const imageUploadRef = useRef(null);
@@ -840,8 +840,10 @@ function App() {
   }, [accountSearchText]);
   const overallProgress = (() => {
     const checks = [
+      taskName !== '',
+      businessUnit !== '',
       selectedAccountIds.length > 0,
-      specificProduct !== '',
+      productAllocMode === 'shared' ? specificProduct !== '' : (selectedAccountIds.length > 0 && selectedAccountIds.every(id => !!perAccountProduct[id])),
       conversionGoal !== '',
       targetingSource === 'package' ? selectedTargetingPackages.length > 0 : (geoSelectedProvinces.length > 0 || geoMode === 'unlimited'),
       bidStrategy === 'max_convert' ? true : bidAmount !== '',
@@ -852,13 +854,20 @@ function App() {
     const done = checks.filter(Boolean).length;
     return done === 0 ? 0 : Math.round((done / checks.length) * 100);
   })();
-  // 已选择的营销产品集合（去重）：shared 单产品；per_account 按账户选择后取去重集合
-  const selectedProductIds = (() => {
-    if (productAllocMode === 'shared') return specificProduct ? [specificProduct] : [];
-    return [...new Set(selectedAccountIds.map(id => perAccountProduct[id]).filter(Boolean))];
+  // 产品信息配置对象：shared 为单产品；per_account 为每个已选账户一套（Tab 名称显示账户 ID）
+  const productInfoTargets = (() => {
+    if (productAllocMode === 'shared') {
+      return specificProduct ? [{ key: specificProduct, productId: specificProduct, accountId: '' }] : [];
+    }
+    return selectedAccountIds
+      .filter(accountId => !!perAccountProduct[accountId])
+      .map(accountId => ({ key: accountId, productId: perAccountProduct[accountId], accountId }));
   })();
   const validationErrors = (() => {
     const errors = [];
+    if (taskName.trim() === '') errors.push('请输入任务名称');
+    if (businessUnit === '') errors.push('请选择主体');
+    if (selectedAccountIds.length === 0) errors.push('请选择账户');
     if (bidStrategy === 'stable_cost') {
       if (bidAmount === '') errors.push('请设置出价');
       if (bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300)) errors.push('出价需在 0.01 ~ 300 元之间');
@@ -874,18 +883,17 @@ function App() {
       });
     }
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
-    // 产品主图：每个已选营销产品都必须至少手动上传 1 张（商品库默认图不算手动新增）
-    if (selectedProductIds.length === 0) {
+    // 产品主图：shared 校验单产品；per_account 按账户逐个校验，报错使用账户 ID
+    if (productInfoTargets.length === 0) {
       errors.push('请选择营销产品');
     } else {
-      selectedProductIds.forEach(pid => {
-        const _pi = productInfoMap[pid] || {};
+      productInfoTargets.forEach(target => {
+        const _pi = productInfoMap[target.key] || {};
         if (!_pi.images || _pi.images.length === 0) {
-          if (selectedProductIds.length === 1) {
+          if (productAllocMode === 'shared') {
             errors.push('产品主图至少需手动上传 1 张');
           } else {
-            const _prod = MOCK.productLibrary.find(p => p.id === pid);
-            errors.push('「' + (_prod ? _prod.name : pid) + '」产品主图至少需手动上传 1 张');
+            errors.push('账户 ' + target.accountId + '：产品主图至少需手动上传 1 张');
           }
         }
       });
@@ -1088,6 +1096,12 @@ function App() {
       if (saved) {
         const data = JSON.parse(saved);
         if (data.selectedAccountIds) setSelectedAccountIds([...new Set(data.selectedAccountIds)]);
+        if (data.taskName !== undefined) setTaskName(data.taskName);
+        if (data.businessUnit) {
+          // 恢复草稿时同步 ref，避免主体切换 effect 把已保存账户清空
+          prevBuRef.current = data.businessUnit;
+          setBusinessUnit(data.businessUnit);
+        }
         if (data.unitName) setUnitName(data.unitName);
         if (data.buildType) setBuildType(data.buildType);
         if (data.selectedUnits) setSelectedUnits(data.selectedUnits);
@@ -1115,8 +1129,29 @@ function App() {
         if (data.productAllocMode) setProductAllocMode(data.productAllocMode);
         if (data.specificProduct) setSpecificProduct(data.specificProduct);
         if (data.perAccountProduct) setPerAccountProduct(data.perAccountProduct);
-        if (data.productInfoMap) setProductInfoMap(data.productInfoMap);
-        if (data.sellingPointsInputs) setSellingPointsInputs(data.sellingPointsInputs);
+        if (data.productInfoMap) {
+          // 兼容旧版：per_account 的产品信息曾按 productId 存储，现迁移为每账户一份
+          if (data.productAllocMode === 'per_account' && data.perAccountProduct) {
+            const migratedMap = { ...data.productInfoMap };
+            const migratedInputs = { ...(data.sellingPointsInputs || {}) };
+            Object.keys(data.perAccountProduct).forEach(accountId => {
+              const pid = data.perAccountProduct[accountId];
+              if (pid && !migratedMap[accountId] && data.productInfoMap[pid]) {
+                migratedMap[accountId] = { ...data.productInfoMap[pid], images: [...(data.productInfoMap[pid].images || [])], sellingPoints: [...(data.productInfoMap[pid].sellingPoints || [])] };
+              }
+              if (pid && migratedInputs[accountId] === undefined && data.sellingPointsInputs && data.sellingPointsInputs[pid] !== undefined) {
+                migratedInputs[accountId] = data.sellingPointsInputs[pid];
+              }
+            });
+            setProductInfoMap(migratedMap);
+            setSellingPointsInputs(migratedInputs);
+          } else {
+            setProductInfoMap(data.productInfoMap);
+            if (data.sellingPointsInputs) setSellingPointsInputs(data.sellingPointsInputs);
+          }
+        } else if (data.sellingPointsInputs) {
+          setSellingPointsInputs(data.sellingPointsInputs);
+        }
         // 老版本草稿迁移：旧单套字段 → 归入第一个营销产品
         if (!data.productInfoMap && (data.extraProductImages || data.extraProductNames || data.extraSellingPoints || data.extraSellingPointsInput !== undefined)) {
           const firstPid = data.specificProduct || (data.perAccountProduct ? (Object.keys(data.perAccountProduct).map(k => data.perAccountProduct[k]).find(Boolean) || '') : '');
@@ -1146,7 +1181,7 @@ function App() {
     if (!currentTaskId) return;
     try {
       const data = {
-        selectedAccountIds, unitName,
+        selectedAccountIds, taskName, businessUnit, unitName,
         buildType, selectedUnits,
         targetingSource, tgtAllocMode, perAccountTgtPkgs, selectedTargetingPackages,
         geoMode, geoSelectedCountry, geoSelectedProvinces, geoSelectedCities,
@@ -1377,9 +1412,9 @@ function App() {
                 className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
             </div>
-            {/* 主体选择：一行一项，与广点通母版一致 */}
+            {/* 选择主体：配置任务名称后先选主体，再选择该主体下的账户 */}
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">主体选择 <span className="text-red-500">*</span></label>
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">选择主体 <span className="text-red-500">*</span></label>
               <select value={businessUnit} onChange={e => setBusinessUnit(e.target.value)}
                 className="w-fit px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 {MOCK.businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}（{bu.id}）</option>)}
@@ -2413,57 +2448,57 @@ function App() {
                 );
               };
 
-              // 已选营销产品集合（去重）
-              const _pids = selectedProductIds;
+              const _targets = productInfoTargets;
 
-              // 单产品：保持原有展示（与旧版完全一致）
-              if (_pids.length <= 1) {
-                const _pid = _pids[0] || '';
-                const _prod = MOCK.productLibrary.find(p => p.id === _pid);
+              // 共享模式或仅 1 个账户：保持单面板展示，不增加无意义 Tab
+              if (_targets.length <= 1) {
+                const _target = _targets[0] || { key: '', productId: '', accountId: '' };
+                const _prod = MOCK.productLibrary.find(p => p.id === _target.productId);
                 const _defaultName = _prod ? _prod.name : '请先在「项目配置」选择营销产品';
                 const _defaultImage = _prod ? _prod.image : '';
-                const _pi = productInfoMap[_pid] || {};
+                const _pi = productInfoMap[_target.key] || {};
                 const _imgs = _pi.images || [];
                 const _points = _pi.sellingPoints || [];
-                // 图库候选：默认图 + 用户上传图，不超过 11
                 const _allImages = [_defaultImage, ..._imgs].filter(Boolean);
                 return (
                   <div>
                     <h4 className="text-sm font-bold text-gray-900 mb-4">产品信息</h4>
-                    {_renderPanel(_pid, _defaultName, _defaultImage, _imgs, _points, _allImages)}
+                    {_renderPanel(_target.key, _defaultName, _defaultImage, _imgs, _points, _allImages)}
                   </div>
                 );
               }
 
-              // 多产品：Tabs 切换，任意时刻只渲染一个产品的配置面板，页面高度恒定
-              const _active = activeProductTab && _pids.includes(activeProductTab) ? activeProductTab : (_pids.find(pid => {
-                const _p = productInfoMap[pid] || {};
+              // 分账户定制：一个账户一个 Tab，以账户 ID 为名称；相同商品也不合并
+              const _targetKeys = _targets.map(target => target.key);
+              const _activeKey = activeProductTab && _targetKeys.includes(activeProductTab) ? activeProductTab : ((_targets.find(target => {
+                const _p = productInfoMap[target.key] || {};
                 return !_p.images || _p.images.length === 0;
-              }) || _pids[0]);
-              const _activeProd = MOCK.productLibrary.find(p => p.id === _active);
+              }) || _targets[0]).key);
+              const _activeTarget = _targets.find(target => target.key === _activeKey) || _targets[0];
+              const _activeProd = MOCK.productLibrary.find(p => p.id === _activeTarget.productId);
               const _activeDefaultName = _activeProd ? _activeProd.name : '';
               const _activeDefaultImage = _activeProd ? _activeProd.image : '';
-              const _activePi = productInfoMap[_active] || {};
+              const _activePi = productInfoMap[_activeKey] || {};
               const _activeImgs = _activePi.images || [];
               const _activePoints = _activePi.sellingPoints || [];
               const _allActiveImages = [_activeDefaultImage, ..._activeImgs].filter(Boolean);
               return (
                 <div>
                   <h4 className="text-sm font-bold text-gray-900 mb-4">产品信息</h4>
-                  {/* Tabs：产品名 + 状态圆点（绿=已配置完成 / 红=有缺项 / 灰=未开始） */}
+                  {/* Tabs：账户 ID + 状态圆点（绿=已配置完成 / 红=有缺项 / 灰=未开始） */}
                   <div className="flex items-center gap-2 mb-4 flex-wrap" style={{ borderBottom: '1px solid #e5e7eb' }}>
-                    {_pids.map(pid => {
-                      const _p = productInfoMap[pid] || {};
+                    {_targets.map(target => {
+                      const _p = productInfoMap[target.key] || {};
                       const _pImgs = _p.images || [];
                       const _started = !!(_p.extraName || '').trim() || _pImgs.length > 0 || (_p.sellingPoints || []).length > 0;
                       const _done = _pImgs.length > 0;
-                      const _isActive = pid === _active;
-                      const _prodT = MOCK.productLibrary.find(p => p.id === pid);
+                      const _isActive = target.key === _activeKey;
+                      const _tabProd = MOCK.productLibrary.find(p => p.id === target.productId);
                       return (
                         <button
-                          key={pid}
+                          key={target.key}
                           type="button"
-                          onClick={() => setActiveProductTab(pid)}
+                          onClick={() => setActiveProductTab(target.key)}
                           className={"px-4 py-2 text-sm transition " + (_isActive ? 'text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50')}
                           style={{
                             display: 'flex', alignItems: 'center', gap: 6,
@@ -2472,16 +2507,16 @@ function App() {
                             borderBottom: _isActive ? 'none' : '1px solid #e5e7eb',
                             background: _isActive ? '#fff' : '#f5f5f5',
                           }}
-                          title={_done ? '已配置完成' : (_started ? '有缺项未完成' : '未开始配置')}
+                          title={(target.accountId + ' · ' + (_tabProd ? _tabProd.name : target.productId) + ' · ' + (_done ? '已配置完成' : (_started ? '有缺项未完成' : '未开始配置')))}
                         >
-                          {_prodT ? _prodT.name : pid}
+                          {target.accountId}
                           <span style={{ width: 8, height: 8, borderRadius: '50%', background: _done ? '#22c55e' : (_started ? '#ef4444' : '#d1d5db'), flexShrink: 0 }} />
                         </button>
                       );
                     })}
                   </div>
-                  {/* 当前产品的配置面板 */}
-                  {_renderPanel(_active, _activeDefaultName, _activeDefaultImage, _activeImgs, _activePoints, _allActiveImages)}
+                  {/* 当前账户所选产品的配置面板 */}
+                  {_renderPanel(_activeKey, _activeDefaultName, _activeDefaultImage, _activeImgs, _activePoints, _allActiveImages)}
                 </div>
               );
             })()}
