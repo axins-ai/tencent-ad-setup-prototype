@@ -245,9 +245,17 @@
 
             <!-- 年龄 -->
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e7eb;">
-              <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:10px;">年龄</div>
-              <div id="tgt-pkg-age-options" style="display:flex;flex-wrap:wrap;gap:8px;">
-                <!-- 由 JS 动态渲染 -->
+              <div style="display:flex;align-items:flex-start;gap:28px;">
+                <div style="width:72px;font-size:14px;font-weight:500;color:#333;padding-top:3px;flex-shrink:0;">年龄</div>
+                <div style="flex:1;min-width:0;">
+                  <div id="tgt-pkg-age-options" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;">
+                    <!-- 由 JS 动态渲染 -->
+                  </div>
+                  <div id="tgt-pkg-custom-age-panel" style="display:none;margin-top:14px;background:#f7f8fa;border-radius:10px;padding:16px;max-width:620px;">
+                    <div id="tgt-pkg-custom-age-rows" style="display:flex;flex-direction:column;gap:12px;"></div>
+                    <button id="tgt-pkg-add-custom-age" type="button" onclick="window.addTgtPkgCustomAgeRange()" style="display:none;margin-top:12px;background:none;border:none;padding:0;color:#2563eb;font-size:13px;cursor:pointer;">+ 添加年龄段</button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -693,7 +701,7 @@
 (function() {
   // 版本自校验：页面版本与 localStorage 不一致时强制刷新一次，绕过 CDN/浏览器对 index.html 的缓存
   (function() {
-    var PAGE_VERSION = '20260824a';
+    var PAGE_VERSION = '20260928a';
     try {
       if (localStorage.getItem('page_version') !== PAGE_VERSION) {
         localStorage.setItem('page_version', PAGE_VERSION);
@@ -1433,40 +1441,94 @@
     return out;
   }
 
-  // ========== 定向包表单年龄多选逻辑 ==========
+  // ========== 广点通定向包年龄逻辑：预设多选 + 最多5组自定义区间 ==========
+  var tgtPkgCustomAgeRanges = [];
+  var TGT_PKG_MAX_CUSTOM_AGE_RANGES = 5;
+  var TGT_PKG_AGE_MIN = 14;
+  var TGT_PKG_AGE_MAX = 65;
+
+  function renderTgtPkgCustomAgeRanges() {
+    var panel = document.getElementById('tgt-pkg-custom-age-panel');
+    var rowsEl = document.getElementById('tgt-pkg-custom-age-rows');
+    var addBtn = document.getElementById('tgt-pkg-add-custom-age');
+    var customCb = document.querySelector('#tgt-pkg-age-options input[value="custom"]');
+    if (!panel || !rowsEl || !addBtn) return;
+    var enabled = !!(customCb && customCb.checked);
+    panel.style.display = enabled ? 'block' : 'none';
+    if (!enabled) return;
+    if (tgtPkgCustomAgeRanges.length === 0) tgtPkgCustomAgeRanges = [{ start: '', end: '' }];
+    rowsEl.innerHTML = '';
+    tgtPkgCustomAgeRanges.forEach(function(range, idx) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:minmax(150px,1fr) 18px minmax(150px,1fr) 28px;gap:8px;align-items:center;';
+      var start = document.createElement('select');
+      var end = document.createElement('select');
+      start.setAttribute('data-custom-age-start', String(idx));
+      end.setAttribute('data-custom-age-end', String(idx));
+      var invalid = range.start === '' || range.end === '' || Number(range.start) >= Number(range.end);
+      var selectStyle = 'width:100%;height:38px;padding:0 12px;border:1px solid ' + (invalid ? '#ff4d4f' : '#d1d5db') + ';border-radius:8px;background:#fff;color:#374151;font-size:13px;outline:none;';
+      start.style.cssText = selectStyle;
+      end.style.cssText = selectStyle;
+      start.innerHTML = '<option value="">请选择开始年龄</option>';
+      end.innerHTML = '<option value="">请选择结束年龄</option>';
+      for (var age = TGT_PKG_AGE_MIN; age <= TGT_PKG_AGE_MAX; age++) {
+        start.innerHTML += '<option value="' + age + '">' + age + ' 岁</option>';
+        end.innerHTML += '<option value="' + age + '">' + age + ' 岁</option>';
+      }
+      start.value = range.start === '' ? '' : String(range.start);
+      end.value = range.end === '' ? '' : String(range.end);
+      start.onchange = function() { tgtPkgCustomAgeRanges[idx].start = this.value === '' ? '' : Number(this.value); renderTgtPkgCustomAgeRanges(); };
+      end.onchange = function() { tgtPkgCustomAgeRanges[idx].end = this.value === '' ? '' : Number(this.value); renderTgtPkgCustomAgeRanges(); };
+      var dash = document.createElement('span');
+      dash.textContent = '-';
+      dash.style.cssText = 'text-align:center;color:#4b5563;font-size:14px;';
+      var remove = document.createElement('button');
+      remove.type = 'button';
+      remove.setAttribute('aria-label', '删除自定义年龄段');
+      remove.innerHTML = '<i class="fas fa-minus-circle"></i>';
+      remove.style.cssText = 'width:28px;height:28px;border:none;background:transparent;color:#8b9098;font-size:16px;cursor:pointer;padding:0;';
+      remove.onclick = function() { window.removeTgtPkgCustomAgeRange(idx); };
+      row.appendChild(start); row.appendChild(dash); row.appendChild(end); row.appendChild(remove);
+      rowsEl.appendChild(row);
+    });
+    addBtn.style.display = tgtPkgCustomAgeRanges.length < TGT_PKG_MAX_CUSTOM_AGE_RANGES ? 'inline-block' : 'none';
+  }
+
+  window.addTgtPkgCustomAgeRange = function() {
+    if (tgtPkgCustomAgeRanges.length >= TGT_PKG_MAX_CUSTOM_AGE_RANGES) return;
+    tgtPkgCustomAgeRanges.push({ start: '', end: '' });
+    renderTgtPkgCustomAgeRanges();
+  };
+  window.removeTgtPkgCustomAgeRange = function(idx) {
+    tgtPkgCustomAgeRanges.splice(idx, 1);
+    if (tgtPkgCustomAgeRanges.length === 0) tgtPkgCustomAgeRanges.push({ start: '', end: '' });
+    renderTgtPkgCustomAgeRanges();
+  };
   window.tgtPkgAgeChange = function(checkbox) {
     var value = checkbox.value;
     var allCheckboxes = document.querySelectorAll('#tgt-pkg-age-options input[type="checkbox"]');
-    if (value === 'unlimited') {
-      // "不限"：切换选中状态
-      if (checkbox.checked) {
-        // 选中"不限"：取消所有其他年龄段
-        allCheckboxes.forEach(function(cb) {
-          if (cb.value !== 'unlimited') cb.checked = false;
-        });
-      } else {
-        // 取消"不限"：不选中任何选项（允许用户选择具体年龄段）
-        // 如果所有都未选中，保持"不限"未选中状态
-      }
-    } else {
-      // 具体年龄段
-      if (checkbox.checked) {
-        // 选中具体年龄段：取消"不限"
-        allCheckboxes.forEach(function(cb) {
-          if (cb.value === 'unlimited') cb.checked = false;
-        });
-      }
-      // 如果没有选择任何具体年龄，自动选择"不限"
-      var anyChecked = false;
-      allCheckboxes.forEach(function(cb) {
-        if (cb.value !== 'unlimited' && cb.checked) anyChecked = true;
-      });
-      if (!anyChecked) {
-        allCheckboxes.forEach(function(cb) {
-          if (cb.value === 'unlimited') cb.checked = true;
-        });
-      }
+    if (value === 'unlimited' && checkbox.checked) {
+      allCheckboxes.forEach(function(cb) { if (cb.value !== 'unlimited') cb.checked = false; });
+      tgtPkgCustomAgeRanges = [];
+    } else if (value !== 'unlimited' && checkbox.checked) {
+      allCheckboxes.forEach(function(cb) { if (cb.value === 'unlimited') cb.checked = false; });
+      if (value === 'custom' && tgtPkgCustomAgeRanges.length === 0) tgtPkgCustomAgeRanges = [{ start: '', end: '' }];
+    } else if (value === 'custom' && !checkbox.checked) {
+      tgtPkgCustomAgeRanges = [];
     }
+    var anyChecked = Array.prototype.some.call(allCheckboxes, function(cb) { return cb.value !== 'unlimited' && cb.checked; });
+    if (!anyChecked) {
+      allCheckboxes.forEach(function(cb) { if (cb.value === 'unlimited') cb.checked = true; });
+    }
+    renderTgtPkgCustomAgeRanges();
+  };
+  window.validateTgtPkgCustomAgeRanges = function() {
+    var customCb = document.querySelector('#tgt-pkg-age-options input[value="custom"]');
+    if (!customCb || !customCb.checked) return true;
+    if (tgtPkgCustomAgeRanges.length === 0) return false;
+    return tgtPkgCustomAgeRanges.every(function(range) {
+      return range.start !== '' && range.end !== '' && Number(range.start) < Number(range.end);
+    });
   };
 
   // ========== 地域选择器 ==========
@@ -1832,31 +1894,34 @@
     var allCheckboxes = document.querySelectorAll('#tgt-pkg-age-options input[type="checkbox"]');
     var selected = [];
     allCheckboxes.forEach(function(cb) {
-      if (cb.checked) selected.push(cb.value);
+      if (cb.checked && cb.value !== 'custom') selected.push(cb.value);
     });
     if (selected.includes('unlimited')) return '不限';
     return selected.join(',');
   };
-  window.setTgtPkgAgeValue = function(val) {
+  window.getTgtPkgCustomAgeRanges = function() {
+    return tgtPkgCustomAgeRanges.map(function(range) { return { start: Number(range.start), end: Number(range.end) }; });
+  };
+  window.setTgtPkgAgeValue = function(val, customRanges) {
     var allCheckboxes = document.querySelectorAll('#tgt-pkg-age-options input[type="checkbox"]');
-    // 先全部取消
     allCheckboxes.forEach(function(cb) { cb.checked = false; });
-    if (!val || val === '不限') {
-      // 选择"不限"
-      allCheckboxes.forEach(function(cb) {
-        if (cb.value === 'unlimited') cb.checked = true;
+    tgtPkgCustomAgeRanges = [];
+    if (customRanges && customRanges.length) {
+      tgtPkgCustomAgeRanges = customRanges.slice(0, TGT_PKG_MAX_CUSTOM_AGE_RANGES).map(function(range) {
+        return { start: range.start === '' ? '' : Number(range.start), end: range.end === '' ? '' : Number(range.end) };
       });
+    }
+    if (!val || val === '不限') {
+      allCheckboxes.forEach(function(cb) { if (cb.value === 'unlimited') cb.checked = true; });
     } else {
-      // 选择具体年龄
       var vals = val.split(',');
       allCheckboxes.forEach(function(cb) {
         if (vals.includes(cb.value)) cb.checked = true;
+        if (cb.value === 'custom' && tgtPkgCustomAgeRanges.length > 0) cb.checked = true;
       });
-      // 取消"不限"
-      allCheckboxes.forEach(function(cb) {
-        if (cb.value === 'unlimited') cb.checked = false;
-      });
+      allCheckboxes.forEach(function(cb) { if (cb.value === 'unlimited') cb.checked = false; });
     }
+    renderTgtPkgCustomAgeRanges();
   };
 
   // ===== 头条渠道定向包表单 =====
@@ -2173,8 +2238,9 @@
     // 清除地域标签
     var tagsEl = document.getElementById('tgt-pkg-region-tags');
     if (tagsEl) tagsEl.innerHTML = '';
-    // 重置年龄
-    window.setTgtPkgAgeValue('不限');
+    // 重置年龄（先渲染选项，再写入默认值）
+    if (window.renderTgtPkgAgeOptions) window.renderTgtPkgAgeOptions();
+    window.setTgtPkgAgeValue('不限', []);
     // 重置性别
     var elGender = document.querySelector('input[name="tgt-pkg-gender"][value="不限"]');
     if (elGender) elGender.checked = true;
@@ -2190,8 +2256,7 @@
 
     if (el) el.checked = true;
     // tgt-pkg-conversion-section 元素已删除，跳过
-    // 渲染年龄选项 + 省份列表
-    if (window.renderTgtPkgAgeOptions) window.renderTgtPkgAgeOptions();
+    // 渲染人群包与省份列表
     if (window.renderTgtPkgAudienceList) window.renderTgtPkgAudienceList();
     // 默认渲染省份列表和城市列表
     if (window.renderTgtPkgProvinceList) window.renderTgtPkgProvinceList();
@@ -2282,8 +2347,8 @@
       var elGeoRegion3 = document.getElementById('tgt-pkg-geo-region');
       if (elGeoRegion3) elGeoRegion3.style.display = 'none';
     }
-    // 年龄
-    window.setTgtPkgAgeValue(tp.age || '不限');
+    // 年龄（兼容旧 age 字符串，新版自定义区间读取 customAgeRanges）
+    window.setTgtPkgAgeValue(tp.age || '不限', tp.customAgeRanges || []);
     // 性别
     var genderRadio = document.querySelector('input[name="tgt-pkg-gender"][value="' + (tp.gender || '不限') + '"]');
     if (genderRadio) genderRadio.checked = true;
@@ -2361,7 +2426,13 @@
           region = allCities.join(',');
         }
 
+        if (!window.validateTgtPkgCustomAgeRanges()) {
+          if (window.renderTgtPkgCustomAgeRanges) window.renderTgtPkgCustomAgeRanges();
+          alert('请完整选择自定义年龄，且开始年龄必须小于结束年龄');
+          return;
+        }
         var age = window.getTgtPkgAgeValue();
+        var customAgeRanges = window.getTgtPkgCustomAgeRanges();
 
         var audienceInput = '';
         if (audienceMode !== 'unlimited') {
@@ -2381,6 +2452,7 @@
           geoMode: geoMode,
           region: region,
           age: age,
+          customAgeRanges: customAgeRanges,
           gender: gender,
           excludeConverted: excludeConverted,
           audienceMode: audienceMode,
@@ -2895,26 +2967,45 @@
     diagnoseAndBind();
   }
 
-  // 渲染年龄选项
+  // 渲染广点通年龄选项（与媒体后台一致）
   window.renderTgtPkgAgeOptions = function() {
     var container = document.getElementById('tgt-pkg-age-options');
     if (!container) return;
-    var ages = ['不限', '18-24', '25-34', '35-44', '45-54', '55+'];
+    var ages = [
+      { value: 'unlimited', label: '不限' },
+      { value: '14-18岁', label: '14-18 岁' },
+      { value: '19-24岁', label: '19-24 岁' },
+      { value: '25-29岁', label: '25-29 岁' },
+      { value: '30-39岁', label: '30-39 岁' },
+      { value: '40-49岁', label: '40-49 岁' },
+      { value: '50岁及以上', label: '50 岁及以上' },
+      { value: 'custom', label: '自定义' }
+    ];
     container.innerHTML = '';
-    ages.forEach(function(age) {
+    ages.forEach(function(item) {
       var label = document.createElement('label');
-      label.style.cssText = 'display:flex;align-items:center;padding:6px 12px;background:#f9fafb;border-radius:6px;cursor:pointer;font-size:13px;';
+      label.style.cssText = 'display:flex;align-items:center;cursor:pointer;font-size:13px;color:#333;white-space:nowrap;';
       var cb = document.createElement('input');
       cb.type = 'checkbox';
-      cb.value = age;
+      cb.value = item.value;
       cb.name = 'tgt-pkg-age';
-      if (age === '不限') cb.checked = true;
-      cb.style.marginRight = '6px';
+      if (item.value === 'unlimited') cb.checked = true;
+      cb.style.cssText = 'margin:0 6px 0 0;width:15px;height:15px;accent-color:#2563eb;';
+      cb.onchange = function() { window.tgtPkgAgeChange(this); };
       label.appendChild(cb);
-      label.appendChild(document.createTextNode(age));
+      label.appendChild(document.createTextNode(item.label));
+      if (item.value === 'custom') {
+        var help = document.createElement('span');
+        help.textContent = '?';
+        help.title = '可添加最多5组自定义年龄区间';
+        help.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:4px;border-radius:50%;background:#c4c7cc;color:white;font-size:10px;';
+        label.appendChild(help);
+      }
       container.appendChild(label);
     });
+    renderTgtPkgCustomAgeRanges();
   };
+  window.renderTgtPkgCustomAgeRanges = renderTgtPkgCustomAgeRanges;
   // 渲染人群包列表
   window.renderTgtPkgAudienceList = function() {
     var container = document.getElementById('tgt-pkg-audience-list');
