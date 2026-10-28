@@ -154,13 +154,22 @@
       className: "modal-overlay",
       onClick: onClose
     }, /*#__PURE__*/React.createElement("div", {
-      className: "modal-content w-full max-w-6xl",
-      onClick: e => e.stopPropagation()
+      className: "modal-content w-full max-w-6xl platform-material-drawer",
+      onClick: e => e.stopPropagation(),
+      style: {
+        marginLeft: 'auto',
+        marginRight: 0,
+        height: '100vh',
+        maxHeight: '100vh',
+        borderRadius: 0
+      }
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-between p-4 border-b"
     }, /*#__PURE__*/React.createElement("h3", {
       className: "text-lg font-bold"
-    }, "选择素材（已选 ", localSelected.length, "/500）"), /*#__PURE__*/React.createElement("button", {
+    }, "选择素材 ", /*#__PURE__*/React.createElement("span", {
+      className: "text-sm font-normal text-gray-500"
+    }, "已选 ", localSelected.length, "/500")), /*#__PURE__*/React.createElement("button", {
       onClick: onClose,
       className: "text-gray-400 hover:text-gray-600"
     }, /*#__PURE__*/React.createElement("i", {
@@ -289,13 +298,16 @@
         maxHeight: '50vh'
       }
     }, /*#__PURE__*/React.createElement("div", {
-      className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
+      className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
     }, paged.map(m => {
       const isSelected = localSelected.includes(m.id);
       return /*#__PURE__*/React.createElement("div", {
         key: m.id,
         onClick: () => toggleSelect(m.id),
-        className: `border-2 rounded-lg p-3 cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`
+        className: `border rounded-lg p-2 cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`,
+        style: {
+          position: 'relative'
+        }
       }, /*#__PURE__*/React.createElement("div", {
         className: "text-4xl text-center mb-2"
       }, m.thumb), /*#__PURE__*/React.createElement("p", {

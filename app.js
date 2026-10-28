@@ -1868,13 +1868,13 @@ function App() {
     }
   }, [runProgress]);
   return /*#__PURE__*/React.createElement("div", {
-    className: "min-h-screen bg-gray-50"
+    className: "min-h-screen bg-white platform-batch-form"
   }, notification && /*#__PURE__*/React.createElement(Notification, {
     msg: notification.msg,
     type: notification.type,
     onClose: () => setNotification(null)
   }), /*#__PURE__*/React.createElement("div", {
-    className: "bg-gray-50 border-b shadow-sm sticky top-0 z-40"
+    className: "bg-white border-b sticky top-0 z-40 platform-form-status"
   }, /*#__PURE__*/React.createElement("div", {
     className: "px-6"
   }, showValidationSummary && validationErrors.length > 0 && /*#__PURE__*/React.createElement("div", {
@@ -1887,7 +1887,7 @@ function App() {
     key: i,
     className: "bg-red-100 px-1.5 py-0.5 rounded whitespace-nowrap"
   }, err)))))), /*#__PURE__*/React.createElement("div", {
-    className: "bg-gray-50 border-b sticky top-[56px] z-30 shadow-sm"
+    className: "bg-white border-b sticky top-[48px] z-30 platform-section-nav"
   }, /*#__PURE__*/React.createElement("div", {
     className: "px-6 flex items-center gap-1 overflow-x-auto py-1"
   }, [{
@@ -1952,7 +1952,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle mr-1"
   }), validationErrors.length, "项未完成"))), /*#__PURE__*/React.createElement("div", {
-    className: "px-6 py-6 space-y-6"
+    className: "px-10 py-5 space-y-4 platform-form-content"
   }, /*#__PURE__*/React.createElement("div", {
     id: "section-basic",
     className: ""

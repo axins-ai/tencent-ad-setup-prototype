@@ -1328,11 +1328,11 @@ function App() {
   }, [runProgress]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white platform-batch-form">
       {notification && <Notification msg={notification.msg} type={notification.type} onClose={() => setNotification(null)} />}
 
       {/* ===== 顶部：精简信息栏 ===== */}
-      <div className="bg-gray-50 border-b shadow-sm sticky top-0 z-40">
+      <div className="bg-white border-b sticky top-0 z-40 platform-form-status">
         <div className="px-6">
           {/* 错误详情条 */}
           {showValidationSummary && validationErrors.length > 0 && (
@@ -1350,7 +1350,7 @@ function App() {
       </div>
 
       {/* ===== 快捷导航 ===== */}
-      <div className="bg-gray-50 border-b sticky top-[56px] z-30 shadow-sm">
+      <div className="bg-white border-b sticky top-[48px] z-30 platform-section-nav">
         <div className="px-6 flex items-center gap-1 overflow-x-auto py-1">
           {[
             {id:'section-basic', label:'基础配置', icon:'fa-cog'},
@@ -1391,7 +1391,7 @@ function App() {
           )}
         </div>
       </div>
-      <div className="px-6 py-6 space-y-6">
+      <div className="px-10 py-5 space-y-4 platform-form-content">
         {/* ===== 1. 基础配置 ===== */}
         <div id="section-basic" className="">
           <div className="px-6 py-3.5 flex items-center gap-3 border-b border-gray-200">
