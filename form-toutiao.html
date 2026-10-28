@@ -27,46 +27,6 @@ body { margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Rob
 .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
 /* 平滑滚动 */
 html { scroll-behavior: smooth; }
-/* 对齐投放管理平台后台设计规范 */
-:root { --platform-blue:#126bff; --platform-blue-hover:#075fe8; --platform-text:#1f2937; --platform-muted:#667085; --platform-line:#e7ecf3; --platform-bg:#f7f9fc; }
-body { color:var(--platform-text); background:#fff; font-size:13px; }
-#root { background:#fff; min-height:calc(100vh - 48px); }
-#back-bar { height:48px; padding:0 28px !important; border-color:var(--platform-line) !important; }
-#back-bar button { height:30px; border-radius:4px !important; padding:0 13px !important; font-size:12px !important; }
-#back-bar button:first-child { border:0 !important; padding-left:0 !important; color:#4b5563 !important; }
-#back-bar button:last-of-type { background:var(--platform-blue) !important; margin-left:auto !important; }
-.modal-overlay { background:rgba(0,0,0,.42); padding:24px; }
-.modal-content { border-radius:8px; box-shadow:0 12px 36px rgba(27,39,60,.18); }
-.modal-content > div:first-child { min-height:50px; padding:14px 18px !important; }
-.modal-content h3 { font-size:16px !important; font-weight:600 !important; }
-.btn-primary { background:var(--platform-blue); border-radius:4px; padding:7px 16px; font-size:12px; }
-.btn-primary:hover { background:var(--platform-blue-hover); }
-.btn-secondary { background:#f5f7fa; color:#4b5563; border-radius:4px; padding:7px 16px; font-size:12px; }
-.tag { background:#eaf2ff; color:var(--platform-blue); border-radius:3px; padding:3px 7px; }
-input, select, textarea { border-radius:4px !important; border-color:#dbe2ec !important; }
-input:focus, select:focus, textarea:focus { outline:none; border-color:var(--platform-blue) !important; box-shadow:0 0 0 2px rgba(18,107,255,.1); }
-.bg-blue-500, .bg-blue-600 { background-color:var(--platform-blue) !important; }
-.text-blue-500, .text-blue-600 { color:var(--platform-blue) !important; }
-.border-blue-500, .border-blue-600 { border-color:var(--platform-blue) !important; }
-.bg-blue-50 { background-color:#f2f7ff !important; }
-.rounded-xl { border-radius:6px !important; }
-.rounded-lg { border-radius:5px !important; }
-.shadow-lg, .shadow-xl, .shadow-2xl { box-shadow:0 8px 24px rgba(25,39,65,.12) !important; }
-.platform-batch-form { font-size:12px; }
-.platform-form-status { box-shadow:none !important; }
-.platform-section-nav { box-shadow:none !important; border-color:var(--platform-line) !important; }
-.platform-section-nav a { border-radius:3px !important; }
-.platform-form-content { max-width:none; }
-.platform-form-content > div { background:#fff; border-bottom:1px solid var(--platform-line); }
-.platform-form-content > div > div:first-child { padding:10px 0 !important; border-bottom:0 !important; }
-.platform-form-content > div > div:first-child > span:first-child { width:3px !important; height:16px !important; border-radius:1px !important; font-size:0 !important; }
-.platform-form-content > div > div:first-child > h2 { font-size:14px !important; }
-.platform-form-content > div > div:nth-child(2) { padding:12px 0 20px !important; }
-.platform-form-content label { font-size:12px !important; color:#4b5563 !important; }
-.platform-form-content input, .platform-form-content select, .platform-form-content textarea { min-height:32px; font-size:12px !important; }
-.platform-material-drawer { width:min(980px,88vw) !important; animation:drawerIn .2s ease-out; }
-@keyframes drawerIn { from { transform:translateX(28px); opacity:.75; } to { transform:translateX(0); opacity:1; } }
-@media (max-width:900px) { #back-bar { padding:0 16px !important; } .modal-overlay { padding:12px; } .platform-form-content { padding-left:18px !important; padding-right:18px !important; } .platform-material-drawer { width:100% !important; } }
 </style>
   <script src="region-data.js"></script>
   <script>
@@ -140,8 +100,8 @@ input:focus, select:focus, textarea:focus { outline:none; border-color:var(--pla
 
 <script src="react.production.min.js"></script>
 <script src="react-dom.production.min.js"></script>
-<script src="shared.js?v=20261028b"></script>
-<script src="app-toutiao.js?v=20261028b"></script>
+<script src="shared.js?v=20260824e"></script>
+<script src="app-toutiao.js?v=20261028a"></script>
 
 </body>
 </html>

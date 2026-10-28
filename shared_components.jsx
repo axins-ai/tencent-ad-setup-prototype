@@ -145,9 +145,9 @@ function MaterialModal({ show, onClose, onConfirm, onClear, selectedMaterials, a
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content w-full max-w-6xl platform-material-drawer" onClick={e => e.stopPropagation()} style={{marginLeft:'auto', marginRight:0, height:'100vh', maxHeight:'100vh', borderRadius:0}}>
+      <div className="modal-content w-full max-w-6xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-bold">选择素材 <span className="text-sm font-normal text-gray-500">已选 {localSelected.length}/500</span></h3>
+          <h3 className="text-lg font-bold">选择素材（已选 {localSelected.length}/500）</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
         </div>
         {/* 标签页 + 筛选条件 */}
@@ -207,15 +207,14 @@ function MaterialModal({ show, onClose, onConfirm, onClear, selectedMaterials, a
         </div>
         {/* 素材网格 */}
         <div className="overflow-y-auto flex-1 p-4" style={{maxHeight: '50vh'}}>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {paged.map(m => {
               const isSelected = localSelected.includes(m.id);
               return (
                 <div
                   key={m.id}
                   onClick={() => toggleSelect(m.id)}
-                  className={`border rounded-lg p-2 cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
-                  style={{position:'relative'}}
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
                 >
                   <div className="text-4xl text-center mb-2">{m.thumb}</div>
                   <p className="text-xs font-medium text-gray-900 text-center truncate">{m.name}</p>
