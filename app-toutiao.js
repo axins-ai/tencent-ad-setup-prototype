@@ -89,28 +89,34 @@ const MOCK = {
     id: 'p_001',
     name: '5G智享套餐',
     image: '📱',
+    category: '通信套餐',
     sellingPoints: ['高速流量', '全国通话', '免费副卡']
   }, {
     id: 'p_002',
     name: '家庭千兆宽带',
     image: '🌐',
+    category: '家庭宽带',
     sellingPoints: ['千兆速率', '稳定不掉线', '免费安装']
   }, {
     id: 'p_003',
     name: '合约机0元购',
     image: '📦',
+    category: '终端合约',
     sellingPoints: ['0元购机', '月租返还', '免息分期']
   }, {
     id: 'p_004',
     name: '移动云盘会员',
     image: '☁️',
+    category: '会员权益',
     sellingPoints: ['空间扩容', '自动备份', '多端同步']
   }, {
     id: 'p_005',
     name: '权益会员包',
     image: '🎁',
+    category: '会员权益',
     sellingPoints: ['视频会员', '音乐会员', '购物折扣']
   }],
+  ctaOptions: ['立即咨询', '立即领取', '立即办理', '立即购买', '了解详情', '查看详情', '免费领取', '马上抢购', '立即预约', '点击咨询', '在线咨询', '立即报名', '立即体验', '马上参与', '立即申请'],
   // 转化目标（按业务单元分类）
   conversionsByBusinessUnit: {
     'baiju': [{
@@ -916,6 +922,9 @@ function App() {
   // 营销产品分配：shared=全账户共用, per_account=分账户定制
   const [productAllocMode, setProductAllocMode] = useState('shared');
   const [perAccountProduct, setPerAccountProduct] = useState({}); // { [accountId]: productId }
+  const [showProductPicker, setShowProductPicker] = useState(false);
+  const [productPickerTarget, setProductPickerTarget] = useState(null); // null=全账户共用；string=账户ID
+  const [productSearchText, setProductSearchText] = useState('');
   // 目标优化类型 / 深度优化方式 开关（默认关闭）
   const [targetOptType, setTargetOptType] = useState(false);
   const [deepOptType, setDeepOptType] = useState(false);
@@ -940,16 +949,14 @@ function App() {
     return MOCK.productsByBusinessUnit[businessUnit] || [];
   };
   const [specificProduct, setSpecificProduct] = useState(() => {
-    const products = MOCK.productsByBusinessUnit['baiju'] || [];
-    return products.length > 0 ? products[0].id : '';
+    return MOCK.productLibrary.length > 0 ? MOCK.productLibrary[0].id : '';
   });
   // 当业务单元或推广产品类型变化时，重置产品选择 + 清空已选账户（跳过首次挂载，避免清空默认全选账户）
   const prevBuRef = useRef(businessUnit);
   useEffect(() => {
     if (prevBuRef.current === businessUnit) return; // 跳过首次挂载
     prevBuRef.current = businessUnit;
-    const products = getProductsForBusinessUnit();
-    setSpecificProduct(products.length > 0 ? products[0].id : '');
+    setSpecificProduct(MOCK.productLibrary.length > 0 ? MOCK.productLibrary[0].id : '');
     setSelectedAccountIds([]);
   }, [businessUnit, promotionType]);
   // ===== 营销项目配置 - 定向相关 =====
@@ -1171,10 +1178,20 @@ function App() {
   // 广告资产（与 index.html 共用 ad_brand_images）：品牌形象（type=brand） / 营销组件（type=component）
   const [creativeAssets, setCreativeAssets] = useState([]);
   const [selectedComponent, setSelectedComponent] = useState(null); // {id, title, btnText, thumb}
-  // 行动号召：输入文案回车添加，上限10条，默认开启智能生成
+  // 行动号召：预置候选可搜索多选，上限10条
   const [ctaList, setCtaList] = useState([]); // string[]
   const [ctaInput, setCtaInput] = useState('');
+  const [showCtaDropdown, setShowCtaDropdown] = useState(false);
+  const ctaDropdownRef = useRef(null);
   const [smartGen, setSmartGen] = useState(true); // 默认开启智能生成
+  useEffect(() => {
+    if (!showCtaDropdown) return;
+    const close = e => {
+      if (ctaDropdownRef.current && !ctaDropdownRef.current.contains(e.target)) setShowCtaDropdown(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [showCtaDropdown]);
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
   // ===== 产品信息（按截图：名称/主图/卖点）=====
@@ -2363,14 +2380,33 @@ function App() {
     style: {
       paddingLeft: '124px'
     }
-  }, /*#__PURE__*/React.createElement("select", {
-    value: specificProduct,
-    onChange: e => setSpecificProduct(e.target.value),
-    className: "w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-  }, MOCK.productLibrary.map(sp => /*#__PURE__*/React.createElement("option", {
-    key: sp.id,
-    value: sp.id
-  }, sp.name)))) : /*#__PURE__*/React.createElement("p", {
+  }, (() => {
+    const selected = MOCK.productLibrary.find(p => p.id === specificProduct);
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      onClick: () => {
+        setProductPickerTarget(null);
+        setProductSearchText('');
+        setShowProductPicker(true);
+      },
+      className: "flex items-center gap-3 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:border-blue-400 text-left outline-none focus:ring-2 focus:ring-blue-500",
+      style: {
+        width: '320px'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-xl flex-shrink-0"
+    }, selected ? selected.image : /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-box-open text-gray-400 text-sm"
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "min-w-0 flex-1"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "block text-sm truncate " + (selected ? 'text-gray-800 font-medium' : 'text-gray-400')
+    }, selected ? selected.name : '请选择营销产品'), selected && /*#__PURE__*/React.createElement("span", {
+      className: "block text-xs text-gray-400 mt-0.5"
+    }, selected.category || '营销产品')), /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-chevron-right text-gray-400 text-xs"
+    }));
+  })()) : /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-500 mt-2"
   }, "分账户定制：在下方按账户分别选择商品")), productAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", {
     className: "mb-5"
@@ -2387,19 +2423,26 @@ function App() {
     }, /*#__PURE__*/React.createElement("div", {
       className: "text-xs font-semibold text-gray-900 truncate mb-1.5",
       title: acc ? acc.name : accountId
-    }, acc ? acc.name : accountId), /*#__PURE__*/React.createElement("select", {
-      value: pid,
-      onChange: e => setPerAccountProduct(prev => ({
-        ...prev,
-        [accountId]: e.target.value
-      })),
-      className: "w-full px-2 py-1 border border-gray-300 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500"
-    }, /*#__PURE__*/React.createElement("option", {
-      value: ""
-    }, "请选择商品"), MOCK.productLibrary.map(sp => /*#__PURE__*/React.createElement("option", {
-      key: sp.id,
-      value: sp.id
-    }, sp.name))));
+    }, acc ? acc.name : accountId), (() => {
+      const selected = MOCK.productLibrary.find(p => p.id === pid);
+      return /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        onClick: () => {
+          setProductPickerTarget(accountId);
+          setProductSearchText('');
+          setShowProductPicker(true);
+        },
+        className: "w-full flex items-center gap-2 px-2 py-1.5 border border-gray-300 rounded bg-white hover:border-blue-400 text-left outline-none focus:ring-1 focus:ring-blue-500"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "w-7 h-7 rounded bg-blue-50 flex items-center justify-center text-base flex-shrink-0"
+      }, selected ? selected.image : /*#__PURE__*/React.createElement("i", {
+        className: "fas fa-box-open text-gray-400 text-xs"
+      })), /*#__PURE__*/React.createElement("span", {
+        className: "text-xs truncate flex-1 " + (selected ? 'text-gray-800' : 'text-gray-400')
+      }, selected ? selected.name : '请选择商品'), /*#__PURE__*/React.createElement("i", {
+        className: "fas fa-chevron-right text-gray-400 text-xs"
+      }));
+    })());
   }))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
@@ -3445,47 +3488,82 @@ function App() {
     className: "text-red-500"
   }, "*"), /*#__PURE__*/React.createElement("i", {
     className: "far fa-question-circle text-gray-400 text-xs",
-    title: "最多10个行动号召，每个2-4个字，可空格分隔，回车(Enter)提交"
-  })), /*#__PURE__*/React.createElement("textarea", {
+    title: "从预置列表选择，最多10个行动号召"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "relative max-w-md",
+    ref: ctaDropdownRef
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setShowCtaDropdown(!showCtaDropdown),
+    className: "w-full min-h-[42px] px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left flex items-center gap-2 outline-none focus:ring-2 focus:ring-blue-500"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: ctaList.length ? 'text-gray-700' : 'text-gray-400'
+  }, ctaList.length ? `已选择 ${ctaList.length} 个行动号召` : '请选择行动号召'), /*#__PURE__*/React.createElement("span", {
+    className: "ml-auto text-xs text-gray-400"
+  }, ctaList.length, "/10"), /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-chevron-down text-gray-400 text-xs transition-transform " + (showCtaDropdown ? 'transform rotate-180' : '')
+  })), showCtaDropdown && /*#__PURE__*/React.createElement("div", {
+    className: "absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-2 border-b border-gray-100"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "relative"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-search absolute left-3 text-gray-400 text-xs",
+    style: {
+      top: '50%',
+      transform: 'translateY(-50%)'
+    }
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "text",
     value: ctaInput,
     onChange: e => setCtaInput(e.target.value),
-    onKeyDown: e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const tokens = ctaInput.split(/\s+/).map(s => s.trim()).filter(Boolean);
-        if (tokens.length === 0) return;
-        if (ctaList.length + tokens.length > 10) {
-          notify('行动号召最多 10 条', 'error');
-          return;
-        }
-        const invalid = tokens.find(t => t.length < 2 || t.length > 4);
-        if (invalid) {
-          notify(`「${invalid}」长度需 2-4 个字`, 'error');
-          return;
-        }
-        const dup = tokens.find(t => ctaList.includes(t));
-        if (dup) {
-          notify(`「${dup}」已存在`, 'error');
-          return;
-        }
-        setCtaList([...ctaList, ...tokens]);
-        setCtaInput('');
-      }
+    placeholder: "搜索行动号召",
+    className: "w-full pl-8 pr-3 py-2 border border-gray-200 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500",
+    autoFocus: true
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "max-h-56 overflow-y-auto p-2"
+  }, MOCK.ctaOptions.filter(item => !ctaInput.trim() || item.includes(ctaInput.trim())).map(item => {
+    const checked = ctaList.includes(item);
+    const disabled = !checked && ctaList.length >= 10;
+    return /*#__PURE__*/React.createElement("label", {
+      key: item,
+      className: "flex items-center px-3 py-2 rounded text-sm " + (disabled ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 cursor-pointer hover:bg-blue-50')
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: checked,
+      disabled: disabled,
+      onChange: () => {
+        if (checked) setCtaList(ctaList.filter(x => x !== item));else if (ctaList.length < 10) setCtaList([...ctaList, item]);
+      },
+      className: "w-4 h-4 mr-2"
+    }), /*#__PURE__*/React.createElement("span", null, item), checked && /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-check text-blue-500 text-xs ml-auto"
+    }));
+  }), MOCK.ctaOptions.filter(item => !ctaInput.trim() || item.includes(ctaInput.trim())).length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "py-5 text-center text-sm text-gray-400"
+  }, "暂无匹配的行动号召")), /*#__PURE__*/React.createElement("div", {
+    className: "p-2 border-t border-gray-100 flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setCtaList([]),
+    className: "text-xs text-gray-500 hover:text-red-500"
+  }, "清空"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => {
+      setShowCtaDropdown(false);
+      setCtaInput('');
     },
-    placeholder: "最多10个行动号召，每个2-4个字，可空格分隔，回车(Enter)提交",
-    rows: 3,
-    className: "w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-gray-400 mt-1"
-  }, ctaList.length, "/10"), ctaList.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap gap-1.5 mt-2"
-  }, ctaList.map((c, i) => /*#__PURE__*/React.createElement("span", {
-    key: i,
-    className: "inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-800 border border-gray-200 rounded px-2 py-0.5"
+    className: "px-3 py-1.5 bg-blue-500 text-white rounded text-xs"
+  }, "完成")))), ctaList.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap gap-1.5 mt-2 max-w-md"
+  }, ctaList.map(c => /*#__PURE__*/React.createElement("span", {
+    key: c,
+    className: "inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-1"
   }, c, /*#__PURE__*/React.createElement("button", {
     type: "button",
-    onClick: () => setCtaList(ctaList.filter((_, idx) => idx !== i)),
-    className: "text-gray-400 hover:text-red-500"
+    onClick: () => setCtaList(ctaList.filter(x => x !== c)),
+    className: "text-blue-400 hover:text-red-500"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-times"
   })))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
@@ -3728,7 +3806,107 @@ function App() {
     className: "btn-secondary text-lg px-8 py-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-play mr-2"
-  }), runMode === 'immediate' ? '立即运行' : '定时运行')), /*#__PURE__*/React.createElement(MaterialModal, {
+  }), runMode === 'immediate' ? '立即运行' : '定时运行')), showProductPicker && /*#__PURE__*/React.createElement("div", {
+    className: "modal-overlay",
+    onClick: () => setShowProductPicker(false),
+    style: {
+      zIndex: 10020
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-content w-full",
+    style: {
+      maxWidth: '860px'
+    },
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between p-5 border-b border-gray-200"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-lg font-bold text-gray-900"
+  }, "选择营销产品"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-gray-500 mt-1"
+  }, productPickerTarget ? `当前账户：${productPickerTarget}` : '全账户共用')), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setShowProductPicker(false),
+    className: "w-8 h-8 rounded-full hover:bg-gray-100 text-gray-400"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-times"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "p-5 border-b border-gray-100"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "relative"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-search absolute left-3 text-gray-400",
+    style: {
+      top: '50%',
+      transform: 'translateY(-50%)'
+    }
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: productSearchText,
+    onChange: e => setProductSearchText(e.target.value),
+    placeholder: "搜索产品名称、分类或产品ID",
+    className: "w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+    autoFocus: true
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "overflow-y-auto p-5",
+    style: {
+      maxHeight: '58vh',
+      minHeight: '260px'
+    }
+  }, (() => {
+    const keyword = productSearchText.trim().toLowerCase();
+    const products = MOCK.productLibrary.filter(p => !keyword || p.name.toLowerCase().includes(keyword) || p.id.toLowerCase().includes(keyword) || (p.category || '').toLowerCase().includes(keyword));
+    const currentId = productPickerTarget ? perAccountProduct[productPickerTarget] : specificProduct;
+    if (products.length === 0) return /*#__PURE__*/React.createElement("div", {
+      className: "py-16 text-center text-sm text-gray-400"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-search text-2xl mb-3 block"
+    }), "没有找到匹配的营销产品");
+    return /*#__PURE__*/React.createElement("div", {
+      className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+    }, products.map(product => {
+      const selected = currentId === product.id;
+      return /*#__PURE__*/React.createElement("button", {
+        key: product.id,
+        type: "button",
+        onClick: () => {
+          if (productPickerTarget) {
+            setPerAccountProduct(prev => ({
+              ...prev,
+              [productPickerTarget]: product.id
+            }));
+          } else {
+            setSpecificProduct(product.id);
+          }
+          setShowProductPicker(false);
+          setProductSearchText('');
+        },
+        className: "relative p-4 rounded-xl border text-left transition hover:border-blue-400 hover:bg-blue-50 " + (selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white')
+      }, selected && /*#__PURE__*/React.createElement("span", {
+        className: "absolute top-3 right-3 w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs"
+      }, /*#__PURE__*/React.createElement("i", {
+        className: "fas fa-check"
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "w-14 h-14 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-3xl mb-3"
+      }, product.image), /*#__PURE__*/React.createElement("div", {
+        className: "text-sm font-semibold text-gray-900 pr-6 truncate",
+        title: product.name
+      }, product.name), /*#__PURE__*/React.createElement("div", {
+        className: "text-xs text-gray-400 mt-1"
+      }, product.category || '营销产品', " · ", product.id), /*#__PURE__*/React.createElement("div", {
+        className: "flex flex-wrap gap-1 mt-3"
+      }, (product.sellingPoints || []).slice(0, 2).map(point => /*#__PURE__*/React.createElement("span", {
+        key: point,
+        className: "px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-xs"
+      }, point))));
+    }));
+  })()), /*#__PURE__*/React.createElement("div", {
+    className: "px-5 py-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500"
+  }, /*#__PURE__*/React.createElement("span", null, "共 ", MOCK.productLibrary.length, " 个产品"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setShowProductPicker(false),
+    className: "px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+  }, "取消")))), /*#__PURE__*/React.createElement(MaterialModal, {
     show: showMaterialModal,
     onClose: () => {
       setShowMaterialModal(false);
