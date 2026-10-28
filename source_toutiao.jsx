@@ -508,9 +508,20 @@ function App() {
   // 营销产品分配：shared=全账户共用, per_account=分账户定制
   const [productAllocMode, setProductAllocMode] = useState('shared');
   const [perAccountProduct, setPerAccountProduct] = useState({}); // { [accountId]: productId }
-  const [showProductPicker, setShowProductPicker] = useState(false);
-  const [productPickerTarget, setProductPickerTarget] = useState(null); // null=全账户共用；string=账户ID
+  const [openProductDropdown, setOpenProductDropdown] = useState(null); // 'shared' 或账户ID
   const [productSearchText, setProductSearchText] = useState('');
+  const productDropdownRef = useRef(null);
+  useEffect(() => {
+    if (!openProductDropdown) return;
+    const close = (e) => {
+      if (productDropdownRef.current && !productDropdownRef.current.contains(e.target)) {
+        setOpenProductDropdown(null);
+        setProductSearchText('');
+      }
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [openProductDropdown]);
   // 目标优化类型 / 深度优化方式 开关（默认关闭）
   const [targetOptType, setTargetOptType] = useState(false);
   const [deepOptType, setDeepOptType] = useState(false);
@@ -1621,23 +1632,37 @@ function App() {
                 </div>
               </div>
               {productAllocMode === 'shared' ? (
-                <div className="mt-3" style={{ paddingLeft: '124px' }}>
+                <div className="mt-3 relative" style={{ paddingLeft: '124px', width: '444px' }} ref={openProductDropdown === 'shared' ? productDropdownRef : null}>
                   {(() => {
                     const selected = MOCK.productLibrary.find(p => p.id === specificProduct);
+                    const keyword = productSearchText.trim().toLowerCase();
+                    const products = MOCK.productLibrary.filter(p => !keyword || p.name.toLowerCase().includes(keyword) || p.id.toLowerCase().includes(keyword) || (p.category || '').toLowerCase().includes(keyword));
                     return (
-                      <button
-                        type="button"
-                        onClick={() => { setProductPickerTarget(null); setProductSearchText(''); setShowProductPicker(true); }}
-                        className="flex items-center gap-3 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:border-blue-400 text-left outline-none focus:ring-2 focus:ring-blue-500"
-                        style={{ width: '320px' }}
-                      >
-                        <span className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-xl flex-shrink-0">{selected ? selected.image : <i className="fas fa-box-open text-gray-400 text-sm"></i>}</span>
-                        <span className="min-w-0 flex-1">
-                          <span className={"block text-sm truncate " + (selected ? 'text-gray-800 font-medium' : 'text-gray-400')}>{selected ? selected.name : '请选择营销产品'}</span>
-                          {selected && <span className="block text-xs text-gray-400 mt-0.5">{selected.category || '营销产品'}</span>}
-                        </span>
-                        <i className="fas fa-chevron-right text-gray-400 text-xs"></i>
-                      </button>
+                      <>
+                        <button type="button" onClick={() => { setOpenProductDropdown(openProductDropdown === 'shared' ? null : 'shared'); setProductSearchText(''); }}
+                          className="w-80 flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:border-blue-400 text-left outline-none focus:ring-2 focus:ring-blue-500">
+                          <span className="text-lg flex-shrink-0">{selected ? selected.image : '📦'}</span>
+                          <span className={"text-sm truncate flex-1 " + (selected ? 'text-gray-800' : 'text-gray-400')}>{selected ? `${selected.name}（${selected.id}）` : '请选择营销产品'}</span>
+                          <i className={`fas fa-chevron-${openProductDropdown === 'shared' ? 'up' : 'down'} text-gray-400 text-xs`}></i>
+                        </button>
+                        {openProductDropdown === 'shared' && (
+                          <div className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 overflow-hidden" style={{ left: '124px', width: '320px' }}>
+                            <div className="p-2 border-b border-gray-100 relative">
+                              <i className="fas fa-search absolute left-5 text-gray-400 text-xs" style={{ top:'50%', transform:'translateY(-50%)' }}></i>
+                              <input type="text" value={productSearchText} onChange={e => setProductSearchText(e.target.value)} placeholder="搜索产品名称、分类或ID" autoFocus className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500" />
+                            </div>
+                            <div className="max-h-64 overflow-y-auto">
+                              {products.length === 0 ? <div className="px-3 py-6 text-center text-sm text-gray-400">没有匹配的营销产品</div> : products.map(product => (
+                                <button key={product.id} type="button" onClick={() => { setSpecificProduct(product.id); setOpenProductDropdown(null); setProductSearchText(''); }} className={`w-full flex items-center gap-3 px-3 py-2.5 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${specificProduct === product.id ? 'bg-blue-50' : ''}`}>
+                                  <span className="text-xl">{product.image}</span>
+                                  <span className="min-w-0 flex-1"><span className="block text-sm text-gray-800 truncate">{product.name}</span><span className="block text-xs text-gray-400 mt-0.5">{product.category} · {product.id}</span></span>
+                                  {specificProduct === product.id && <i className="fas fa-check text-blue-500 text-xs"></i>}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
                     );
                   })()}
                 </div>
@@ -1655,23 +1680,32 @@ function App() {
                     {selectedAccountIds.map(accountId => {
                       const acc = MOCK.accounts.find(a => a.id === accountId);
                       const pid = perAccountProduct[accountId] || '';
+                      const selected = MOCK.productLibrary.find(p => p.id === pid);
+                      const keyword = openProductDropdown === accountId ? productSearchText.trim().toLowerCase() : '';
+                      const products = MOCK.productLibrary.filter(p => !keyword || p.name.toLowerCase().includes(keyword) || p.id.toLowerCase().includes(keyword) || (p.category || '').toLowerCase().includes(keyword));
                       return (
-                        <div key={accountId} className="border border-gray-200 rounded-lg p-2.5 bg-gray-50">
+                        <div key={accountId} className="border border-gray-200 rounded-lg p-2.5 bg-gray-50 relative" ref={openProductDropdown === accountId ? productDropdownRef : null}>
                           <div className="text-xs font-semibold text-gray-900 truncate mb-1.5" title={acc ? acc.name : accountId}>{acc ? acc.name : accountId}</div>
-                          {(() => {
-                            const selected = MOCK.productLibrary.find(p => p.id === pid);
-                            return (
-                              <button
-                                type="button"
-                                onClick={() => { setProductPickerTarget(accountId); setProductSearchText(''); setShowProductPicker(true); }}
-                                className="w-full flex items-center gap-2 px-2 py-1.5 border border-gray-300 rounded bg-white hover:border-blue-400 text-left outline-none focus:ring-1 focus:ring-blue-500"
-                              >
-                                <span className="w-7 h-7 rounded bg-blue-50 flex items-center justify-center text-base flex-shrink-0">{selected ? selected.image : <i className="fas fa-box-open text-gray-400 text-xs"></i>}</span>
-                                <span className={"text-xs truncate flex-1 " + (selected ? 'text-gray-800' : 'text-gray-400')}>{selected ? selected.name : '请选择商品'}</span>
-                                <i className="fas fa-chevron-right text-gray-400 text-xs"></i>
-                              </button>
-                            );
-                          })()}
+                          <button type="button" onClick={() => { setOpenProductDropdown(openProductDropdown === accountId ? null : accountId); setProductSearchText(''); }} className="w-full flex items-center gap-2 px-2 py-1.5 border border-gray-300 rounded bg-white hover:border-blue-400 text-left outline-none focus:ring-1 focus:ring-blue-500">
+                            <span className="text-base flex-shrink-0">{selected ? selected.image : '📦'}</span>
+                            <span className={"text-xs truncate flex-1 " + (selected ? 'text-gray-800' : 'text-gray-400')}>{selected ? `${selected.name}（${selected.id}）` : '请选择商品'}</span>
+                            <i className={`fas fa-chevron-${openProductDropdown === accountId ? 'up' : 'down'} text-gray-400 text-xs`}></i>
+                          </button>
+                          {openProductDropdown === accountId && (
+                            <div className="absolute z-50 left-2 right-2 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 overflow-hidden">
+                              <div className="p-2 border-b border-gray-100 relative">
+                                <i className="fas fa-search absolute left-5 text-gray-400 text-xs" style={{ top:'50%', transform:'translateY(-50%)' }}></i>
+                                <input type="text" value={productSearchText} onChange={e => setProductSearchText(e.target.value)} placeholder="搜索产品名称、分类或ID" autoFocus className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500" />
+                              </div>
+                              <div className="max-h-52 overflow-y-auto">
+                                {products.length === 0 ? <div className="px-3 py-5 text-center text-xs text-gray-400">没有匹配的营销产品</div> : products.map(product => (
+                                  <button key={product.id} type="button" onClick={() => { setPerAccountProduct(prev => ({ ...prev, [accountId]: product.id })); setOpenProductDropdown(null); setProductSearchText(''); }} className={`w-full flex items-center gap-2 px-3 py-2 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${pid === product.id ? 'bg-blue-50' : ''}`}>
+                                    <span className="text-base">{product.image}</span><span className="min-w-0 flex-1"><span className="block text-xs text-gray-800 truncate">{product.name}</span><span className="block text-2xs text-gray-400">{product.category} · {product.id}</span></span>{pid === product.id && <i className="fas fa-check text-blue-500 text-xs"></i>}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -2806,76 +2840,6 @@ function App() {
         </div>
 
       
-      {/* ===== 营销产品大搜索弹窗 ===== */}
-      {showProductPicker && (
-        <div className="modal-overlay" onClick={() => setShowProductPicker(false)} style={{ zIndex: 10020 }}>
-          <div className="modal-content w-full" style={{ maxWidth: '860px' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-gray-200">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">选择营销产品</h3>
-                <p className="text-xs text-gray-500 mt-1">{productPickerTarget ? `当前账户：${productPickerTarget}` : '全账户共用'}</p>
-              </div>
-              <button type="button" onClick={() => setShowProductPicker(false)} className="w-8 h-8 rounded-full hover:bg-gray-100 text-gray-400"><i className="fas fa-times"></i></button>
-            </div>
-            <div className="p-5 border-b border-gray-100">
-              <div className="relative">
-                <i className="fas fa-search absolute left-3 text-gray-400" style={{ top: '50%', transform: 'translateY(-50%)' }}></i>
-                <input
-                  type="text"
-                  value={productSearchText}
-                  onChange={e => setProductSearchText(e.target.value)}
-                  placeholder="搜索产品名称、分类或产品ID"
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="overflow-y-auto p-5" style={{ maxHeight: '58vh', minHeight: '260px' }}>
-              {(() => {
-                const keyword = productSearchText.trim().toLowerCase();
-                const products = MOCK.productLibrary.filter(p => !keyword || p.name.toLowerCase().includes(keyword) || p.id.toLowerCase().includes(keyword) || (p.category || '').toLowerCase().includes(keyword));
-                const currentId = productPickerTarget ? perAccountProduct[productPickerTarget] : specificProduct;
-                if (products.length === 0) return <div className="py-16 text-center text-sm text-gray-400"><i className="fas fa-search text-2xl mb-3 block"></i>没有找到匹配的营销产品</div>;
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {products.map(product => {
-                      const selected = currentId === product.id;
-                      return (
-                        <button
-                          key={product.id}
-                          type="button"
-                          onClick={() => {
-                            if (productPickerTarget) {
-                              setPerAccountProduct(prev => ({ ...prev, [productPickerTarget]: product.id }));
-                            } else {
-                              setSpecificProduct(product.id);
-                            }
-                            setShowProductPicker(false);
-                            setProductSearchText('');
-                          }}
-                          className={"relative p-4 rounded-xl border text-left transition hover:border-blue-400 hover:bg-blue-50 " + (selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white')}
-                        >
-                          {selected && <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs"><i className="fas fa-check"></i></span>}
-                          <div className="w-14 h-14 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-3xl mb-3">{product.image}</div>
-                          <div className="text-sm font-semibold text-gray-900 pr-6 truncate" title={product.name}>{product.name}</div>
-                          <div className="text-xs text-gray-400 mt-1">{product.category || '营销产品'} · {product.id}</div>
-                          <div className="flex flex-wrap gap-1 mt-3">
-                            {(product.sellingPoints || []).slice(0, 2).map(point => <span key={point} className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-xs">{point}</span>)}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
-            <div className="px-5 py-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
-              <span>共 {MOCK.productLibrary.length} 个产品</span>
-              <button type="button" onClick={() => setShowProductPicker(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">取消</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ===== 素材库弹窗 ===== */}
       <MaterialModal
