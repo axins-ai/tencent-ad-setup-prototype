@@ -919,6 +919,8 @@ function App() {
   const [perAccountProduct, setPerAccountProduct] = useState({}); // { [accountId]: productId }
   const [openProductDropdown, setOpenProductDropdown] = useState(null); // 'shared' 或账户ID
   const [productSearchText, setProductSearchText] = useState('');
+  const [productPage, setProductPage] = useState(1);
+  const PRODUCT_PAGE_SIZE = 3;
   const productDropdownRef = useRef(null);
   useEffect(() => {
     if (!openProductDropdown) return;
@@ -926,6 +928,7 @@ function App() {
       if (productDropdownRef.current && !productDropdownRef.current.contains(e.target)) {
         setOpenProductDropdown(null);
         setProductSearchText('');
+        setProductPage(1);
       }
     };
     document.addEventListener('mousedown', close);
@@ -2361,11 +2364,15 @@ function App() {
     const selected = MOCK.productLibrary.find(p => p.id === specificProduct);
     const keyword = productSearchText.trim().toLowerCase();
     const products = MOCK.productLibrary.filter(p => !keyword || p.name.toLowerCase().includes(keyword) || p.id.toLowerCase().includes(keyword) || (p.category || '').toLowerCase().includes(keyword));
+    const totalPages = Math.max(1, Math.ceil(products.length / PRODUCT_PAGE_SIZE));
+    const currentPage = Math.min(productPage, totalPages);
+    const pagedProducts = products.slice((currentPage - 1) * PRODUCT_PAGE_SIZE, currentPage * PRODUCT_PAGE_SIZE);
     return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
       type: "button",
       onClick: () => {
         setOpenProductDropdown(openProductDropdown === 'shared' ? null : 'shared');
         setProductSearchText('');
+        setProductPage(1);
       },
       className: "w-80 flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:border-blue-400 text-left outline-none focus:ring-2 focus:ring-blue-500"
     }, /*#__PURE__*/React.createElement("span", {
@@ -2391,34 +2398,60 @@ function App() {
     }), /*#__PURE__*/React.createElement("input", {
       type: "text",
       value: productSearchText,
-      onChange: e => setProductSearchText(e.target.value),
-      placeholder: "搜索产品名称、分类或ID",
+      onChange: e => {
+        setProductSearchText(e.target.value);
+        setProductPage(1);
+      },
+      placeholder: "搜索商品ID或名称",
       autoFocus: true,
       className: "w-full pl-8 pr-3 py-2 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500"
     })), /*#__PURE__*/React.createElement("div", {
-      className: "max-h-64 overflow-y-auto"
+      className: "grid border-b border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-500",
+      style: {
+        gridTemplateColumns: '60px 90px minmax(0,1fr) 20px',
+        gap: '8px'
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "商品图片"), /*#__PURE__*/React.createElement("span", null, "商品ID"), /*#__PURE__*/React.createElement("span", null, "商品名称"), /*#__PURE__*/React.createElement("span", null)), /*#__PURE__*/React.createElement("div", {
+      className: "overflow-y-auto"
     }, products.length === 0 ? /*#__PURE__*/React.createElement("div", {
       className: "px-3 py-6 text-center text-sm text-gray-400"
-    }, "没有匹配的营销产品") : products.map(product => /*#__PURE__*/React.createElement("button", {
+    }, "没有匹配的商品") : pagedProducts.map(product => /*#__PURE__*/React.createElement("button", {
       key: product.id,
       type: "button",
       onClick: () => {
         setSpecificProduct(product.id);
         setOpenProductDropdown(null);
         setProductSearchText('');
+        setProductPage(1);
       },
-      className: `w-full flex items-center gap-3 px-3 py-2.5 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${specificProduct === product.id ? 'bg-blue-50' : ''}`
+      className: `w-full grid items-center px-3 py-2 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${specificProduct === product.id ? 'bg-blue-50' : ''}`,
+      style: {
+        gridTemplateColumns: '60px 90px minmax(0,1fr) 20px',
+        gap: '8px'
+      }
     }, /*#__PURE__*/React.createElement("span", {
-      className: "text-xl"
+      className: "w-10 h-10 rounded border border-gray-200 bg-white flex items-center justify-center text-xl"
     }, product.image), /*#__PURE__*/React.createElement("span", {
-      className: "min-w-0 flex-1"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "block text-sm text-gray-800 truncate"
-    }, product.name), /*#__PURE__*/React.createElement("span", {
-      className: "block text-xs text-gray-400 mt-0.5"
-    }, product.category, " · ", product.id)), specificProduct === product.id && /*#__PURE__*/React.createElement("i", {
+      className: "text-xs text-gray-500 truncate"
+    }, product.id), /*#__PURE__*/React.createElement("span", {
+      className: "text-sm text-gray-800 truncate"
+    }, product.name), /*#__PURE__*/React.createElement("span", null, specificProduct === product.id && /*#__PURE__*/React.createElement("i", {
       className: "fas fa-check text-blue-500 text-xs"
-    }))))));
+    }))))), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-between px-3 py-2 border-t border-gray-100 text-xs text-gray-500"
+    }, /*#__PURE__*/React.createElement("span", null, "共 ", products.length, " 条"), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-2"
+    }, /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      disabled: currentPage <= 1,
+      onClick: () => setProductPage(p => Math.max(1, p - 1)),
+      className: "px-2 py-1 border border-gray-200 rounded disabled:opacity-40"
+    }, "上一页"), /*#__PURE__*/React.createElement("span", null, currentPage, " / ", totalPages), /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      disabled: currentPage >= totalPages,
+      onClick: () => setProductPage(p => Math.min(totalPages, p + 1)),
+      className: "px-2 py-1 border border-gray-200 rounded disabled:opacity-40"
+    }, "下一页")))));
   })()) : /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-gray-500 mt-2"
   }, "分账户定制：在下方按账户分别选择商品")), productAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", {
@@ -2433,6 +2466,9 @@ function App() {
     const selected = MOCK.productLibrary.find(p => p.id === pid);
     const keyword = openProductDropdown === accountId ? productSearchText.trim().toLowerCase() : '';
     const products = MOCK.productLibrary.filter(p => !keyword || p.name.toLowerCase().includes(keyword) || p.id.toLowerCase().includes(keyword) || (p.category || '').toLowerCase().includes(keyword));
+    const totalPages = Math.max(1, Math.ceil(products.length / PRODUCT_PAGE_SIZE));
+    const currentPage = Math.min(productPage, totalPages);
+    const pagedProducts = products.slice((currentPage - 1) * PRODUCT_PAGE_SIZE, currentPage * PRODUCT_PAGE_SIZE);
     return /*#__PURE__*/React.createElement("div", {
       key: accountId,
       className: "border border-gray-200 rounded-lg p-2.5 bg-gray-50 relative",
@@ -2445,6 +2481,7 @@ function App() {
       onClick: () => {
         setOpenProductDropdown(openProductDropdown === accountId ? null : accountId);
         setProductSearchText('');
+        setProductPage(1);
       },
       className: "w-full flex items-center gap-2 px-2 py-1.5 border border-gray-300 rounded bg-white hover:border-blue-400 text-left outline-none focus:ring-1 focus:ring-blue-500"
     }, /*#__PURE__*/React.createElement("span", {
@@ -2466,15 +2503,24 @@ function App() {
     }), /*#__PURE__*/React.createElement("input", {
       type: "text",
       value: productSearchText,
-      onChange: e => setProductSearchText(e.target.value),
-      placeholder: "搜索产品名称、分类或ID",
+      onChange: e => {
+        setProductSearchText(e.target.value);
+        setProductPage(1);
+      },
+      placeholder: "搜索商品ID或名称",
       autoFocus: true,
       className: "w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500"
     })), /*#__PURE__*/React.createElement("div", {
-      className: "max-h-52 overflow-y-auto"
+      className: "grid border-b border-gray-200 bg-gray-50 px-2 py-1.5 text-2xs font-medium text-gray-500",
+      style: {
+        gridTemplateColumns: '44px 64px minmax(0,1fr) 16px',
+        gap: '5px'
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "图片"), /*#__PURE__*/React.createElement("span", null, "商品ID"), /*#__PURE__*/React.createElement("span", null, "商品名称"), /*#__PURE__*/React.createElement("span", null)), /*#__PURE__*/React.createElement("div", {
+      className: "overflow-y-auto"
     }, products.length === 0 ? /*#__PURE__*/React.createElement("div", {
       className: "px-3 py-5 text-center text-xs text-gray-400"
-    }, "没有匹配的营销产品") : products.map(product => /*#__PURE__*/React.createElement("button", {
+    }, "没有匹配的商品") : pagedProducts.map(product => /*#__PURE__*/React.createElement("button", {
       key: product.id,
       type: "button",
       onClick: () => {
@@ -2484,19 +2530,36 @@ function App() {
         }));
         setOpenProductDropdown(null);
         setProductSearchText('');
+        setProductPage(1);
       },
-      className: `w-full flex items-center gap-2 px-3 py-2 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${pid === product.id ? 'bg-blue-50' : ''}`
+      className: `w-full grid items-center px-2 py-1.5 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${pid === product.id ? 'bg-blue-50' : ''}`,
+      style: {
+        gridTemplateColumns: '44px 64px minmax(0,1fr) 16px',
+        gap: '5px'
+      }
     }, /*#__PURE__*/React.createElement("span", {
-      className: "text-base"
+      className: "w-8 h-8 rounded border border-gray-200 bg-white flex items-center justify-center text-base"
     }, product.image), /*#__PURE__*/React.createElement("span", {
-      className: "min-w-0 flex-1"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "block text-xs text-gray-800 truncate"
-    }, product.name), /*#__PURE__*/React.createElement("span", {
-      className: "block text-2xs text-gray-400"
-    }, product.category, " · ", product.id)), pid === product.id && /*#__PURE__*/React.createElement("i", {
+      className: "text-2xs text-gray-500 truncate"
+    }, product.id), /*#__PURE__*/React.createElement("span", {
+      className: "text-xs text-gray-800 truncate"
+    }, product.name), /*#__PURE__*/React.createElement("span", null, pid === product.id && /*#__PURE__*/React.createElement("i", {
       className: "fas fa-check text-blue-500 text-xs"
-    }))))));
+    }))))), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-between px-2 py-1.5 border-t border-gray-100 text-2xs text-gray-500"
+    }, /*#__PURE__*/React.createElement("span", null, "共 ", products.length, " 条"), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-1"
+    }, /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      disabled: currentPage <= 1,
+      onClick: () => setProductPage(p => Math.max(1, p - 1)),
+      className: "px-1.5 py-1 border border-gray-200 rounded disabled:opacity-40"
+    }, "上一页"), /*#__PURE__*/React.createElement("span", null, currentPage, "/", totalPages), /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      disabled: currentPage >= totalPages,
+      onClick: () => setProductPage(p => Math.min(totalPages, p + 1)),
+      className: "px-1.5 py-1 border border-gray-200 rounded disabled:opacity-40"
+    }, "下一页")))));
   }))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
