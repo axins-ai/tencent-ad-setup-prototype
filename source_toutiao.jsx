@@ -440,11 +440,6 @@ function App() {
   const [channel, setChannel] = useState('oceanengine');
   const [selectedAccountIds, setSelectedAccountIds] = useState([]); // 新建时默认不选账户，由用户手动选择
   const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和广告, unit_only=仅搭建广告
-  // 项目生成规则
-  const [projectGenRule, setProjectGenRule] = useState('total_per_project'); // total_per_project=按总广告数/每项目广告数, fixed=指定数量
-  const [adsPerProject, setAdsPerProject] = useState(10); // 每个项目广告数上限
-  const [projectsPerAccount, setProjectsPerAccount] = useState(1); // 每个账户指定项目数量
-  const [projectRuleHover, setProjectRuleHover] = useState(null); // 项目生成规则角标 hover 提示
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const accountDropdownRef = useRef(null);
 
@@ -1195,6 +1190,7 @@ function App() {
       const data = {
         selectedAccountIds, taskName, businessUnit, unitName,
         buildType, selectedUnits,
+        deliveryMode: 'auto', maxAdsPerProject: 1,
         targetingSource, tgtAllocMode, perAccountTgtPkgs, selectedTargetingPackages,
         geoMode, geoSelectedCountry, geoSelectedProvinces, geoSelectedCities,
         locationTypeResident, ageSelections, customAgeMin, customAgeMax,
@@ -1508,50 +1504,19 @@ function App() {
               </div>
             </div>
 
-            {/* 项目生成规则（仅搭建项目和广告时显示） */}
-            {buildType === 'project_unit' && (
-              <div className="mb-5">
-                <div className="flex items-center gap-3">
-                  <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">项目生成规则</label>
-                  <div className="flex gap-3">
-                    <button type="button" onClick={() => setProjectGenRule('total_per_project')}
-                      className={`relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'total_per_project' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                      <div className="text-sm font-medium text-gray-900">按总广告数/每项目广告数</div>
-                      <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer group"
-                        onMouseEnter={() => setProjectRuleHover('total_per_project')} onMouseLeave={() => setProjectRuleHover(null)}>
-                        <i className="fas fa-info"></i>
-                        {projectRuleHover === 'total_per_project' && (
-                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none">根据生成的广告总数与项目内广告数上限，自动生成项目</span>
-                        )}
-                      </span>
-                    </button>
-                    <button type="button" onClick={() => setProjectGenRule('fixed')}
-                      className={`relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                      <div className="text-sm font-medium text-gray-900">指定数量</div>
-                      <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer"
-                        onMouseEnter={() => setProjectRuleHover('fixed')} onMouseLeave={() => setProjectRuleHover(null)}>
-                        <i className="fas fa-info"></i>
-                        {projectRuleHover === 'fixed' && (
-                          <span className="absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none">手动指定每个账户的项目数量</span>
-                        )}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-                {projectGenRule === 'total_per_project' && (
-                  <div className="flex items-center gap-2 mt-3">
-                    <label className="text-sm text-gray-700 whitespace-nowrap">每个项目广告数上限</label>
-                    <input type="number" min="1" max="1000" value={adsPerProject} onChange={e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-                  </div>
-                )}
-                {projectGenRule === 'fixed' && (
-                  <div className="flex items-center gap-2 mt-3">
-                    <label className="text-sm text-gray-700 whitespace-nowrap">每个账户指定项目数</label>
-                    <input type="number" min="1" max="100" value={projectsPerAccount} onChange={e => setProjectsPerAccount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))} className="w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-                  </div>
-                )}
+            {/* 投放模式与单项目最大广告数：固定配置 */}
+            <div className="flex items-center gap-3 mb-5">
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">投放模式 <span className="text-red-500">*</span></label>
+              <div className="px-4 py-2 border border-blue-500 bg-blue-50 rounded-lg text-sm text-gray-900 flex items-center">
+                <input type="radio" checked readOnly className="w-4 h-4 mr-2 text-blue-600" />
+                <span>自动投放</span>
               </div>
-            )}
+            </div>
+            <div className="flex items-center gap-3 mb-5">
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0">单项目最大广告数 <span className="text-red-500">*</span></label>
+              <input type="number" value={1} readOnly disabled className="w-24 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-sm cursor-not-allowed" />
+            </div>
+
             
             {/* 投放链匹配结果：全宽整行，置于任务名称/主体/搭建类型下方 */}
             <div className="mt-6 pt-6 border-t border-gray-100">
@@ -3155,7 +3120,9 @@ function App() {
                   items.push({ label: '运行模式', value: runMode === 'scheduled' ? '定时运行' : '立即运行', required: false, ok: true });
                   if (runMode === 'scheduled') items.push({ label: '定时时间', value: (scheduledDate && scheduledTime) ? (scheduledDate + ' ' + scheduledTime) : '未设置', required: true, ok: !!(scheduledDate && scheduledTime) });
                   items.push({ label: '投放日期', value: 投放日期类型 === 'long_term' ? '从今天起长期投放' : '设置开始和结束日期', required: false, ok: true });
-                  items.push({ label: '搭建类型', value: buildType === 'unit_only' ? '仅搭建项目' : '搭建项目和项目', required: false, ok: true });
+                  items.push({ label: '搭建类型', value: buildType === 'unit_only' ? '仅搭建广告' : '搭建项目和广告', required: false, ok: true });
+                  items.push({ label: '投放模式', value: '自动投放', required: false, ok: true });
+                  items.push({ label: '单项目最大广告数', value: '1', required: false, ok: true });
                   items.push({ label: '推官链接', value: getDefaultLandingPage(selectedAccountIds[0] || '') ? '已设置' : '未设置', required: false, ok: true });
                   return items;
                 })();

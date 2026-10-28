@@ -834,11 +834,6 @@ function App() {
   const [channel, setChannel] = useState('oceanengine');
   const [selectedAccountIds, setSelectedAccountIds] = useState([]); // 新建时默认不选账户，由用户手动选择
   const [buildType, setBuildType] = useState('project_unit'); // 搭建类型：project_unit=搭建项目和广告, unit_only=仅搭建广告
-  // 项目生成规则
-  const [projectGenRule, setProjectGenRule] = useState('total_per_project'); // total_per_project=按总广告数/每项目广告数, fixed=指定数量
-  const [adsPerProject, setAdsPerProject] = useState(10); // 每个项目广告数上限
-  const [projectsPerAccount, setProjectsPerAccount] = useState(1); // 每个账户指定项目数量
-  const [projectRuleHover, setProjectRuleHover] = useState(null); // 项目生成规则角标 hover 提示
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const accountDropdownRef = useRef(null);
 
@@ -1739,6 +1734,8 @@ function App() {
         unitName,
         buildType,
         selectedUnits,
+        deliveryMode: 'auto',
+        maxAdsPerProject: 1,
         targetingSource,
         tgtAllocMode,
         perAccountTgtPkgs,
@@ -2171,65 +2168,32 @@ function App() {
     checked: buildType === 'unit_only',
     onChange: () => setBuildType('unit_only'),
     className: "w-4 h-4 mr-2 text-blue-600"
-  }), /*#__PURE__*/React.createElement("span", null, "仅搭建广告")))), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
-    className: "mb-5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3"
+  }), /*#__PURE__*/React.createElement("span", null, "仅搭建广告")))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
     className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
-  }, "项目生成规则"), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-3"
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: () => setProjectGenRule('total_per_project'),
-    className: `relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'total_per_project' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-medium text-gray-900"
-  }, "按总广告数/每项目广告数"), /*#__PURE__*/React.createElement("span", {
-    className: "absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer group",
-    onMouseEnter: () => setProjectRuleHover('total_per_project'),
-    onMouseLeave: () => setProjectRuleHover(null)
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-info"
-  }), projectRuleHover === 'total_per_project' && /*#__PURE__*/React.createElement("span", {
-    className: "absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none"
-  }, "根据生成的广告总数与项目内广告数上限，自动生成项目"))), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: () => setProjectGenRule('fixed'),
-    className: `relative rounded-lg border px-4 py-3 text-left transition ${projectGenRule === 'fixed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-medium text-gray-900"
-  }, "指定数量"), /*#__PURE__*/React.createElement("span", {
-    className: "absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs cursor-pointer",
-    onMouseEnter: () => setProjectRuleHover('fixed'),
-    onMouseLeave: () => setProjectRuleHover(null)
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-info"
-  }), projectRuleHover === 'fixed' && /*#__PURE__*/React.createElement("span", {
-    className: "absolute -top-2 -right-2 whitespace-nowrap bg-gray-700 text-white text-xs rounded px-2 py-1 z-10 pointer-events-none"
-  }, "手动指定每个账户的项目数量"))))), projectGenRule === 'total_per_project' && /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 mt-3"
+  }, "投放模式 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*")), /*#__PURE__*/React.createElement("div", {
+    className: "px-4 py-2 border border-blue-500 bg-blue-50 rounded-lg text-sm text-gray-900 flex items-center"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    checked: true,
+    readOnly: true,
+    className: "w-4 h-4 mr-2 text-blue-600"
+  }), /*#__PURE__*/React.createElement("span", null, "自动投放"))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "text-sm text-gray-700 whitespace-nowrap"
-  }, "每个项目广告数上限"), /*#__PURE__*/React.createElement("input", {
+    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
+  }, "单项目最大广告数 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-red-500"
+  }, "*")), /*#__PURE__*/React.createElement("input", {
     type: "number",
-    min: "1",
-    max: "1000",
-    value: adsPerProject,
-    onChange: e => setAdsPerProject(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1))),
-    className: "w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-  })), projectGenRule === 'fixed' && /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 mt-3"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "text-sm text-gray-700 whitespace-nowrap"
-  }, "每个账户指定项目数"), /*#__PURE__*/React.createElement("input", {
-    type: "number",
-    min: "1",
-    max: "100",
-    value: projectsPerAccount,
-    onChange: e => setProjectsPerAccount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1))),
-    className: "w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-  }))), /*#__PURE__*/React.createElement("div", {
+    value: 1,
+    readOnly: true,
+    disabled: true,
+    className: "w-24 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-sm cursor-not-allowed"
+  })), /*#__PURE__*/React.createElement("div", {
     className: "mt-6 pt-6 border-t border-gray-100"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 mb-2"
@@ -4332,7 +4296,19 @@ function App() {
         });
         items.push({
           label: '搭建类型',
-          value: buildType === 'unit_only' ? '仅搭建项目' : '搭建项目和项目',
+          value: buildType === 'unit_only' ? '仅搭建广告' : '搭建项目和广告',
+          required: false,
+          ok: true
+        });
+        items.push({
+          label: '投放模式',
+          value: '自动投放',
+          required: false,
+          ok: true
+        });
+        items.push({
+          label: '单项目最大广告数',
+          value: '1',
           required: false,
           ok: true
         });
