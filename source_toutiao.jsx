@@ -1648,7 +1648,7 @@ function App() {
                 </div>
               </div>
               {productAllocMode === 'shared' ? (
-                <div className="mt-3 relative" style={{ paddingLeft: '124px', width: '764px' }} ref={openProductDropdown === 'shared' ? productDropdownRef : null}>
+                <div className="mt-3 relative" style={{ marginLeft: '124px', width: '640px' }} ref={openProductDropdown === 'shared' ? productDropdownRef : null}>
                   {(() => {
                     const selectedItems = MOCK.productLibrary.filter(p => specificProducts.includes(p.id));
                     const keyword = productSearchText.trim().toLowerCase();
@@ -1658,27 +1658,32 @@ function App() {
                     const pagedProducts = products.slice((currentPage - 1) * PRODUCT_PAGE_SIZE, currentPage * PRODUCT_PAGE_SIZE);
                     return (
                       <>
-                        <button type="button" onClick={() => { setOpenProductDropdown(openProductDropdown === 'shared' ? null : 'shared'); setProductSearchText(''); setProductPage(1); }}
-                          className="w-full flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg bg-white hover:border-blue-400 text-left outline-none focus:ring-2 focus:ring-blue-500">
-                          <span className="text-lg flex-shrink-0">{selectedItems.length > 0 ? selectedItems[0].image : '📦'}</span>
-                          <span className={"text-sm truncate flex-1 " + (selectedItems.length > 0 ? 'text-gray-800' : 'text-gray-400')}>{selectedItems.length > 0 ? `已选择 ${selectedItems.length} 个商品：${selectedItems.map(p => p.name).join('、')}` : '请选择营销产品'}</span>
-                          <i className={`fas fa-chevron-${openProductDropdown === 'shared' ? 'up' : 'down'} text-gray-400 text-xs`}></i>
-                        </button>
-                        {openProductDropdown === 'shared' && (
-                          <div className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 overflow-hidden" style={{ left: '124px', width: '640px' }}>
-                            <div className="p-2 border-b border-gray-100 relative">
-                              <i className="fas fa-search absolute left-5 text-gray-400 text-xs" style={{ top:'50%', transform:'translateY(-50%)' }}></i>
-                              <input type="text" value={productSearchText} onChange={e => { setProductSearchText(e.target.value); setProductPage(1); }} placeholder="搜索商品ID或名称" autoFocus className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500" />
+                        <div className={`border rounded-lg bg-white transition-colors ${openProductDropdown === 'shared' ? 'border-blue-500 ring-1 ring-blue-100' : 'border-gray-300 hover:border-blue-400'}`}>
+                          <button type="button" onClick={() => { setOpenProductDropdown(openProductDropdown === 'shared' ? null : 'shared'); setProductSearchText(''); setProductPage(1); }} className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left outline-none">
+                            <span className={selectedItems.length > 0 ? 'text-sm text-gray-800' : 'text-sm text-gray-400'}>{selectedItems.length > 0 ? `已选择 ${selectedItems.length} 个营销产品` : '请选择营销产品'}</span>
+                            <span className="flex items-center gap-2 flex-shrink-0"><span className="text-xs text-gray-400">支持多选</span><i className={`fas fa-chevron-${openProductDropdown === 'shared' ? 'up' : 'down'} text-gray-400 text-xs`}></i></span>
+                          </button>
+                          {selectedItems.length > 0 && (
+                            <div className="flex flex-wrap gap-2 px-3 pb-3">
+                              {selectedItems.map(product => <span key={product.id} className="inline-flex items-center gap-2 max-w-full px-2.5 py-1.5 rounded bg-blue-50 text-blue-700 text-xs"><span className="text-sm">{product.image}</span><span className="truncate">{product.name}</span><button type="button" title="移除商品" onClick={e => { e.stopPropagation(); setSpecificProducts(prev => prev.filter(id => id !== product.id)); }} className="text-blue-400 hover:text-blue-700"><i className="fas fa-times"></i></button></span>)}
                             </div>
-                            <div className="grid border-b border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-medium text-gray-500" style={{ gridTemplateColumns:'80px 150px minmax(0,1fr) 36px', gap:'12px' }}><span>商品图片</span><span>商品ID</span><span>商品名称</span><span>选择</span></div>
+                          )}
+                        </div>
+                        {openProductDropdown === 'shared' && (
+                          <div className="absolute z-50 left-0 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-2 overflow-hidden">
+                            <div className="p-3 border-b border-gray-100 relative">
+                              <i className="fas fa-search absolute left-6 text-gray-400 text-xs" style={{ top:'50%', transform:'translateY(-50%)' }}></i>
+                              <input type="text" value={productSearchText} onChange={e => { setProductSearchText(e.target.value); setProductPage(1); }} placeholder="搜索商品名称、商品ID或分类" autoFocus className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100" />
+                            </div>
+                            <div className="grid border-b border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-medium text-gray-500" style={{ gridTemplateColumns:'72px 140px minmax(0,1fr) 44px', gap:'12px' }}><span>商品图片</span><span>商品ID</span><span>商品名称</span><span className="text-center">选择</span></div>
                             <div className="overflow-y-auto">
-                              {products.length === 0 ? <div className="px-3 py-6 text-center text-sm text-gray-400">没有匹配的商品</div> : pagedProducts.map(product => (
-                                <button key={product.id} type="button" onClick={() => setSpecificProducts(prev => prev.includes(product.id) ? prev.filter(id => id !== product.id) : [...prev, product.id])} className={`w-full grid items-center px-4 py-3 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${specificProducts.includes(product.id) ? 'bg-blue-50' : ''}`} style={{ gridTemplateColumns:'80px 150px minmax(0,1fr) 36px', gap:'12px' }}>
-                                  <span className="w-14 h-14 rounded border border-gray-200 bg-white flex items-center justify-center text-3xl">{product.image}</span><span className="text-sm text-gray-500 truncate">{product.id}</span><span className="text-sm text-gray-800 truncate">{product.name}</span><span><input type="checkbox" readOnly checked={specificProducts.includes(product.id)} className="w-4 h-4 text-blue-600 rounded" /></span>
+                              {products.length === 0 ? <div className="px-3 py-8 text-center text-sm text-gray-400">没有匹配的商品</div> : pagedProducts.map(product => (
+                                <button key={product.id} type="button" onClick={() => setSpecificProducts(prev => prev.includes(product.id) ? prev.filter(id => id !== product.id) : [...prev, product.id])} className={`w-full grid items-center px-4 py-3 text-left border-b border-gray-100 last:border-b-0 hover:bg-blue-50 ${specificProducts.includes(product.id) ? 'bg-blue-50' : ''}`} style={{ gridTemplateColumns:'72px 140px minmax(0,1fr) 44px', gap:'12px' }}>
+                                  <span className="w-12 h-12 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-2xl">{product.image}</span><span className="text-sm text-gray-500 truncate">{product.id}</span><span className="min-w-0"><span className="block text-sm font-medium text-gray-800 truncate">{product.name}</span><span className="block text-xs text-gray-400 mt-1 truncate">{product.category}</span></span><span className="text-center"><input type="checkbox" readOnly checked={specificProducts.includes(product.id)} className="w-4 h-4 text-blue-600 rounded" /></span>
                                 </button>
                               ))}
                             </div>
-                            <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100 text-xs text-gray-500"><span>共 {products.length} 条，已选 {specificProducts.length} 条</span><div className="flex items-center gap-2"><button type="button" disabled={currentPage <= 1} onClick={() => setProductPage(p => Math.max(1, p - 1))} className="px-2 py-1 border border-gray-200 rounded disabled:opacity-40">上一页</button><span>{currentPage} / {totalPages}</span><button type="button" disabled={currentPage >= totalPages} onClick={() => setProductPage(p => Math.min(totalPages, p + 1))} className="px-2 py-1 border border-gray-200 rounded disabled:opacity-40">下一页</button><button type="button" onClick={() => { setOpenProductDropdown(null); setProductSearchText(''); setProductPage(1); }} className="px-3 py-1 bg-blue-500 text-white rounded">完成</button></div></div>
+                            <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 bg-gray-50 text-xs text-gray-500"><span>共 {products.length} 条 · 已选 {specificProducts.length} 条</span><div className="flex items-center gap-2"><button type="button" disabled={currentPage <= 1} onClick={() => setProductPage(p => Math.max(1, p - 1))} className="px-2.5 py-1.5 bg-white border border-gray-200 rounded disabled:opacity-40">上一页</button><span>{currentPage} / {totalPages}</span><button type="button" disabled={currentPage >= totalPages} onClick={() => setProductPage(p => Math.min(totalPages, p + 1))} className="px-2.5 py-1.5 bg-white border border-gray-200 rounded disabled:opacity-40">下一页</button><button type="button" onClick={() => { setOpenProductDropdown(null); setProductSearchText(''); setProductPage(1); }} className="px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded">完成</button></div></div>
                           </div>
                         )}
                       </>
@@ -1686,16 +1691,16 @@ function App() {
                   })()}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 mt-2">分账户定制：在下方按账户分别选择商品</p>
+                <p className="text-xs text-gray-400 mt-2" style={{ marginLeft: '124px' }}>每个账户可以独立选择一个或多个营销产品</p>
               )}
             </div>
             {/* 分账户定制商品（网格），左对齐营销产品标签 */}
             {productAllocMode === 'per_account' && (
-              <div className="mb-5">
+              <div className="mb-5" style={{ marginLeft: '124px', width: '760px' }}>
                 {selectedAccountIds.length === 0 ? (
-                  <p className="text-sm text-gray-400">请先选择账户</p>
+                  <div className="px-4 py-6 border border-dashed border-gray-300 rounded-lg text-center text-sm text-gray-400">请先在上方选择广告账户</div>
                 ) : (
-                  <div className="space-y-3 max-w-4xl">
+                  <div className="border border-gray-200 rounded-lg bg-white divide-y divide-gray-100">
                     {selectedAccountIds.map(accountId => {
                       const acc = MOCK.accounts.find(a => a.id === accountId);
                       const selectedIds = Array.isArray(perAccountProduct[accountId]) ? perAccountProduct[accountId] : (perAccountProduct[accountId] ? [perAccountProduct[accountId]] : []);
@@ -1706,32 +1711,27 @@ function App() {
                       const currentPage = Math.min(productPage, totalPages);
                       const pagedProducts = products.slice((currentPage - 1) * PRODUCT_PAGE_SIZE, currentPage * PRODUCT_PAGE_SIZE);
                       return (
-                        <div key={accountId} className="border border-gray-200 rounded-lg p-4 bg-gray-50 relative" ref={openProductDropdown === accountId ? productDropdownRef : null}>
-                          <div className="flex items-center gap-4">
-                            <div className="w-44 flex-shrink-0"><div className="text-sm font-semibold text-gray-900 truncate" title={acc ? acc.name : accountId}>{acc ? acc.name : accountId}</div><div className="text-xs text-gray-400 mt-1">账户ID：{accountId}</div></div>
-                          <button type="button" onClick={() => { setOpenProductDropdown(openProductDropdown === accountId ? null : accountId); setProductSearchText(''); setProductPage(1); }} className="flex-1 min-w-0 flex items-center gap-2 px-3 py-2.5 border border-gray-300 rounded-lg bg-white hover:border-blue-400 text-left outline-none focus:ring-1 focus:ring-blue-500">
-                            <span className="text-lg flex-shrink-0">{selectedItems.length > 0 ? selectedItems[0].image : '📦'}</span>
-                            <span className={"text-sm truncate flex-1 " + (selectedItems.length > 0 ? 'text-gray-800' : 'text-gray-400')}>{selectedItems.length > 0 ? `已选 ${selectedItems.length} 个：${selectedItems.map(p => p.name).join('、')}` : '请选择商品'}</span>
-                            <i className={`fas fa-chevron-${openProductDropdown === accountId ? 'up' : 'down'} text-gray-400 text-xs`}></i>
-                          </button>
-                          </div>
-                          {openProductDropdown === accountId && (
-                            <div className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 overflow-hidden" style={{ left:'192px', right:'16px', minWidth:'560px' }}>
-                              <div className="p-2 border-b border-gray-100 relative">
-                                <i className="fas fa-search absolute left-5 text-gray-400 text-xs" style={{ top:'50%', transform:'translateY(-50%)' }}></i>
-                                <input type="text" value={productSearchText} onChange={e => { setProductSearchText(e.target.value); setProductPage(1); }} placeholder="搜索商品ID或名称" autoFocus className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500" />
+                        <div key={accountId} className="px-4 py-3 relative" ref={openProductDropdown === accountId ? productDropdownRef : null}>
+                          <div className="flex items-start gap-4">
+                            <div className="w-44 flex-shrink-0 pt-2"><div className="text-sm font-medium text-gray-900 truncate" title={acc ? acc.name : accountId}>{acc ? acc.name : accountId}</div><div className="text-xs text-gray-400 mt-1">账户ID：{accountId}</div></div>
+                            <div className="flex-1 min-w-0">
+                              <div className={`border rounded-lg bg-white ${openProductDropdown === accountId ? 'border-blue-500 ring-1 ring-blue-100' : 'border-gray-300 hover:border-blue-400'}`}>
+                                <button type="button" onClick={() => { setOpenProductDropdown(openProductDropdown === accountId ? null : accountId); setProductSearchText(''); setProductPage(1); }} className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left outline-none">
+                                  <span className={selectedItems.length > 0 ? 'text-sm text-gray-800' : 'text-sm text-gray-400'}>{selectedItems.length > 0 ? `已选择 ${selectedItems.length} 个营销产品` : '请选择营销产品'}</span>
+                                  <i className={`fas fa-chevron-${openProductDropdown === accountId ? 'up' : 'down'} text-gray-400 text-xs`}></i>
+                                </button>
+                                {selectedItems.length > 0 && <div className="flex flex-wrap gap-1.5 px-3 pb-2.5">{selectedItems.map(product => <span key={product.id} className="inline-flex items-center gap-1.5 max-w-full px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs"><span>{product.image}</span><span className="truncate">{product.name}</span><button type="button" title="移除商品" onClick={e => { e.stopPropagation(); setPerAccountProduct(prev => ({ ...prev, [accountId]: selectedIds.filter(id => id !== product.id) })); }} className="text-blue-400 hover:text-blue-700"><i className="fas fa-times"></i></button></span>)}</div>}
                               </div>
-                              <div className="grid border-b border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-medium text-gray-500" style={{ gridTemplateColumns:'80px 140px minmax(0,1fr) 40px', gap:'10px' }}><span>商品图片</span><span>商品ID</span><span>商品名称</span><span>选择</span></div>
-                              <div className="overflow-y-auto">
-                                {products.length === 0 ? <div className="px-3 py-5 text-center text-xs text-gray-400">没有匹配的商品</div> : pagedProducts.map(product => (
-                                  <button key={product.id} type="button" onClick={() => setPerAccountProduct(prev => { const current = Array.isArray(prev[accountId]) ? prev[accountId] : (prev[accountId] ? [prev[accountId]] : []); return { ...prev, [accountId]: current.includes(product.id) ? current.filter(id => id !== product.id) : [...current, product.id] }; })} className={`w-full grid items-center px-4 py-3 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${selectedIds.includes(product.id) ? 'bg-blue-50' : ''}`} style={{ gridTemplateColumns:'80px 140px minmax(0,1fr) 40px', gap:'10px' }}>
-                                    <span className="w-14 h-14 rounded border border-gray-200 bg-white flex items-center justify-center text-3xl">{product.image}</span><span className="text-sm text-gray-500 truncate">{product.id}</span><span className="text-sm text-gray-800 truncate">{product.name}</span><span><input type="checkbox" readOnly checked={selectedIds.includes(product.id)} className="w-4 h-4 text-blue-600 rounded" /></span>
-                                  </button>
-                                ))}
-                              </div>
-                              <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100 text-xs text-gray-500"><span>共 {products.length} 条，已选 {selectedIds.length} 条</span><div className="flex items-center gap-2"><button type="button" disabled={currentPage <= 1} onClick={() => setProductPage(p => Math.max(1, p - 1))} className="px-2 py-1 border border-gray-200 rounded disabled:opacity-40">上一页</button><span>{currentPage}/{totalPages}</span><button type="button" disabled={currentPage >= totalPages} onClick={() => setProductPage(p => Math.min(totalPages, p + 1))} className="px-2 py-1 border border-gray-200 rounded disabled:opacity-40">下一页</button><button type="button" onClick={() => { setOpenProductDropdown(null); setProductSearchText(''); setProductPage(1); }} className="px-3 py-1 bg-blue-500 text-white rounded">完成</button></div></div>
+                              {openProductDropdown === accountId && (
+                                <div className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-xl mt-2 overflow-hidden" style={{ left:'208px', right:'16px' }}>
+                                  <div className="p-3 border-b border-gray-100 relative"><i className="fas fa-search absolute left-6 text-gray-400 text-xs" style={{ top:'50%', transform:'translateY(-50%)' }}></i><input type="text" value={productSearchText} onChange={e => { setProductSearchText(e.target.value); setProductPage(1); }} placeholder="搜索商品名称、商品ID或分类" autoFocus className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100" /></div>
+                                  <div className="grid border-b border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-medium text-gray-500" style={{ gridTemplateColumns:'64px 120px minmax(0,1fr) 40px', gap:'10px' }}><span>图片</span><span>商品ID</span><span>商品名称</span><span className="text-center">选择</span></div>
+                                  <div className="overflow-y-auto">{products.length === 0 ? <div className="px-3 py-8 text-center text-sm text-gray-400">没有匹配的商品</div> : pagedProducts.map(product => <button key={product.id} type="button" onClick={() => setPerAccountProduct(prev => { const current = Array.isArray(prev[accountId]) ? prev[accountId] : (prev[accountId] ? [prev[accountId]] : []); return { ...prev, [accountId]: current.includes(product.id) ? current.filter(id => id !== product.id) : [...current, product.id] }; })} className={`w-full grid items-center px-4 py-3 text-left border-b border-gray-100 last:border-b-0 hover:bg-blue-50 ${selectedIds.includes(product.id) ? 'bg-blue-50' : ''}`} style={{ gridTemplateColumns:'64px 120px minmax(0,1fr) 40px', gap:'10px' }}><span className="w-11 h-11 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-2xl">{product.image}</span><span className="text-xs text-gray-500 truncate">{product.id}</span><span className="min-w-0"><span className="block text-sm font-medium text-gray-800 truncate">{product.name}</span><span className="block text-xs text-gray-400 mt-1 truncate">{product.category}</span></span><span className="text-center"><input type="checkbox" readOnly checked={selectedIds.includes(product.id)} className="w-4 h-4 text-blue-600 rounded" /></span></button>)}</div>
+                                  <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 bg-gray-50 text-xs text-gray-500"><span>共 {products.length} 条 · 已选 {selectedIds.length} 条</span><div className="flex items-center gap-2"><button type="button" disabled={currentPage <= 1} onClick={() => setProductPage(p => Math.max(1, p - 1))} className="px-2.5 py-1.5 bg-white border border-gray-200 rounded disabled:opacity-40">上一页</button><span>{currentPage}/{totalPages}</span><button type="button" disabled={currentPage >= totalPages} onClick={() => setProductPage(p => Math.min(totalPages, p + 1))} className="px-2.5 py-1.5 bg-white border border-gray-200 rounded disabled:opacity-40">下一页</button><button type="button" onClick={() => { setOpenProductDropdown(null); setProductSearchText(''); setProductPage(1); }} className="px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded">完成</button></div></div>
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
                         </div>
                       );
                     })}
