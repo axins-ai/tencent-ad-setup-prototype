@@ -789,7 +789,7 @@ function App() {
         setProductInfoMap(prev => {
           const cur = prev[pid] || {};
           const imgs = cur.images || [];
-          if (imgs.length >= 10) { notify('产品主图最多 11 张', 'error'); return prev; }
+          if (imgs.length >= (useDefaultProductInfo ? 9 : 10)) { notify('产品主图最多 10 张', 'error'); return prev; }
           return { ...prev, [pid]: { ...cur, images: [...imgs, dataUrl] } };
         });
         e.target.value = '';
@@ -887,6 +887,13 @@ function App() {
     return done === 0 ? 0 : Math.round((done / checks.length) * 100);
   })();
   // 产品信息配置对象：全账户共用时取首个营销产品；分账户定制时每个账户配置一整套产品信息
+  const selectedMarketingProductCount = productAllocMode === 'shared'
+    ? specificProducts.length
+    : selectedAccountIds.reduce((sum, accountId) => {
+        const ids = Array.isArray(perAccountProduct[accountId]) ? perAccountProduct[accountId] : (perAccountProduct[accountId] ? [perAccountProduct[accountId]] : []);
+        return sum + ids.length;
+      }, 0);
+  const useDefaultProductInfo = selectedMarketingProductCount === 1;
   const productInfoTargets = (() => {
     if (productInfoAllocMode === 'shared') {
       const sharedProductId = specificProducts[0] || selectedAccountIds.map(id => {
@@ -920,21 +927,8 @@ function App() {
       });
     }
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
-    // 产品主图：shared 校验单产品；per_account 按账户逐个校验，报错使用账户 ID
-    if (productInfoTargets.length === 0) {
-      errors.push('请选择营销产品');
-    } else {
-      productInfoTargets.forEach(target => {
-        const _pi = productInfoMap[target.key] || {};
-        if (!_pi.images || _pi.images.length === 0) {
-          if (productAllocMode === 'shared') {
-            errors.push('产品主图至少需手动上传 1 张');
-          } else {
-            errors.push('账户 ' + target.accountId + '：产品主图至少需手动上传 1 张');
-          }
-        }
-      });
-    }
+    // 产品名称和主图均非必填；仅校验是否已选择营销产品
+    if (productInfoTargets.length === 0) errors.push('请选择营销产品');
     // 广告数量上限 1000：超限直接拦截，阻止立即运行
     if (getBuildSummary().totalCreatives > 1000) errors.push('广告数量超限（1000个），请减少物料选择');
     return errors;
@@ -2409,7 +2403,7 @@ function App() {
               </div>
             {(() => {
               // 每产品一套配置面板（名称/主图/卖点），单产品与多产品 Tabs 共用同一套面板
-              const _renderPanel = (pid, defaultName, defaultImage, imgs, points, allImages) => {
+              const _renderPanel = (pid, defaultName, defaultImage, imgs, points, allImages, loadDefaultInfo) => {
                 const _pi = productInfoMap[pid] || {};
                 const extraName = _pi.extraName || '';
                 return (
@@ -2418,13 +2412,11 @@ function App() {
                     <div className="mb-5">
                       <div className="flex items-center gap-1.5 mb-2">
                         <span className="text-sm font-medium text-gray-700">产品名称</span>
-                        <span className="text-red-500">*</span>
+                        <span className="text-xs text-gray-400">选填</span>
                       </div>
-                      {/* 第一个：商品库默认名称（只读展示） */}
-                      <div className="relative mb-2 max-w-md">
-                        <input type="text" value={defaultName} readOnly disabled className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed" />
-                      </div>
-                      {/* 第二个：可额外添加（选填，表单校验逻辑控制，最多 1 条） */}
+                      {/* 仅单营销产品时加载商品库默认名称 */}
+                      {loadDefaultInfo && <div className="relative mb-2 max-w-md"><input type="text" value={defaultName} readOnly disabled className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed" /></div>}
+                      {/* 自定义产品名称，选填 */}
                       <div className="relative max-w-md">
                         <input type="text" maxLength={20} value={extraName} onChange={e => {
                           const v = e.target.value;
@@ -2438,9 +2430,9 @@ function App() {
                     <div className="mb-5">
                       <div className="flex items-center gap-1.5 mb-2">
                         <span className="text-sm font-medium text-gray-700">产品主图</span>
-                        <span className="text-red-500">*</span>
+                        <span className="text-xs text-gray-400">选填</span>
                       </div>
-                      <div className="text-xs text-gray-500 mb-2">已添加：<span className="text-gray-700">{allImages.length}</span>/11</div>
+                      <div className="text-xs text-gray-500 mb-2">已添加：<span className="text-gray-700">{allImages.length}</span>/10</div>
                       <div className="flex flex-wrap gap-2 mb-2">
                         {allImages.map((em, i) => (
                           <div key={i} className="relative w-16 h-16 border border-gray-200 rounded-lg bg-white flex items-center justify-center text-2xl shadow-sm overflow-hidden">
@@ -2456,7 +2448,7 @@ function App() {
                             })} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-700 text-white rounded-full text-[10px] flex items-center justify-center hover:bg-red-500"><i className="fas fa-times"></i></button>}
                           </div>
                         ))}
-                        {allImages.length < 11 && (
+                        {allImages.length < 10 && (
                           <button type="button" onClick={() => imageUploadRef.current && imageUploadRef.current.click()} className="w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition">
                             <i className="fas fa-plus"></i>
                           </button>
@@ -2468,12 +2460,7 @@ function App() {
                         <i className="fas fa-image mt-0.5"></i>
                         <span>支持格式：jpg / png / jpeg；宽高比 1:1；大小 ≤ 1M；尺寸 108×108 ≤ 尺寸 ≤ 108×108</span>
                       </div>
-                      {imgs.length === 0 && (
-                        <div className="flex items-start gap-1.5 text-xs text-orange-500 mt-1.5">
-                          <i className="fas fa-exclamation-circle mt-0.5"></i>
-                          <span>产品主图必须至少手动上传 1 张</span>
-                        </div>
-                      )}
+                      {!loadDefaultInfo && <div className="text-xs text-gray-400 mt-1.5">已选择多个营销产品，不读取商品默认主图，可按需自定义上传。</div>}
                     </div>
 
                     {/* 产品卖点 */}
@@ -2537,10 +2524,10 @@ function App() {
                 const _pi = productInfoMap[_target.key] || {};
                 const _imgs = _pi.images || [];
                 const _points = _pi.sellingPoints || [];
-                const _allImages = [_defaultImage, ..._imgs].filter(Boolean);
+                const _allImages = [useDefaultProductInfo ? _defaultImage : '', ..._imgs].filter(Boolean);
                 return (
                   <div className="pl-32">
-                    {_renderPanel(_target.key, _defaultName, _defaultImage, _imgs, _points, _allImages)}
+                    {_renderPanel(_target.key, _defaultName, _defaultImage, _imgs, _points, _allImages, useDefaultProductInfo)}
                   </div>
                 );
               }
@@ -2558,7 +2545,7 @@ function App() {
               const _activePi = productInfoMap[_activeKey] || {};
               const _activeImgs = _activePi.images || [];
               const _activePoints = _activePi.sellingPoints || [];
-              const _allActiveImages = [_activeDefaultImage, ..._activeImgs].filter(Boolean);
+              const _allActiveImages = [useDefaultProductInfo ? _activeDefaultImage : '', ..._activeImgs].filter(Boolean);
               return (
                 <div className="pl-32">
                   {/* 账户切换：每个账户独立配置一整套产品信息 */}
@@ -2585,7 +2572,7 @@ function App() {
                     })}
                   </div>
                   {/* 当前账户所选产品的配置面板 */}
-                  {_renderPanel(_activeKey, _activeDefaultName, _activeDefaultImage, _activeImgs, _activePoints, _allActiveImages)}
+                  {_renderPanel(_activeKey, _activeDefaultName, _activeDefaultImage, _activeImgs, _activePoints, _allActiveImages, useDefaultProductInfo)}
                 </div>
               );
             })()}

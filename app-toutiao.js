@@ -1258,8 +1258,8 @@ function App() {
         setProductInfoMap(prev => {
           const cur = prev[pid] || {};
           const imgs = cur.images || [];
-          if (imgs.length >= 10) {
-            notify('产品主图最多 11 张', 'error');
+          if (imgs.length >= (useDefaultProductInfo ? 9 : 10)) {
+            notify('产品主图最多 10 张', 'error');
             return prev;
           }
           return {
@@ -1348,6 +1348,11 @@ function App() {
     return done === 0 ? 0 : Math.round(done / checks.length * 100);
   })();
   // 产品信息配置对象：全账户共用时取首个营销产品；分账户定制时每个账户配置一整套产品信息
+  const selectedMarketingProductCount = productAllocMode === 'shared' ? specificProducts.length : selectedAccountIds.reduce((sum, accountId) => {
+    const ids = Array.isArray(perAccountProduct[accountId]) ? perAccountProduct[accountId] : perAccountProduct[accountId] ? [perAccountProduct[accountId]] : [];
+    return sum + ids.length;
+  }, 0);
+  const useDefaultProductInfo = selectedMarketingProductCount === 1;
   const productInfoTargets = (() => {
     if (productInfoAllocMode === 'shared') {
       const sharedProductId = specificProducts[0] || selectedAccountIds.map(id => {
@@ -1393,21 +1398,8 @@ function App() {
       });
     }
     if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
-    // 产品主图：shared 校验单产品；per_account 按账户逐个校验，报错使用账户 ID
-    if (productInfoTargets.length === 0) {
-      errors.push('请选择营销产品');
-    } else {
-      productInfoTargets.forEach(target => {
-        const _pi = productInfoMap[target.key] || {};
-        if (!_pi.images || _pi.images.length === 0) {
-          if (productAllocMode === 'shared') {
-            errors.push('产品主图至少需手动上传 1 张');
-          } else {
-            errors.push('账户 ' + target.accountId + '：产品主图至少需手动上传 1 张');
-          }
-        }
-      });
-    }
+    // 产品名称和主图均非必填；仅校验是否已选择营销产品
+    if (productInfoTargets.length === 0) errors.push('请选择营销产品');
     // 广告数量上限 1000：超限直接拦截，阻止立即运行
     if (getBuildSummary().totalCreatives > 1000) errors.push('广告数量超限（1000个），请减少物料选择');
     return errors;
@@ -3472,7 +3464,7 @@ function App() {
     className: "w-4 h-4 mr-2 text-blue-600"
   }), /*#__PURE__*/React.createElement("span", null, "分账户定制")))), (() => {
     // 每产品一套配置面板（名称/主图/卖点），单产品与多产品 Tabs 共用同一套面板
-    const _renderPanel = (pid, defaultName, defaultImage, imgs, points, allImages) => {
+    const _renderPanel = (pid, defaultName, defaultImage, imgs, points, allImages, loadDefaultInfo) => {
       const _pi = productInfoMap[pid] || {};
       const extraName = _pi.extraName || '';
       return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -3482,8 +3474,8 @@ function App() {
       }, /*#__PURE__*/React.createElement("span", {
         className: "text-sm font-medium text-gray-700"
       }, "产品名称"), /*#__PURE__*/React.createElement("span", {
-        className: "text-red-500"
-      }, "*")), /*#__PURE__*/React.createElement("div", {
+        className: "text-xs text-gray-400"
+      }, "选填")), loadDefaultInfo && /*#__PURE__*/React.createElement("div", {
         className: "relative mb-2 max-w-md"
       }, /*#__PURE__*/React.createElement("input", {
         type: "text",
@@ -3522,12 +3514,12 @@ function App() {
       }, /*#__PURE__*/React.createElement("span", {
         className: "text-sm font-medium text-gray-700"
       }, "产品主图"), /*#__PURE__*/React.createElement("span", {
-        className: "text-red-500"
-      }, "*")), /*#__PURE__*/React.createElement("div", {
+        className: "text-xs text-gray-400"
+      }, "选填")), /*#__PURE__*/React.createElement("div", {
         className: "text-xs text-gray-500 mb-2"
       }, "已添加：", /*#__PURE__*/React.createElement("span", {
         className: "text-gray-700"
-      }, allImages.length), "/11"), /*#__PURE__*/React.createElement("div", {
+      }, allImages.length), "/10"), /*#__PURE__*/React.createElement("div", {
         className: "flex flex-wrap gap-2 mb-2"
       }, allImages.map((em, i) => /*#__PURE__*/React.createElement("div", {
         key: i,
@@ -3553,7 +3545,7 @@ function App() {
         className: "absolute -top-1 -right-1 w-4 h-4 bg-gray-700 text-white rounded-full text-[10px] flex items-center justify-center hover:bg-red-500"
       }, /*#__PURE__*/React.createElement("i", {
         className: "fas fa-times"
-      })))), allImages.length < 11 && /*#__PURE__*/React.createElement("button", {
+      })))), allImages.length < 10 && /*#__PURE__*/React.createElement("button", {
         type: "button",
         onClick: () => imageUploadRef.current && imageUploadRef.current.click(),
         className: "w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition"
@@ -3569,11 +3561,9 @@ function App() {
         className: "flex items-start gap-1.5 text-xs text-gray-400 mt-1"
       }, /*#__PURE__*/React.createElement("i", {
         className: "fas fa-image mt-0.5"
-      }), /*#__PURE__*/React.createElement("span", null, "支持格式：jpg / png / jpeg；宽高比 1:1；大小 ≤ 1M；尺寸 108×108 ≤ 尺寸 ≤ 108×108")), imgs.length === 0 && /*#__PURE__*/React.createElement("div", {
-        className: "flex items-start gap-1.5 text-xs text-orange-500 mt-1.5"
-      }, /*#__PURE__*/React.createElement("i", {
-        className: "fas fa-exclamation-circle mt-0.5"
-      }), /*#__PURE__*/React.createElement("span", null, "产品主图必须至少手动上传 1 张"))), /*#__PURE__*/React.createElement("div", {
+      }), /*#__PURE__*/React.createElement("span", null, "支持格式：jpg / png / jpeg；宽高比 1:1；大小 ≤ 1M；尺寸 108×108 ≤ 尺寸 ≤ 108×108")), !loadDefaultInfo && /*#__PURE__*/React.createElement("div", {
+        className: "text-xs text-gray-400 mt-1.5"
+      }, "已选择多个营销产品，不读取商品默认主图，可按需自定义上传。")), /*#__PURE__*/React.createElement("div", {
         className: "mb-3"
       }, /*#__PURE__*/React.createElement("div", {
         className: "flex items-center gap-1.5 mb-2"
@@ -3667,10 +3657,10 @@ function App() {
       const _pi = productInfoMap[_target.key] || {};
       const _imgs = _pi.images || [];
       const _points = _pi.sellingPoints || [];
-      const _allImages = [_defaultImage, ..._imgs].filter(Boolean);
+      const _allImages = [useDefaultProductInfo ? _defaultImage : '', ..._imgs].filter(Boolean);
       return /*#__PURE__*/React.createElement("div", {
         className: "pl-32"
-      }, _renderPanel(_target.key, _defaultName, _defaultImage, _imgs, _points, _allImages));
+      }, _renderPanel(_target.key, _defaultName, _defaultImage, _imgs, _points, _allImages, useDefaultProductInfo));
     }
 
     // 分账户定制：一个账户一个 Tab，以账户 ID 为名称；相同商品也不合并
@@ -3686,7 +3676,7 @@ function App() {
     const _activePi = productInfoMap[_activeKey] || {};
     const _activeImgs = _activePi.images || [];
     const _activePoints = _activePi.sellingPoints || [];
-    const _allActiveImages = [_activeDefaultImage, ..._activeImgs].filter(Boolean);
+    const _allActiveImages = [useDefaultProductInfo ? _activeDefaultImage : '', ..._activeImgs].filter(Boolean);
     return /*#__PURE__*/React.createElement("div", {
       className: "pl-32"
     }, /*#__PURE__*/React.createElement("div", {
@@ -3713,7 +3703,7 @@ function App() {
           flexShrink: 0
         }
       }));
-    })), _renderPanel(_activeKey, _activeDefaultName, _activeDefaultImage, _activeImgs, _activePoints, _allActiveImages));
+    })), _renderPanel(_activeKey, _activeDefaultName, _activeDefaultImage, _activeImgs, _activePoints, _allActiveImages, useDefaultProductInfo));
   })()), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", {
     className: "text-sm font-bold text-gray-900 mb-4"
   }, "创意组件"), /*#__PURE__*/React.createElement("div", {
