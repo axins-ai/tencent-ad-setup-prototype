@@ -1548,7 +1548,7 @@ function App() {
               </div>
             </div>
             <div className="flex items-center gap-3 mb-5">
-              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 leading-5"><span>单项目最大</span><br /><span>广告数 <span className="text-red-500">*</span></span></label>
+              <label className="text-left text-sm font-medium text-gray-700 flex-shrink-0 whitespace-nowrap" style={{ width: '124px' }}>单项目最大广告数 <span className="text-red-500">*</span></label>
               <input type="number" value={1} readOnly disabled className="w-24 h-10 px-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-sm cursor-not-allowed" />
             </div>
 
@@ -1715,7 +1715,7 @@ function App() {
                         })}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 p-3 border-b border-gray-100 bg-gray-50"><div className="relative flex-1"><i className="fas fa-search absolute left-3 text-gray-400 text-xs" style={{ top:'50%', transform:'translateY(-50%)' }}></i><input type="text" value={productSearchText} onChange={e => { setProductSearchText(e.target.value); setProductPage(1); }} placeholder="输入商品名称、ID或分类搜索" className="w-full h-9 pl-8 pr-3 border border-gray-300 rounded-lg bg-white text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100" /></div><span className="px-2 py-1 rounded bg-white border border-gray-200 text-xs text-gray-500 whitespace-nowrap">已选 {selectedIds.length}/{MOCK.productLibrary.length}</span>{selectedIds.length > 0 && <button type="button" onClick={() => setPerAccountProduct(prev => ({ ...prev, [accountId]: [] }))} className="text-xs text-blue-500 hover:text-blue-700 whitespace-nowrap">清空</button>}</div>
+                    <div className="flex items-center gap-3 p-3 border-b border-gray-100 bg-gray-50"><div className="relative flex-1"><i className="fas fa-search absolute left-3 text-gray-400 text-xs pointer-events-none" style={{ top:'50%', transform:'translateY(-50%)' }}></i><input type="text" value={productSearchText} onChange={e => { setProductSearchText(e.target.value); setProductPage(1); }} placeholder="搜索商品名称、ID或分类" className="w-full h-9 pl-9 pr-3 border border-gray-300 rounded-lg bg-white text-sm leading-9 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100" /></div><span className="px-2 py-1 rounded bg-white border border-gray-200 text-xs text-gray-500 whitespace-nowrap">已选 {selectedIds.length}/{MOCK.productLibrary.length}</span>{selectedIds.length > 0 && <button type="button" onClick={() => setPerAccountProduct(prev => ({ ...prev, [accountId]: [] }))} className="text-xs text-blue-500 hover:text-blue-700 whitespace-nowrap">清空</button>}</div>
                     <div className="grid border-b border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-medium text-gray-500" style={{ gridTemplateColumns:'36px 56px 128px minmax(0,1fr)', gap:'12px' }}><span></span><span>素材</span><span>商品ID</span><span>名称</span></div>
                     <div>{products.length === 0 ? <div className="px-3 py-8 text-center text-sm text-gray-400">没有匹配的商品</div> : pagedProducts.map(product => <button key={product.id} type="button" onClick={() => setPerAccountProduct(prev => { const current = Array.isArray(prev[accountId]) ? prev[accountId] : (prev[accountId] ? [prev[accountId]] : []); return { ...prev, [accountId]: current.includes(product.id) ? current.filter(id => id !== product.id) : [...current, product.id] }; })} className={`w-full grid items-center px-4 py-2.5 text-left border-b border-gray-100 last:border-b-0 hover:bg-blue-50 ${selectedIds.includes(product.id) ? 'bg-blue-50' : ''}`} style={{ gridTemplateColumns:'36px 56px 128px minmax(0,1fr)', gap:'12px' }}><span><input type="checkbox" readOnly checked={selectedIds.includes(product.id)} className="w-4 h-4 text-blue-600 rounded" /></span><span className="w-10 h-10 rounded border border-gray-200 bg-blue-50 flex items-center justify-center text-xl">{product.image}</span><span className="text-xs text-gray-500 truncate">{product.id}</span><span className="min-w-0"><span className="block text-sm text-gray-800 truncate">{product.name}</span><span className="block text-xs text-gray-400 mt-0.5 truncate">{product.category}</span></span></button>)}</div>
                     <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-white text-xs text-gray-500"><span>共 {products.length} 条商品</span><div className="flex items-center gap-2"><button type="button" disabled={currentPage <= 1} onClick={() => setProductPage(p => Math.max(1, p - 1))} className="px-3 py-1.5 border border-gray-200 rounded-lg bg-white hover:border-blue-300 disabled:opacity-40 disabled:hover:border-gray-200">上一页</button><span className="min-w-12 text-center">{currentPage} / {totalPages}</span><button type="button" disabled={currentPage >= totalPages} onClick={() => setProductPage(p => Math.min(totalPages, p + 1))} className="px-3 py-1.5 border border-gray-200 rounded-lg bg-white hover:border-blue-300 disabled:opacity-40 disabled:hover:border-gray-200">下一页</button></div></div>
@@ -2228,8 +2228,9 @@ function App() {
 
               {/* 出价：仅稳定成本时需配置 */}
               {bidStrategy === 'stable_cost' && (
-                <div className="mb-4">
-                  <div className="block text-sm font-medium text-gray-700 mb-1">出价（元）<span className="text-red-500">*</span></div>
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-28 flex-shrink-0 text-sm font-medium text-gray-700 pt-2">出价（元）<span className="text-red-500">*</span></div>
+                  <div>
                   <input
                     type="number"
                     min="0.01"
@@ -2252,12 +2253,13 @@ function App() {
                   {bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && (
                     <p className="text-xs text-red-500 mt-1">出价需在 0.01 ~ 300 元之间</p>
                   )}
+                  </div>
                 </div>
               )}
 
               {/* 日预算 */}
-              <div>
-                <div className="block text-sm font-medium text-gray-700 mb-1">日预算（元）</div>
+              <div className="flex items-center gap-3">
+                <div className="w-28 flex-shrink-0 text-sm font-medium text-gray-700">日预算（元）</div>
                 <input
                   type="number"
                   value={dailyBudget}
@@ -2270,7 +2272,7 @@ function App() {
 
             {/* 项目名称：仅在搭建项目时填写，与其它字段左对齐 */}
             {buildType === 'project_unit' && (
-              <div className="border-t pt-4 mt-0">
+              <div className="pt-4 mt-0">
                 <div className="flex items-center gap-2 mb-5">
                   <label className="text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0">项目名称 <span className="text-red-500">*</span></label>
                   <input

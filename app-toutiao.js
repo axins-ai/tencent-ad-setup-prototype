@@ -2221,10 +2221,13 @@ function App() {
   }), /*#__PURE__*/React.createElement("span", null, "自动投放"))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 leading-5"
-  }, /*#__PURE__*/React.createElement("span", null, "单项目最大"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", null, "广告数 ", /*#__PURE__*/React.createElement("span", {
+    className: "text-left text-sm font-medium text-gray-700 flex-shrink-0 whitespace-nowrap",
+    style: {
+      width: '124px'
+    }
+  }, "单项目最大广告数 ", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
-  }, "*"))), /*#__PURE__*/React.createElement("input", {
+  }, "*")), /*#__PURE__*/React.createElement("input", {
     type: "number",
     value: 1,
     readOnly: true,
@@ -2544,7 +2547,7 @@ function App() {
     }, /*#__PURE__*/React.createElement("div", {
       className: "relative flex-1"
     }, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-search absolute left-3 text-gray-400 text-xs",
+      className: "fas fa-search absolute left-3 text-gray-400 text-xs pointer-events-none",
       style: {
         top: '50%',
         transform: 'translateY(-50%)'
@@ -2556,8 +2559,8 @@ function App() {
         setProductSearchText(e.target.value);
         setProductPage(1);
       },
-      placeholder: "输入商品名称、ID或分类搜索",
-      className: "w-full h-9 pl-8 pr-3 border border-gray-300 rounded-lg bg-white text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100"
+      placeholder: "搜索商品名称、ID或分类",
+      className: "w-full h-9 pl-9 pr-3 border border-gray-300 rounded-lg bg-white text-sm leading-9 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100"
     })), /*#__PURE__*/React.createElement("span", {
       className: "px-2 py-1 rounded bg-white border border-gray-200 text-xs text-gray-500 whitespace-nowrap"
     }, "已选 ", selectedIds.length, "/", MOCK.productLibrary.length), selectedIds.length > 0 && /*#__PURE__*/React.createElement("button", {
@@ -3240,12 +3243,12 @@ function App() {
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
   }, "最大转化")))), bidStrategy === 'stable_cost' && /*#__PURE__*/React.createElement("div", {
-    className: "mb-4"
+    className: "flex items-start gap-3 mb-4"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
+    className: "w-28 flex-shrink-0 text-sm font-medium text-gray-700 pt-2"
   }, "出价（元）", /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
-  }, "*")), /*#__PURE__*/React.createElement("input", {
+  }, "*")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "0.01",
     max: "300",
@@ -3265,8 +3268,10 @@ function App() {
     className: `w-48 px-3 py-2 border rounded-lg outline-none focus:ring-2 ${bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`
   }), bidAmount !== '' && (parseFloat(bidAmount) < 0.01 || parseFloat(bidAmount) > 300) && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-red-500 mt-1"
-  }, "出价需在 0.01 ~ 300 元之间")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "block text-sm font-medium text-gray-700 mb-1"
+  }, "出价需在 0.01 ~ 300 元之间"))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-28 flex-shrink-0 text-sm font-medium text-gray-700"
   }, "日预算（元）"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     value: dailyBudget,
@@ -3274,7 +3279,7 @@ function App() {
     placeholder: "输入日预算，留空=不限",
     className: "w-48 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-left"
   }))), buildType === 'project_unit' && /*#__PURE__*/React.createElement("div", {
-    className: "border-t pt-4 mt-0"
+    className: "pt-4 mt-0"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 mb-5"
   }, /*#__PURE__*/React.createElement("label", {
