@@ -507,6 +507,7 @@ function App() {
   const [marketingScene, setMarketingScene] = useState('short_video');
   // 营销产品分配：shared=全账户共用, per_account=分账户定制
   const [productAllocMode, setProductAllocMode] = useState('shared');
+  const [productsPerProject, setProductsPerProject] = useState(1);
   const [perAccountProduct, setPerAccountProduct] = useState({}); // { [accountId]: productId[] }，兼容旧版字符串
   const [activeProductAccountId, setActiveProductAccountId] = useState('');
   const [specificProducts, setSpecificProducts] = useState(() => MOCK.productLibrary.length > 0 ? [MOCK.productLibrary[0].id] : []);
@@ -1134,6 +1135,7 @@ function App() {
         if (data.marketingObjective) setMarketingObjective(data.marketingObjective);
         if (data.marketingScene) setMarketingScene(data.marketingScene);
         if (data.productAllocMode) setProductAllocMode(data.productAllocMode);
+        if (data.productsPerProject !== undefined) setProductsPerProject(Math.max(1, Math.min(10, parseInt(data.productsPerProject) || 1)));
         if (Array.isArray(data.specificProducts)) setSpecificProducts(data.specificProducts);
         else if (data.specificProduct) setSpecificProducts([data.specificProduct]);
         if (data.perAccountProduct) {
@@ -1213,7 +1215,7 @@ function App() {
         投放日期类型, 自定义开始日期, 自定义结束日期,
         selectedMaterials, selectedCopies,
         composeRule, composeStrategy, buildAdsByMaterialCount, batchCrossItems, singleBatchAdCount,
-        marketingObjective, marketingScene, productAllocMode, specificProduct, specificProducts, perAccountProduct,
+        marketingObjective, marketingScene, productAllocMode, productsPerProject, specificProduct, specificProducts, perAccountProduct,
         productInfoAllocMode, productInfoMap, sellingPointsInputs,
         targetOptType, deepOptType, ctaList, smartGen, sourceText, creativeName,
         selectedCreativeComponents,
@@ -1689,6 +1691,23 @@ function App() {
                   })()}
                 </div>
               ) : null}
+            </div>
+            <div className="flex items-center gap-3 mb-5">
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 whitespace-nowrap">单项目商品数 <span className="text-red-500">*</span></label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={productsPerProject}
+                onChange={e => {
+                  const raw = e.target.value;
+                  if (raw === '') { setProductsPerProject(''); return; }
+                  setProductsPerProject(Math.max(1, Math.min(10, parseInt(raw) || 1)));
+                }}
+                onBlur={() => setProductsPerProject(Math.max(1, Math.min(10, parseInt(productsPerProject) || 1)))}
+                className="w-24 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <span className="text-xs text-gray-400">范围 1-10，表示每个营销项目使用的商品数量</span>
             </div>
             {/* 分账户定制：顶部账户切换，下方共用一个营销产品组件 */}
             {productAllocMode === 'per_account' && (
