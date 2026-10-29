@@ -1343,7 +1343,7 @@ function App() {
     }
   }, [accountSearchText]);
   const overallProgress = (() => {
-    const checks = [taskName !== '', businessUnit !== '', selectedAccountIds.length > 0, productAllocMode === 'shared' ? specificProducts.length > 0 : selectedAccountIds.length > 0 && selectedAccountIds.every(id => Array.isArray(perAccountProduct[id]) ? perAccountProduct[id].length > 0 : !!perAccountProduct[id]), conversionGoal !== '', targetingSource === 'package' ? selectedTargetingPackages.length > 0 : geoSelectedProvinces.length > 0 || geoMode === 'unlimited', bidStrategy === 'max_convert' ? true : bidAmount !== '', selectedMaterials.length > 0, selectedCopies.length > 0, unitName !== ''];
+    const checks = [taskName !== '', businessUnit !== '', selectedAccountIds.length > 0, productAllocMode === 'shared' ? specificProducts.length > 0 : selectedAccountIds.length > 0 && selectedAccountIds.every(id => Array.isArray(perAccountProduct[id]) ? perAccountProduct[id].length > 0 : !!perAccountProduct[id]), conversionGoal !== '', targetingSource === 'package' ? tgtAllocMode === 'shared' ? selectedTargetingPackages.length > 0 : selectedAccountIds.length > 0 && selectedAccountIds.every(id => (perAccountTgtPkgs[id] || []).length > 0) : geoSelectedProvinces.length > 0 || geoMode === 'unlimited', bidStrategy === 'max_convert' ? true : bidAmount !== '', selectedMaterials.length > 0, selectedCopies.length > 0, buildType === 'unit_only' ? true : unitName.trim() !== ''];
     const done = checks.filter(Boolean).length;
     return done === 0 ? 0 : Math.round(done / checks.length * 100);
   })();
@@ -1386,7 +1386,7 @@ function App() {
     if (selectedMaterials.length === 0) errors.push('请选择素材');
     if (selectedCopies.length === 0) errors.push('请选择文案');
     if ((composeRule.images || 0) + (composeRule.videos || 0) === 0) errors.push('图片和视频不能同时为 0');
-    if (unitName === '') errors.push('请输入项目名称');
+    if (buildType === 'project_unit' && unitName.trim() === '') errors.push('请输入营销项目名称');
     if (buildType === 'unit_only') {
       selectedAccountIds.forEach(function (id) {
         var su = selectedUnits[id];
@@ -1397,7 +1397,12 @@ function App() {
         }).name + ' 未选择营销项目');
       });
     }
-    if (targetingSource === 'package' && selectedTargetingPackages.length === 0) errors.push('请选择定向包');
+    if (targetingSource === 'package') {
+      if (tgtAllocMode === 'shared' && selectedTargetingPackages.length === 0) errors.push('请选择至少一个定向包');
+      if (tgtAllocMode === 'per_account') selectedAccountIds.forEach(id => {
+        if ((perAccountTgtPkgs[id] || []).length === 0) errors.push('账户 ' + id + ' 未选择定向包');
+      });
+    }
     // 产品名称和主图均非必填；仅校验是否已选择营销产品
     if (productInfoTargets.length === 0) errors.push('请选择营销产品');
     // 广告数量上限 1000：超限直接拦截，阻止立即运行
@@ -1425,50 +1430,28 @@ function App() {
     return acc.kaboshi || '';
   };
 
-  // 生成广告组合（考虑定向包组合）
-  const getCreativeCombos = () => {
-    if (selectedMaterials.length === 0 || selectedCopies.length === 0) return [];
-    const combos = [];
-    // 每个定向包 × 每个素材 × 每个文案 = 一个广告
-    const tpCount = selectedTargetingPackages.length || 1; // 若未选定向包，默认为1
-    for (let t = 0; t < Math.max(tpCount, 1); t++) {
-      for (let m of selectedMaterials) {
-        for (let c of selectedCopies) {
-          combos.push({
-            material: m,
-            copy: c,
-            targetingPackageId: selectedTargetingPackages[t] || null
-          });
-        }
-      }
-    }
-    return combos;
-  };
-
   // 计算搭建总数（新增：定向包组合 + 广告数量分配）
   function getBuildSummary() {
     const accountCount = selectedAccountIds.length;
     const materialCount = selectedMaterials.length;
     const copyCount = selectedCopies.length;
 
-    // 各账户项目数 = 该账户定向包数（默认至少1）
-    const tpFor = accountId => {
+    // 头条渠道允许一个任务选择多个定向包；定向包数量只用于新建项目或叉乘计算，不限制选择数量。
+    const targetingCountFor = accountId => {
+      if (targetingSource !== 'package') return 1;
       if (tgtAllocMode === 'per_account') {
         return Math.max((perAccountTgtPkgs[accountId] || []).length, 1);
       }
       return Math.max(selectedTargetingPackages.length, 1);
     };
-    const unitsPerAccount = tgtAllocMode === 'per_account' ? accountCount > 0 ? Math.round(selectedAccountIds.reduce((s, id) => s + tpFor(id), 0) / accountCount) : 0 : Math.max(selectedTargetingPackages.length, 1);
-    const tpCount = tgtAllocMode === 'per_account' ? Math.max(1, ...selectedAccountIds.map(tpFor)) : Math.max(selectedTargetingPackages.length, 1);
-    let totalUnits = 0;
-    if (buildType === 'unit_only') {
-      totalUnits = selectedAccountIds.reduce(function (sum, id) {
-        const su = selectedUnits[id] || [];
-        return sum + su.length;
-      }, 0);
-    } else {
-      totalUnits = selectedAccountIds.reduce((sum, id) => sum + tpFor(id), 0);
-    }
+    const projectCountFor = accountId => {
+      if (buildType === 'unit_only') return (selectedUnits[accountId] || []).length;
+      return targetingCountFor(accountId);
+    };
+    const projectCounts = selectedAccountIds.map(projectCountFor);
+    const unitsPerAccount = projectCounts.length > 0 && projectCounts.every(count => count === projectCounts[0]) ? projectCounts[0] : null;
+    const tpCount = selectedAccountIds.length > 0 ? Math.max(1, ...selectedAccountIds.map(targetingCountFor)) : 1;
+    const totalUnits = projectCounts.reduce((sum, count) => sum + count, 0);
 
     // 根据素材确定广告数：每个广告捆绑「图片+视频」个素材（文案仅顺序选取，不影响总数）
     let creativesPerUnit = 0;
@@ -1480,15 +1463,16 @@ function App() {
     // 平均分配：素材在项目间均分 → 总广告数 = 每项目广告数 = 已选素材数 ÷ 单广告素材数
     // 复制分配：每个项目独立使用全部素材 → 项目数 × (素材数 ÷ 单广告素材数)
     let totalCreatives = 0;
+    const requestedBatchAdCount = Math.max(1, Math.min(1000, parseInt(singleBatchAdCount) || 1));
     if (!buildAdsByMaterialCount) {
       const batchCount = selectedAccountIds.reduce((sum, accountId) => {
         const accountFactor = 1;
-        const targetingFactor = batchCrossItems.includes('targeting') ? tpFor(accountId) : 1;
+        const targetingFactor = batchCrossItems.includes('targeting') ? targetingCountFor(accountId) : 1;
         const productIds = productAllocMode === 'per_account' ? Array.isArray(perAccountProduct[accountId]) ? perAccountProduct[accountId] : perAccountProduct[accountId] ? [perAccountProduct[accountId]] : [] : specificProducts;
         const productFactor = batchCrossItems.includes('product') ? Math.max(productIds.length, 1) : 1;
         return sum + accountFactor * targetingFactor * productFactor;
       }, 0);
-      totalCreatives = batchCount * Math.max(1, Math.min(1000, parseInt(singleBatchAdCount) || 1));
+      totalCreatives = batchCount * requestedBatchAdCount;
     } else if (composeStrategy === 'average') {
       totalCreatives = creativesPerUnit;
     } else {
@@ -1499,7 +1483,7 @@ function App() {
     // 单个项目最多可分配 100 个广告：
     // 复制分配：每项目共用全部素材 = 每项目广告数(creativesPerUnit)
     // 平均分配：总广告数在项目间均分 → 每项目 = creativesPerUnit ÷ 项目数
-    const perUnitCreatives = composeStrategy === 'average' ? totalUnits > 0 ? Math.floor(creativesPerUnit / totalUnits) : creativesPerUnit : creativesPerUnit;
+    const perUnitCreatives = !buildAdsByMaterialCount ? requestedBatchAdCount : composeStrategy === 'average' ? totalUnits > 0 ? Math.ceil(creativesPerUnit / totalUnits) : creativesPerUnit : creativesPerUnit;
     const UNIT_LIMIT = 100;
     const overUnit = perUnitCreatives > UNIT_LIMIT;
     return {
@@ -1839,12 +1823,19 @@ function App() {
     }
   };
 
+  // 始终保存最新版表单状态，避免定时器捕获首次渲染的旧闭包并覆盖新数据。
+  const doSaveFormRef = useRef(doSaveForm);
+  useEffect(() => {
+    doSaveFormRef.current = doSaveForm;
+  });
+
   // 定期自动保存 + 暴露接口给外部调用
   useEffect(() => {
-    const timer = setInterval(doSaveForm, 3000);
-    window.__doSaveForm = doSaveForm;
+    const saveLatest = () => doSaveFormRef.current();
+    const timer = setInterval(saveLatest, 3000);
+    window.__doSaveForm = saveLatest;
     window.__getFormData = () => {
-      doSaveForm();
+      saveLatest();
       try {
         return JSON.parse(localStorage.getItem('ad_task_form_' + currentTaskId) || '{}');
       } catch (e) {
@@ -1852,18 +1843,20 @@ function App() {
       }
     };
     const msgHandler = e => {
-      if (e.data && e.data.type === 'REQUEST_FORM_SAVE') doSaveForm();
+      if (e.data && e.data.type === 'REQUEST_FORM_SAVE') saveLatest();
     };
     window.addEventListener('message', msgHandler);
     return () => {
       clearInterval(timer);
       window.removeEventListener('message', msgHandler);
+      if (window.__doSaveForm === saveLatest) delete window.__doSaveForm;
+      delete window.__getFormData;
     };
-  }, []);
+  }, [currentTaskId]);
 
   // 关键状态变更时立即保存（debounce 用 setTimeout）
   useEffect(() => {
-    const t = setTimeout(doSaveForm, 500);
+    const t = setTimeout(() => doSaveFormRef.current(), 500);
     return () => clearTimeout(t);
   }, [selectedAccountIds, unitName, selectedMaterials, selectedCopies, selectedTargetingPackages]);
 
@@ -1919,18 +1912,22 @@ function App() {
       localStorage.setItem(key, JSON.stringify(arr));
     } catch (e) {}
   };
-  const handleRun = () => {
-    if (selectedAccountIds.length === 0) {
-      notify('请先选择账户', 'error');
-      return;
-    }
-    // 广告数量超限：单次任务最多 1000 条、单个项目最多 100 个，任一超限均阻止运行
-    const s = getBuildSummary();
-    if (s.overLimit || s.overUnit) {
+  const validateBeforeRun = () => {
+    if (validationErrors.length > 0) {
       setShowValidationSummary(true);
-      notify('广告数量超限（单次任务最多 1000 条、单个项目最多 100 个），请调整物料选择', 'error');
-      return;
+      notify(`还有 ${validationErrors.length} 项配置未完成`, 'error');
+      return false;
     }
+    const summary = getBuildSummary();
+    if (summary.overLimit || summary.overUnit) {
+      setShowValidationSummary(true);
+      notify('广告数量超限（单次任务最多 1000 条、单个项目最多 100 个），请调整配置', 'error');
+      return false;
+    }
+    return true;
+  };
+  const handleRun = (skipValidation = false) => {
+    if (!skipValidation && !validateBeforeRun()) return;
     runBgRef.current = false;
     setRunBg(false);
     setRunResult(null);
@@ -3006,21 +3003,19 @@ function App() {
     className: "px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-left w-full md:w-auto min-w-[200px]"
   }, /*#__PURE__*/React.createElement("span", {
     className: selectedTargetingPackages.length > 0 ? 'text-gray-900' : 'text-gray-400'
-  }, selectedTargetingPackages.length > 0 ? (MOCK.targetingPackages.find(t => t.id === selectedTargetingPackages[0]) || userTgtPkgs.find(t => t.id === selectedTargetingPackages[0]) || {}).name : '点击选择定向包'), /*#__PURE__*/React.createElement("i", {
+  }, selectedTargetingPackages.length > 0 ? `已选 ${selectedTargetingPackages.length} 个定向包` : '点击选择定向包'), /*#__PURE__*/React.createElement("i", {
     className: "fas fa-chevron-down ml-2 text-gray-400 text-sm"
   })), selectedTargetingPackages.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-orange-500 mt-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle mr-1"
-  }), "请选择一个定向包"), channel === 'oceanengine' && selectedTargetingPackages.length > 0 && /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-blue-500 mt-1"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-info-circle mr-1"
-  }), "巨量引擎渠道：一个任务仅能选择一个定向包，同一定向包内容在同一账户下仅对应一个项目")), tgtAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+  }), "请选择至少一个定向包")), tgtAllocMode === 'per_account' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-3"
-  }, "为每个账户独立选择一个定向包（每个账户仅能选一个）："), /*#__PURE__*/React.createElement("div", {
+  }, "为每个账户独立选择定向包（支持多选）："), selectedAccountIds.length === 0 ? /*#__PURE__*/React.createElement("p", {
+    className: "text-sm text-gray-400"
+  }, "请先选择账户") : /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
-  }, (selectedAccountIds.length > 0 ? selectedAccountIds : MOCK.accounts.map(a => a.id)).map(id => {
+  }, selectedAccountIds.map(id => {
     const acc = MOCK.accounts.find(a => a.id === id);
     if (!acc) return null;
     const sel = perAccountTgtPkgs[id] || [];
@@ -3047,7 +3042,6 @@ function App() {
       placeholder: "选择定向包",
       emptyText: "暂无可用的定向包",
       compact: true,
-      single: true,
       panelMaxHeight: 220
     }), sel.length > 0 && /*#__PURE__*/React.createElement("div", {
       className: "flex flex-wrap gap-0.5 mt-1.5"
@@ -3090,8 +3084,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center"
   }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "tgt_pkg_single",
+    type: "checkbox",
     checked: modalSelectedIds.includes(tp.id),
     onChange: () => toggleModalTp(tp.id),
     className: "mr-3"
@@ -3570,8 +3563,8 @@ function App() {
       }, /*#__PURE__*/React.createElement("span", {
         className: "text-sm font-medium text-gray-700"
       }, "产品卖点"), /*#__PURE__*/React.createElement("span", {
-        className: "text-red-500"
-      }, "*"), /*#__PURE__*/React.createElement("i", {
+        className: "text-xs text-gray-400"
+      }, "选填"), /*#__PURE__*/React.createElement("i", {
         className: "far fa-question-circle text-gray-400 text-xs",
         title: "每条 6-9 个字，空格分隔多个，回车提交"
       })), /*#__PURE__*/React.createElement("textarea", {
@@ -4090,26 +4083,29 @@ function App() {
       }
       setShowPreview(true);
     },
-    className: "btn-primary text-lg px-8 py-3"
+    className: "btn-secondary text-lg px-8 py-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-eye mr-2"
   }), "预览全部"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
-      if (selectedAccountIds.length === 0) {
-        notify('请先选择账户', 'error');
-        return;
-      }
+      if (!validateBeforeRun()) return;
       if (runMode === 'scheduled') {
         if (!scheduledDate || !scheduledTime) {
           notify('请设置定时日期和时间', 'error');
           return;
         }
+        const scheduledAt = new Date(`${scheduledDate}T${scheduledTime}`);
+        if (Number.isNaN(scheduledAt.getTime()) || scheduledAt <= new Date()) {
+          notify('定时时间必须晚于当前时间', 'error');
+          return;
+        }
+        doSaveFormRef.current();
         notify(`任务已提交，将在 ${scheduledDate} ${scheduledTime} 运行`, 'success');
         return;
       }
-      handleRun();
+      handleRun(true);
     },
-    className: "btn-secondary text-lg px-8 py-3"
+    className: "btn-primary text-lg px-8 py-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-play mr-2"
   }), runMode === 'immediate' ? '立即运行' : '定时运行')), /*#__PURE__*/React.createElement(MaterialModal, {
@@ -4386,9 +4382,9 @@ function App() {
         className: "text-right"
       }, /*#__PURE__*/React.createElement("p", {
         className: "text-sm font-bold text-gray-900"
-      }, unitsPerAccount, " 项目 × ", materialCount, " 素材 = ", /*#__PURE__*/React.createElement("span", {
+      }, unitsPerAccount === null ? '项目数按账户配置' : `${unitsPerAccount} 项目`, " × ", materialCount, " 素材 = ", /*#__PURE__*/React.createElement("span", {
         className: "text-blue-600"
-      }, Math.floor(totalCreatives / accountCount), " 广告"))));
+      }, accountCount > 0 ? Math.floor(totalCreatives / accountCount) : 0, " 广告"))));
     }))), (() => {
       const configItems = (() => {
         const bu = MOCK.businessUnits.find(b => b.id === businessUnit);
