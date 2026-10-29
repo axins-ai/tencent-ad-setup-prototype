@@ -1221,65 +1221,10 @@ function App() {
   // 产品卖点输入草稿按配置 key 独立，切换账户 Tab 不串
   const [sellingPointsInputs, setSellingPointsInputs] = useState({});
   const [activeProductTab, setActiveProductTab] = useState(null);
-  // 产品主图上传（点击「+」直接吊起本地文件选择；Tabs 任意时刻只渲染一个面板，共用单个 ref）
-  const imageUploadRef = useRef(null);
-  const handleImageFileChange = pid => e => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    // 1) 格式校验：jpg / png / jpeg
-    const okType = /\.(jpe?g|png)$/i.test(file.name) || ['image/jpeg', 'image/png'].includes(file.type);
-    if (!okType) {
-      notify('仅支持 jpg / png / jpeg 格式', 'error');
-      e.target.value = '';
-      return;
-    }
-    // 2) 大小校验：≤ 1M
-    if (file.size > 1024 * 1024) {
-      notify('图片大小需 ≤ 1M', 'error');
-      e.target.value = '';
-      return;
-    }
-    // 3) 宽高比 1:1 + 尺寸 108×108：读取后校验
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const dataUrl = ev.target.result;
-      const img = new Image();
-      img.onload = () => {
-        const w = img.naturalWidth,
-          h = img.naturalHeight;
-        if (Math.abs(w - h) > 2) {
-          notify('宽高比需为 1:1', 'error');
-          return;
-        }
-        if (Math.abs(w - 108) > 2 || Math.abs(h - 108) > 2) {
-          notify('尺寸需为 108×108', 'error');
-          return;
-        }
-        setProductInfoMap(prev => {
-          const cur = prev[pid] || {};
-          const imgs = cur.images || [];
-          if (imgs.length >= (useDefaultProductInfo ? 9 : 10)) {
-            notify('产品主图最多 10 张', 'error');
-            return prev;
-          }
-          return {
-            ...prev,
-            [pid]: {
-              ...cur,
-              images: [...imgs, dataUrl]
-            }
-          };
-        });
-        e.target.value = '';
-        notify('产品主图上传成功', 'success');
-      };
-      img.onerror = () => {
-        notify('图片读取失败，请重试', 'error');
-      };
-      img.src = dataUrl;
-    };
-    reader.readAsDataURL(file);
-  };
+  // 产品主图统一从创意资产库选择，不再读取本地文件。
+  const [showProductImageAssetModal, setShowProductImageAssetModal] = useState(false);
+  const [productImageAssetTarget, setProductImageAssetTarget] = useState(null);
+  const [pendingProductImageAssetIds, setPendingProductImageAssetIds] = useState([]);
   // 附加创意组件（点击按钮拉起资产库，多选）
   const [showCreativeCompModal, setShowCreativeCompModal] = useState(false);
   const [selectedCreativeComponents, setSelectedCreativeComponents] = useState([]); // { id, name }
@@ -1287,7 +1232,13 @@ function App() {
     const loadAssets = () => {
       try {
         const raw = localStorage.getItem('ad_brand_images');
-        if (raw) setCreativeAssets(JSON.parse(raw));
+        const parsed = raw ? JSON.parse(raw) : [];
+        setCreativeAssets((Array.isArray(parsed) ? parsed : []).map(asset => ({
+          ...asset,
+          channel: asset.channel || 'gdt',
+          name: asset.name || asset.title || '',
+          thumb: asset.thumb || asset.url || ''
+        })));
       } catch (e) {}
     };
     loadAssets();
@@ -3517,7 +3468,7 @@ function App() {
       }, allImages.map((em, i) => /*#__PURE__*/React.createElement("div", {
         key: i,
         className: "relative w-16 h-16 border border-gray-200 rounded-lg bg-white flex items-center justify-center text-2xl shadow-sm overflow-hidden"
-      }, em && em.startsWith('data:image') ? /*#__PURE__*/React.createElement("img", {
+      }, em && (/^data:image\//.test(em) || /^https?:\/\//.test(em)) ? /*#__PURE__*/React.createElement("img", {
         src: em,
         alt: "产品主图",
         className: "w-full h-full object-cover"
@@ -3540,23 +3491,25 @@ function App() {
         className: "fas fa-times"
       })))), allImages.length < 10 && /*#__PURE__*/React.createElement("button", {
         type: "button",
-        onClick: () => imageUploadRef.current && imageUploadRef.current.click(),
-        className: "w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-xl text-gray-400 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-500 transition"
+        onClick: () => {
+          const currentImages = (productInfoMap[pid] || {}).images || [];
+          const selectedIds = creativeAssets.filter(asset => currentImages.includes(asset.thumb)).map(asset => asset.id);
+          setProductImageAssetTarget(pid);
+          setPendingProductImageAssetIds(selectedIds);
+          setShowProductImageAssetModal(true);
+        },
+        className: "w-16 h-16 border border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-500 transition"
       }, /*#__PURE__*/React.createElement("i", {
-        className: "fas fa-plus"
-      }))), /*#__PURE__*/React.createElement("input", {
-        ref: imageUploadRef,
-        type: "file",
-        accept: "image/jpeg,image/png,.jpg,.jpeg,.png",
-        className: "hidden",
-        onChange: handleImageFileChange(pid)
-      }), /*#__PURE__*/React.createElement("div", {
+        className: "fas fa-images text-lg"
+      }), /*#__PURE__*/React.createElement("span", {
+        className: "text-[10px] mt-1"
+      }, "资产库"))), /*#__PURE__*/React.createElement("div", {
         className: "flex items-start gap-1.5 text-xs text-gray-400 mt-1"
       }, /*#__PURE__*/React.createElement("i", {
-        className: "fas fa-image mt-0.5"
-      }), /*#__PURE__*/React.createElement("span", null, "支持格式：jpg / png / jpeg；宽高比 1:1；大小 ≤ 1M；尺寸 108×108 ≤ 尺寸 ≤ 108×108")), !loadDefaultInfo && /*#__PURE__*/React.createElement("div", {
+        className: "fas fa-database mt-0.5"
+      }), /*#__PURE__*/React.createElement("span", null, "产品主图仅从创意资产库读取；资产规格：jpg / png / jpeg，宽高比 1:1，大小 ≤ 1M，尺寸 108×108。")), !loadDefaultInfo && /*#__PURE__*/React.createElement("div", {
         className: "text-xs text-gray-400 mt-1.5"
-      }, "已选择多个营销产品，不读取商品默认主图，可按需自定义上传。")), /*#__PURE__*/React.createElement("div", {
+      }, "已选择多个营销产品，不读取商品默认主图，请从创意资产库选择产品主图。")), /*#__PURE__*/React.createElement("div", {
         className: "mb-3"
       }, /*#__PURE__*/React.createElement("div", {
         className: "flex items-center gap-1.5 mb-2"
@@ -4141,7 +4094,98 @@ function App() {
     copyLibrary: MOCK.copyLibrary,
     copyPackages: MOCK.copyPackages,
     channel: "toutiao"
-  }), showCreativeCompModal && /*#__PURE__*/React.createElement("div", {
+  }), showProductImageAssetModal && (() => {
+    const productImageAssets = creativeAssets.filter(asset => asset.channel === 'toutiao' && asset.type === 'product_image');
+    const targetInfo = productInfoMap[productImageAssetTarget] || {};
+    const currentImages = targetInfo.images || [];
+    const maxCustomImages = useDefaultProductInfo ? 9 : 10;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "modal-overlay",
+      onClick: () => setShowProductImageAssetModal(false)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "modal-content w-full max-w-3xl",
+      onClick: e => e.stopPropagation()
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-between p-4 border-b"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+      className: "text-lg font-bold"
+    }, "选择产品主图（创意资产库）"), /*#__PURE__*/React.createElement("p", {
+      className: "text-xs text-gray-500 mt-1"
+    }, "仅展示头条渠道的“产品主图”资产，最多选择 ", maxCustomImages, " 张自定义主图。")), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setShowProductImageAssetModal(false),
+      className: "text-gray-400 hover:text-gray-600"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-times"
+    }))), /*#__PURE__*/React.createElement("div", {
+      className: "overflow-y-auto p-4",
+      style: {
+        maxHeight: '58vh'
+      }
+    }, productImageAssets.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      className: "py-16 text-center text-gray-400"
+    }, /*#__PURE__*/React.createElement("i", {
+      className: "far fa-images text-4xl mb-3"
+    }), /*#__PURE__*/React.createElement("p", {
+      className: "text-sm text-gray-500"
+    }, "暂无头条产品主图资产"), /*#__PURE__*/React.createElement("p", {
+      className: "text-xs mt-1"
+    }, "请先前往左侧“创意资产”菜单添加。")) : /*#__PURE__*/React.createElement("div", {
+      className: "grid grid-cols-2 md:grid-cols-4 gap-3"
+    }, productImageAssets.map(asset => {
+      const checked = pendingProductImageAssetIds.includes(asset.id);
+      return /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        key: asset.id,
+        onClick: () => {
+          setPendingProductImageAssetIds(prev => {
+            if (prev.includes(asset.id)) return prev.filter(id => id !== asset.id);
+            if (prev.length >= maxCustomImages) {
+              notify(`产品主图最多选择 ${maxCustomImages} 张资产`, 'error');
+              return prev;
+            }
+            return [...prev, asset.id];
+          });
+        },
+        className: `relative text-left border rounded-lg p-2 transition ${checked ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-200' : 'border-gray-200 hover:border-blue-300'}`
+      }, /*#__PURE__*/React.createElement("img", {
+        src: asset.thumb,
+        alt: asset.name,
+        className: "w-full aspect-square object-cover rounded-md bg-gray-50"
+      }), /*#__PURE__*/React.createElement("div", {
+        className: "mt-2 text-xs font-medium text-gray-700 truncate",
+        title: asset.name
+      }, asset.name), checked && /*#__PURE__*/React.createElement("span", {
+        className: "absolute top-3 right-3 w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs"
+      }, /*#__PURE__*/React.createElement("i", {
+        className: "fas fa-check"
+      })));
+    }))), /*#__PURE__*/React.createElement("div", {
+      className: "p-4 border-t flex items-center justify-between"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-sm text-gray-500"
+    }, "已选 ", pendingProductImageAssetIds.length, "/", maxCustomImages), /*#__PURE__*/React.createElement("div", {
+      className: "flex gap-2"
+    }, /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      onClick: () => setPendingProductImageAssetIds([]),
+      className: "btn-secondary"
+    }, "清空"), /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      onClick: () => {
+        const selectedImages = pendingProductImageAssetIds.map(id => productImageAssets.find(asset => asset.id === id)).filter(Boolean).map(asset => asset.thumb);
+        setProductInfoMap(prev => ({
+          ...prev,
+          [productImageAssetTarget]: {
+            ...(prev[productImageAssetTarget] || {}),
+            images: selectedImages
+          }
+        }));
+        setShowProductImageAssetModal(false);
+        notify('产品主图已从创意资产库更新', 'success');
+      },
+      className: "btn-primary"
+    }, "确认选择")))));
+  })(), showCreativeCompModal && /*#__PURE__*/React.createElement("div", {
     className: "modal-overlay",
     onClick: () => setShowCreativeCompModal(false)
   }, /*#__PURE__*/React.createElement("div", {

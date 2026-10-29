@@ -501,7 +501,7 @@
     </div>
 <!-- 视图：品牌形象 -->
     <div id="view-creative-assets" style="display:none;padding:32px 24px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div>
           <h2 style="font-size:24px;font-weight:bold;color:#111827;margin:0;">创意资产</h2>
         </div>
@@ -510,6 +510,14 @@
             <i class="fas fa-plus"></i> 添加
           </button>
         </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:14px 16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">
+        <span style="font-size:14px;font-weight:500;color:#374151;">渠道类型</span>
+        <select id="creative-asset-channel-filter" onchange="renderBrandImageList()" style="min-width:150px;padding:8px 32px 8px 12px;border:1px solid #d1d5db;border-radius:6px;background:white;font-size:14px;color:#374151;">
+          <option value="">全部渠道</option>
+          <option value="gdt">广点通</option>
+          <option value="toutiao">头条</option>
+        </select>
       </div>
       <!-- 品牌形象列表 -->
       <div id="brand-image-list" style="display:block;"></div>
@@ -526,10 +534,24 @@
             <button onclick="closeBrandImageModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9ca3af;line-height:1;padding:0 4px;">×</button>
           </div>
           <div style="padding:24px;overflow-y:auto;flex:1;">
+            <!-- 渠道类型 -->
+            <div style="margin-bottom:20px;">
+              <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 渠道类型</div>
+              <div style="display:flex;gap:20px;">
+                <label style="display:flex;align-items:center;cursor:pointer;gap:6px;">
+                  <input type="radio" name="asset-channel" value="gdt" checked onchange="onAssetChannelChange()">
+                  <span style="font-size:14px;">广点通</span>
+                </label>
+                <label style="display:flex;align-items:center;cursor:pointer;gap:6px;">
+                  <input type="radio" name="asset-channel" value="toutiao" onchange="onAssetChannelChange()">
+                  <span style="font-size:14px;">头条</span>
+                </label>
+              </div>
+            </div>
             <!-- 资产类型 -->
             <div style="margin-bottom:20px;">
               <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;">资产类型</div>
-              <div style="display:flex;gap:20px;">
+              <div style="display:flex;gap:20px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;cursor:pointer;gap:6px;">
                   <input type="radio" name="asset-type" value="brand" checked onchange="onAssetTypeChange()">
                   <span style="font-size:14px;">品牌形象-自定义</span>
@@ -537,6 +559,10 @@
                 <label style="display:flex;align-items:center;cursor:pointer;gap:6px;">
                   <input type="radio" name="asset-type" value="component" onchange="onAssetTypeChange()">
                   <span style="font-size:14px;">营销组件-浮层卡片</span>
+                </label>
+                <label id="asset-type-product-image-option" style="display:none;align-items:center;cursor:pointer;gap:6px;">
+                  <input type="radio" name="asset-type" value="product_image" onchange="onAssetTypeChange()">
+                  <span style="font-size:14px;">产品主图</span>
                 </label>
               </div>
             </div>
@@ -563,6 +589,27 @@
                   <input type="text" id="bi-name-input" placeholder="请输入名称（20字以内）" maxlength="20" oninput="document.getElementById('bi-name-count').textContent=this.value.length+'/20'"
                     style="width:100%;padding:9px 60px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
                   <span id="bi-name-count" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:#9ca3af;">0/20</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 头条产品主图区域 -->
+            <div id="bi-product-image-section" style="display:none;">
+              <div style="margin-bottom:20px;">
+                <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 产品主图</div>
+                <button type="button" onclick="triggerBiFileInput()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:white;border:1px dashed #d1d5db;border-radius:6px;cursor:pointer;font-size:14px;color:#374151;">
+                  <i class="fas fa-plus" style="color:#9ca3af;"></i> 添加图片
+                </button>
+                <div style="margin-top:8px;font-size:13px;color:#6b7280;line-height:1.7;">
+                  支持 jpg、png、jpeg 等图片格式；宽高比 1:1；大小 ≤ 1M；尺寸 108×108。
+                </div>
+                <div id="bi-preview-area-3" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;"></div>
+              </div>
+              <div style="margin-bottom:12px;">
+                <div style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px;"><span style="color:red">*</span> 名称</div>
+                <div style="position:relative;">
+                  <input type="text" id="pi-name-input" placeholder="请输入产品主图名称（20字以内）" maxlength="20" oninput="document.getElementById('pi-name-count').textContent=this.value.length+'/20'" style="width:100%;padding:9px 60px 9px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
+                  <span id="pi-name-count" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:#9ca3af;">0/20</span>
                 </div>
               </div>
             </div>
@@ -697,7 +744,7 @@
 (function() {
   // 版本自校验：页面版本与 localStorage 不一致时强制刷新一次，绕过 CDN/浏览器对 index.html 的缓存
   (function() {
-    var PAGE_VERSION = '20260928b';
+    var PAGE_VERSION = '20261029a';
     try {
       if (localStorage.getItem('page_version') !== PAGE_VERSION) {
         localStorage.setItem('page_version', PAGE_VERSION);
@@ -2490,11 +2537,23 @@
   var biSelectedFiles = [];
   var editingBrandImageId = null;
 
-  // 资产类型切换
+  // 渠道与资产类型切换
+  window.onAssetChannelChange = function() {
+    var channel = (document.querySelector('input[name="asset-channel"]:checked') || {}).value || 'gdt';
+    var productOption = document.getElementById('asset-type-product-image-option');
+    if (productOption) productOption.style.display = channel === 'toutiao' ? 'flex' : 'none';
+    var checkedType = (document.querySelector('input[name="asset-type"]:checked') || {}).value;
+    if (channel !== 'toutiao' && checkedType === 'product_image') {
+      var brandRadio = document.querySelector('input[name="asset-type"][value="brand"]');
+      if (brandRadio) brandRadio.checked = true;
+    }
+    window.onAssetTypeChange();
+  };
   window.onAssetTypeChange = function() {
-    var isBrand = document.querySelector('input[name="asset-type"]:checked').value === 'brand';
-    document.getElementById('bi-brand-section').style.display = isBrand ? 'block' : 'none';
-    document.getElementById('bi-component-section').style.display = isBrand ? 'none' : 'block';
+    var type = (document.querySelector('input[name="asset-type"]:checked') || {}).value || 'brand';
+    document.getElementById('bi-brand-section').style.display = type === 'brand' ? 'block' : 'none';
+    document.getElementById('bi-component-section').style.display = type === 'component' ? 'block' : 'none';
+    document.getElementById('bi-product-image-section').style.display = type === 'product_image' ? 'block' : 'none';
     var titleEl = document.getElementById('bi-modal-title');
     if (titleEl) titleEl.textContent = editingBrandImageId ? '编辑创意资产' : '添加创意资产';
   };
@@ -2503,28 +2562,40 @@
     var listEl = document.getElementById('brand-image-list');
     var emptyEl = document.getElementById('brand-image-empty');
     if (!listEl) return;
-    if (brandImages.length === 0) {
+    var channelFilter = (document.getElementById('creative-asset-channel-filter') || {}).value || '';
+    var displayAssets = brandImages.filter(function(asset) {
+      var channel = asset.channel || 'gdt';
+      return !channelFilter || channel === channelFilter;
+    });
+    if (displayAssets.length === 0) {
       listEl.innerHTML = '';
       if (emptyEl) emptyEl.style.display = 'block';
       return;
     }
     if (emptyEl) emptyEl.style.display = 'none';
-    var typeLabel = function(bi) { return bi.type === 'component' ? '📦 营销组件' : '👑 品牌形象'; };
+    var typeLabel = function(bi) {
+      if (bi.type === 'component') return '📦 营销组件';
+      if (bi.type === 'product_image') return '🖼️ 产品主图';
+      return '👑 品牌形象';
+    };
+    var channelLabel = function(bi) { return (bi.channel || 'gdt') === 'toutiao' ? '头条' : '广点通'; };
     var html = '';
     html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px 8px 0 0;font-size:13px;font-weight:600;color:#374151;">' +
       '<div style="width:48px;flex-shrink:0;text-align:center;">序号</div>' +
       '<div style="width:48px;flex-shrink:0;text-align:center;">缩略图</div>' +
+      '<div style="width:80px;flex-shrink:0;">渠道类型</div>' +
       '<div style="width:120px;flex-shrink:0;">资产类型</div>' +
       '<div style="flex:1;min-width:0;">名称</div>' +
       '<div style="width:140px;flex-shrink:0;text-align:right;">操作</div>' +
     '</div>';
-    brandImages.forEach(function(bi, idx) {
+    displayAssets.forEach(function(bi, idx) {
       html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #e5e7eb;border-top:none;background:white;">' +
         '<div style="width:48px;flex-shrink:0;text-align:center;font-size:14px;color:#6b7280;">' + (idx + 1) + '</div>' +
         '<div style="width:48px;height:48px;flex-shrink:0;border-radius:6px;overflow:hidden;background:#f9fafb;display:flex;align-items:center;justify-content:center;">' +
           '<img src="' + (bi.thumb || '') + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" style="width:100%;height:100%;object-fit:cover;">' +
           '<div style="display:none;font-size:20px;color:#d1d5db;">👑</div>' +
         '</div>' +
+        '<div style="width:80px;flex-shrink:0;font-size:13px;color:#374151;">' + channelLabel(bi) + '</div>' +
         '<div style="width:120px;flex-shrink:0;font-size:12px;color:#9ca3af;">' + typeLabel(bi) + '</div>' +
         '<div style="flex:1;min-width:0;font-size:14px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(bi.name || bi.title || '') + '">' + escapeHtml(bi.name || bi.title || '') + '</div>' +
         '<div style="width:140px;flex-shrink:0;display:flex;gap:8px;justify-content:flex-end;">' +
@@ -2549,12 +2620,15 @@
   function getDefaultBrandImages() {
     return [
       // 品牌形象（type=brand）：名称 + 缩略图
-      { id: 'ex_bi_1', type: 'brand', name: '品牌形象-夏季大促', thumb: makeThumb('#3b82f6', '形象A') },
-      { id: 'ex_bi_2', type: 'brand', name: '品牌形象-会员日', thumb: makeThumb('#10b981', '形象B') },
-      { id: 'ex_bi_3', type: 'brand', name: '品牌形象-新品首发', thumb: makeThumb('#f59e0b', '形象C') },
+      { id: 'ex_bi_1', channel: 'gdt', type: 'brand', name: '品牌形象-夏季大促', thumb: makeThumb('#3b82f6', '形象A') },
+      { id: 'ex_bi_2', channel: 'gdt', type: 'brand', name: '品牌形象-会员日', thumb: makeThumb('#10b981', '形象B') },
+      { id: 'ex_bi_3', channel: 'gdt', type: 'brand', name: '品牌形象-新品首发', thumb: makeThumb('#f59e0b', '形象C') },
       // 营销组件（type=component）：按钮文案 + 缩略图
-      { id: 'ex_mc_1', type: 'component', title: '立即领取-示例', desc: '限时领取福利', btnText: '立即领取', thumb: makeThumb('#ef4444', '领取') },
-      { id: 'ex_mc_2', type: 'component', title: '查看详情-示例', desc: '了解更多产品', btnText: '查看详情', thumb: makeThumb('#8b5cf6', '详情') }
+      { id: 'ex_mc_1', channel: 'gdt', type: 'component', title: '立即领取-示例', desc: '限时领取福利', btnText: '立即领取', thumb: makeThumb('#ef4444', '领取') },
+      { id: 'ex_mc_2', channel: 'gdt', type: 'component', title: '查看详情-示例', desc: '了解更多产品', btnText: '查看详情', thumb: makeThumb('#8b5cf6', '详情') },
+      // 头条产品主图（type=product_image）
+      { id: 'ex_pi_1', channel: 'toutiao', type: 'product_image', name: '头条产品主图-套餐A', thumb: makeThumb('#2563eb', '套餐A') },
+      { id: 'ex_pi_2', channel: 'toutiao', type: 'product_image', name: '头条产品主图-套餐B', thumb: makeThumb('#7c3aed', '套餐B') }
     ];
   }
 
@@ -2577,12 +2651,20 @@
     if (btnSelect) btnSelect.value = '';
     var previewArea2 = document.getElementById('bi-preview-area-2');
     if (previewArea2) previewArea2.innerHTML = '';
+    var previewArea3 = document.getElementById('bi-preview-area-3');
+    if (previewArea3) previewArea3.innerHTML = '';
+    var productNameInput = document.getElementById('pi-name-input');
+    if (productNameInput) productNameInput.value = '';
+    var productNameCount = document.getElementById('pi-name-count');
+    if (productNameCount) productNameCount.textContent = '0/20';
     if (titleInput) document.getElementById('mc-title-count').textContent = '0/10';
     if (descInput) document.getElementById('mc-desc-count').textContent = '0/14';
-    // 默认品牌形象
+    // 默认广点通品牌形象
+    var gdtRadio = document.querySelector('input[name="asset-channel"][value="gdt"]');
+    if (gdtRadio) gdtRadio.checked = true;
     var brandRadio = document.querySelector('input[name="asset-type"][value="brand"]');
     if (brandRadio) brandRadio.checked = true;
-    window.onAssetTypeChange();
+    window.onAssetChannelChange();
     var modal = document.getElementById('brand-image-modal');
     if (modal) modal.style.display = 'flex';
     var titleEl = document.getElementById('bi-modal-title');
@@ -2592,6 +2674,9 @@
     if (id) {
       var found = brandImages.find(function(b) { return b.id === id; });
       if (found) {
+        var foundChannelRadio = document.querySelector('input[name="asset-channel"][value="' + (found.channel || 'gdt') + '"]');
+        if (foundChannelRadio) foundChannelRadio.checked = true;
+        window.onAssetChannelChange();
         if (found.type === 'component') {
           var compRadio = document.querySelector('input[name="asset-type"][value="component"]');
           if (compRadio) compRadio.checked = true;
@@ -2601,6 +2686,12 @@
           if (btnSelect) btnSelect.value = found.btnText || '';
           if (titleInput) document.getElementById('mc-title-count').textContent = (found.title || '').length + '/10';
           if (descInput) document.getElementById('mc-desc-count').textContent = (found.desc || '').length + '/14';
+        } else if (found.type === 'product_image') {
+          var productRadio = document.querySelector('input[name="asset-type"][value="product_image"]');
+          if (productRadio) productRadio.checked = true;
+          window.onAssetTypeChange();
+          if (productNameInput) productNameInput.value = found.name || '';
+          if (productNameCount) productNameCount.textContent = (found.name || '').length + '/20';
         } else {
           if (nameInput) nameInput.value = found.name || '';
           if (nameCount) nameCount.textContent = (found.name || '').length + '/20';
@@ -2617,9 +2708,11 @@
 
   window.triggerBiFileInput = function() { document.getElementById('bi-file-input').click(); };
   window.onBiFilesSelected = function(e) {
-    var isBrand = document.querySelector('input[name="asset-type"]:checked').value === 'brand';
-    var maxSize = isBrand ? 50 * 1024 : 400 * 1024;
-    var sizeLabel = isBrand ? '50KB' : '400KB';
+    var assetType = document.querySelector('input[name="asset-type"]:checked').value;
+    var isBrand = assetType === 'brand';
+    var isProductImage = assetType === 'product_image';
+    var maxSize = isProductImage ? 1024 * 1024 : (isBrand ? 50 * 1024 : 400 * 1024);
+    var sizeLabel = isProductImage ? '1M' : (isBrand ? '50KB' : '400KB');
     var files = e.target.files;
     if (!files.length) return;
     for (var i = 0; i < files.length; i++) {
@@ -2628,20 +2721,34 @@
       var ext = f.name.split('.').pop().toLowerCase();
       if (!['jpg', 'jpeg', 'png'].includes(ext)) { alert(f.name + ' 格式不支持，仅支持jpg和png'); continue; }
       var reader = new FileReader();
-      reader.onload = (function(file) {
+      reader.onload = (function(file, validateProductImage) {
         return function(ev) {
-          biSelectedFiles.push({ name: file.name, dataUrl: ev.target.result });
-          renderBiPreview();
+          var dataUrl = ev.target.result;
+          if (!validateProductImage) {
+            biSelectedFiles.push({ name: file.name, dataUrl: dataUrl });
+            renderBiPreview();
+            return;
+          }
+          var img = new Image();
+          img.onload = function() {
+            if (Math.abs(img.naturalWidth - img.naturalHeight) > 1) { alert(file.name + ' 宽高比必须为 1:1'); return; }
+            if (img.naturalWidth !== 108 || img.naturalHeight !== 108) { alert(file.name + ' 尺寸必须为 108×108'); return; }
+            biSelectedFiles.push({ name: file.name, dataUrl: dataUrl });
+            renderBiPreview();
+          };
+          img.onerror = function() { alert(file.name + ' 图片读取失败'); };
+          img.src = dataUrl;
         };
-      })(f);
+      })(f, isProductImage);
       reader.readAsDataURL(f);
     }
     e.target.value = '';
   };
 
   function renderBiPreview() {
-    var isBrand = document.querySelector('input[name="asset-type"]:checked').value === 'brand';
-    var area = document.getElementById(isBrand ? 'bi-preview-area' : 'bi-preview-area-2');
+    var assetType = document.querySelector('input[name="asset-type"]:checked').value;
+    var areaId = assetType === 'brand' ? 'bi-preview-area' : (assetType === 'product_image' ? 'bi-preview-area-3' : 'bi-preview-area-2');
+    var area = document.getElementById(areaId);
     if (!area) return;
     var html = '';
     biSelectedFiles.forEach(function(f, idx) {
@@ -2657,9 +2764,35 @@
   window.onBiBatchSelect = function() { alert('批量选择账号功能（原型）'); };
 
   window.saveBrandImages = function() {
-    var isBrand = document.querySelector('input[name="asset-type"]:checked').value === 'brand';
+    var channel = (document.querySelector('input[name="asset-channel"]:checked') || {}).value || 'gdt';
+    var assetType = document.querySelector('input[name="asset-type"]:checked').value;
+    var isBrand = assetType === 'brand';
 
-    if (isBrand) {
+    if (assetType === 'product_image') {
+      var productImageName = document.getElementById('pi-name-input').value.trim();
+      if (channel !== 'toutiao') { alert('产品主图仅支持头条渠道'); return; }
+      if (!productImageName) { alert('请输入产品主图名称'); return; }
+      if (biSelectedFiles.length === 0 && !editingBrandImageId) { alert('请添加产品主图'); return; }
+      if (editingBrandImageId) {
+        var productImageIdx = brandImages.findIndex(function(b) { return b.id === editingBrandImageId; });
+        if (productImageIdx >= 0) {
+          if (biSelectedFiles.length > 0) brandImages[productImageIdx].thumb = biSelectedFiles[0].dataUrl;
+          brandImages[productImageIdx].name = productImageName;
+          brandImages[productImageIdx].type = 'product_image';
+          brandImages[productImageIdx].channel = 'toutiao';
+        }
+      } else {
+        biSelectedFiles.forEach(function(f) {
+          brandImages.push({
+            id: 'pi_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            channel: 'toutiao',
+            type: 'product_image',
+            name: productImageName,
+            thumb: f.dataUrl
+          });
+        });
+      }
+    } else if (isBrand) {
       // 品牌形象
       var name = document.getElementById('bi-name-input').value.trim();
       if (!name) { alert('请输入名称'); return; }
@@ -2671,11 +2804,13 @@
           if (biSelectedFiles.length > 0) brandImages[idx].thumb = biSelectedFiles[0].dataUrl;
           brandImages[idx].name = name;
           brandImages[idx].type = 'brand';
+          brandImages[idx].channel = channel;
         }
       } else {
         biSelectedFiles.forEach(function(f) {
           brandImages.push({
             id: 'bi_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            channel: channel,
             name: name,
             thumb: f.dataUrl,
             type: 'brand'
@@ -2700,11 +2835,13 @@
           brandImages[idx].desc = desc;
           brandImages[idx].btnText = btnText;
           brandImages[idx].type = 'component';
+          brandImages[idx].channel = channel;
         }
       } else {
         biSelectedFiles.forEach(function(f) {
           brandImages.push({
             id: 'bi_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            channel: channel,
             title: title,
             desc: desc,
             btnText: btnText,
