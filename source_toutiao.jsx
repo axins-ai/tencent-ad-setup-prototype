@@ -597,8 +597,8 @@ function App() {
   const [modalTargetAccount, setModalTargetAccount] = useState(null);
   const openSharedTgtModal = () => { setModalSelectedIds([...selectedTargetingPackages]); setModalTargetAccount(null); setShowTgtPkgModal(true); };
   const openPerAccountTgtModal = (accountId) => { setModalSelectedIds([...(perAccountTgtPkgs[accountId] || [])]); setModalTargetAccount(accountId); setShowTgtPkgModal(true); };
-  // 单选：一个任务只能选择一个定向包
-  const toggleModalTp = (tpId) => { setModalSelectedIds(prev => (prev.length === 1 && prev[0] === tpId) ? [] : [tpId]); };
+  // 多选：一个任务可组合多个定向包
+  const toggleModalTp = (tpId) => { setModalSelectedIds(prev => prev.includes(tpId) ? prev.filter(id => id !== tpId) : [...prev, tpId]); };
   const confirmTgtPkgModal = () => { if (modalTargetAccount === null) { setSelectedTargetingPackages(modalSelectedIds); } else { setPerAccountTgtPkgs(prev => ({ ...prev, [modalTargetAccount]: modalSelectedIds })); } setShowTgtPkgModal(false); };
   const handleNewTgtPkg = () => { try { window.parent.postMessage({ type: 'GOTO_TARGETING_PACKAGES' }, '*'); } catch (e) {} };
   const handleRefreshTgtPkgs = () => { try { const raw = localStorage.getItem('ad_targeting_packages'); if (raw) setUserTgtPkgs(JSON.parse(raw)); notify('定向包列表已刷新', 'success'); } catch (e) { notify('刷新定向包列表失败', 'error'); } };
@@ -720,6 +720,8 @@ function App() {
   const [selectedCopies, setSelectedCopies] = useState([]);
   const [videoStrategy, setVideoStrategy] = useState('average');
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 素材分配策略
+  const [buildAdsByMaterialCount, setBuildAdsByMaterialCount] = useState(true);
+  const [batchCrossItems, setBatchCrossItems] = useState(['account']); // account | targeting | product
   const [hoverStrategy, setHoverStrategy] = useState(null); // 悬停展示策略注释
   // 截图样式广告配置：账户分配规则 / 广告组配置 / 广告组数据
   const [accountAllocMode, setAccountAllocMode] = useState('all'); // 'all'=全账户复用, 'average'=平均分配
@@ -1015,7 +1017,17 @@ function App() {
     // 平均分配：素材在项目间均分 → 总广告数 = 每项目广告数 = 已选素材数 ÷ 单广告素材数
     // 复制分配：每个项目独立使用全部素材 → 项目数 × (素材数 ÷ 单广告素材数)
     let totalCreatives = 0;
-    if (composeStrategy === 'average') {
+    if (!buildAdsByMaterialCount) {
+      totalCreatives = selectedAccountIds.reduce((sum, accountId) => {
+        const accountFactor = batchCrossItems.includes('account') ? 1 : 1;
+        const targetingFactor = batchCrossItems.includes('targeting') ? tpFor(accountId) : 1;
+        const productIds = productAllocMode === 'per_account'
+          ? (Array.isArray(perAccountProduct[accountId]) ? perAccountProduct[accountId] : (perAccountProduct[accountId] ? [perAccountProduct[accountId]] : []))
+          : specificProducts;
+        const productFactor = batchCrossItems.includes('product') ? Math.max(productIds.length, 1) : 1;
+        return sum + accountFactor * targetingFactor * productFactor;
+      }, 0);
+    } else if (composeStrategy === 'average') {
       totalCreatives = creativesPerUnit;
     } else {
       totalCreatives = totalUnits * creativesPerUnit;
@@ -1158,6 +1170,8 @@ function App() {
         if (data.copies) setSelectedCopies(data.copies);
         if (data.composeRule) setComposeRule(data.composeRule);
         if (data.composeStrategy) setComposeStrategy(data.composeStrategy);
+        if (typeof data.buildAdsByMaterialCount === 'boolean') setBuildAdsByMaterialCount(data.buildAdsByMaterialCount);
+        if (Array.isArray(data.batchCrossItems)) setBatchCrossItems(data.batchCrossItems);
         if (data.marketingObjective) setMarketingObjective(data.marketingObjective);
         if (data.marketingScene) setMarketingScene(data.marketingScene);
         if (data.productAllocMode) setProductAllocMode(data.productAllocMode);
@@ -1239,7 +1253,7 @@ function App() {
         bidAmount, bidStrategy, dailyBudget,
         投放日期类型, 自定义开始日期, 自定义结束日期,
         selectedMaterials, selectedCopies,
-        composeRule, composeStrategy,
+        composeRule, composeStrategy, buildAdsByMaterialCount, batchCrossItems,
         marketingObjective, marketingScene, productAllocMode, specificProduct, specificProducts, perAccountProduct,
         productInfoAllocMode, productInfoMap, sellingPointsInputs,
         targetOptType, deepOptType, ctaList, smartGen, sourceText, creativeName,
@@ -1999,7 +2013,7 @@ function App() {
               </div>
               {tgtAllocMode === 'shared' && (
                 <div>
-                  <div className="block text-sm font-medium text-gray-700 mb-2">选择定向包（一个任务仅能选择一个定向包）</div>
+                  <div className="block text-sm font-medium text-gray-700 mb-2">选择定向包（支持多选）</div>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {selectedTargetingPackages.map(tpId => {
                       const tp = MOCK.targetingPackages.find(t => t.id === tpId) || userTgtPkgs.find(t => t.id === tpId);
@@ -2716,8 +2730,15 @@ function App() {
                   )}
                 </div>
 
-                {/* 素材分配策略 */}
-                <div className="pt-2 mb-6">
+                {/* 是否按素材数建广告 */}
+                <div className="flex items-center gap-3 pt-2">
+                  <span className="w-28 flex-shrink-0 text-sm font-medium text-gray-700">按素材数建广告</span>
+                  <label className="flex items-center cursor-pointer"><input type="radio" name="buildAdsByMaterialCount" checked={buildAdsByMaterialCount} onChange={() => setBuildAdsByMaterialCount(true)} className="mr-2" /><span className="text-sm">是</span></label>
+                  <label className="flex items-center cursor-pointer"><input type="radio" name="buildAdsByMaterialCount" checked={!buildAdsByMaterialCount} onChange={() => setBuildAdsByMaterialCount(false)} className="mr-2" /><span className="text-sm">否</span></label>
+                </div>
+
+                {/* 素材分配策略：仅按素材数建广告时展示 */}
+                {buildAdsByMaterialCount ? <div className="pt-2 mb-6">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-sm font-medium text-gray-700">素材分配策略</span>
                     <div className="flex gap-3">
@@ -2745,7 +2766,12 @@ function App() {
                       </button>
                     </div>
                   </div>
-                </div>
+                </div> : <div className="flex items-center gap-3 pt-2 mb-6">
+                  <span className="w-28 flex-shrink-0 text-sm font-medium text-gray-700">批次叉乘项</span>
+                  <div className="flex items-center gap-4">
+                    {[['account','账户'],['targeting','定向包'],['product','商品']].map(([value, label]) => <label key={value} className="flex items-center cursor-pointer"><input type="checkbox" checked={batchCrossItems.includes(value)} onChange={() => setBatchCrossItems(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value])} className="w-4 h-4 mr-2 text-blue-600 rounded" /><span className="text-sm">{label}</span></label>)}
+                  </div>
+                </div>}
 
                 {/* 预估可生成广告数 */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-6">
@@ -2754,7 +2780,7 @@ function App() {
                     const s = getBuildSummary();
                     const total = s.totalCreatives;
                     const over = s.overLimit || s.overUnit;
-                    const isAvg = composeStrategy === 'average';
+                    const isAvg = buildAdsByMaterialCount && composeStrategy === 'average';
                     return (
                       <div>
                         <p className={`text-lg font-bold ${over ? 'text-red-600' : 'text-blue-600'}`}>
@@ -2762,9 +2788,11 @@ function App() {
                           {s.overLimit && <span className="text-xs font-normal text-red-500 ml-2">（已超限，单次任务上限 1000 个）</span>}
                           {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单项目超限，上限 100 个）</span>}
                           <span className="text-xs font-normal text-gray-500 ml-2">
-                            {isAvg
-                              ? `已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`
-                              : `已选账户数 ${s.accountCount} × 已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`}
+                            {!buildAdsByMaterialCount
+                              ? `各账户独立计算：${batchCrossItems.length > 0 ? batchCrossItems.map(item => ({ account:'账户', targeting:'定向包', product:'商品' }[item])).join(' × ') : '未选择叉乘项'}`
+                              : (isAvg
+                                ? `已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`
+                                : `已选账户数 ${s.accountCount} × 已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`)}
                           </span>
                         </p>
                         {s.overUnit && (
@@ -2774,9 +2802,7 @@ function App() {
                     );
                   })()}
                   <div className="text-xs text-gray-400 mt-1 leading-relaxed">
-                    <div>规则：默认根据素材确定广告数，文案选取方式为顺序选取</div>
-                    <div>复制分配：预估可生成广告数 = 已选账户数 × 已选素材数 ÷ 单广告素材数；</div>
-                    <div>平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数</div>
+                    {buildAdsByMaterialCount ? <><div>规则：默认根据素材确定广告数，文案选取方式为顺序选取</div><div>复制分配：预估可生成广告数 = 已选账户数 × 已选素材数 ÷ 单广告素材数；</div><div>平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数</div></> : <><div>规则：每个账户独立计算广告数，再汇总为任务预估广告数。</div><div>单账户广告数 = 当前账户所选叉乘项数量相乘；未勾选的维度按 1 计算。</div></>}
                   </div>
                 </div>
               </div>
