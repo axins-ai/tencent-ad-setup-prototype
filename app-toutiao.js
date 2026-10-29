@@ -1081,6 +1081,8 @@ function App() {
   const [genderSelection, setGenderSelection] = useState('unlimited'); // 'unlimited' | 'male' | 'female'
   // 自定义人群（按账户分别配置）
   const [accountAudienceSettings, setAccountAudienceSettings] = useState({}); // { [accountId]: { mode: 'unlimited'|'target'|'exclude', targetList: [], excludeList: [] } }
+  // 素材补充方式：AIGC 动态创意默认关闭
+  const [aigcDynamicCreative, setAigcDynamicCreative] = useState(false);
   // 人群包列表（可刷新）
   const [audiencePackageList, setAudiencePackageList] = useState([...MOCK.customAudiences]);
   const [excludeAudiencePackageList, setExcludeAudiencePackageList] = useState([...MOCK.excludeConversions]);
@@ -1694,6 +1696,7 @@ function App() {
             });
           }
         }
+        if (typeof data.aigcDynamicCreative === 'boolean') setAigcDynamicCreative(data.aigcDynamicCreative);
         if (data.targetOptType !== undefined) setTargetOptType(data.targetOptType);
         if (data.deepOptType !== undefined) setDeepOptType(data.deepOptType);
         if (data.ctaList) setCtaList(data.ctaList);
@@ -1763,6 +1766,7 @@ function App() {
         productInfoAllocMode,
         productInfoMap,
         sellingPointsInputs,
+        aigcDynamicCreative,
         targetOptType,
         deepOptType,
         ctaList,
@@ -2745,6 +2749,24 @@ function App() {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-lock text-xs"
   }), /*#__PURE__*/React.createElement("span", null, "关闭"))), /*#__PURE__*/React.createElement("div", {
+    className: "border-t pt-4"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-base font-semibold text-gray-900 mb-3"
+  }, "素材补充方式"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 mb-5"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0"
+  }, "AIGC动态创意"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    role: "switch",
+    "aria-checked": aigcDynamicCreative,
+    onClick: () => setAigcDynamicCreative(prev => !prev),
+    className: `relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${aigcDynamicCreative ? 'bg-blue-500' : 'bg-gray-300'}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ${aigcDynamicCreative ? 'translate-x-5' : 'translate-x-0'}`
+  })), /*#__PURE__*/React.createElement("span", {
+    className: `text-sm ${aigcDynamicCreative ? 'text-blue-600' : 'text-gray-500'}`
+  }, aigcDynamicCreative ? '开启' : '关闭'))), /*#__PURE__*/React.createElement("div", {
     className: "border-t pt-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-3"
