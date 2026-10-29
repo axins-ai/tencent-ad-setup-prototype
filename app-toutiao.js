@@ -2473,7 +2473,14 @@ function App() {
     }, "没有匹配的商品") : pagedProducts.map(product => /*#__PURE__*/React.createElement("button", {
       key: product.id,
       type: "button",
-      onClick: () => setSpecificProducts(prev => prev.includes(product.id) ? prev.filter(id => id !== product.id) : [...prev, product.id]),
+      onClick: () => setSpecificProducts(prev => {
+        if (prev.includes(product.id)) return prev.filter(id => id !== product.id);
+        if (prev.length >= 10) {
+          notify('营销产品最多选择 10 个', 'error');
+          return prev;
+        }
+        return [...prev, product.id];
+      }),
       className: `w-full grid items-center px-4 py-2.5 text-left border-b border-gray-100 last:border-b-0 hover:bg-blue-50 ${specificProducts.includes(product.id) ? 'bg-blue-50' : ''}`,
       style: {
         gridTemplateColumns: '56px minmax(0,1fr) 132px 40px',
@@ -2498,7 +2505,7 @@ function App() {
       className: "w-4 h-4 text-blue-600 rounded"
     }))))), /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 bg-gray-50 text-xs text-gray-500"
-    }, /*#__PURE__*/React.createElement("span", null, "共 ", products.length, " 条 · 已选 ", specificProducts.length, " 条"), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", null, "共 ", products.length, " 条 · 已选 ", specificProducts.length, "/10"), /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-2"
     }, /*#__PURE__*/React.createElement("button", {
       type: "button",
@@ -2580,7 +2587,7 @@ function App() {
       className: "w-full h-9 pl-9 pr-3 border border-gray-300 rounded-lg bg-white text-sm leading-9 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100"
     })), /*#__PURE__*/React.createElement("span", {
       className: "px-2 py-1 rounded bg-white border border-gray-200 text-xs text-gray-500 whitespace-nowrap"
-    }, "已选 ", selectedIds.length, "/", MOCK.productLibrary.length), selectedIds.length > 0 && /*#__PURE__*/React.createElement("button", {
+    }, "已选 ", selectedIds.length, "/10"), selectedIds.length > 0 && /*#__PURE__*/React.createElement("button", {
       type: "button",
       onClick: () => setPerAccountProduct(prev => ({
         ...prev,
@@ -2600,9 +2607,17 @@ function App() {
       type: "button",
       onClick: () => setPerAccountProduct(prev => {
         const current = Array.isArray(prev[accountId]) ? prev[accountId] : prev[accountId] ? [prev[accountId]] : [];
+        if (current.includes(product.id)) return {
+          ...prev,
+          [accountId]: current.filter(id => id !== product.id)
+        };
+        if (current.length >= 10) {
+          notify('每个账户的营销产品最多选择 10 个', 'error');
+          return prev;
+        }
         return {
           ...prev,
-          [accountId]: current.includes(product.id) ? current.filter(id => id !== product.id) : [...current, product.id]
+          [accountId]: [...current, product.id]
         };
       }),
       className: `w-full grid items-center px-4 py-2.5 text-left border-b border-gray-100 last:border-b-0 hover:bg-blue-50 ${selectedIds.includes(product.id) ? 'bg-blue-50' : ''}`,
