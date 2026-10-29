@@ -758,11 +758,11 @@ function App() {
   // 来源（文本输入）
   const [sourceText, setSourceText] = useState('');
   // ===== 产品信息（按截图：名称/主图/卖点）=====
-  // shared 模式以 productId 为 key；per_account 模式以 accountId 为 key，保证每个账户独立配置
+  // 产品信息配置模式：shared=全账户共用，per_account=分账户定制
+  const [productInfoAllocMode, setProductInfoAllocMode] = useState('shared');
   const [productInfoMap, setProductInfoMap] = useState({});
   // 产品卖点输入草稿按配置 key 独立，切换账户 Tab 不串
   const [sellingPointsInputs, setSellingPointsInputs] = useState({});
-  // 产品信息 Tabs：per_account 模式记录当前激活的 accountId
   const [activeProductTab, setActiveProductTab] = useState(null);
   // 产品主图上传（点击「+」直接吊起本地文件选择；Tabs 任意时刻只渲染一个面板，共用单个 ref）
   const imageUploadRef = useRef(null);
@@ -883,14 +883,18 @@ function App() {
     const done = checks.filter(Boolean).length;
     return done === 0 ? 0 : Math.round((done / checks.length) * 100);
   })();
-  // 产品信息配置对象：shared 为单产品；per_account 为每个已选账户一套（Tab 名称显示账户 ID）
+  // 产品信息配置对象：全账户共用时取首个营销产品；分账户定制时每个账户配置一整套产品信息
   const productInfoTargets = (() => {
-    if (productAllocMode === 'shared') {
-      return specificProducts.map(productId => ({ key: productId, productId, accountId: '' }));
+    if (productInfoAllocMode === 'shared') {
+      const sharedProductId = specificProducts[0] || selectedAccountIds.map(id => {
+        const ids = Array.isArray(perAccountProduct[id]) ? perAccountProduct[id] : (perAccountProduct[id] ? [perAccountProduct[id]] : []);
+        return ids[0];
+      }).find(Boolean) || '';
+      return sharedProductId ? [{ key: 'shared', productId: sharedProductId, accountId: '' }] : [];
     }
-    return selectedAccountIds.flatMap(accountId => {
+    return selectedAccountIds.map(accountId => {
       const ids = Array.isArray(perAccountProduct[accountId]) ? perAccountProduct[accountId] : (perAccountProduct[accountId] ? [perAccountProduct[accountId]] : []);
-      return ids.map(productId => ({ key: accountId + '::' + productId, productId, accountId }));
+      return { key: 'account::' + accountId, productId: ids[0] || specificProducts[0] || '', accountId };
     });
   })();
   const validationErrors = (() => {
@@ -1167,6 +1171,7 @@ function App() {
           });
           setPerAccountProduct(migratedProducts);
         }
+        if (data.productInfoAllocMode) setProductInfoAllocMode(data.productInfoAllocMode);
         if (data.productInfoMap) {
           // 兼容旧版：per_account 的产品信息曾按 productId 存储，现迁移为每账户一份
           if (data.productAllocMode === 'per_account' && data.perAccountProduct) {
@@ -1236,7 +1241,7 @@ function App() {
         selectedMaterials, selectedCopies,
         composeRule, composeStrategy,
         marketingObjective, marketingScene, productAllocMode, specificProduct, specificProducts, perAccountProduct,
-        productInfoMap, sellingPointsInputs,
+        productInfoAllocMode, productInfoMap, sellingPointsInputs,
         targetOptType, deepOptType, ctaList, smartGen, sourceText, creativeName,
         selectedCreativeComponents,
       };
@@ -1548,8 +1553,8 @@ function App() {
               </div>
             </div>
             <div className="flex items-center gap-3 mb-5">
-              <label className="text-left text-sm font-medium text-gray-700 flex-shrink-0 whitespace-nowrap" style={{ width: '124px' }}>单项目最大广告数 <span className="text-red-500">*</span></label>
-              <input type="number" value={1} readOnly disabled className="w-24 h-10 px-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-sm cursor-not-allowed" />
+              <label className="w-28 text-left text-sm font-medium text-gray-700 flex-shrink-0 whitespace-nowrap">单项目最大广告数 <span className="text-red-500">*</span></label>
+              <input type="number" value={1} readOnly disabled className="w-24 px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-sm cursor-not-allowed" />
             </div>
 
             
@@ -2212,8 +2217,8 @@ function App() {
               </div>
 
               {/* 竞价策略：单选（稳定成本 / 最大转化） */}
-              <div className="mb-4">
-                <div className="block text-sm font-medium text-gray-700 mb-2">竞价策略</div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-28 flex-shrink-0 text-sm font-medium text-gray-700">竞价策略</div>
                 <div className="flex gap-6">
                   <label className="flex items-center cursor-pointer">
                     <input type="radio" name="bid_strategy" value="stable_cost" checked={bidStrategy === 'stable_cost'} onChange={() => setBidStrategy('stable_cost')} className="mr-2" />
@@ -2376,7 +2381,15 @@ function App() {
               </button>
             </div>
 
-            {/* 产品信息 —— 名称 / 主图 / 卖点（与其他配置项平级，不单独卡片） */}
+            {/* 产品信息 —— 全账户共用 / 分账户定制 */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <h4 className="w-28 flex-shrink-0 text-sm font-bold text-gray-900">产品信息</h4>
+                <div className="flex gap-3">
+                  <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: productInfoAllocMode === 'shared' ? '#1890ff' : '#e5e7eb', background: productInfoAllocMode === 'shared' ? '#eff6ff' : '#fff' }}><input type="radio" name="productInfoAllocMode" checked={productInfoAllocMode === 'shared'} onChange={() => { setProductInfoAllocMode('shared'); setActiveProductTab(null); }} className="w-4 h-4 mr-2 text-blue-600" /><span>全账户共用</span></label>
+                  <label className="flex items-center cursor-pointer px-4 py-2 border rounded-lg text-sm" style={{ borderColor: productInfoAllocMode === 'per_account' ? '#1890ff' : '#e5e7eb', background: productInfoAllocMode === 'per_account' ? '#eff6ff' : '#fff' }}><input type="radio" name="productInfoAllocMode" checked={productInfoAllocMode === 'per_account'} onChange={() => { setProductInfoAllocMode('per_account'); setActiveProductTab(selectedAccountIds[0] ? 'account::' + selectedAccountIds[0] : null); }} className="w-4 h-4 mr-2 text-blue-600" /><span>分账户定制</span></label>
+                </div>
+              </div>
             {(() => {
               // 每产品一套配置面板（名称/主图/卖点），单产品与多产品 Tabs 共用同一套面板
               const _renderPanel = (pid, defaultName, defaultImage, imgs, points, allImages) => {
@@ -2509,8 +2522,7 @@ function App() {
                 const _points = _pi.sellingPoints || [];
                 const _allImages = [_defaultImage, ..._imgs].filter(Boolean);
                 return (
-                  <div>
-                    <h4 className="text-sm font-bold text-gray-900 mb-4">产品信息</h4>
+                  <div className="pl-32">
                     {_renderPanel(_target.key, _defaultName, _defaultImage, _imgs, _points, _allImages)}
                   </div>
                 );
@@ -2531,10 +2543,9 @@ function App() {
               const _activePoints = _activePi.sellingPoints || [];
               const _allActiveImages = [_activeDefaultImage, ..._activeImgs].filter(Boolean);
               return (
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 mb-4">产品信息</h4>
-                  {/* Tabs：账户 ID + 状态圆点（绿=已配置完成 / 红=有缺项 / 灰=未开始） */}
-                  <div className="flex items-center gap-2 mb-4 flex-wrap" style={{ borderBottom: '1px solid #e5e7eb' }}>
+                <div className="pl-32">
+                  {/* 账户切换：每个账户独立配置一整套产品信息 */}
+                  <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
                     {_targets.map(target => {
                       const _p = productInfoMap[target.key] || {};
                       const _pImgs = _p.images || [];
@@ -2547,14 +2558,7 @@ function App() {
                           key={target.key}
                           type="button"
                           onClick={() => setActiveProductTab(target.key)}
-                          className={"px-4 py-2 text-sm transition " + (_isActive ? 'text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50')}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 6,
-                            borderRadius: _isActive ? '8px 8px 0 0' : '8px',
-                            border: '1px solid ' + (_isActive ? '#1890ff' : '#e5e7eb'),
-                            borderBottom: _isActive ? 'none' : '1px solid #e5e7eb',
-                            background: _isActive ? '#fff' : '#f5f5f5',
-                          }}
+                          className={"flex-shrink-0 min-w-36 px-3 py-2 rounded-lg border text-sm transition " + (_isActive ? 'text-blue-700 font-medium border-blue-500 bg-blue-50' : 'text-gray-600 border-gray-200 bg-white hover:border-blue-300')}
                           title={(target.accountId + ' · ' + (_tabProd ? _tabProd.name : target.productId) + ' · ' + (_done ? '已配置完成' : (_started ? '有缺项未完成' : '未开始配置')))}
                         >
                           {target.accountId}
@@ -2568,6 +2572,7 @@ function App() {
                 </div>
               );
             })()}
+            </div>
 
             {/* 创意组件 */}
             <div>
