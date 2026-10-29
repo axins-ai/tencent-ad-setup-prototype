@@ -1171,7 +1171,8 @@ function App() {
   const [videoStrategy, setVideoStrategy] = useState('average');
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 素材分配策略
   const [buildAdsByMaterialCount, setBuildAdsByMaterialCount] = useState(true);
-  const [batchCrossItems, setBatchCrossItems] = useState(['account']); // account | targeting | product
+  const [batchCrossItems, setBatchCrossItems] = useState(['account']); // account 必选；targeting / product 可选
+  const [singleBatchAdCount, setSingleBatchAdCount] = useState(1); // 单批次广告数，上限1000
   const [hoverStrategy, setHoverStrategy] = useState(null); // 悬停展示策略注释
   // 截图样式广告配置：账户分配规则 / 广告组配置 / 广告组数据
   const [accountAllocMode, setAccountAllocMode] = useState('all'); // 'all'=全账户复用, 'average'=平均分配
@@ -1488,13 +1489,14 @@ function App() {
     // 复制分配：每个项目独立使用全部素材 → 项目数 × (素材数 ÷ 单广告素材数)
     let totalCreatives = 0;
     if (!buildAdsByMaterialCount) {
-      totalCreatives = selectedAccountIds.reduce((sum, accountId) => {
-        const accountFactor = batchCrossItems.includes('account') ? 1 : 1;
+      const batchCount = selectedAccountIds.reduce((sum, accountId) => {
+        const accountFactor = 1;
         const targetingFactor = batchCrossItems.includes('targeting') ? tpFor(accountId) : 1;
         const productIds = productAllocMode === 'per_account' ? Array.isArray(perAccountProduct[accountId]) ? perAccountProduct[accountId] : perAccountProduct[accountId] ? [perAccountProduct[accountId]] : [] : specificProducts;
         const productFactor = batchCrossItems.includes('product') ? Math.max(productIds.length, 1) : 1;
         return sum + accountFactor * targetingFactor * productFactor;
       }, 0);
+      totalCreatives = batchCount * Math.max(1, Math.min(1000, parseInt(singleBatchAdCount) || 1));
     } else if (composeStrategy === 'average') {
       totalCreatives = creativesPerUnit;
     } else {
@@ -1697,7 +1699,8 @@ function App() {
         if (data.composeRule) setComposeRule(data.composeRule);
         if (data.composeStrategy) setComposeStrategy(data.composeStrategy);
         if (typeof data.buildAdsByMaterialCount === 'boolean') setBuildAdsByMaterialCount(data.buildAdsByMaterialCount);
-        if (Array.isArray(data.batchCrossItems)) setBatchCrossItems(data.batchCrossItems);
+        if (Array.isArray(data.batchCrossItems)) setBatchCrossItems(['account', ...data.batchCrossItems.filter(item => item !== 'account')]);
+        if (data.singleBatchAdCount !== undefined) setSingleBatchAdCount(Math.max(1, Math.min(1000, parseInt(data.singleBatchAdCount) || 1)));
         if (data.marketingObjective) setMarketingObjective(data.marketingObjective);
         if (data.marketingScene) setMarketingScene(data.marketingScene);
         if (data.productAllocMode) setProductAllocMode(data.productAllocMode);
@@ -1820,6 +1823,7 @@ function App() {
         composeStrategy,
         buildAdsByMaterialCount,
         batchCrossItems,
+        singleBatchAdCount,
         marketingObjective,
         marketingScene,
         productAllocMode,
@@ -3960,12 +3964,26 @@ function App() {
   }), hoverStrategy === 'average' && /*#__PURE__*/React.createElement("span", {
     className: "absolute -top-2 -right-2 whitespace-nowrap bg-blue-500 text-white text-xs rounded px-2 py-1"
   }, "素材平均分到每个账户中")))))) : /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 pt-2 mb-6"
+    className: "pt-2 mb-6 space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "w-28 flex-shrink-0 text-sm font-medium text-gray-700"
   }, "批次叉乘项"), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4"
-  }, [['account', '账户'], ['targeting', '定向包'], ['product', '商品']].map(([value, label]) => /*#__PURE__*/React.createElement("label", {
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center cursor-not-allowed"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: true,
+    readOnly: true,
+    disabled: true,
+    className: "w-4 h-4 mr-2 text-blue-600 rounded"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-gray-700"
+  }, "账户"), /*#__PURE__*/React.createElement("span", {
+    className: "ml-1 text-xs text-gray-400"
+  }, "必选")), [['targeting', '定向包'], ['product', '商品']].map(([value, label]) => /*#__PURE__*/React.createElement("label", {
     key: value,
     className: "flex items-center cursor-pointer"
   }, /*#__PURE__*/React.createElement("input", {
@@ -3976,6 +3994,20 @@ function App() {
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-sm"
   }, label))))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-28 flex-shrink-0 text-sm font-medium text-gray-700"
+  }, "单账户广告数"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "1",
+    max: "1000",
+    value: singleBatchAdCount,
+    onChange: e => setSingleBatchAdCount(e.target.value === '' ? '' : Math.max(1, Math.min(1000, parseInt(e.target.value) || 1))),
+    onBlur: () => setSingleBatchAdCount(Math.max(1, Math.min(1000, parseInt(singleBatchAdCount) || 1))),
+    className: "w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-gray-400"
+  }, "1-1000 个"))), /*#__PURE__*/React.createElement("div", {
     className: "bg-blue-50 border border-blue-200 rounded-lg p-3 mt-6"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-500 mb-1"
@@ -3992,16 +4024,16 @@ function App() {
       className: "text-xs font-normal text-red-500 ml-2"
     }, "（单项目超限，上限 100 个）"), /*#__PURE__*/React.createElement("span", {
       className: "text-xs font-normal text-gray-500 ml-2"
-    }, !buildAdsByMaterialCount ? `各账户独立计算：${batchCrossItems.length > 0 ? batchCrossItems.map(item => ({
+    }, !buildAdsByMaterialCount ? `批次数（${batchCrossItems.map(item => ({
       account: '账户',
       targeting: '定向包',
       product: '商品'
-    })[item]).join(' × ') : '未选择叉乘项'}` : isAvg ? `已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}` : `已选账户数 ${s.accountCount} × 已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`)), s.overUnit && /*#__PURE__*/React.createElement("div", {
+    })[item]).join(' × ')}）× 单批次广告数 ${Math.max(1, parseInt(singleBatchAdCount) || 1)}` : isAvg ? `已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}` : `已选账户数 ${s.accountCount} × 已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`)), s.overUnit && /*#__PURE__*/React.createElement("div", {
       className: "mt-2 text-xs text-red-500"
     }, "单个项目广告数 ", s.perUnitCreatives, " 超出上限 100 个，请调整素材 / 单广告素材数 / 项目数"));
   })(), /*#__PURE__*/React.createElement("div", {
     className: "text-xs text-gray-400 mt-1 leading-relaxed"
-  }, buildAdsByMaterialCount ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", null, "规则：默认根据素材确定广告数，文案选取方式为顺序选取"), /*#__PURE__*/React.createElement("div", null, "复制分配：预估可生成广告数 = 已选账户数 × 已选素材数 ÷ 单广告素材数；"), /*#__PURE__*/React.createElement("div", null, "平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", null, "规则：每个账户独立计算广告数，再汇总为任务预估广告数。"), /*#__PURE__*/React.createElement("div", null, "单账户广告数 = 当前账户所选叉乘项数量相乘；未勾选的维度按 1 计算。")))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, buildAdsByMaterialCount ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", null, "规则：默认根据素材确定广告数，文案选取方式为顺序选取"), /*#__PURE__*/React.createElement("div", null, "复制分配：预估可生成广告数 = 已选账户数 × 已选素材数 ÷ 单广告素材数；"), /*#__PURE__*/React.createElement("div", null, "平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", null, "规则：账户为必选叉乘项，定向包和商品为可选项。"), /*#__PURE__*/React.createElement("div", null, "预估可生成广告数 = 批次叉乘项数量相乘 × 单批次广告数；单批次广告数上限 1000。")))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 max-w-md"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-sm font-medium text-gray-700 flex-shrink-0"

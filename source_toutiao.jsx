@@ -721,7 +721,8 @@ function App() {
   const [videoStrategy, setVideoStrategy] = useState('average');
   const [composeStrategy, setComposeStrategy] = useState('copy'); // 'copy' | 'average' 素材分配策略
   const [buildAdsByMaterialCount, setBuildAdsByMaterialCount] = useState(true);
-  const [batchCrossItems, setBatchCrossItems] = useState(['account']); // account | targeting | product
+  const [batchCrossItems, setBatchCrossItems] = useState(['account']); // account 必选；targeting / product 可选
+  const [singleBatchAdCount, setSingleBatchAdCount] = useState(1); // 单批次广告数，上限1000
   const [hoverStrategy, setHoverStrategy] = useState(null); // 悬停展示策略注释
   // 截图样式广告配置：账户分配规则 / 广告组配置 / 广告组数据
   const [accountAllocMode, setAccountAllocMode] = useState('all'); // 'all'=全账户复用, 'average'=平均分配
@@ -1018,8 +1019,8 @@ function App() {
     // 复制分配：每个项目独立使用全部素材 → 项目数 × (素材数 ÷ 单广告素材数)
     let totalCreatives = 0;
     if (!buildAdsByMaterialCount) {
-      totalCreatives = selectedAccountIds.reduce((sum, accountId) => {
-        const accountFactor = batchCrossItems.includes('account') ? 1 : 1;
+      const batchCount = selectedAccountIds.reduce((sum, accountId) => {
+        const accountFactor = 1;
         const targetingFactor = batchCrossItems.includes('targeting') ? tpFor(accountId) : 1;
         const productIds = productAllocMode === 'per_account'
           ? (Array.isArray(perAccountProduct[accountId]) ? perAccountProduct[accountId] : (perAccountProduct[accountId] ? [perAccountProduct[accountId]] : []))
@@ -1027,6 +1028,7 @@ function App() {
         const productFactor = batchCrossItems.includes('product') ? Math.max(productIds.length, 1) : 1;
         return sum + accountFactor * targetingFactor * productFactor;
       }, 0);
+      totalCreatives = batchCount * Math.max(1, Math.min(1000, parseInt(singleBatchAdCount) || 1));
     } else if (composeStrategy === 'average') {
       totalCreatives = creativesPerUnit;
     } else {
@@ -1171,7 +1173,8 @@ function App() {
         if (data.composeRule) setComposeRule(data.composeRule);
         if (data.composeStrategy) setComposeStrategy(data.composeStrategy);
         if (typeof data.buildAdsByMaterialCount === 'boolean') setBuildAdsByMaterialCount(data.buildAdsByMaterialCount);
-        if (Array.isArray(data.batchCrossItems)) setBatchCrossItems(data.batchCrossItems);
+        if (Array.isArray(data.batchCrossItems)) setBatchCrossItems(['account', ...data.batchCrossItems.filter(item => item !== 'account')]);
+        if (data.singleBatchAdCount !== undefined) setSingleBatchAdCount(Math.max(1, Math.min(1000, parseInt(data.singleBatchAdCount) || 1)));
         if (data.marketingObjective) setMarketingObjective(data.marketingObjective);
         if (data.marketingScene) setMarketingScene(data.marketingScene);
         if (data.productAllocMode) setProductAllocMode(data.productAllocMode);
@@ -1253,7 +1256,7 @@ function App() {
         bidAmount, bidStrategy, dailyBudget,
         投放日期类型, 自定义开始日期, 自定义结束日期,
         selectedMaterials, selectedCopies,
-        composeRule, composeStrategy, buildAdsByMaterialCount, batchCrossItems,
+        composeRule, composeStrategy, buildAdsByMaterialCount, batchCrossItems, singleBatchAdCount,
         marketingObjective, marketingScene, productAllocMode, specificProduct, specificProducts, perAccountProduct,
         productInfoAllocMode, productInfoMap, sellingPointsInputs,
         targetOptType, deepOptType, ctaList, smartGen, sourceText, creativeName,
@@ -2766,10 +2769,18 @@ function App() {
                       </button>
                     </div>
                   </div>
-                </div> : <div className="flex items-center gap-3 pt-2 mb-6">
-                  <span className="w-28 flex-shrink-0 text-sm font-medium text-gray-700">批次叉乘项</span>
-                  <div className="flex items-center gap-4">
-                    {[['account','账户'],['targeting','定向包'],['product','商品']].map(([value, label]) => <label key={value} className="flex items-center cursor-pointer"><input type="checkbox" checked={batchCrossItems.includes(value)} onChange={() => setBatchCrossItems(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value])} className="w-4 h-4 mr-2 text-blue-600 rounded" /><span className="text-sm">{label}</span></label>)}
+                </div> : <div className="pt-2 mb-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-gray-700">批次叉乘项</span>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center cursor-not-allowed"><input type="checkbox" checked readOnly disabled className="w-4 h-4 mr-2 text-blue-600 rounded" /><span className="text-sm text-gray-700">账户</span><span className="ml-1 text-xs text-gray-400">必选</span></label>
+                      {[['targeting','定向包'],['product','商品']].map(([value, label]) => <label key={value} className="flex items-center cursor-pointer"><input type="checkbox" checked={batchCrossItems.includes(value)} onChange={() => setBatchCrossItems(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value])} className="w-4 h-4 mr-2 text-blue-600 rounded" /><span className="text-sm">{label}</span></label>)}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="w-28 flex-shrink-0 text-sm font-medium text-gray-700">单账户广告数</span>
+                    <input type="number" min="1" max="1000" value={singleBatchAdCount} onChange={e => setSingleBatchAdCount(e.target.value === '' ? '' : Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))} onBlur={() => setSingleBatchAdCount(Math.max(1, Math.min(1000, parseInt(singleBatchAdCount) || 1)))} className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                    <span className="text-xs text-gray-400">1-1000 个</span>
                   </div>
                 </div>}
 
@@ -2789,7 +2800,7 @@ function App() {
                           {s.overUnit && <span className="text-xs font-normal text-red-500 ml-2">（单项目超限，上限 100 个）</span>}
                           <span className="text-xs font-normal text-gray-500 ml-2">
                             {!buildAdsByMaterialCount
-                              ? `各账户独立计算：${batchCrossItems.length > 0 ? batchCrossItems.map(item => ({ account:'账户', targeting:'定向包', product:'商品' }[item])).join(' × ') : '未选择叉乘项'}`
+                              ? `批次数（${batchCrossItems.map(item => ({ account:'账户', targeting:'定向包', product:'商品' }[item])).join(' × ')}）× 单批次广告数 ${Math.max(1, parseInt(singleBatchAdCount) || 1)}`
                               : (isAvg
                                 ? `已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`
                                 : `已选账户数 ${s.accountCount} × 已选素材数 ${s.materialCount} ÷ 单广告素材数 ${(composeRule.images || 0) + (composeRule.videos || 0)}`)}
@@ -2802,7 +2813,7 @@ function App() {
                     );
                   })()}
                   <div className="text-xs text-gray-400 mt-1 leading-relaxed">
-                    {buildAdsByMaterialCount ? <><div>规则：默认根据素材确定广告数，文案选取方式为顺序选取</div><div>复制分配：预估可生成广告数 = 已选账户数 × 已选素材数 ÷ 单广告素材数；</div><div>平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数</div></> : <><div>规则：每个账户独立计算广告数，再汇总为任务预估广告数。</div><div>单账户广告数 = 当前账户所选叉乘项数量相乘；未勾选的维度按 1 计算。</div></>}
+                    {buildAdsByMaterialCount ? <><div>规则：默认根据素材确定广告数，文案选取方式为顺序选取</div><div>复制分配：预估可生成广告数 = 已选账户数 × 已选素材数 ÷ 单广告素材数；</div><div>平均分配：预估可生成广告数 = 已选素材数 ÷ 单广告素材数</div></> : <><div>规则：账户为必选叉乘项，定向包和商品为可选项。</div><div>预估可生成广告数 = 批次叉乘项数量相乘 × 单批次广告数；单批次广告数上限 1000。</div></>}
                   </div>
                 </div>
               </div>
